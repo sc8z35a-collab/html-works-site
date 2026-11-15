@@ -1,0 +1,281 @@
+<!DOCTYPE html><html lang="ja"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>学校怪異 ～逃げられない校舎～</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'MS Gothic','Hiragino Kaku Gothic Pro',monospace;touch-action:none}
+#c{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);image-rendering:pixelated;image-rendering:crisp-edges;background:#000}
+#title{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;color:#900;z-index:100;cursor:pointer}
+#title h1{font-size:min(8vw,56px);letter-spacing:.15em;text-shadow:0 0 30px #600,0 0 60px #300}
+#title .sub{font-size:min(4vw,26px);color:#700;margin-top:12px}
+#title .tap{font-size:min(3vw,16px);color:#555;margin-top:50px;animation:bl 1.5s infinite}
+#title .inst{font-size:min(2.2vw,13px);color:#444;margin-top:20px;text-align:center;line-height:1.8}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
+.overlay{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;cursor:pointer}
+#go{background:rgba(50,0,0,.95);color:#fff}
+#go h2{font-size:min(6vw,48px);text-shadow:0 0 20px #f00}
+#go p{font-size:min(3vw,18px);color:#aaa;margin-top:20px}
+#win{background:rgba(0,0,0,.97);color:#ccc}
+#win h2{font-size:min(6vw,44px);color:#8f8}
+#win p{font-size:min(3vw,18px);margin-top:20px}
+#touch{position:fixed;bottom:8px;left:0;width:100%;display:none;justify-content:space-between;align-items:flex-end;padding:0 10px;z-index:50;pointer-events:none}
+.tp{pointer-events:auto;display:flex;flex-direction:column;align-items:center}
+.tb{width:52px;height:52px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:20px;margin:2px;user-select:none;-webkit-user-select:none}
+.tb:active{background:rgba(255,255,255,.25)}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="title">
+<h1>学校怪異</h1>
+<p class="sub">～逃げられない校舎～</p>
+<p class="tap">タップ / クリックでスタート</p>
+<p class="inst">WASD／矢印キー：移動＆回転<br>Shift：ダッシュ　Q/E：横移動</p>
+</div>
+<div id="go" class="overlay"><h2>捕まった…</h2><p>タップでリトライ</p></div>
+<div id="win" class="overlay"><h2>脱 出 成 功</h2><p>タップでリトライ</p></div>
+<div id="touch">
+<div class="tp"><div class="tb" data-k="w">↑</div><div style="display:flex"><div class="tb" data-k="a">←</div><div class="tb" data-k="s">↓</div><div class="tb" data-k="d">→</div></div></div>
+<div class="tp"><div class="tb" data-k="shift" style="width:70px;font-size:11px">ダッシュ</div></div>
+</div>
+<script>
+"use strict";
+const RW=480,RH=320,TX=64,FOV=Math.PI/3,MW=36,MH=24,NKEYS=3;
+const W={N:0,C:1,CR:2,D:3,BB:4,WI:5,LK:6,DK:7};
+const cv=document.getElementById("c"),ct=cv.getContext("2d");
+cv.width=RW;cv.height=RH;
+function fitCanvas(){const s=Math.min(innerWidth/RW,innerHeight/RH);cv.style.width=(RW*s|0)+"px";cv.style.height=(RH*s|0)+"px"}
+fitCanvas();addEventListener("resize",fitCanvas);
+const imgD=ct.createImageData(RW,RH),buf=imgD.data,zb=new Float32Array(RW);
+let state="title",P,M,keysFound,gt,nearM,flickT,curMsg,msgT,afId=0;
+const mp=[],cl=[];
+const tex=[];
+let sDsk,sKey,sMon;const MSIZ=128;const spr=[];
+const inp={},tinp={};
+document.addEventListener("keydown",e=>{if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key))e.preventDefault();inp[e.key.toLowerCase()]=true;inp[e.code]=true});
+document.addEventListener("keyup",e=>{inp[e.key.toLowerCase()]=false;inp[e.code]=false});
+document.getElementById("touch").addEventListener("touchstart",e=>{e.preventDefault();if(e.target.dataset.k)tinp[e.target.dataset.k]=true},{passive:false});
+document.getElementById("touch").addEventListener("touchend",e=>{e.preventDefault();if(e.target.dataset.k)tinp[e.target.dataset.k]=false},{passive:false});
+document.getElementById("touch").addEventListener("touchcancel",e=>{if(e.target.dataset.k)tinp[e.target.dataset.k]=false});
+function pk(k){return inp[k]||tinp[k]}
+let actx,gn;
+function initAudio(){try{actx=new(window.AudioContext||window.webkitAudioContext)();gn=actx.createGain();gn.gain.value=.04;gn.connect(actx.destination);const o=actx.createOscillator();o.type="sine";o.frequency.value=48;const f=actx.createBiquadFilter();f.type="lowpass";f.frequency.value=150;o.connect(f);f.connect(gn);o.start();const o2=actx.createOscillator();o2.type="sine";o2.frequency.value=51.3;const g2=actx.createGain();g2.gain.value=.02;o2.connect(g2);g2.connect(actx.destination);o2.start()}catch(e){}}
+function sfxScream(){if(!actx)return;const o=actx.createOscillator();o.type="sawtooth";o.frequency.setValueAtTime(150,actx.currentTime);o.frequency.linearRampToValueAtTime(900,actx.currentTime+.3);const g=actx.createGain();g.gain.setValueAtTime(.35,actx.currentTime);g.gain.linearRampToValueAtTime(0,actx.currentTime+.8);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+.8);const b=actx.createBuffer(1,actx.sampleRate*.4|0,actx.sampleRate),ch=b.getChannelData(0);for(let i=0;i<ch.length;i++)ch[i]=(Math.random()*2-1)*Math.exp(-i/ch.length*3);const n=actx.createBufferSource();n.buffer=b;const ng=actx.createGain();ng.gain.value=.25;n.connect(ng);ng.connect(actx.destination);n.start()}
+function sfxPick(){if(!actx)return;const o=actx.createOscillator();o.type="sine";o.frequency.setValueAtTime(880,actx.currentTime);o.frequency.setValueAtTime(1100,actx.currentTime+.1);const g=actx.createGain();g.gain.setValueAtTime(.12,actx.currentTime);g.gain.linearRampToValueAtTime(0,actx.currentTime+.35);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+.35)}
+function hsh(x,y,s){return((x*374761393+y*668265263+s*1274126177)>>>0)/4294967296}
+function mkMap(){for(let y=0;y<MH;y++){mp[y]=new Uint8Array(MW);cl[y]=new Uint8Array(MW)}
+for(let x=0;x<MW;x++){mp[0][x]=W.C;mp[MH-1][x]=W.C}
+for(let y=0;y<MH;y++){mp[y][0]=W.C;mp[y][MW-1]=W.C}
+for(let y=2;y<=7;y++)mp[y][0]=W.LK;
+for(let y=16;y<=21;y++)mp[y][0]=W.LK;
+for(let y=0;y<MH;y++)mp[y][7]=W.C;
+for(let y=10;y<=13;y++)mp[y][7]=0;
+for(let x=1;x<=6;x++){mp[8][x]=W.CR;mp[15][x]=W.CR}
+mp[8][3]=W.D;mp[15][3]=W.D;
+for(let y=1;y<=7;y++)mp[y][4]=W.LK;
+for(let y=16;y<=21;y++)mp[y][4]=W.LK;
+const dvs=[14,21,28];for(const d of dvs)for(let y=0;y<MH;y++)mp[y][d]=W.C;
+for(let x=8;x<MW-1;x++){mp[10][x]=W.CR;mp[13][x]=W.CR}
+for(const d of dvs){mp[10][d]=W.CR;mp[13][d]=W.CR}
+const cs=[8,15,22,29],CW=6;
+for(const c of cs){const dx=c+3;if(dx<MW-1){mp[10][dx]=W.D;mp[13][dx]=W.D}}
+for(const c of cs)for(let d=0;d<CW;d++){const x=c+d;if(x>=MW-1)break;mp[0][x]=(d===0||d===CW-1)?W.WI:W.BB;mp[MH-1][x]=(d===0||d===CW-1)?W.WI:W.BB}
+mp[0][24]=W.DK;mp[0][25]=W.DK;
+mp[11][0]=W.D;mp[12][0]=W.D;
+for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)cl[y][x]=(mp[y][x]>0&&mp[y][x]!==W.D)?1:0}
+function mkTex(){for(let t=0;t<9;t++){const d=new Uint8Array(TX*TX*4);for(let y=0;y<TX;y++)for(let x=0;x<TX;x++){const i=(y*TX+x)*4,h=hsh(x,y,t);let r=0,g=0,b=0;
+switch(t){case 0:{const v=165+h*20;r=v;g=v-5;b=v-10;if(y%32<2||x%32<2){r-=25;g-=25;b-=25}break}
+case 1:if(y>=50){r=55+h*5;g=45+h*5;b=35+h*5;if(y===50){r+=15;g+=15;b+=15}}else{r=228+h*8;g=224+h*8;b=218+h*8;if(y%16<1||x%32<1){r-=12;g-=12;b-=12}if(y>=20&&y<=30&&x>=10&&x<=54){if(y===20||y===30||x===10||x===54){r=120;g=90;b=50}else{r=180+h*20;g=160+h*15;b=120+h*10}}}break;
+case 2:{r=155+h*10;g=115+h*8;b=70+h*6;const gr=Math.sin(y*.5+Math.sin(x*.1)*3)*8;r+=gr;g+=gr*.7;b+=gr*.3;if(x<3||x>60||y<3||y>60){r=95;g=70;b=40}if(x>50&&x<57&&y>26&&y<37){r=140;g=140;b=145;if(x===50||x===56||y===26||y===36){r=100;g=100;b=105}}if(x>5&&x<58&&y>5&&y<20){r=12+h*4;g=16+h*4;b=30+h*6;if(x===5||x===57||y===5||y===19){r=75;g=75;b=80}}break}
+case 3:{const bx=5,by=8,bw=54,bh=42;if(x>=bx&&x<bx+bw&&y>=by&&y<by+bh){r=22+h*12;g=52+h*15;b=32+h*12;if(h>.92){const c=40+h*40;r+=c;g+=c;b+=c}if(y>=by+bh-3){r=145;g=135;b=125}}else{r=218+h*8;g=213+h*8;b=203+h*8}if(((x===bx-1||x===bx+bw)&&y>=by-1&&y<=by+bh)||((y===by-1||y===by+bh)&&x>=bx-1&&x<=bx+bw)){r=125;g=95;b=50}break}
+case 4:{const wx=4,wy=4,ww=56,wh=56;if(x>=wx&&x<wx+ww&&y>=wy&&y<wy+wh){const mx2=wx+ww/2,my2=wy+wh/2;if(Math.abs(x-mx2)<1.5||Math.abs(y-my2)<1.5){r=70;g=70;b=75}else{r=3+h*3;g=5+h*4;b=15+h*8;if(h>.996){r=170;g=170;b=190}}}else{r=205+h*10;g=200+h*10;b=190+h*10}if(((x===wx-1||x===wx+ww)&&y>=wy-1&&y<=wy+wh)||((y===wy-1||y===wy+wh)&&x>=wx-1&&x<=wx+ww)){r=65;g=65;b=70}break}
+case 5:{r=152+h*10;g=157+h*10;b=165+h*10;const lw=10,lh=12,lx=x%lw,ly=y%lh;if(lx<1||ly<1){r-=50;g-=50;b-=50}if(ly>=2&&ly<=4&&lx>=2&&lx<=lw-3){r-=25;g-=25;b-=25}break}
+case 6:{r=100+h*25;g=60+h*20;b=55+h*20;if(h>.82){r=70+h*50;g=8+h*12;b=8+h*12}const cr2=Math.sin(x*.7+y*1.3)+Math.sin(x*1.1-y*.8);if(Math.abs(cr2)<.15){r*=.3;g*=.3;b*=.3}break}
+case 7:{r=170+h*12;g=155+h*12;b=125+h*10;if(x%32<1||y%32<1){r-=18;g-=18;b-=15}if((x+y)%3===0){r+=4;g+=4;b+=4}if(h>.97){r-=22;g-=18;b-=12}break}
+case 8:{r=212+h*8;g=212+h*8;b=207+h*8;if(x%32<1||y%32<1){r-=12;g-=12;b-=12}if(Math.abs(x-32)<3&&y>10&&y<54){r=235;g=235;b=240;if(Math.abs(x-32)===2){r=175;g=175;b=180}}if(h>.985){r-=15;g-=12;b-=5}break}}
+d[i]=Math.max(0,Math.min(255,r|0));d[i+1]=Math.max(0,Math.min(255,g|0));d[i+2]=Math.max(0,Math.min(255,b|0));d[i+3]=255}tex[t]=d}}
+function mkSprites(){spr.length=0;
+sDsk=new Uint8Array(TX*TX*4);
+for(let y=0;y<TX;y++)for(let x=0;x<TX;x++){const i=(y*TX+x)*4;let r=0,g=0,b=0,a=0;
+if(y>=18&&y<=33&&x>=4&&x<=59){r=158;g=122;b=74;a=255;if(y===18||y===33||x===4||x===59){r=115;g=85;b=50}}
+if(y>33&&y<58&&((x>=7&&x<=10)||(x>=53&&x<=56))){r=125;g=125;b=130;a=255}
+if(y>=8&&y<=22&&x>=18&&x<=44){if(y===8||y===22||x===18||x===44){r=105;g=105;b=110;a=255}else if(a===0){r=120;g=120;b=125;a=255}}
+sDsk[i]=r;sDsk[i+1]=g;sDsk[i+2]=b;sDsk[i+3]=a}
+sKey=new Uint8Array(TX*TX*4);
+for(let y=0;y<TX;y++)for(let x=0;x<TX;x++){const i=(y*TX+x)*4;let r=0,g=0,b=0,a=0;const dx=x-24,dy=y-32;
+if(dx*dx+dy*dy<121&&dx*dx+dy*dy>49){r=255;g=210;b=0;a=255}
+if(y>=30&&y<=34&&x>=32&&x<=52){r=255;g=210;b=0;a=255}
+if(x>=47&&x<=52&&((y>=25&&y<=30)||(y>=34&&y<=39))){r=255;g=210;b=0;a=255}
+if(a===0){const dd=Math.sqrt((x-36)**2+(y-32)**2);if(dd<20){a=Math.max(0,55-dd*3|0);r=255;g=180;b=0}}
+sKey[i]=r;sKey[i+1]=g;sKey[i+2]=b;sKey[i+3]=a}
+const S=MSIZ,mc=document.createElement("canvas");mc.width=mc.height=S;const mg=mc.getContext("2d"),cx=S/2;
+mg.clearRect(0,0,S,S);
+const gr=mg.createRadialGradient(cx,55,5,cx,55,55);gr.addColorStop(0,"rgba(30,0,0,0.3)");gr.addColorStop(1,"rgba(0,0,0,0)");mg.fillStyle=gr;mg.fillRect(0,0,S,S);
+mg.fillStyle="#0f0f1a";mg.fillRect(cx-14,42,28,45);
+mg.fillStyle="#ccc";mg.beginPath();mg.moveTo(cx-12,42);mg.lineTo(cx,52);mg.lineTo(cx+12,42);mg.fill();
+mg.fillStyle="#0f0f1a";mg.beginPath();mg.moveTo(cx-15,87);mg.lineTo(cx-19,107);mg.lineTo(cx+19,107);mg.lineTo(cx+15,87);mg.fill();
+mg.fillStyle="#c8bdb5";mg.fillRect(cx-8,107,5,17);mg.fillRect(cx+3,107,5,17);
+mg.strokeStyle="#0f0f1a";mg.lineWidth=6;
+mg.beginPath();mg.moveTo(cx-14,48);mg.bezierCurveTo(cx-27,65,cx-30,88,cx-23,114);mg.stroke();
+mg.beginPath();mg.moveTo(cx+14,48);mg.bezierCurveTo(cx+27,65,cx+30,88,cx+23,114);mg.stroke();
+mg.fillStyle="#bfb4aa";[-23,23].forEach(sx=>{for(let f=0;f<5;f++)mg.fillRect(cx+sx+(f-2)*2-1,112+f,2,10)});
+mg.fillStyle="#d4cbc4";mg.beginPath();mg.ellipse(cx,28,11,13,0,0,Math.PI*2);mg.fill();
+mg.fillStyle="#000";mg.beginPath();mg.ellipse(cx-5,26,3.5,4.5,0,0,Math.PI*2);mg.fill();mg.beginPath();mg.ellipse(cx+5,26,3.5,4.5,0,0,Math.PI*2);mg.fill();
+mg.fillStyle="#e00";mg.beginPath();mg.arc(cx-5,26,1.5,0,Math.PI*2);mg.fill();mg.beginPath();mg.arc(cx+5,26,1.5,0,Math.PI*2);mg.fill();
+mg.fillStyle="#180000";mg.beginPath();mg.ellipse(cx,36,6.5,4.5,0,0,Math.PI);mg.fill();
+mg.fillStyle="#ddd";for(let t=-5;t<=5;t+=2.5)mg.fillRect(cx+t,33,1.5,3);
+mg.fillStyle="#060202";mg.beginPath();mg.ellipse(cx,15,19,12,0,0,Math.PI*2);mg.fill();
+mg.fillStyle="#070303";for(let i=-15;i<=15;i++){if(Math.abs(i)>3||i%2)mg.fillRect(cx+i-1,8,2.5,36+Math.sin(i*.5)*8)}
+sMon=new Uint8Array(mg.getImageData(0,0,S,S).data);
+const cst=[8,15,22,29],CW2=6;
+for(const c of cst){for(let r=0;r<3;r++)for(let co=0;co<2;co++){spr.push({x:c+1.5+co*2.5,y:3.5+r*2.2,t:0});spr.push({x:c+1.5+co*2.5,y:16+r*2.2,t:0})}}
+spr.push({x:10.5,y:5,t:1,id:0,g:false});
+spr.push({x:24.5,y:19,t:1,id:1,g:false});
+spr.push({x:31.5,y:7,t:1,id:2,g:false});
+spr.push({x:M.x,y:M.y,t:2})}
+function isO(x,y){const mx=x|0,my=y|0;return mx>=0&&mx<MW&&my>=0&&my<MH&&cl[my][mx]===0}
+function canW(x,y){const m=.2;return isO(x-m,y-m)&&isO(x+m,y-m)&&isO(x-m,y+m)&&isO(x+m,y+m)}
+function canM(x,y){const m=.15;return isO(x-m,y-m)&&isO(x+m,y-m)&&isO(x-m,y+m)&&isO(x+m,y+m)}
+function getRoom(x){const s=[8,15,22,29];for(const c of s)if(x>=c&&x<c+6)return c;return-1}
+function msg(t,d){curMsg=t;msgT=d||3000}
+let cdx,cdy,plx,ply;
+function updP(dt){
+const sprint=pk("shift")||pk("ShiftLeft")||pk("ShiftRight");
+const spd=sprint?.055:.03;
+let dx=0,dy=0;
+if(pk("w")||pk("arrowup")){dx+=Math.cos(P.a)*spd;dy+=Math.sin(P.a)*spd}
+if(pk("s")||pk("arrowdown")){dx-=Math.cos(P.a)*spd;dy-=Math.sin(P.a)*spd}
+if(pk("a")||pk("arrowleft"))P.a-=.04;
+if(pk("d")||pk("arrowright"))P.a+=.04;
+if(pk("q")){dx+=Math.cos(P.a-Math.PI/2)*.03;dy+=Math.sin(P.a-Math.PI/2)*.03}
+if(pk("e")){dx+=Math.cos(P.a+Math.PI/2)*.03;dy+=Math.sin(P.a+Math.PI/2)*.03}
+if(canW(P.x+dx,P.y))P.x+=dx;
+if(canW(P.x,P.y+dy))P.y+=dy;
+for(const s of spr)if(s.t===1&&!s.g){if(Math.hypot(s.x-P.x,s.y-P.y)<1.2){s.g=true;keysFound++;sfxPick();msg("鍵を手に入れた（"+keysFound+"/"+NKEYS+"）",3000);if(!M.on){M.on=true;setTimeout(()=>msg("…何かの気配がする",4000),2000)}}}
+if(P.x<1.8&&P.y>=10&&P.y<=14){if(keysFound>=NKEYS){state="win";document.getElementById("win").style.display="flex"}else if(msgT<=0)msg("鍵が足りない…（"+keysFound+"/"+NKEYS+"）",2000)}}
+function updM(dt){if(!M.on)return;M.t+=dt;if(M.t<3500)return;
+const dx=P.x-M.x,dy=P.y-M.y,dist=Math.hypot(dx,dy);
+if(dist<.55){state="dead";return}
+const spd=M.spd*(1+keysFound*.45)*(dist<8?1.8:1);
+let tx,ty;
+const inCorr=(M.y>=10.3&&M.y<=13.7&&M.x>=7.3)||(M.x<7.5&&M.y>=8.3&&M.y<=15.7);
+if(!inCorr){const rm=getRoom(M.x);if(rm>=0){tx=rm+3.5;ty=M.y<12?10.5:13.5}else{tx=P.x;ty=P.y}}else{tx=P.x;ty=P.y}
+const tdx=tx-M.x,tdy=ty-M.y,td=Math.hypot(tdx,tdy);
+if(td<.01)return;
+const nx=tdx/td*spd,ny=tdy/td*spd;
+const ox=M.x,oy=M.y;
+if(canM(M.x+nx,M.y))M.x+=nx;
+if(canM(M.x,M.y+ny))M.y+=ny;
+if(Math.abs(M.x-ox)<.0005&&Math.abs(M.y-oy)<.0005){if(canM(M.x+tdy/td*spd,M.y))M.x+=tdy/td*spd;else if(canM(M.x-tdy/td*spd,M.y))M.x-=tdy/td*spd;if(canM(M.x,M.y+tdx/td*spd))M.y+=tdx/td*spd;else if(canM(M.x,M.y-tdx/td*spd))M.y-=tdx/td*spd}
+for(const s of spr)if(s.t===2){s.x=M.x;s.y=M.y}
+nearM=Math.max(0,1-dist/12)}
+function render(){buf.fill(0);
+cdx=Math.cos(P.a);cdy=Math.sin(P.a);const pm=Math.tan(FOV/2);plx=-cdy*pm;ply=cdx*pm;
+flickT+=16;const flick=Math.sin(flickT*.003)*Math.sin(flickT*.007)>.7?.55:1;const dm=flick*(1-nearM*.3);
+const hh=RH>>1;
+for(let y=hh+1;y<RH;y++){const r0x=cdx-plx,r0y=cdy-ply,r1x=cdx+plx,r1y=cdy+ply;
+const p=y-hh,rd=(.5*RH)/p;const fsx=rd*(r1x-r0x)/RW,fsy=rd*(r1y-r0y)/RW;
+let fx=P.x+rd*r0x,fy=P.y+rd*r0y;const dk=Math.min(1,2.2/(1+rd*rd*.04))*dm;
+for(let x=0;x<RW;x++){const ttx=(fx*TX|0)&(TX-1),tty=(fy*TX|0)&(TX-1);fx+=fsx;fy+=fsy;
+const ti=(tty*TX+ttx)*4;let pi=(y*RW+x)*4;
+buf[pi]=tex[7][ti]*dk;buf[pi+1]=tex[7][ti+1]*dk;buf[pi+2]=tex[7][ti+2]*dk;buf[pi+3]=255;
+const cy2=RH-1-y;if(cy2>=0&&cy2<hh){pi=(cy2*RW+x)*4;buf[pi]=tex[8][ti]*dk;buf[pi+1]=tex[8][ti+1]*dk;buf[pi+2]=tex[8][ti+2]*dk;buf[pi+3]=255}}}
+for(let x=0;x<RW;x++){const cx2=2*x/RW-1,rdx=cdx+plx*cx2,rdy=cdy+ply*cx2;
+let mx=P.x|0,my=P.y|0;const ddx=Math.abs(1/rdx),ddy=Math.abs(1/rdy);
+let sx,sdx,sy,sdy;
+if(rdx<0){sx=-1;sdx=(P.x-mx)*ddx}else{sx=1;sdx=(mx+1-P.x)*ddx}
+if(rdy<0){sy=-1;sdy=(P.y-my)*ddy}else{sy=1;sdy=(my+1-P.y)*ddy}
+let side,hit=false;for(let i=0;i<60&&!hit;i++){if(sdx<sdy){sdx+=ddx;mx+=sx;side=0}else{sdy+=ddy;my+=sy;side=1}if(mx>=0&&mx<MW&&my>=0&&my<MH&&mp[my][mx]>0)hit=true}
+if(!hit){zb[x]=1e9;continue}
+let pwd;if(side===0)pwd=(mx-P.x+(1-sx)/2)/rdx;else pwd=(my-P.y+(1-sy)/2)/rdy;
+if(pwd<.01)pwd=.01;zb[x]=pwd;
+const lh=(RH/pwd)|0;let ds=(-lh/2+hh)|0,de=(lh/2+hh)|0;
+let wx;if(side===0)wx=P.y+pwd*rdy;else wx=P.x+pwd*rdx;wx-=wx|0;
+let txX=(wx*TX)|0;if(txX>=TX)txX=TX-1;if(side===0&&rdx>0)txX=TX-1-txX;if(side===1&&rdy<0)txX=TX-1-txX;
+const ti=mp[my][mx]-1,tD=tex[ti];if(!tD)continue;
+const step=TX/lh;let tP=ds<0?-ds*step:0;if(ds<0)ds=0;if(de>=RH)de=RH-1;
+const dk=Math.min(1,2.5/(1+pwd*pwd*.04))*dm*(side===1?.75:1);
+for(let y=ds;y<=de;y++){const txY=(tP|0)&(TX-1);tP+=step;const si=(txY*TX+txX)*4,pi=(y*RW+x)*4;
+buf[pi]=tD[si]*dk;buf[pi+1]=tD[si+1]*dk;buf[pi+2]=tD[si+2]*dk;buf[pi+3]=255}}
+rSprites();
+for(let y=0;y<RH;y++){const dy2=(y/RH-.5)*2,dy2s=dy2*dy2;for(let x=0;x<RW;x++){const dx2=(x/RW-.5)*2;const v=Math.max(0,1-(dx2*dx2+dy2s)*.4);const pi=(y*RW+x)*4;
+let r=buf[pi]*v,g=buf[pi+1]*v,b=buf[pi+2]*v;
+if(nearM>.1){r+=nearM*25;if(((x*7+y*13+flickT)&31)<nearM*8){const n=nearM*50;r+=n;g-=n*.3;b-=n*.3}}
+buf[pi]=r>255?255:r<0?0:r;buf[pi+1]=g>255?255:g<0?0:g;buf[pi+2]=b>255?255:b<0?0:b}}
+ct.putImageData(imgD,0,0);
+if(nearM>.3){cv.style.transform=`translate(${(Math.random()-.5)*nearM*8|0}px,${(Math.random()-.5)*nearM*8|0}px)`}else cv.style.transform="translate(-50%,-50%)";
+ct.fillStyle="#fff";ct.font="bold 10px monospace";ct.textAlign="left";
+ct.fillText("鍵："+keysFound+"/"+NKEYS,8,15);
+if(msgT>0){ct.globalAlpha=Math.min(1,msgT/500);ct.fillStyle="#fff";ct.font="bold 12px monospace";ct.textAlign="center";ct.fillText(curMsg,RW/2,RH-28);ct.textAlign="left";ct.globalAlpha=1}
+const ms2=75,mmx=RW-ms2-5,mmy=5,sc=ms2/Math.max(MW,MH);
+ct.globalAlpha=.45;ct.fillStyle="#111";ct.fillRect(mmx,mmy,MW*sc,MH*sc);
+for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(mp[y][x]>0){ct.fillStyle="#333";ct.fillRect(mmx+x*sc,mmy+y*sc,Math.ceil(sc),Math.ceil(sc))}
+ct.globalAlpha=1;ct.fillStyle="#0f0";ct.fillRect(mmx+P.x*sc-1,mmy+P.y*sc-1,3,3);
+if(M.on&&((gt/400|0)%2)){ct.fillStyle="#f00";ct.fillRect(mmx+M.x*sc-1,mmy+M.y*sc-1,3,3)}
+for(const s of spr)if(s.t===1&&!s.g){ct.fillStyle="#ff0";ct.fillRect(mmx+s.x*sc-1,mmy+s.y*sc-1,2,2)}}
+function rSprites(){const sd=[];for(const s of spr){if(s.t===1&&s.g)continue;const dx=s.x-P.x,dy=s.y-P.y;sd.push({s,d:dx*dx+dy*dy})}
+sd.sort((a,b)=>b.d-a.d);const invD=1/(plx*cdy-cdx*ply);
+for(const{s,d}of sd){if(d>800)continue;const sx=s.x-P.x,sy=s.y-P.y;
+const trx=invD*(cdy*sx-cdx*sy),tr=invD*(-ply*sx+plx*sy);if(tr<=.1)continue;
+const ssx=(RW/2*(1+trx/tr))|0;const isMon=s.t===2;
+const tData=isMon?sMon:s.t===1?sKey:sDsk;const tSz=isMon?MSIZ:TX;
+const sh=Math.abs((RH/tr)|0);const sw=isMon?sh*.8:sh;const tall=isMon?sh*1.6:sh;
+let dy1=(-tall/2+RH/2)|0,dy2=(tall/2+RH/2)|0;let dx1=(ssx-sw/2)|0,dx2=(ssx+sw/2)|0;
+if(dx2<0||dx1>=RW||dy2<0||dy1>=RH)continue;
+const dk=Math.min(1,2.5/(1+tr*tr*.04));
+if(dx1<0)dx1=0;if(dx2>=RW)dx2=RW-1;if(dy1<0)dy1=0;if(dy2>=RH)dy2=RH-1;
+for(let x=dx1;x<=dx2;x++){if(tr>=zb[x])continue;const txX=((x-ssx+sw/2)*tSz/sw)|0;if(txX<0||txX>=tSz)continue;
+for(let y=dy1;y<=dy2;y++){const txY=((y-(RH/2-tall/2))*tSz/tall)|0;if(txY<0||txY>=tSz)continue;
+const si=(txY*tSz+txX)*4;if(tData[si+3]<128)continue;const pi=(y*RW+x)*4;
+if(isMon&&nearM>.2&&((x+y*3+flickT)&15)<nearM*5){buf[pi]=200;buf[pi+1]=0;buf[pi+2]=0;buf[pi+3]=255}
+else{buf[pi]=tData[si]*dk;buf[pi+1]=tData[si+1]*dk;buf[pi+2]=tData[si+2]*dk;buf[pi+3]=255}}}}}
+function jumpScare(){sfxScream();ct.fillStyle="#000";ct.fillRect(0,0,RW,RH);
+ct.fillStyle="#c8bfb8";ct.beginPath();ct.ellipse(RW/2,RH/2-10,RW/2.5,RH/2.2,0,0,Math.PI*2);ct.fill();
+ct.fillStyle="#000";ct.beginPath();ct.ellipse(RW/2-60,RH/2-40,22,28,0,0,Math.PI*2);ct.fill();
+ct.beginPath();ct.ellipse(RW/2+60,RH/2-40,22,28,0,0,Math.PI*2);ct.fill();
+ct.fillStyle="#e00";ct.beginPath();ct.arc(RW/2-60,RH/2-40,6,0,Math.PI*2);ct.fill();
+ct.beginPath();ct.arc(RW/2+60,RH/2-40,6,0,Math.PI*2);ct.fill();
+ct.fillStyle="#200";ct.beginPath();ct.ellipse(RW/2,RH/2+50,55,30,0,0,Math.PI);ct.fill();
+ct.fillStyle="#050202";
+for(let i=-RW/2;i<RW/2;i+=3){if(Math.abs(i)>45||Math.abs(i)<30)ct.fillRect(RW/2+i,0,4,RH/2+20+Math.sin(i)*15)}
+setTimeout(()=>{document.getElementById("go").style.display="flex"},1000)}
+function reset(){P={x:3.5,y:11.5,a:0};M={x:30.5,y:3.5,spd:.012,on:false,t:0};
+keysFound=0;gt=0;nearM=0;flickT=0;curMsg="";msgT=0;
+mkMap();mkSprites();msg("この校舎から脱出せよ… 鍵を3つ集めろ",4500)}
+let lastT=0;
+function loop(now){if(state!=="play")return;
+const dt=Math.min(now-lastT,50);lastT=now;gt+=dt;if(msgT>0)msgT-=dt;
+updP(dt);updM(dt);
+if(state==="dead"){jumpScare();return}
+if(state==="win")return;
+render();afId=requestAnimationFrame(loop)}
+function startGame(){document.getElementById("title").style.display="none";
+if("ontouchstart"in window)document.getElementById("touch").style.display="flex";
+initAudio();reset();state="play";lastT=performance.now();afId=requestAnimationFrame(loop)}
+function restartGame(){document.getElementById("go").style.display="none";document.getElementById("win").style.display="none";
+cancelAnimationFrame(afId);reset();state="play";lastT=performance.now();afId=requestAnimationFrame(loop)}
+mkMap();mkTex();P={x:3.5,y:11.5,a:0};M={x:30.5,y:3.5,spd:.012,on:false,t:0};keysFound=0;gt=0;nearM=0;flickT=0;curMsg="";msgT=0;mkSprites();
+document.getElementById("title").addEventListener("click",startGame);
+document.getElementById("go").addEventListener("click",restartGame);
+document.getElementById("win").addEventListener("click",restartGame);
+</script>
+
+
+</body></html>
