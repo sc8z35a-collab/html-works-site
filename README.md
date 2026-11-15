@@ -1,11 +1,17 @@
-# HTML Works Collection
+# HTML Works Hub
 
-単体HTMLで動く13作品をまとめた閲覧サイトです。ビルド不要で、そのままブラウザで開けます。
+単体HTMLで動く13作品の**ハブサイト**です。トップページ（ハブ）から検索・カテゴリ絞り込みができ、各作品は全画面ビューワー（`viewer.html`）で開きます。スマホでは「全画面（横）」ボタンで横向き全画面表示になります（PWAマニフェスト付き：`display: fullscreen` / `orientation: landscape`）。
 
-## 見る方法
+## 公開先（連携）
 
-- **トップページ**: `index.html`（13作品へのリンク集）
-- **GitHub Pages**: Settings → Pages → Source を `main` / `/ (root)` にすると、`https://sc8z35a-collab.github.io/html-works-site/` で公開されます
+| 配信先 | URL |
+|---|---|
+| **Cloudflare Workers（本番）** | https://html-works-site.sc8z-35a.workers.dev/ |
+| GitHub Pages（ミラー） | https://sc8z35a-collab.github.io/html-works-site/ |
+| GitHub（ソース） | https://github.com/sc8z35a-collab/html-works-site |
+
+- Cloudflare へ再デプロイ: このフォルダで `npx wrangler deploy`（設定は `wrangler.toml`、静的アセット配信＋ `_headers` でセキュリティヘッダ/キャッシュ付与）
+- GitHub Pages は `main` ブランチへのマージで自動更新（Settings → Pages: main / root）
 
 ## 作品一覧
 
