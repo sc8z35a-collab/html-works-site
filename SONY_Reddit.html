@@ -1,0 +1,3707 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SONY A7 IV Reddit評価 | 徹底分析レポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&family=Inter:wght@100;300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS RESET & BASE
+   ============================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#1a1a2e;
+  --accent:#e94560;
+  --accent2:#0f3460;
+  --accent3:#16213e;
+  --gold:#c9a84c;
+  --gold-light:#e8d48b;
+  --silver:#c0c0c0;
+  --bg:#fafafa;
+  --text:#1a1a1a;
+  --text-light:#555;
+  --text-lighter:#888;
+  --card-bg:#ffffff;
+  --border:#e8e8e8;
+  --shadow:0 4px 30px rgba(0,0,0,0.06);
+  --shadow-hover:0 12px 50px rgba(0,0,0,0.12);
+  --radius:16px;
+  --radius-sm:8px;
+  --transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+html{scroll-behavior:smooth;font-size:16px;overflow-x:hidden}
+body{
+  font-family:'Noto Sans JP','Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.8;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+::selection{background:var(--accent);color:#fff}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:#f0f0f0}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--accent),var(--accent2));border-radius:4px}
+
+/* ============================================
+   LOADING SCREEN
+   ============================================ */
+#loading-screen{
+  position:fixed;
+  top:0;left:0;width:100%;height:100%;
+  background:#fff;
+  z-index:99999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  transition:opacity 0.8s ease, visibility 0.8s ease;
+}
+#loading-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+#loading-screen .loader-ring{
+  width:80px;height:80px;
+  border:3px solid #eee;
+  border-top:3px solid var(--accent);
+  border-right:3px solid var(--accent2);
+  border-radius:50%;
+  animation:loaderSpin 1s cubic-bezier(0.68,-0.55,0.27,1.55) infinite;
+}
+@keyframes loaderSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+#loading-screen .loader-text{
+  margin-top:24px;
+  font-family:'Playfair Display',serif;
+  font-size:18px;
+  color:var(--text-light);
+  letter-spacing:4px;
+  animation:loaderFade 1.5s ease infinite;
+}
+@keyframes loaderFade{0%,100%{opacity:0.3}50%{opacity:1}}
+#loading-screen .loader-bar{
+  width:200px;height:2px;background:#eee;margin-top:16px;border-radius:2px;overflow:hidden;
+}
+#loading-screen .loader-bar-inner{
+  width:0%;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));
+  animation:loaderBar 2s ease forwards;
+}
+@keyframes loaderBar{0%{width:0%}100%{width:100%}}
+
+/* ============================================
+   CURSOR
+   ============================================ */
+.custom-cursor{
+  width:20px;height:20px;
+  border:2px solid var(--accent);
+  border-radius:50%;
+  position:fixed;
+  pointer-events:none;
+  z-index:99998;
+  transition:transform 0.15s ease, opacity 0.15s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:difference;
+}
+.custom-cursor.hover{
+  width:50px;height:50px;
+  border-color:var(--gold);
+  background:rgba(233,69,96,0.1);
+}
+.cursor-dot{
+  width:5px;height:5px;
+  background:var(--accent);
+  border-radius:50%;
+  position:fixed;
+  pointer-events:none;
+  z-index:99998;
+  transform:translate(-50%,-50%);
+  transition:opacity 0.15s ease;
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+nav{
+  position:fixed;top:0;left:0;width:100%;
+  z-index:9999;
+  padding:16px 40px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  transition:var(--transition);
+  background:rgba(255,255,255,0);
+  backdrop-filter:blur(0px);
+}
+nav.scrolled{
+  background:rgba(255,255,255,0.92);
+  backdrop-filter:blur(20px);
+  box-shadow:0 1px 30px rgba(0,0,0,0.06);
+  padding:10px 40px;
+}
+nav .logo{
+  font-family:'Playfair Display',serif;
+  font-size:22px;
+  font-weight:700;
+  color:var(--primary);
+  letter-spacing:1px;
+  text-decoration:none;
+  display:flex;align-items:center;gap:10px;
+}
+nav .logo .logo-icon{
+  width:36px;height:36px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;font-weight:900;
+  font-family:'Inter',sans-serif;
+  letter-spacing:-0.5px;
+  transition:var(--transition);
+}
+nav .logo:hover .logo-icon{transform:rotate(10deg) scale(1.1)}
+nav .nav-links{display:flex;gap:32px;align-items:center}
+nav .nav-links a{
+  text-decoration:none;
+  color:var(--text-light);
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  position:relative;
+  transition:var(--transition);
+  padding:4px 0;
+}
+nav .nav-links a::after{
+  content:'';
+  position:absolute;bottom:-2px;left:0;
+  width:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transition:width 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+nav .nav-links a:hover{color:var(--text)}
+nav .nav-links a:hover::after{width:100%}
+.nav-indicator{
+  position:absolute;bottom:0;left:0;
+  height:2px;background:var(--accent);
+  transition:var(--transition);
+}
+.hamburger{
+  display:none;
+  flex-direction:column;gap:5px;
+  cursor:pointer;z-index:10001;
+  padding:8px;
+}
+.hamburger span{
+  display:block;width:24px;height:2px;
+  background:var(--text);
+  transition:var(--transition);
+  transform-origin:center;
+}
+.hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.active span:nth-child(2){opacity:0}
+.hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.mobile-menu{
+  position:fixed;top:0;right:-100%;
+  width:100%;height:100vh;
+  background:rgba(255,255,255,0.98);
+  backdrop-filter:blur(30px);
+  z-index:10000;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:24px;
+  transition:right 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.mobile-menu.active{right:0}
+.mobile-menu a{
+  font-size:24px;font-weight:600;color:var(--text);
+  text-decoration:none;letter-spacing:2px;
+  opacity:0;transform:translateY(20px);
+  transition:all 0.4s ease;
+}
+.mobile-menu.active a{opacity:1;transform:translateY(0)}
+.mobile-menu.active a:nth-child(1){transition-delay:0.1s}
+.mobile-menu.active a:nth-child(2){transition-delay:0.15s}
+.mobile-menu.active a:nth-child(3){transition-delay:0.2s}
+.mobile-menu.active a:nth-child(4){transition-delay:0.25s}
+.mobile-menu.active a:nth-child(5){transition-delay:0.3s}
+.mobile-menu.active a:nth-child(6){transition-delay:0.35s}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+  background:#fff;
+}
+.hero-bg{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  overflow:hidden;z-index:0;
+}
+.hero-bg .grid-pattern{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size:60px 60px;
+  animation:gridMove 20s linear infinite;
+}
+@keyframes gridMove{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+.hero-bg .gradient-orb{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(100px);
+  opacity:0.15;
+  animation:orbFloat 8s ease-in-out infinite;
+}
+.hero-bg .gradient-orb.orb1{
+  width:600px;height:600px;
+  background:var(--accent);
+  top:-200px;right:-100px;
+  animation-delay:0s;
+}
+.hero-bg .gradient-orb.orb2{
+  width:400px;height:400px;
+  background:var(--accent2);
+  bottom:-100px;left:-50px;
+  animation-delay:-3s;
+}
+.hero-bg .gradient-orb.orb3{
+  width:300px;height:300px;
+  background:var(--gold);
+  top:50%;left:50%;
+  animation-delay:-5s;
+  opacity:0.08;
+}
+@keyframes orbFloat{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(30px,-30px) scale(1.05)}
+  66%{transform:translate(-20px,20px) scale(0.95)}
+}
+.hero-content{
+  position:relative;z-index:2;
+  text-align:center;
+  max-width:900px;
+  padding:0 40px;
+}
+.hero-badge{
+  display:inline-flex;
+  align-items:center;gap:8px;
+  background:rgba(233,69,96,0.08);
+  border:1px solid rgba(233,69,96,0.15);
+  padding:8px 20px;
+  border-radius:50px;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:32px;
+  opacity:0;
+  transform:translateY(20px);
+  animation:heroFadeUp 0.8s ease 0.5s forwards;
+}
+.hero-badge .badge-dot{
+  width:6px;height:6px;
+  background:var(--accent);
+  border-radius:50%;
+  animation:badgePulse 2s ease infinite;
+}
+@keyframes badgePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.5)}}
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(42px,6vw,80px);
+  font-weight:900;
+  line-height:1.1;
+  color:var(--primary);
+  margin-bottom:24px;
+  opacity:0;transform:translateY(30px);
+  animation:heroFadeUp 0.8s ease 0.7s forwards;
+}
+.hero h1 span.highlight{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  position:relative;
+}
+.hero h1 span.highlight::after{
+  content:'';
+  position:absolute;bottom:0;left:0;width:100%;height:8px;
+  background:linear-gradient(90deg,rgba(233,69,96,0.2),rgba(15,52,96,0.2));
+  border-radius:4px;
+  transform:scaleX(0);
+  animation:underlineExpand 0.6s ease 1.5s forwards;
+}
+@keyframes underlineExpand{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+.hero-subtitle{
+  font-size:clamp(16px,2vw,20px);
+  color:var(--text-light);
+  line-height:1.8;
+  margin-bottom:48px;
+  font-weight:300;
+  opacity:0;transform:translateY(30px);
+  animation:heroFadeUp 0.8s ease 0.9s forwards;
+}
+@keyframes heroFadeUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
+.hero-stats{
+  display:flex;
+  justify-content:center;
+  gap:48px;
+  opacity:0;transform:translateY(30px);
+  animation:heroFadeUp 0.8s ease 1.1s forwards;
+}
+.hero-stat{text-align:center}
+.hero-stat .stat-number{
+  font-family:'Playfair Display',serif;
+  font-size:42px;font-weight:900;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-stat .stat-label{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--text-lighter);
+  margin-top:4px;
+}
+.hero-scroll{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:0;animation:heroFadeUp 0.8s ease 1.5s forwards;
+}
+.hero-scroll .scroll-text{
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--text-lighter);font-weight:500;
+}
+.hero-scroll .scroll-line{
+  width:1px;height:40px;background:#ddd;position:relative;overflow:hidden;
+}
+.hero-scroll .scroll-line::after{
+  content:'';position:absolute;top:-100%;left:0;
+  width:100%;height:50%;
+  background:var(--accent);
+  animation:scrollLine 2s ease infinite;
+}
+@keyframes scrollLine{0%{top:-50%}100%{top:150%}}
+.hero-cta-group{
+  display:flex;gap:16px;justify-content:center;
+  margin-bottom:48px;
+  opacity:0;transform:translateY(30px);
+  animation:heroFadeUp 0.8s ease 1s forwards;
+}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 32px;
+  background:linear-gradient(135deg,var(--accent),#c23152);
+  color:#fff;
+  border:none;border-radius:50px;
+  font-size:14px;font-weight:600;letter-spacing:1px;
+  text-decoration:none;
+  cursor:pointer;
+  transition:var(--transition);
+  position:relative;overflow:hidden;
+}
+.btn-primary::before{
+  content:'';position:absolute;top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+  transition:left 0.5s ease;
+}
+.btn-primary:hover::before{left:100%}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(233,69,96,0.3)}
+.btn-secondary{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 32px;
+  background:transparent;
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:50px;
+  font-size:14px;font-weight:500;letter-spacing:1px;
+  text-decoration:none;
+  cursor:pointer;
+  transition:var(--transition);
+}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
+
+/* ============================================
+   SECTION COMMON
+   ============================================ */
+section{padding:120px 0;position:relative}
+.container{max-width:1200px;margin:0 auto;padding:0 40px}
+.section-header{
+  text-align:center;
+  margin-bottom:80px;
+  position:relative;
+}
+.section-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:16px;
+}
+.section-tag::before,.section-tag::after{
+  content:'';width:24px;height:1px;background:var(--accent);
+}
+.section-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(32px,4vw,52px);
+  font-weight:800;
+  color:var(--primary);
+  line-height:1.2;
+  margin-bottom:16px;
+}
+.section-desc{
+  font-size:16px;color:var(--text-light);
+  max-width:600px;margin:0 auto;
+  font-weight:300;line-height:1.8;
+}
+
+/* ============================================
+   OVERVIEW SECTION
+   ============================================ */
+#overview{background:#fff}
+.overview-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+.overview-card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:40px 32px;
+  transition:var(--transition);
+  position:relative;
+  overflow:hidden;
+  opacity:0;transform:translateY(40px);
+}
+.overview-card.visible{opacity:1;transform:translateY(0)}
+.overview-card::before{
+  content:'';position:absolute;top:0;left:0;
+  width:100%;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transform:scaleX(0);
+  transition:transform 0.5s ease;
+  transform-origin:left;
+}
+.overview-card:hover::before{transform:scaleX(1)}
+.overview-card:hover{
+  transform:translateY(-8px);
+  box-shadow:var(--shadow-hover);
+  border-color:transparent;
+}
+.overview-card .card-icon{
+  width:56px;height:56px;
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  margin-bottom:24px;
+  position:relative;
+  transition:var(--transition);
+}
+.overview-card:hover .card-icon{transform:scale(1.1) rotate(5deg)}
+.card-icon.red{background:rgba(233,69,96,0.08);color:var(--accent)}
+.card-icon.blue{background:rgba(15,52,96,0.08);color:var(--accent2)}
+.card-icon.gold{background:rgba(201,168,76,0.08);color:var(--gold)}
+.overview-card h3{
+  font-size:18px;font-weight:700;
+  margin-bottom:12px;color:var(--primary);
+}
+.overview-card p{
+  font-size:14px;color:var(--text-light);line-height:1.8;
+}
+.overview-card .card-number{
+  position:absolute;top:20px;right:24px;
+  font-family:'Playfair Display',serif;
+  font-size:48px;font-weight:900;
+  color:rgba(0,0,0,0.03);
+  line-height:1;
+}
+
+/* ============================================
+   PROS & CONS SECTION
+   ============================================ */
+#proscons{background:var(--bg)}
+.proscons-container{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+}
+.proscons-column{
+  opacity:0;transform:translateX(-40px);
+}
+.proscons-column.cons-col{transform:translateX(40px)}
+.proscons-column.visible{opacity:1;transform:translateX(0);transition:all 0.8s ease}
+.proscons-column h3{
+  font-family:'Playfair Display',serif;
+  font-size:28px;font-weight:700;
+  margin-bottom:32px;
+  display:flex;align-items:center;gap:12px;
+}
+.proscons-column h3 .icon-circle{
+  width:40px;height:40px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:#fff;
+}
+.pros-col h3 .icon-circle{background:linear-gradient(135deg,#2ed573,#17a556)}
+.cons-col h3 .icon-circle{background:linear-gradient(135deg,var(--accent),#c23152)}
+.proscons-item{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:24px;
+  margin-bottom:16px;
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  transition:var(--transition);
+  position:relative;
+  overflow:hidden;
+}
+.proscons-item::after{
+  content:'';position:absolute;top:0;left:0;
+  width:3px;height:100%;
+  transition:height 0.3s ease;
+}
+.pros-col .proscons-item::after{background:#2ed573}
+.cons-col .proscons-item::after{background:var(--accent)}
+.proscons-item:hover{
+  transform:translateX(8px);
+  box-shadow:var(--shadow);
+  border-color:transparent;
+}
+.proscons-item .item-count{
+  min-width:48px;height:48px;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;justify-content:center;
+  font-size:20px;font-weight:900;
+  color:#fff;
+}
+.pros-col .item-count{background:linear-gradient(135deg,#2ed573,#17a556)}
+.cons-col .item-count{background:linear-gradient(135deg,var(--accent),#c23152)}
+.item-count small{font-size:8px;font-weight:600;letter-spacing:1px;opacity:0.8}
+.proscons-item .item-text h4{
+  font-size:15px;font-weight:700;margin-bottom:4px;color:var(--primary);
+}
+.proscons-item .item-text p{
+  font-size:13px;color:var(--text-light);line-height:1.7;
+}
+/* bar chart visual */
+.mention-bar{
+  height:6px;
+  border-radius:3px;
+  background:#eee;
+  margin-top:8px;
+  overflow:hidden;
+  position:relative;
+}
+.mention-bar-inner{
+  height:100%;
+  border-radius:3px;
+  width:0%;
+  transition:width 1.2s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.pros-col .mention-bar-inner{background:linear-gradient(90deg,#2ed573,#17a556)}
+.cons-col .mention-bar-inner{background:linear-gradient(90deg,var(--accent),#c23152)}
+.mention-bar-inner.animated{width:var(--bar-width)}
+
+/* ============================================
+   CHART / DATA VISUALIZATION
+   ============================================ */
+#dataviz{background:#fff}
+.chart-container{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+  align-items:start;
+}
+.chart-card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:40px;
+  transition:var(--transition);
+  opacity:0;transform:translateY(40px);
+}
+.chart-card.visible{opacity:1;transform:translateY(0)}
+.chart-card:hover{box-shadow:var(--shadow-hover);border-color:transparent}
+.chart-card h3{
+  font-size:18px;font-weight:700;margin-bottom:8px;color:var(--primary);
+}
+.chart-card .chart-subtitle{
+  font-size:13px;color:var(--text-lighter);margin-bottom:32px;
+}
+/* Radar chart */
+.radar-container{
+  width:100%;max-width:360px;margin:0 auto;
+  position:relative;
+}
+.radar-svg{width:100%;height:auto}
+/* Horizontal bar */
+.hbar-list{display:flex;flex-direction:column;gap:20px}
+.hbar-item{display:flex;align-items:center;gap:16px}
+.hbar-label{
+  min-width:140px;font-size:13px;font-weight:600;color:var(--text);
+  text-align:right;
+}
+.hbar-track{
+  flex:1;height:32px;
+  background:#f5f5f5;
+  border-radius:8px;
+  overflow:hidden;
+  position:relative;
+}
+.hbar-fill{
+  height:100%;
+  border-radius:8px;
+  display:flex;align-items:center;
+  padding:0 12px;
+  font-size:12px;font-weight:700;color:#fff;
+  width:0%;
+  transition:width 1.5s cubic-bezier(0.25,0.46,0.45,0.94);
+  position:relative;
+  overflow:hidden;
+}
+.hbar-fill::after{
+  content:'';position:absolute;top:0;left:0;
+  width:200%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+  animation:shimmer 2s ease infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.hbar-fill.animated{width:var(--bar-w)}
+.hbar-fill.green{background:linear-gradient(90deg,#2ed573,#17a556)}
+.hbar-fill.red{background:linear-gradient(90deg,var(--accent),#c23152)}
+.hbar-fill.blue{background:linear-gradient(90deg,var(--accent2),#1a5276)}
+.hbar-fill.gold{background:linear-gradient(90deg,var(--gold),#b8942f)}
+
+/* ============================================
+   TIMELINE SECTION
+   ============================================ */
+#timeline{
+  background:linear-gradient(180deg,var(--bg),#fff);
+  overflow:hidden;
+}
+.timeline-wrapper{position:relative;padding-left:60px}
+.timeline-line{
+  position:absolute;left:29px;top:0;
+  width:2px;height:100%;
+  background:linear-gradient(180deg,var(--accent),var(--accent2),var(--gold));
+}
+.timeline-line-progress{
+  position:absolute;left:29px;top:0;
+  width:2px;height:0%;
+  background:var(--accent);
+  transition:height 0.1s linear;
+  z-index:1;
+  box-shadow:0 0 10px rgba(233,69,96,0.3);
+}
+.timeline-item{
+  position:relative;
+  padding:0 0 60px 40px;
+  opacity:0;transform:translateX(-30px);
+  transition:all 0.6s ease;
+}
+.timeline-item.visible{opacity:1;transform:translateX(0)}
+.timeline-dot{
+  position:absolute;left:-41px;top:4px;
+  width:22px;height:22px;
+  border-radius:50%;
+  border:3px solid #fff;
+  box-shadow:0 0 0 3px var(--accent);
+  background:var(--accent);
+  z-index:2;
+  transition:var(--transition);
+}
+.timeline-dot.blue{background:var(--accent2);box-shadow:0 0 0 3px var(--accent2)}
+.timeline-dot.gold{background:var(--gold);box-shadow:0 0 0 3px var(--gold)}
+.timeline-item:hover .timeline-dot{transform:scale(1.3)}
+.timeline-item .timeline-date{
+  font-size:12px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:8px;
+}
+.timeline-item .timeline-date.blue-text{color:var(--accent2)}
+.timeline-item .timeline-date.gold-text{color:var(--gold)}
+.timeline-item .timeline-card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:24px;
+  transition:var(--transition);
+}
+.timeline-item:hover .timeline-card{
+  box-shadow:var(--shadow-hover);
+  border-color:transparent;
+  transform:translateX(8px);
+}
+.timeline-card h4{
+  font-size:16px;font-weight:700;margin-bottom:8px;color:var(--primary);
+}
+.timeline-card p{
+  font-size:14px;color:var(--text-light);line-height:1.7;
+}
+.timeline-card .tag{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:4px;
+  font-size:10px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  margin-top:12px;
+}
+.tag.release{background:rgba(233,69,96,0.08);color:var(--accent)}
+.tag.firmware{background:rgba(15,52,96,0.08);color:var(--accent2)}
+.tag.feature{background:rgba(201,168,76,0.08);color:var(--gold)}
+
+/* ============================================
+   QUOTES / VOICES
+   ============================================ */
+#voices{background:#fff}
+.voices-masonry{
+  columns:2;
+  column-gap:24px;
+}
+.voice-card{
+  break-inside:avoid;
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:32px;
+  margin-bottom:24px;
+  transition:var(--transition);
+  position:relative;
+  overflow:hidden;
+  opacity:0;transform:translateY(30px);
+}
+.voice-card.visible{opacity:1;transform:translateY(0)}
+.voice-card:hover{
+  box-shadow:var(--shadow-hover);
+  border-color:transparent;
+  transform:translateY(-4px);
+}
+.voice-card .quote-mark{
+  font-family:'Playfair Display',serif;
+  font-size:64px;font-weight:900;
+  line-height:1;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  opacity:0.3;
+  position:absolute;top:16px;left:24px;
+}
+.voice-card blockquote{
+  font-size:14px;line-height:1.8;
+  color:var(--text);
+  margin-bottom:16px;
+  position:relative;
+  z-index:1;
+  font-style:italic;
+}
+.voice-card .voice-meta{
+  display:flex;align-items:center;gap:12px;
+  position:relative;z-index:1;
+}
+.voice-avatar{
+  width:36px;height:36px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;color:#fff;
+}
+.voice-avatar.pro{background:linear-gradient(135deg,var(--gold),#b8942f)}
+.voice-avatar.general{background:linear-gradient(135deg,var(--accent2),#1a5276)}
+.voice-info .voice-name{font-size:13px;font-weight:600;color:var(--text)}
+.voice-info .voice-sub{font-size:11px;color:var(--text-lighter)}
+.voice-card .sentiment-badge{
+  position:absolute;top:16px;right:16px;
+  padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;
+}
+.sentiment-badge.positive{background:rgba(46,213,115,0.1);color:#17a556}
+.sentiment-badge.negative{background:rgba(233,69,96,0.1);color:var(--accent)}
+.sentiment-badge.neutral{background:rgba(0,0,0,0.05);color:var(--text-lighter)}
+
+/* ============================================
+   FIRMWARE DETAIL SECTION
+   ============================================ */
+#firmware{background:var(--bg)}
+.firmware-tabs{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:48px;
+  flex-wrap:wrap;
+}
+.fw-tab{
+  padding:10px 24px;
+  border:1px solid var(--border);
+  border-radius:50px;
+  font-size:13px;font-weight:600;
+  cursor:pointer;
+  transition:var(--transition);
+  background:#fff;
+  color:var(--text-light);
+  letter-spacing:0.5px;
+}
+.fw-tab:hover{border-color:var(--accent);color:var(--accent)}
+.fw-tab.active{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;
+  border-color:transparent;
+}
+.fw-content{
+  display:none;
+  opacity:0;
+  transform:translateY(20px);
+  transition:all 0.5s ease;
+}
+.fw-content.active{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+  opacity:1;
+  transform:translateY(0);
+  animation:fwFadeIn 0.5s ease forwards;
+}
+@keyframes fwFadeIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+.fw-feature-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:24px;
+  transition:var(--transition);
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+}
+.fw-feature-card:hover{
+  box-shadow:var(--shadow);
+  border-color:transparent;
+  transform:translateY(-4px);
+}
+.fw-feature-icon{
+  width:44px;height:44px;
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  flex-shrink:0;
+}
+.fw-feature-icon.green{background:rgba(46,213,115,0.1);color:#17a556}
+.fw-feature-icon.blue{background:rgba(15,52,96,0.1);color:var(--accent2)}
+.fw-feature-icon.gold{background:rgba(201,168,76,0.1);color:var(--gold)}
+.fw-feature-icon.red{background:rgba(233,69,96,0.1);color:var(--accent)}
+.fw-feature-text h4{font-size:14px;font-weight:700;margin-bottom:4px;color:var(--primary)}
+.fw-feature-text p{font-size:13px;color:var(--text-light);line-height:1.7}
+
+/* ============================================
+   ISSUE DEEP DIVE
+   ============================================ */
+#issues{background:#fff}
+.issue-accordion{max-width:800px;margin:0 auto}
+.issue-item{
+  border:1px solid var(--border);
+  border-radius:12px;
+  margin-bottom:12px;
+  overflow:hidden;
+  transition:var(--transition);
+  background:var(--card-bg);
+}
+.issue-item:hover{box-shadow:var(--shadow)}
+.issue-header{
+  padding:20px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
+  transition:var(--transition);
+}
+.issue-header:hover{background:rgba(0,0,0,0.01)}
+.issue-header-left{display:flex;align-items:center;gap:16px}
+.issue-severity{
+  width:10px;height:10px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.issue-severity.high{background:var(--accent);box-shadow:0 0 8px rgba(233,69,96,0.3)}
+.issue-severity.medium{background:var(--gold);box-shadow:0 0 8px rgba(201,168,76,0.3)}
+.issue-severity.low{background:#2ed573;box-shadow:0 0 8px rgba(46,213,115,0.3)}
+.issue-header h4{font-size:15px;font-weight:600;color:var(--primary)}
+.issue-header .mention-count{
+  font-size:12px;font-weight:600;
+  color:var(--text-lighter);
+  background:#f5f5f5;
+  padding:4px 10px;border-radius:20px;
+}
+.issue-header .arrow{
+  font-size:18px;color:var(--text-lighter);
+  transition:transform 0.3s ease;
+}
+.issue-item.open .arrow{transform:rotate(180deg)}
+.issue-body{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.issue-item.open .issue-body{max-height:600px}
+.issue-body-inner{
+  padding:0 24px 24px;
+  font-size:14px;
+  color:var(--text-light);
+  line-height:1.8;
+}
+.issue-body-inner .user-quote{
+  background:#f9f9f9;
+  border-left:3px solid var(--accent);
+  padding:12px 16px;
+  margin:12px 0;
+  border-radius:0 8px 8px 0;
+  font-style:italic;
+  font-size:13px;
+}
+.issue-body-inner .solution{
+  background:rgba(46,213,115,0.05);
+  border:1px solid rgba(46,213,115,0.15);
+  border-radius:8px;
+  padding:12px 16px;
+  margin-top:12px;
+  font-size:13px;
+  color:#17a556;
+}
+.issue-body-inner .solution strong{display:block;margin-bottom:4px;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+
+/* ============================================
+   SUMMARY SECTION
+   ============================================ */
+#summary{
+  background:linear-gradient(135deg,var(--primary),var(--accent3));
+  color:#fff;
+  position:relative;
+  overflow:hidden;
+}
+#summary::before{
+  content:'';
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+#summary .container{position:relative;z-index:1}
+#summary .section-tag{color:var(--gold)}
+#summary .section-tag::before,#summary .section-tag::after{background:var(--gold)}
+#summary .section-title{color:#fff}
+#summary .section-desc{color:rgba(255,255,255,0.7)}
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:32px;
+  margin-top:48px;
+}
+.summary-card{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--radius);
+  padding:36px;
+  backdrop-filter:blur(10px);
+  transition:var(--transition);
+  opacity:0;transform:translateY(30px);
+}
+.summary-card.visible{opacity:1;transform:translateY(0)}
+.summary-card:hover{
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.15);
+  transform:translateY(-4px);
+}
+.summary-card h3{
+  font-size:18px;font-weight:700;
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:10px;
+}
+.summary-card p{
+  font-size:14px;line-height:1.8;
+  color:rgba(255,255,255,0.75);
+}
+.summary-icon{
+  width:32px;height:32px;
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+}
+.summary-icon.green{background:rgba(46,213,115,0.15);color:#2ed573}
+.summary-icon.red{background:rgba(233,69,96,0.15);color:var(--accent)}
+.summary-icon.blue{background:rgba(100,149,237,0.15);color:cornflowerblue}
+.summary-icon.gold{background:rgba(201,168,76,0.15);color:var(--gold)}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+footer{
+  background:#fff;
+  border-top:1px solid var(--border);
+  padding:60px 0 40px;
+}
+.footer-content{
+  display:flex;
+  justify-content:space-between;
+  align-items:start;
+  gap:40px;
+  margin-bottom:40px;
+}
+.footer-brand .logo{
+  font-family:'Playfair Display',serif;
+  font-size:20px;font-weight:700;color:var(--primary);
+  margin-bottom:12px;
+}
+.footer-brand p{font-size:13px;color:var(--text-light);max-width:300px;line-height:1.7}
+.footer-links h4{
+  font-size:12px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--text);margin-bottom:16px;
+}
+.footer-links a{
+  display:block;font-size:13px;
+  color:var(--text-light);text-decoration:none;
+  margin-bottom:8px;transition:var(--transition);
+}
+.footer-links a:hover{color:var(--accent);transform:translateX(4px)}
+.footer-bottom{
+  border-top:1px solid var(--border);
+  padding-top:24px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.footer-bottom p{font-size:12px;color:var(--text-lighter)}
+.back-to-top{
+  width:40px;height:40px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:var(--transition);
+  font-size:16px;color:var(--text-light);
+}
+.back-to-top:hover{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+  transform:translateY(-4px);
+}
+
+/* ============================================
+   FLOATING ELEMENTS
+   ============================================ */
+.floating-shapes{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;
+}
+.floating-shape{
+  position:absolute;
+  border:1px solid rgba(0,0,0,0.03);
+  border-radius:50%;
+  animation:floatShape 15s ease-in-out infinite;
+}
+@keyframes floatShape{
+  0%,100%{transform:translate(0,0) rotate(0deg)}
+  25%{transform:translate(20px,-20px) rotate(90deg)}
+  50%{transform:translate(-10px,-40px) rotate(180deg)}
+  75%{transform:translate(-20px,10px) rotate(270deg)}
+}
+
+/* ============================================
+   PROGRESS BAR (top of page)
+   ============================================ */
+.reading-progress{
+  position:fixed;top:0;left:0;
+  width:0%;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--gold));
+  z-index:99999;
+  transition:width 0.1s linear;
+}
+
+/* ============================================
+   PARTICLE CANVAS
+   ============================================ */
+#particles-canvas{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;
+  opacity:0.4;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media(max-width:1024px){
+  .overview-grid{grid-template-columns:repeat(2,1fr)}
+  .chart-container{grid-template-columns:1fr}
+  .voices-masonry{columns:1}
+  .fw-content.active{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .container{padding:0 20px}
+  section{padding:80px 0}
+  nav .nav-links{display:none}
+  .hamburger{display:flex}
+  .overview-grid{grid-template-columns:1fr}
+  .proscons-container{grid-template-columns:1fr}
+  .hero-stats{flex-direction:column;gap:24px}
+  .hero h1{font-size:36px}
+  .hero-cta-group{flex-direction:column;align-items:center}
+  .summary-grid{grid-template-columns:1fr}
+  .footer-content{flex-direction:column}
+  .footer-bottom{flex-direction:column;gap:16px;text-align:center}
+  .custom-cursor,.cursor-dot{display:none}
+  .timeline-wrapper{padding-left:40px}
+  .timeline-line,.timeline-line-progress{left:9px}
+  .timeline-dot{left:-41px}
+}
+@media(max-width:480px){
+  .section-title{font-size:28px}
+  .hero-stats{gap:16px}
+}
+
+/* ============================================
+   ANIMATION UTILITIES
+   ============================================ */
+.fade-in{opacity:0;transform:translateY(30px);transition:all 0.6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.fade-in-left{opacity:0;transform:translateX(-30px);transition:all 0.6s ease}
+.fade-in-left.visible{opacity:1;transform:translateX(0)}
+.fade-in-right{opacity:0;transform:translateX(30px);transition:all 0.6s ease}
+.fade-in-right.visible{opacity:1;transform:translateX(0)}
+.scale-in{opacity:0;transform:scale(0.9);transition:all 0.6s ease}
+.scale-in.visible{opacity:1;transform:scale(1)}
+.stagger-1{transition-delay:0.1s}
+.stagger-2{transition-delay:0.2s}
+.stagger-3{transition-delay:0.3s}
+.stagger-4{transition-delay:0.4s}
+.stagger-5{transition-delay:0.5s}
+.stagger-6{transition-delay:0.6s}
+
+/* Counter animation */
+.counter{
+  font-family:'Playfair Display',serif;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Tooltip */
+.tooltip{
+  position:relative;
+  cursor:help;
+}
+.tooltip::after{
+  content:attr(data-tip);
+  position:absolute;bottom:calc(100% + 8px);left:50%;
+  transform:translateX(-50%) translateY(4px);
+  background:var(--primary);color:#fff;
+  padding:6px 12px;border-radius:6px;
+  font-size:11px;white-space:nowrap;
+  opacity:0;pointer-events:none;
+  transition:all 0.3s ease;
+}
+.tooltip:hover::after{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Divider */
+.section-divider{
+  width:100%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border),transparent);
+  margin:0;
+}
+
+/* Rating stars */
+.rating-stars{display:flex;gap:4px}
+.star{font-size:16px;color:#ddd;transition:color 0.3s ease}
+.star.filled{color:var(--gold)}
+.star.half{
+  background:linear-gradient(90deg,var(--gold) 50%,#ddd 50%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+/* Glow effects */
+.glow-red{filter:drop-shadow(0 0 8px rgba(233,69,96,0.3))}
+.glow-blue{filter:drop-shadow(0 0 8px rgba(15,52,96,0.3))}
+.glow-gold{filter:drop-shadow(0 0 8px rgba(201,168,76,0.3))}
+
+/* Skeleton loading shimmer for images */
+.skeleton{
+  background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
+  background-size:200% 100%;
+  animation:skeletonShimmer 1.5s ease infinite;
+}
+@keyframes skeletonShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Camera icon SVG decoration */
+.camera-deco{
+  position:absolute;
+  opacity:0.03;
+  font-size:200px;
+  pointer-events:none;
+}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div class="loader-ring"></div>
+  <div class="loader-text">LOADING</div>
+  <div class="loader-bar"><div class="loader-bar-inner"></div></div>
+</div>
+
+<!-- READING PROGRESS BAR -->
+<div class="reading-progress" id="readingProgress"></div>
+
+<!-- CUSTOM CURSOR -->
+<div class="custom-cursor" id="customCursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- PARTICLE CANVAS -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- NAVIGATION -->
+<nav id="mainNav">
+  <a href="#" class="logo">
+    <div class="logo-icon">α7</div>
+    <span>Reddit Analysis</span>
+  </a>
+  <div class="nav-links">
+    <a href="#overview">概要</a>
+    <a href="#proscons">評価</a>
+    <a href="#dataviz">データ</a>
+    <a href="#timeline">タイムライン</a>
+    <a href="#voices">ユーザーの声</a>
+    <a href="#firmware">ファームウェア</a>
+    <a href="#issues">課題分析</a>
+    <a href="#summary">総括</a>
+  </div>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#overview" onclick="closeMobileMenu()">概要</a>
+  <a href="#proscons" onclick="closeMobileMenu()">評価</a>
+  <a href="#dataviz" onclick="closeMobileMenu()">データ</a>
+  <a href="#timeline" onclick="closeMobileMenu()">タイムライン</a>
+  <a href="#voices" onclick="closeMobileMenu()">ユーザーの声</a>
+  <a href="#firmware" onclick="closeMobileMenu()">ファームウェア</a>
+  <a href="#issues" onclick="closeMobileMenu()">課題分析</a>
+  <a href="#summary" onclick="closeMobileMenu()">総括</a>
+</div>
+
+<!-- HERO SECTION -->
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb1"></div>
+    <div class="gradient-orb orb2"></div>
+    <div class="gradient-orb orb3"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Reddit Community Analysis 2024–2026
+    </div>
+    <h1>
+      SONY <span class="highlight">A7 IV</span><br>
+      Reddit 徹底評価
+    </h1>
+    <p class="hero-subtitle">
+      r/SonyAlpha・r/Cameras・r/photography から約30件の投稿を抽出し、<br>
+      一般ユーザーとプロフェッショナルの生の声を分析しました。
+    </p>
+    <div class="hero-cta-group">
+      <a href="#proscons" class="btn-primary">
+        <span>▶</span> 評価を見る
+      </a>
+      <a href="#timeline" class="btn-secondary">
+        <span>◆</span> タイムラインへ
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="stat-number counter" data-target="30">0</div>
+        <div class="stat-label">分析投稿数</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-number counter" data-target="3">0</div>
+        <div class="stat-label">サブレディット</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-number counter" data-target="24">0</div>
+        <div class="stat-label">月間調査期間</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-number counter" data-target="6">0</div>
+        <div class="stat-label">FWアップデート</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span class="scroll-text">Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- OVERVIEW SECTION -->
+<section id="overview">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Overview</div>
+      <h2 class="section-title">調査概要</h2>
+      <p class="section-desc">
+        Reddit上のSony A7 IVに関する投稿・コメント（2024年2月〜2026年2月）を体系的に分析した結果をお届けします。
+      </p>
+    </div>
+    <div class="overview-grid">
+      <div class="overview-card fade-in stagger-1">
+        <div class="card-number">01</div>
+        <div class="card-icon red">📊</div>
+        <h3>調査対象</h3>
+        <p>r/SonyAlpha、r/Cameras、r/photography などカメラ関連コミュニティから約30件の投稿・コメントを選出。投稿者の属性（プロ／一般）も分類しました。</p>
+      </div>
+      <div class="overview-card fade-in stagger-2">
+        <div class="card-number">02</div>
+        <div class="card-icon blue">🎯</div>
+        <h3>分析方法</h3>
+        <p>投稿者が「プロカメラマン」「映像制作者」等と明言している場合はプロと判断。それ以外は一般ユーザーとして分類し、文脈や語り口から補足判断を行いました。</p>
+      </div>
+      <div class="overview-card fade-in stagger-3">
+        <div class="card-number">03</div>
+        <div class="card-icon gold">📈</div>
+        <h3>主な発見</h3>
+        <p>画質・動画性能への高評価の一方、バッテリー寿命、発熱問題、有料機能への不満が繰り返し指摘されており、ソフトウェア更新の品質も議論の的となっています。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- PROS & CONS SECTION -->
+<section id="proscons">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Evaluation</div>
+      <h2 class="section-title">利点と欠点</h2>
+      <p class="section-desc">
+        投稿で最も多く言及された評価ポイントを、利点・欠点に分けて頻度順に整理しました。
+      </p>
+    </div>
+    <div class="proscons-container">
+      <!-- PROS -->
+      <div class="proscons-column pros-col fade-in-left">
+        <h3><span class="icon-circle">✓</span> 利点（Pros）</h3>
+        <div class="proscons-item">
+          <div class="item-count"><span>4</span><small>件</small></div>
+          <div class="item-text">
+            <h4>画質・高感度性能</h4>
+            <p>低照度対応に優れ、ISO12800までノイズ除去ソフト併用で実用可能と評価。フルサイズセンサーの恩恵が高く、夜間撮影でも色再現に優れる。</p>
+            <div class="mention-bar"><div class="mention-bar-inner" style="--bar-width:80%"></div></div>
+          </div>
+        </div>
+        <div class="proscons-item">
+          <div class="item-count"><span>4</span><small>件</small></div>
+          <div class="item-text">
+            <h4>動画機能</h4>
+            <p>4K60p、10bit 4:2:2収録、S-Cinetoneなどプロレベルの動画機能を搭載。プロユーザーからも「非常に良い画」と高評価。</p>
+            <div class="mention-bar"><div class="mention-bar-inner" style="--bar-width:80%"></div></div>
+          </div>
+        </div>
+        <div class="proscons-item">
+          <div class="item-count"><span>3</span><small>件</small></div>
+          <div class="item-text">
+            <h4>オートフォーカス性能</h4>
+            <p>瞳AF・動物AFが継続的に強化され、安定した追従性能をユーザーが評価。ファームウェア更新によりさらに改善。</p>
+            <div class="mention-bar"><div class="mention-bar-inner" style="--bar-width:60%"></div></div>
+          </div>
+        </div>
+        <div class="proscons-item">
+          <div class="item-count"><span>2</span><small>件</small></div>
+          <div class="item-text">
+            <h4>手ブレ補正（IBIS）</h4>
+            <p>ボディ内手ブレ補正が安定しており、低速シャッターでの撮影にも対応可能と好評。</p>
+            <div class="mention-bar"><div class="mention-bar-inner" style="--bar-width:40%"></div></div>
+          </div>
+        </div>
+        <div class="proscons-item">
+          <div class="item-count"><span>2</span><small>件</small></div>
+          <div class="item-text">
+            <h4>操作性・UIの使い勝手</h4>
+            <p>ファームウェア6.0でUIが大幅に刷新され、サブメニューの位置改善やカメラの高速化により使い勝手が向上。</p>
+            <div class="mention-bar"><div class="mention-bar-inner" style="--bar-width:40%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONS -->
+      <div class="proscons-column cons-col fade-in-right">
+        <h3><span class="icon-circle">✕</span> 欠点（Cons）</h3>
+        <div class="proscons-item">
+          <div class="item-count"><span>5</span><small>件</small></div>
+          <div class="item-text">
+            <h4>バッテリー寿命</h4>
+            <p>公称500枚に対し実用で300枚程度とする報告が多数。新品バッテリー2本で試しても改善せず、本体側の問題を疑うユーザーも。</p>
+            <div class="mention-bar"><div class="mention-bar-inner" style="--bar-width:100%"></div></div>
+          </div>
+        </div>
+        <div class="proscons-item">
+          <div class="item-count"><span>4</span><small>件</small></div>
+          <div class="item-text">
+            <h4>発熱・オーバーヒート</h4>
+            <p>4K50/60fps撮影時に10〜15分で過熱停止する事例が報告。室内冷房下でも発生し、プロの撮影現場で深刻な問題に。</p>
+            <div class="mention-bar"><div class="mention-bar-inner" style="--bar-width:80%"></div></div>
+          </div>
+        </div>
+        <div class="proscons-item">
+          <div class="item-count"><span>3</span><small>件</small></div>
+          <div class="item-text">
+            <h4>有料機能（追加ライセンス）</h4>
+            <p>カスタムグリッドライン等の基本的機能に$150の追加課金が必要。「既に備わる機能を有料化する姿勢」に強い批判。</p>
+            <div class="mention-bar"><div class="mention-bar-inner" style="--bar-width:60%"></div></div>
+          </div>
+        </div>
+        <div class="proscons-item">
+          <div class="item-count"><span>3</span><small>件</small></div>
+          <div class="item-text">
+            <h4>ファーム更新のバグ・不具合</h4>
+            <p>更新後にシステムエラー、サードパーティバッテリーの警告表示、基板交換が必要になった事例も。慎重派ユーザーが一定数存在。</p>
+            <div class="mention-bar"><div class="mention-bar-inner" style="--bar-width:60%"></div></div>
+          </div>
+        </div>
+        <div class="proscons-item">
+          <div class="item-count"><span>2</span><small>件</small></div>
+          <div class="item-text">
+            <h4>高価格・追加コスト</h4>
+            <p>本体価格に加え、有料ライセンスや付属品コストが嵩む点への不満。サードパーティ製品との互換性問題も追加出費の一因。</p>
+            <div class="mention-bar"><div class="mention-bar-inner" style="--bar-width:40%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- DATA VISUALIZATION SECTION -->
+<section id="dataviz">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Data</div>
+      <h2 class="section-title">データビジュアライゼーション</h2>
+      <p class="section-desc">
+        言及頻度を可視化し、ユーザー評価の全体像をグラフで把握します。
+      </p>
+    </div>
+    <div class="chart-container">
+      <!-- Horizontal bar chart: Pros -->
+      <div class="chart-card fade-in stagger-1">
+        <h3>利点の言及頻度</h3>
+        <p class="chart-subtitle">投稿数ベースでの各利点の出現回数</p>
+        <div class="hbar-list">
+          <div class="hbar-item">
+            <div class="hbar-label">画質・高感度</div>
+            <div class="hbar-track">
+              <div class="hbar-fill green" style="--bar-w:80%">4件</div>
+            </div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-label">動画機能</div>
+            <div class="hbar-track">
+              <div class="hbar-fill green" style="--bar-w:80%">4件</div>
+            </div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-label">AF性能</div>
+            <div class="hbar-track">
+              <div class="hbar-fill green" style="--bar-w:60%">3件</div>
+            </div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-label">手ブレ補正</div>
+            <div class="hbar-track">
+              <div class="hbar-fill green" style="--bar-w:40%">2件</div>
+            </div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-label">操作性・UI</div>
+            <div class="hbar-track">
+              <div class="hbar-fill green" style="--bar-w:40%">2件</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Horizontal bar chart: Cons -->
+      <div class="chart-card fade-in stagger-2">
+        <h3>欠点の言及頻度</h3>
+        <p class="chart-subtitle">投稿数ベースでの各欠点の出現回数</p>
+        <div class="hbar-list">
+          <div class="hbar-item">
+            <div class="hbar-label">バッテリー寿命</div>
+            <div class="hbar-track">
+              <div class="hbar-fill red" style="--bar-w:100%">5件</div>
+            </div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-label">発熱</div>
+            <div class="hbar-track">
+              <div class="hbar-fill red" style="--bar-w:80%">4件</div>
+            </div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-label">有料機能</div>
+            <div class="hbar-track">
+              <div class="hbar-fill red" style="--bar-w:60%">3件</div>
+            </div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-label">FWバグ</div>
+            <div class="hbar-track">
+              <div class="hbar-fill red" style="--bar-w:60%">3件</div>
+            </div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-label">追加コスト</div>
+            <div class="hbar-track">
+              <div class="hbar-fill red" style="--bar-w:40%">2件</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RADAR CHART (SVG) -->
+    <div class="chart-card fade-in" style="margin-top:40px;max-width:700px;margin-left:auto;margin-right:auto">
+      <h3 style="text-align:center">総合評価レーダーチャート</h3>
+      <p class="chart-subtitle" style="text-align:center">Reddit投稿に基づくA7 IVの各性能評価（5段階）</p>
+      <div class="radar-container">
+        <svg class="radar-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" id="radarChart">
+          <!-- Background pentagons -->
+          <g opacity="0.1" stroke="#ccc" fill="none" stroke-width="1">
+            <polygon points="200,40 352,150 294,328 106,328 48,150" />
+            <polygon points="200,80 312,160 272,304 128,304 88,160" />
+            <polygon points="200,120 272,170 250,280 150,280 128,170" />
+            <polygon points="200,160 232,180 228,256 172,256 168,180" />
+          </g>
+          <!-- Axis lines -->
+          <g stroke="#ddd" stroke-width="1">
+            <line x1="200" y1="200" x2="200" y2="40" />
+            <line x1="200" y1="200" x2="352" y2="150" />
+            <line x1="200" y1="200" x2="294" y2="328" />
+            <line x1="200" y1="200" x2="106" y2="328" />
+            <line x1="200" y1="200" x2="48" y2="150" />
+          </g>
+          <!-- Data polygon -->
+          <polygon id="radarData"
+            points="200,200 200,200 200,200 200,200 200,200"
+            fill="rgba(233,69,96,0.15)"
+            stroke="var(--accent)"
+            stroke-width="2"
+            style="transition:all 1.5s cubic-bezier(0.25,0.46,0.45,0.94)"/>
+          <!-- Data points -->
+          <g id="radarDots" fill="var(--accent)">
+            <circle cx="200" cy="200" r="5" style="transition:all 1.5s ease"/>
+            <circle cx="200" cy="200" r="5" style="transition:all 1.5s ease"/>
+            <circle cx="200" cy="200" r="5" style="transition:all 1.5s ease"/>
+            <circle cx="200" cy="200" r="5" style="transition:all 1.5s ease"/>
+            <circle cx="200" cy="200" r="5" style="transition:all 1.5s ease"/>
+          </g>
+          <!-- Labels -->
+          <text x="200" y="25" text-anchor="middle" font-size="12" font-weight="600" fill="#333">画質</text>
+          <text x="370" y="155" text-anchor="start" font-size="12" font-weight="600" fill="#333">動画</text>
+          <text x="310" y="348" text-anchor="middle" font-size="12" font-weight="600" fill="#333">AF性能</text>
+          <text x="90" y="348" text-anchor="middle" font-size="12" font-weight="600" fill="#333">操作性</text>
+          <text x="30" y="155" text-anchor="end" font-size="12" font-weight="600" fill="#333">手ブレ補正</text>
+          <!-- Score labels -->
+          <text x="200" y="65" text-anchor="middle" font-size="10" fill="#999" id="radarScore1">4.0</text>
+          <text x="345" y="148" text-anchor="start" font-size="10" fill="#999" id="radarScore2">4.0</text>
+          <text x="290" y="335" text-anchor="middle" font-size="10" fill="#999" id="radarScore3">3.5</text>
+          <text x="110" y="335" text-anchor="middle" font-size="10" fill="#999" id="radarScore4">3.5</text>
+          <text x="55" y="148" text-anchor="end" font-size="10" fill="#999" id="radarScore5">3.0</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- TIMELINE SECTION -->
+<section id="timeline">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Timeline</div>
+      <h2 class="section-title">主な出来事</h2>
+      <p class="section-desc">
+        A7 IVの発売からファームウェア更新まで、主要イベントを時系列でたどります。
+      </p>
+    </div>
+    <div class="timeline-wrapper">
+      <div class="timeline-line"></div>
+      <div class="timeline-line-progress" id="timelineProgress"></div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">2021年11月</div>
+        <div class="timeline-card">
+          <h4>A7 IV 発売</h4>
+          <p>世界同時発表。33メガピクセルのフルサイズミラーレスカメラとして、α7シリーズの「ベーシックモデル」の新世代機として登場。4K60p動画対応、BIONZ XRプロセッサ搭載で写真と動画のハイブリッド機として注目を集めました。</p>
+          <span class="tag release">製品発売</span>
+        </div>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-dot gold"></div>
+        <div class="timeline-date gold-text">2023年11月</div>
+        <div class="timeline-card">
+          <h4>カスタムグリッドライン有料機能発表</h4>
+          <p>$150で購入するカスタムグリッドライン機能の発表がRedditで大きな議論を引き起こしました。「PNGファイルを読み込むだけの機能に$150は高すぎる」「サブスク時代の到来か」など否定的な意見が多数。</p>
+          <span class="tag feature">有料機能</span>
+        </div>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-dot gold"></div>
+        <div class="timeline-date gold-text">2024年4月</div>
+        <div class="timeline-card">
+          <h4>グリッドライン有料ライセンス提供開始</h4>
+          <p>発表されたカスタムグリッドラインの有料ライセンスが実際に購入可能に。一部ユーザーからは引き続き批判の声が上がりましたが、プロユーザーの中には活用する声も。</p>
+          <span class="tag feature">有料機能</span>
+        </div>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-dot blue"></div>
+        <div class="timeline-date blue-text">2025年3月</div>
+        <div class="timeline-card">
+          <h4>ファームウェア 4.0 公開</h4>
+          <p>フォーカスブラケット、False Color、Waveform表示、アナモルフィックレンズ対応、Creator's App連携など大規模な機能追加。記録停止バグの修正も含まれ、多くのユーザーから歓迎されました。</p>
+          <span class="tag firmware">ファームウェア</span>
+        </div>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-dot blue"></div>
+        <div class="timeline-date blue-text">2025年10月</div>
+        <div class="timeline-card">
+          <h4>ファームウェア 5.0 公開</h4>
+          <p>画像認証用デジタル署名機能の追加と動作安定化が主な内容。コンテンツの信頼性確保のためのC2PA対応として注目を集めました。</p>
+          <span class="tag firmware">ファームウェア</span>
+        </div>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-dot blue"></div>
+        <div class="timeline-date blue-text">2025年12月</div>
+        <div class="timeline-card">
+          <h4>ファームウェア 6.0 公開</h4>
+          <p>UI大幅刷新（サブメニュー位置変更、高速化）、瞳AF/動物AF強化、「モニター＆コントロール」アプリ対応、サードパーティバッテリー警告表示の仕様変更など。ユーザーから使い勝手の向上を評価する声多数。</p>
+          <span class="tag firmware">ファームウェア</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- USER VOICES SECTION -->
+<section id="voices">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Voices</div>
+      <h2 class="section-title">ユーザーの声</h2>
+      <p class="section-desc">
+        プロフェッショナルから一般ユーザーまで、Redditに寄せられたリアルな声を紹介します。
+      </p>
+    </div>
+    <div class="voices-masonry">
+
+      <!-- Voice 1: Pro positive -->
+      <div class="voice-card fade-in">
+        <span class="quote-mark">"</span>
+        <span class="sentiment-badge positive">Positive</span>
+        <blockquote>
+          私は数年にわたりプロとしてA7 IVを使っています。イベント撮影やビデオで使用していますが、このカメラが大好きです。ビデオはS-CinetoneのPP11で撮っていますが、非常に良い画になります。A7 IIIから乗り換えましたが、A7S IIIへ移行するほどの理由はありません。
+        </blockquote>
+        <div class="voice-meta">
+          <div class="voice-avatar pro">P</div>
+          <div class="voice-info">
+            <div class="voice-name">YouDontKnow5859</div>
+            <div class="voice-sub">r/SonyAlpha · 2026年1月 · プロ</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice 2: General positive -->
+      <div class="voice-card fade-in">
+        <span class="quote-mark">"</span>
+        <span class="sentiment-badge positive">Positive</span>
+        <blockquote>
+          素晴らしいカメラです。低照度性能も優秀で、現行の新型機に比べても静止画ではA7 IVがそれほど劣ることはありません。ノイズ除去ソフト（例：Topaz）を使えばISO12800まで安心して使えます。
+        </blockquote>
+        <div class="voice-meta">
+          <div class="voice-avatar general">J</div>
+          <div class="voice-info">
+            <div class="voice-name">Juhyo</div>
+            <div class="voice-sub">r/SonyAlpha · 2026年1月 · 一般</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice 3: Pro negative -->
+      <div class="voice-card fade-in">
+        <span class="quote-mark">"</span>
+        <span class="sentiment-badge negative">Negative</span>
+        <blockquote>
+          プロ写真家歴15年でキャノンから乗り換えましたが、正直低照度性能には失望しています。「低照度に強い」と聞いていたのに、以前の機種より悪いくらいです。ISO12800で撮っても、現像でノイズ除去しても画像はギリギリ。
+        </blockquote>
+        <div class="voice-meta">
+          <div class="voice-avatar pro">L</div>
+          <div class="voice-info">
+            <div class="voice-name">ladynomingtonn</div>
+            <div class="voice-sub">r/SonyAlpha · 2025年7月 · プロ</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice 4: Overheat complaint -->
+      <div class="voice-card fade-in">
+        <span class="quote-mark">"</span>
+        <span class="sentiment-badge negative">Negative</span>
+        <blockquote>
+          50fpsの4K撮りたいだけなのに…。A7IVは10〜15分で過熱します。室内で冷房ありの状況でもすぐOVERHEAT。最小ビットレートに下げて「高温耐性」設定にしてもダメ。タレントに待ってもらうのは本当にストレスです。
+        </blockquote>
+        <div class="voice-meta">
+          <div class="voice-avatar general">J</div>
+          <div class="voice-info">
+            <div class="voice-name">japppasta</div>
+            <div class="voice-sub">r/SonyAlpha · 2025年12月 · 一般</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice 5: FW6.0 positive -->
+      <div class="voice-card fade-in">
+        <span class="quote-mark">"</span>
+        <span class="sentiment-badge positive">Positive</span>
+        <blockquote>
+          最新6.0でUIが大幅に刷新されました。サブメニューがフォーカスポイント上ではなく画面下に移動し、カメラが高速化。素早く設定変更できるようになり、使い勝手が改善されています。
+        </blockquote>
+        <div class="voice-meta">
+          <div class="voice-avatar general">F</div>
+          <div class="voice-info">
+            <div class="voice-name">Fakros</div>
+            <div class="voice-sub">r/SonyAlpha · 2025年11月 · 一般</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice 6: Paid feature criticism -->
+      <div class="voice-card fade-in">
+        <span class="quote-mark">"</span>
+        <span class="sentiment-badge negative">Negative</span>
+        <blockquote>
+          使い回しの中古A7IVですが、有料機能の追加で諦めモード。「できる機能」をあえて有料化する発想には怒りしかない。ここまで来たら消費者はもう受け入れるしかないのだろうが…
+        </blockquote>
+        <div class="voice-meta">
+          <div class="voice-avatar general">C</div>
+          <div class="voice-info">
+            <div class="voice-name">cynicown101</div>
+            <div class="voice-sub">r/photography · 2023年12月 · 一般</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice 7: Battery issue -->
+      <div class="voice-card fade-in">
+        <span class="quote-mark">"</span>
+        <span class="sentiment-badge negative">Negative</span>
+        <blockquote>
+          新品バッテリーなのに500ショット（公称値）の半分しか持ちません。300枚程度しか撮れず、どんなレンズにしても変わりません。新品2本試しましたがカメラ本体の問題のようです。
+        </blockquote>
+        <div class="voice-meta">
+          <div class="voice-avatar general">G</div>
+          <div class="voice-info">
+            <div class="voice-name">GSyncNew</div>
+            <div class="voice-sub">r/SonyAlpha · 2024年12月 · 一般</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice 8: FW caution -->
+      <div class="voice-card fade-in">
+        <span class="quote-mark">"</span>
+        <span class="sentiment-badge neutral">Neutral</span>
+        <blockquote>
+          カメラが正常に動作していて新機能が不要ならアップデートは待った方が良いです。過去の更新でソニーはバグを出して修正しないこともあるので。
+        </blockquote>
+        <div class="voice-meta">
+          <div class="voice-avatar general">L</div>
+          <div class="voice-info">
+            <div class="voice-name">LORD_CMDR_INTERNET</div>
+            <div class="voice-sub">r/SonyAlpha · 2025年11月 · 一般</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice 9: FX series suggestion -->
+      <div class="voice-card fade-in">
+        <span class="quote-mark">"</span>
+        <span class="sentiment-badge neutral">Neutral</span>
+        <blockquote>
+          A7IVは動画専用機ではありません。動画重視なら冷却ファン内蔵のFXシリーズ（FX3/FX30/FX6/FX6S/FX2）を選ぶべきです。FX2はA7IVにファンを付けたようなものです。
+        </blockquote>
+        <div class="voice-meta">
+          <div class="voice-avatar general">L</div>
+          <div class="voice-info">
+            <div class="voice-name">LoganNolag</div>
+            <div class="voice-sub">r/SonyAlpha · 2025年12月 · 一般</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice 10: FW repair experience -->
+      <div class="voice-card fade-in">
+        <span class="quote-mark">"</span>
+        <span class="sentiment-badge negative">Negative</span>
+        <blockquote>
+          これまでにSony機のファーム更新でカメラを壊されたことはないですか？ 私は以前A7IVを3週間も修理に出し（基板交換）、FS7でも同様でした。変更が必要なければ更新しない方がいいですよ。
+        </blockquote>
+        <div class="voice-meta">
+          <div class="voice-avatar pro">U</div>
+          <div class="voice-info">
+            <div class="voice-name">Unlucky-Eye-3345</div>
+            <div class="voice-sub">r/SonyAlpha · 2025年11月 · プロ</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- FIRMWARE DETAIL SECTION -->
+<section id="firmware">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Firmware</div>
+      <h2 class="section-title">ファームウェア詳細</h2>
+      <p class="section-desc">
+        各バージョンの主な追加機能と変更点をタブで切り替えて確認できます。
+      </p>
+    </div>
+    <div class="firmware-tabs">
+      <div class="fw-tab active" data-tab="fw4">v4.0（2025年3月）</div>
+      <div class="fw-tab" data-tab="fw5">v5.0（2025年10月）</div>
+      <div class="fw-tab" data-tab="fw6">v6.0（2025年12月）</div>
+    </div>
+
+    <!-- FW 4.0 -->
+    <div class="fw-content active" id="fw4">
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon green">◎</div>
+        <div class="fw-feature-text">
+          <h4>フォーカスブラケット</h4>
+          <p>被写界深度を拡張するためのフォーカスブラケット撮影機能を追加。風景・マクロ撮影者に待望の機能。</p>
+        </div>
+      </div>
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon blue">◎</div>
+        <div class="fw-feature-text">
+          <h4>False Color / Waveform</h4>
+          <p>映像制作者向けのFalse Color表示とWaveformモニターを追加。露出管理がより正確に。</p>
+        </div>
+      </div>
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon gold">◎</div>
+        <div class="fw-feature-text">
+          <h4>アナモルフィックレンズ対応</h4>
+          <p>アナモルフィックレンズ使用時のデスクイーズ表示に対応。シネマティックな映像制作が容易に。</p>
+        </div>
+      </div>
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon green">◎</div>
+        <div class="fw-feature-text">
+          <h4>Creator's App連携強化</h4>
+          <p>焦点距離設定やアプリからのカメラ制御機能が拡張。リモート操作の利便性が向上。</p>
+        </div>
+      </div>
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon red">◎</div>
+        <div class="fw-feature-text">
+          <h4>記録停止バグ修正</h4>
+          <p>動画撮影中に突然記録が停止する重大バグが修正され、信頼性が向上。</p>
+        </div>
+      </div>
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon blue">◎</div>
+        <div class="fw-feature-text">
+          <h4>焦点距離表示設定</h4>
+          <p>使用中のレンズ焦点距離を画面上に表示する設定が追加され、特にMFレンズ使用時に便利。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FW 5.0 -->
+    <div class="fw-content" id="fw5">
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon blue">◎</div>
+        <div class="fw-feature-text">
+          <h4>デジタル署名機能</h4>
+          <p>画像認証用のデジタル署名（C2PA対応）を追加。コンテンツの信頼性・真正性を証明可能に。</p>
+        </div>
+      </div>
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon green">◎</div>
+        <div class="fw-feature-text">
+          <h4>動作安定化</h4>
+          <p>全体的なシステムの安定性を向上。各種操作のレスポンス改善も含まれています。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FW 6.0 -->
+    <div class="fw-content" id="fw6">
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon gold">◎</div>
+        <div class="fw-feature-text">
+          <h4>UI大幅刷新</h4>
+          <p>サブメニューがフォーカスポイント上から画面下に移動。カメラの動作速度も向上し、素早い設定変更が可能に。</p>
+        </div>
+      </div>
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon green">◎</div>
+        <div class="fw-feature-text">
+          <h4>瞳AF / 動物AF強化</h4>
+          <p>被写体認識精度の向上により、瞳AFと動物AFの追従性能がさらに改善。</p>
+        </div>
+      </div>
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon blue">◎</div>
+        <div class="fw-feature-text">
+          <h4>モニター＆コントロール アプリ対応</h4>
+          <p>外部デバイスからのモニタリングとカメラ制御に対応するアプリ連携が追加。</p>
+        </div>
+      </div>
+      <div class="fw-feature-card">
+        <div class="fw-feature-icon red">◎</div>
+        <div class="fw-feature-text">
+          <h4>サードパーティバッテリー表示変更</h4>
+          <p>警告表示が変更され、残量がパーセントではなく4段階アイコン表示に。純正バッテリー使用を促す仕様変更。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ISSUE DEEP DIVE -->
+<section id="issues">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Deep Dive</div>
+      <h2 class="section-title">課題の深堀り</h2>
+      <p class="section-desc">
+        ユーザーが報告した主要な問題点とコミュニティで提案された対策をまとめました。
+      </p>
+    </div>
+    <div class="issue-accordion">
+
+      <div class="issue-item fade-in">
+        <div class="issue-header" onclick="toggleIssue(this)">
+          <div class="issue-header-left">
+            <div class="issue-severity high"></div>
+            <h4>バッテリー寿命の問題</h4>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="mention-count">5件の言及</span>
+            <span class="arrow">▼</span>
+          </div>
+        </div>
+        <div class="issue-body">
+          <div class="issue-body-inner">
+            <p>公称約500枚の撮影可能枚数に対し、実際には300枚程度しか撮れないとする報告が複数寄せられています。A7 IIIの高い持続時間を期待していたユーザーほど落胆する傾向があります。</p>
+            <div class="user-quote">
+              「新品バッテリーなのに500ショット（公称値）の半分しか持ちません。新品2本試しましたがカメラ本体の問題のようです。」— GSyncNew
+            </div>
+            <div class="user-quote">
+              「300枚は明らかに低すぎます。僕のA7IIは公称350枚でしたが、機内モードOFFで400枚撮れました。」— Entire_Teaching3521
+            </div>
+            <div class="solution">
+              <strong>コミュニティ提案の対策</strong>
+              バッテリーが中古の場合は新品に交換 / 機内モードの利用で消費電力削減 / 予備バッテリーの携行 / USB-C充電対応の外部バッテリーの活用
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-item fade-in">
+        <div class="issue-header" onclick="toggleIssue(this)">
+          <div class="issue-header-left">
+            <div class="issue-severity high"></div>
+            <h4>4K高フレームレート撮影時の発熱</h4>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="mention-count">4件の言及</span>
+            <span class="arrow">▼</span>
+          </div>
+        </div>
+        <div class="issue-body">
+          <div class="issue-body-inner">
+            <p>4K 50/60fps撮影時に10〜15分程度で過熱し撮影が強制停止する事例が報告されています。室内で冷房がある環境でも発生する場合があり、ビデオ撮影を主用途とするユーザーにとって深刻な問題です。</p>
+            <div class="user-quote">
+              「50fpsの4K撮りたいだけなのに…。室内で冷房ありの状況でもすぐOVERHEAT。タレントに待ってもらうのは本当にストレスです。」— japppasta
+            </div>
+            <div class="solution">
+              <strong>コミュニティ提案の対策</strong>
+              液晶画面を開いて使用 / USB充電しながらの撮影を避ける / 高温耐性設定を有効化 / ケージや外部冷却ファンの装着 / ダミーバッテリーで外部電源使用 / 長時間動画にはFXシリーズ（FX3/FX30等）を検討 / 4K30pで撮影（発熱大幅軽減）
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-item fade-in">
+        <div class="issue-header" onclick="toggleIssue(this)">
+          <div class="issue-header-left">
+            <div class="issue-severity medium"></div>
+            <h4>有料追加機能への批判</h4>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="mention-count">3件の言及</span>
+            <span class="arrow">▼</span>
+          </div>
+        </div>
+        <div class="issue-body">
+          <div class="issue-body-inner">
+            <p>カスタムグリッドラインなど、ハードウェア的に実装可能な機能を$150の追加ライセンスとして販売する方針に対し、ユーザーコミュニティから強い反発が起きました。「カメラメーカーにもサブスク時代が来る」という懸念の声もあります。</p>
+            <div class="user-quote">
+              「Nikonがログ録画用に同様の有料ライセンスを出したのは理解できたが、PNGファイルを読み込むだけのグリッド線に$150はやり過ぎ。」— Goodie__
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-item fade-in">
+        <div class="issue-header" onclick="toggleIssue(this)">
+          <div class="issue-header-left">
+            <div class="issue-severity medium"></div>
+            <h4>ファームウェア更新の不具合リスク</h4>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="mention-count">3件の言及</span>
+            <span class="arrow">▼</span>
+          </div>
+        </div>
+        <div class="issue-body">
+          <div class="issue-body-inner">
+            <p>ファームウェア更新後にシステムエラーが発生し修理が必要になったケース、サードパーティバッテリーへの警告表示が追加されたケースなど、更新に伴うリスクを指摘する声があります。「動いているなら触るな」という慎重派と「最新にしないと現場で困る」という更新推進派の意見が分かれています。</p>
+            <div class="user-quote">
+              「私は以前A7IVを3週間も修理に出し（基板交換）、FS7でも同様でした。保証外だと大損です。」— Unlucky-Eye-3345
+            </div>
+            <div class="user-quote">
+              「4.0の更新で記録停止などの重大バグは修正されました。3ヶ月経ってみんな問題ないと言っていますよ。」— heroism777
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-item fade-in">
+        <div class="issue-header" onclick="toggleIssue(this)">
+          <div class="issue-header-left">
+            <div class="issue-severity low"></div>
+            <h4>高ISO時のノイズ問題</h4>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="mention-count">3件の言及</span>
+            <span class="arrow">▼</span>
+          </div>
+        </div>
+        <div class="issue-body">
+          <div class="issue-body-inner">
+            <p>ISO12800以上で色ノイズが顕著になるという指摘があります。ただし、ソフトウェアによるノイズ除去の発展により実用上は十分とする意見も多く、過去9年以内の非積層型フルサイズ機ではどれも同等レベルとの指摘もあります。</p>
+            <div class="user-quote">
+              「A7IVはISO12800あたりから暗所で破綻し始めます。色ノイズが出やすい。ISO6400に下げるか露光時間を延ばした方がいい。」— bertpel
+            </div>
+            <div class="solution">
+              <strong>コミュニティ提案の対策</strong>
+              DXO PhotoLab / Topaz DeNoise等のソフトウェアNR活用 / ISO6400以下での撮影を心がける / 露出時間の延長 / 明るいレンズの使用
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- SUMMARY SECTION -->
+<section id="summary">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Summary</div>
+      <h2 class="section-title">総括</h2>
+      <p class="section-desc">
+        Reddit上の声から浮かび上がるSony A7 IVの総合的な評価をまとめます。
+      </p>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card fade-in stagger-1">
+        <h3><span class="summary-icon green">✓</span> 画質・動画性能は高評価</h3>
+        <p>多くのユーザーが画質と高感度特性を高く評価しています。33MPフルサイズセンサーの暗所性能は、ノイズ除去ソフトとの組み合わせでISO12800まで実用可能。4K動画、10bit収録、S-Cinetoneなどの動画機能はプロからも「十分な画」と評価されています。手ブレ補正（IBIS）やAF性能も含め、写真・動画のハイブリッド機としての基本性能は堅実です。</p>
+      </div>
+      <div class="summary-card fade-in stagger-2">
+        <h3><span class="summary-icon red">!</span> バッテリー・発熱は要注意</h3>
+        <p>最も多く指摘された欠点はバッテリー寿命です。公称値を大幅に下回る実用枚数に不満が集中。また4K高フレームレート撮影時の発熱問題も深刻で、動画メインの用途にはFXシリーズなど専用機の検討が推奨されています。予備バッテリーや外部冷却ファンなどの対策が不可欠です。</p>
+      </div>
+      <div class="summary-card fade-in stagger-3">
+        <h3><span class="summary-icon gold">$</span> 有料機能への強い反発</h3>
+        <p>カスタムグリッドラインへの$150課金に代表される有料機能の導入は、コミュニティから強い批判を受けています。「カメラ本体に備わる機能をソフトウェアで制限し追加課金するのは消費者軽視」という声は根強く、メーカーの姿勢に対する不信感が蓄積されています。</p>
+      </div>
+      <div class="summary-card fade-in stagger-4">
+        <h3><span class="summary-icon blue">↑</span> ファームウェアで進化し続ける</h3>
+        <p>発売後もv4.0〜v6.0まで継続的な機能追加が行われ、フォーカスブラケット、False Color、UI刷新、AF強化など大幅な進化を遂げています。一方で更新に伴うバグリスクも指摘されており、「安定動作していれば待つ」という慎重なアプローチも一定の支持を得ています。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <div class="logo">SONY A7 IV Reddit Analysis</div>
+        <p>Reddit上のr/SonyAlpha、r/Cameras、r/photographyから収集した投稿・コメントに基づく分析レポートです。2024年2月〜2026年2月の期間を対象としています。</p>
+      </div>
+      <div class="footer-links">
+        <h4>セクション</h4>
+        <a href="#overview">調査概要</a>
+        <a href="#proscons">利点と欠点</a>
+        <a href="#dataviz">データ</a>
+        <a href="#timeline">タイムライン</a>
+        <a href="#voices">ユーザーの声</a>
+        <a href="#firmware">ファームウェア</a>
+        <a href="#issues">課題分析</a>
+        <a href="#summary">総括</a>
+      </div>
+      <div class="footer-links">
+        <h4>ソース</h4>
+        <a href="https://www.reddit.com/r/SonyAlpha/" target="_blank">r/SonyAlpha</a>
+        <a href="https://www.reddit.com/r/Cameras/" target="_blank">r/Cameras</a>
+        <a href="https://www.reddit.com/r/photography/" target="_blank">r/photography</a>
+        <a href="https://petapixel.com" target="_blank">PetaPixel</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Sony A7 IV Reddit Analysis Report. All data sourced from public Reddit posts.</p>
+      <button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+/* ============================================
+   LOADING SCREEN
+   ============================================ */
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    document.getElementById('loading-screen').classList.add('hidden');
+    startCounters();
+  }, 2200);
+});
+
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+const cursor = document.getElementById('customCursor');
+const cursorDot = document.getElementById('cursorDot');
+let mouseX = 0, mouseY = 0;
+let cursorX = 0, cursorY = 0;
+
+document.addEventListener('mousemove', function(e) {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  cursorDot.style.left = mouseX + 'px';
+  cursorDot.style.top = mouseY + 'px';
+});
+
+function animateCursor() {
+  cursorX += (mouseX - cursorX) * 0.15;
+  cursorY += (mouseY - cursorY) * 0.15;
+  cursor.style.left = cursorX + 'px';
+  cursor.style.top = cursorY + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+// Hover effects on interactive elements
+const hoverElements = document.querySelectorAll('a, button, .fw-tab, .issue-header, .overview-card, .proscons-item, .voice-card, .timeline-card');
+hoverElements.forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+});
+
+/* ============================================
+   NAVIGATION SCROLL
+   ============================================ */
+const nav = document.getElementById('mainNav');
+let lastScrollY = 0;
+
+window.addEventListener('scroll', function() {
+  const scrollY = window.scrollY;
+  if (scrollY > 50) {
+    nav.classList.add('scrolled');
+  } else {
+    nav.classList.remove('scrolled');
+  }
+  lastScrollY = scrollY;
+
+  // Reading progress
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = (scrollY / docHeight) * 100;
+  document.getElementById('readingProgress').style.width = progress + '%';
+});
+
+/* ============================================
+   HAMBURGER MENU
+   ============================================ */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+hamburger.addEventListener('click', function() {
+  hamburger.classList.toggle('active');
+  mobileMenu.classList.toggle('active');
+  document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+});
+
+function closeMobileMenu() {
+  hamburger.classList.remove('active');
+  mobileMenu.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+/* ============================================
+   COUNTER ANIMATION
+   ============================================ */
+function startCounters() {
+  const counters = document.querySelectorAll('.counter');
+  counters.forEach(counter => {
+    const target = parseInt(counter.getAttribute('data-target'));
+    const duration = 2000;
+    const startTime = performance.now();
+
+    function updateCounter(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+      counter.textContent = current;
+      if (progress < 1) {
+        requestAnimationFrame(updateCounter);
+      }
+    }
+    requestAnimationFrame(updateCounter);
+  });
+}
+
+/* ============================================
+   INTERSECTION OBSERVER (Scroll Animations)
+   ============================================ */
+const observerOptions = {
+  root: null,
+  rootMargin: '0px 0px -80px 0px',
+  threshold: 0.1
+};
+
+const observer = new IntersectionObserver(function(entries) {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+
+      // Animate mention bars
+      const bars = entry.target.querySelectorAll('.mention-bar-inner');
+      bars.forEach(bar => {
+        setTimeout(() => bar.classList.add('animated'), 300);
+      });
+
+      // Animate horizontal bars
+      const hbars = entry.target.querySelectorAll('.hbar-fill');
+      hbars.forEach((bar, i) => {
+        setTimeout(() => bar.classList.add('animated'), 200 + i * 100);
+      });
+    }
+  });
+}, observerOptions);
+
+// Observe all animatable elements
+document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .scale-in, .overview-card, .proscons-column, .chart-card, .timeline-item, .voice-card, .summary-card').forEach(el => {
+  observer.observe(el);
+});
+
+/* ============================================
+   RADAR CHART ANIMATION
+   ============================================ */
+const radarObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Scores: 画質4.0, 動画4.0, AF3.5, 操作性
+// Pentagon vertices (max = outer ring):
+      //   Top:        (200, 40)   → center(200,200) → delta(0,-160)
+      //   TopRight:   (352, 150)  → delta(152,-50)
+      //   BottomRight:(294, 328)  → delta(94, 128)
+      //   BottomLeft: (106, 328)  → delta(-94, 128)
+      //   Left:       (48,  150)  → delta(-152,-50)
+      //
+      // Score / 5 * delta = actual point
+      const scores = [4.0, 4.0, 3.5, 3.5, 3.0];
+      const center = { x: 200, y: 200 };
+      const vertices = [
+        { x: 200, y: 40 },   // 画質 (top)
+        { x: 352, y: 150 },  // 動画 (top-right)
+        { x: 294, y: 328 },  // AF性能 (bottom-right)
+        { x: 106, y: 328 },  // 操作性 (bottom-left)
+        { x: 48,  y: 150 }   // 手ブレ補正 (left)
+      ];
+
+      const points = scores.map((score, i) => {
+        const ratio = score / 5;
+        const px = center.x + (vertices[i].x - center.x) * ratio;
+        const py = center.y + (vertices[i].y - center.y) * ratio;
+        return { x: Math.round(px), y: Math.round(py) };
+      });
+
+      const pointsStr = points.map(p => p.x + ',' + p.y).join(' ');
+
+      // Animate with slight delay for visual effect
+      setTimeout(function() {
+        const radarData = document.getElementById('radarData');
+        if (radarData) {
+          radarData.setAttribute('points', pointsStr);
+        }
+
+        // Animate dots
+        const radarDots = document.querySelectorAll('#radarDots circle');
+        radarDots.forEach((dot, i) => {
+          if (points[i]) {
+            dot.setAttribute('cx', points[i].x);
+            dot.setAttribute('cy', points[i].y);
+          }
+        });
+      }, 500);
+
+      radarObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+
+const radarChart = document.getElementById('radarChart');
+if (radarChart) {
+  radarObserver.observe(radarChart);
+}
+
+/* ============================================
+   FIRMWARE TABS
+   ============================================ */
+const fwTabs = document.querySelectorAll('.fw-tab');
+const fwContents = document.querySelectorAll('.fw-content');
+
+fwTabs.forEach(tab => {
+  tab.addEventListener('click', function() {
+    const targetTab = this.getAttribute('data-tab');
+
+    // Remove active from all tabs
+    fwTabs.forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+
+    // Hide all contents with fade-out
+    fwContents.forEach(content => {
+      content.classList.remove('active');
+      content.style.display = 'none';
+    });
+
+    // Show target content with fade-in
+    const targetContent = document.getElementById(targetTab);
+    if (targetContent) {
+      // Small delay for transition effect
+      setTimeout(function() {
+        targetContent.classList.add('active');
+        targetContent.style.display = '';
+
+        // Re-trigger animation
+        targetContent.style.animation = 'none';
+        targetContent.offsetHeight; // force reflow
+        targetContent.style.animation = '';
+      }, 50);
+    }
+  });
+});
+
+/* ============================================
+   ISSUE ACCORDION
+   ============================================ */
+function toggleIssue(headerEl) {
+  const issueItem = headerEl.parentElement;
+  const isOpen = issueItem.classList.contains('open');
+
+  // Close all other items
+  document.querySelectorAll('.issue-item').forEach(item => {
+    item.classList.remove('open');
+  });
+
+  // Toggle current
+  if (!isOpen) {
+    issueItem.classList.add('open');
+
+    // Smooth scroll into view if needed
+    setTimeout(function() {
+      const rect = issueItem.getBoundingClientRect();
+      if (rect.bottom > window.innerHeight) {
+        issueItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 300);
+  }
+}
+
+/* ============================================
+   TIMELINE PROGRESS LINE
+   ============================================ */
+function updateTimelineProgress() {
+  const timelineSection = document.getElementById('timeline');
+  if (!timelineSection) return;
+
+  const timelineWrapper = timelineSection.querySelector('.timeline-wrapper');
+  const progressLine = document.getElementById('timelineProgress');
+  if (!timelineWrapper || !progressLine) return;
+
+  const rect = timelineWrapper.getBoundingClientRect();
+  const wrapperTop = rect.top;
+  const wrapperHeight = rect.height;
+  const windowHeight = window.innerHeight;
+
+  // Calculate how far we've scrolled through the timeline
+  const scrolledInto = windowHeight - wrapperTop;
+  const totalScrollable = wrapperHeight + windowHeight * 0.5;
+  let progress = Math.max(0, Math.min(1, scrolledInto / totalScrollable));
+
+  progressLine.style.height = (progress * 100) + '%';
+}
+
+window.addEventListener('scroll', updateTimelineProgress);
+window.addEventListener('resize', updateTimelineProgress);
+
+/* ============================================
+   PARTICLE SYSTEM (Canvas)
+   ============================================ */
+const particleCanvas = document.getElementById('particles-canvas');
+const pCtx = particleCanvas ? particleCanvas.getContext('2d') : null;
+let particles = [];
+let particleAnimFrame = null;
+
+function initParticles() {
+  if (!particleCanvas || !pCtx) return;
+
+  particleCanvas.width = window.innerWidth;
+  particleCanvas.height = window.innerHeight;
+
+  particles = [];
+  const count = Math.min(60, Math.floor(window.innerWidth / 25));
+
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * particleCanvas.width,
+      y: Math.random() * particleCanvas.height,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      radius: Math.random() * 1.5 + 0.5,
+      opacity: Math.random() * 0.3 + 0.1,
+      pulseSpeed: Math.random() * 0.02 + 0.005,
+      pulsePhase: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function drawParticles() {
+  if (!pCtx || !particleCanvas) return;
+
+  pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+  const time = Date.now() * 0.001;
+
+  // Draw connections
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 120) {
+        const alpha = (1 - distance / 120) * 0.08;
+        pCtx.beginPath();
+        pCtx.moveTo(particles[i].x, particles[i].y);
+        pCtx.lineTo(particles[j].x, particles[j].y);
+        pCtx.strokeStyle = 'rgba(100, 100, 120,' + alpha + ')';
+        pCtx.lineWidth = 0.5;
+        pCtx.stroke();
+      }
+    }
+  }
+
+  // Draw and update particles
+  particles.forEach(p => {
+    // Pulsing opacity
+    const pulse = Math.sin(time * p.pulseSpeed * 60 + p.pulsePhase) * 0.5 + 0.5;
+    const currentOpacity = p.opacity * (0.5 + pulse * 0.5);
+
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    pCtx.fillStyle = 'rgba(80, 80, 100,' + currentOpacity + ')';
+    pCtx.fill();
+
+    // Outer glow
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.radius * 3, 0, Math.PI * 2);
+    pCtx.fillStyle = 'rgba(233, 69, 96,' + (currentOpacity * 0.05) + ')';
+    pCtx.fill();
+
+    // Move
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // Wrap around
+    if (p.x < -10) p.x = particleCanvas.width + 10;
+    if (p.x > particleCanvas.width + 10) p.x = -10;
+    if (p.y < -10) p.y = particleCanvas.height + 10;
+    if (p.y > particleCanvas.height + 10) p.y = -10;
+  });
+
+  // Mouse interaction: push particles away gently
+  particles.forEach(p => {
+    const dx = p.x - mouseX;
+    const dy = p.y - (mouseY + window.scrollY - particleCanvas.getBoundingClientRect().top);
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 100 && dist > 0) {
+      const force = (100 - dist) / 100 * 0.02;
+      p.vx += (dx / dist) * force;
+      p.vy += (dy / dist) * force;
+    }
+    // Damping
+    p.vx *= 0.999;
+    p.vy *= 0.999;
+  });
+
+  particleAnimFrame = requestAnimationFrame(drawParticles);
+}
+
+initParticles();
+drawParticles();
+
+window.addEventListener('resize', function() {
+  if (particleCanvas) {
+    particleCanvas.width = window.innerWidth;
+    particleCanvas.height = window.innerHeight;
+  }
+  initParticles();
+});
+
+/* ============================================
+   SMOOTH REVEAL FOR SECTION HEADERS
+   ============================================ */
+const sectionHeaders = document.querySelectorAll('.section-header');
+const headerObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const tag = entry.target.querySelector('.section-tag');
+      const title = entry.target.querySelector('.section-title');
+      const desc = entry.target.querySelector('.section-desc');
+
+      if (tag) {
+        tag.style.opacity = '0';
+        tag.style.transform = 'translateY(20px)';
+        tag.style.transition = 'all 0.6s ease 0.1s';
+        setTimeout(() => {
+          tag.style.opacity = '1';
+          tag.style.transform = 'translateY(0)';
+        }, 50);
+      }
+      if (title) {
+        title.style.opacity = '0';
+        title.style.transform = 'translateY(20px)';
+        title.style.transition = 'all 0.6s ease 0.2s';
+        setTimeout(() => {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }, 50);
+      }
+      if (desc) {
+        desc.style.opacity = '0';
+        desc.style.transform = 'translateY(20px)';
+        desc.style.transition = 'all 0.6s ease 0.3s';
+        setTimeout(() => {
+          desc.style.opacity = '1';
+          desc.style.transform = 'translateY(0)';
+        }, 50);
+      }
+
+      headerObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+
+sectionHeaders.forEach(header => {
+  headerObserver.observe(header);
+});
+
+/* ============================================
+   PARALLAX EFFECT ON HERO ORBS
+   ============================================ */
+let ticking = false;
+window.addEventListener('scroll', function() {
+  if (!ticking) {
+    requestAnimationFrame(function() {
+      const scrollY = window.scrollY;
+      const orbs = document.querySelectorAll('.gradient-orb');
+      orbs.forEach((orb, i) => {
+        const speed = (i + 1) * 0.05;
+        orb.style.transform = 'translateY(' + (scrollY * speed) + 'px)';
+      });
+      ticking = false;
+    });
+    ticking = true;
+  }
+});
+
+/* ============================================
+   MAGNETIC BUTTON EFFECT
+   ============================================ */
+document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+  btn.addEventListener('mousemove', function(e) {
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    btn.style.transform = 'translate(' + (x * 0.15) + 'px,' + (y * 0.15) + 'px)';
+  });
+  btn.addEventListener('mouseleave', function() {
+    btn.style.transform = '';
+  });
+});
+
+/* ============================================
+   VOICE CARD TILT EFFECT
+   ============================================ */
+document.querySelectorAll('.voice-card').forEach(card => {
+  card.addEventListener('mousemove', function(e) {
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    const tiltX = (y - 0.5) * 6;
+    const tiltY = (x - 0.5) * -6;
+    card.style.transform = 'perspective(1000px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg) translateY(-4px)';
+  });
+  card.addEventListener('mouseleave', function() {
+    card.style.transform = '';
+    card.style.transition = 'transform 0.5s ease';
+  });
+  card.addEventListener('mouseenter', function() {
+    card.style.transition = 'transform 0.1s ease';
+  });
+});
+
+/* ============================================
+   OVERVIEW CARD HOVER SHINE
+   ============================================ */
+document.querySelectorAll('.overview-card').forEach(card => {
+  card.addEventListener('mousemove', function(e) {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    card.style.background = 'radial-gradient(circle at ' + x + 'px ' + y + 'px, rgba(233,69,96,0.03) 0%, white 60%)';
+  });
+  card.addEventListener('mouseleave', function() {
+    card.style.background = '';
+  });
+});
+
+/* ============================================
+   ACTIVE NAVIGATION HIGHLIGHT
+   ============================================ */
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+function highlightNav() {
+  const scrollPos = window.scrollY + 200;
+
+  sections.forEach(section => {
+    const top = section.offsetTop;
+    const height = section.offsetHeight;
+    const id = section.getAttribute('id');
+
+    if (scrollPos >= top && scrollPos < top + height) {
+      navLinks.forEach(link => {
+        link.style.color = '';
+        link.classList.remove('active-link');
+        if (link.getAttribute('href') === '#' + id) {
+          link.style.color = 'var(--accent)';
+          link.classList.add('active-link');
+        }
+      });
+    }
+  });
+}
+
+window.addEventListener('scroll', highlightNav);
+
+/* ============================================
+   STAGGERED ANIMATION FOR PROSCONS ITEMS
+   ============================================ */
+const prosConsObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const items = entry.target.querySelectorAll('.proscons-item');
+      items.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        item.style.transition = 'all 0.5s ease ' + (index * 0.1) + 's';
+        setTimeout(() => {
+          item.style.opacity = '1';
+          item.style.transform = 'translateY(0)';
+        }, 100);
+      });
+      prosConsObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.proscons-column').forEach(col => {
+  prosConsObserver.observe(col);
+});
+
+/* ============================================
+   TIMELINE ITEM STAGGERED REVEAL
+   ============================================ */
+const timelineItems = document.querySelectorAll('.timeline-item');
+const timelineObserver = new IntersectionObserver(function(entries) {
+  entries.forEach((entry, idx) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, 150);
+      timelineObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+timelineItems.forEach(item => {
+  timelineObserver.observe(item);
+});
+
+/* ============================================
+   SMOOTH ANCHOR SCROLL WITH OFFSET
+   ============================================ */
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const targetId = this.getAttribute('href').substring(1);
+    const targetEl = document.getElementById(targetId);
+    if (targetEl) {
+      const navHeight = nav.offsetHeight;
+      const targetPos = targetEl.getBoundingClientRect().top + window.scrollY - navHeight - 20;
+      window.scrollTo({
+        top: targetPos,
+        behavior: 'smooth'
+      });
+    }
+  });
+});
+
+/* ============================================
+   DYNAMIC FLOATING SHAPES (Background decor)
+   ============================================ */
+function createFloatingShapes() {
+  const container = document.createElement('div');
+  container.className = 'floating-shapes';
+  document.body.appendChild(container);
+
+  const shapeCount = 8;
+  for (let i = 0; i < shapeCount; i++) {
+    const shape = document.createElement('div');
+    shape.className = 'floating-shape';
+    const size = Math.random() * 80 + 20;
+    shape.style.width = size + 'px';
+    shape.style.height = size + 'px';
+    shape.style.left = Math.random() * 100 + '%';
+    shape.style.top = Math.random() * 100 + '%';
+    shape.style.animationDuration = (Math.random() * 10 + 10) + 's';
+    shape.style.animationDelay = (Math.random() * -10) + 's';
+    shape.style.opacity = Math.random() * 0.03 + 0.01;
+    container.appendChild(shape);
+  }
+}
+createFloatingShapes();
+
+/* ============================================
+   TEXT TYPING EFFECT FOR HERO BADGE
+   ============================================ */
+function typeEffect(element, text, speed) {
+  if (!element) return;
+  element.textContent = '';
+  let index = 0;
+  const interval = setInterval(() => {
+    if (index < text.length) {
+      element.textContent += text.charAt(index);
+      index++;
+    } else {
+      clearInterval(interval);
+    }
+  }, speed);
+}
+
+/* ============================================
+   DONUT CHART - SENTIMENT DISTRIBUTION
+   ============================================ */
+function createDonutChart() {
+  // Create a sentiment donut chart dynamically and insert after dataviz section
+  const datavizSection = document.getElementById('dataviz');
+  if (!datavizSection) return;
+
+  const donutWrapper = document.createElement('div');
+  donutWrapper.className = 'chart-card fade-in';
+  donutWrapper.style.marginTop = '40px';
+  donutWrapper.style.maxWidth = '700px';
+  donutWrapper.style.marginLeft = 'auto';
+  donutWrapper.style.marginRight = 'auto';
+  donutWrapper.innerHTML = '<h3 style="text-align:center">投稿センチメント分布</h3>' +
+    '<p class="chart-subtitle" style="text-align:center">分析した約30件の投稿における肯定・否定・中立の割合</p>' +
+    '<div id="donutContainer" style="display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap;padding:24px 0"></div>';
+
+  const container = datavizSection.querySelector('.container');
+  if (container) {
+    container.appendChild(donutWrapper);
+    observer.observe(donutWrapper);
+  }
+
+  // Draw donut with SVG
+  const donutContainer = document.getElementById('donutContainer');
+  if (!donutContainer) return;
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 200 200');
+  svg.setAttribute('width', '220');
+  svg.setAttribute('height', '220');
+  svg.style.overflow = 'visible';
+
+  // Data: Positive ~40%, Negative ~35%, Neutral ~25%
+  const data = [
+    { label: 'Positive', value: 40, color: '#2ed573' },
+    { label: 'Negative', value: 35, color: '#e94560' },
+    { label: 'Neutral',  value: 25, color: '#0f3460' }
+  ];
+
+  const total = data.reduce((a, b) => a + b.value, 0);
+  const cx = 100, cy = 100, r = 70, strokeWidth = 28;
+  const circumference = 2 * Math.PI * r;
+  let accumulatedOffset = 0;
+
+  data.forEach((d, i) => {
+    const fraction = d.value / total;
+    const dashLen = circumference * fraction;
+    const dashGap = circumference - dashLen;
+
+    const circle = document.createElementNS(svgNS, 'circle');
+    circle.setAttribute('cx', cx);
+    circle.setAttribute('cy', cy);
+    circle.setAttribute('r', r);
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('stroke', d.color);
+    circle.setAttribute('stroke-width', strokeWidth);
+    circle.setAttribute('stroke-dasharray', '0 ' + circumference);
+    circle.setAttribute('stroke-dashoffset', -accumulatedOffset);
+    circle.setAttribute('stroke-linecap', 'butt');
+    circle.style.transform = 'rotate(-90deg)';
+    circle.style.transformOrigin = '50% 50%';
+    circle.style.transition = 'stroke-dasharray 1.5s cubic-bezier(0.25,0.46,0.45,0.94) ' + (i * 0.3) + 's';
+    circle.dataset.target = dashLen + ' ' + dashGap;
+
+    svg.appendChild(circle);
+    accumulatedOffset += dashLen;
+  });
+
+  // Center text
+  const centerText = document.createElementNS(svgNS, 'text');
+  centerText.setAttribute('x', cx);
+  centerText.setAttribute('y', cy - 5);
+  centerText.setAttribute('text-anchor', 'middle');
+  centerText.setAttribute('font-size', '28');
+  centerText.setAttribute('font-weight', '900');
+  centerText.setAttribute('fill', '#1a1a2e');
+  centerText.setAttribute('font-family', 'Playfair Display, serif');
+  centerText.textContent = '30';
+
+  const subText = document.createElementNS(svgNS, 'text');
+  subText.setAttribute('x', cx);
+  subText.setAttribute('y', cy + 16);
+  subText.setAttribute('text-anchor', 'middle');
+  subText.setAttribute('font-size', '10');
+  subText.setAttribute('fill', '#888');
+  subText.setAttribute('font-weight', '600');
+  subText.setAttribute('letter-spacing', '1');
+  subText.textContent = 'POSTS';
+
+  svg.appendChild(centerText);
+  svg.appendChild(subText);
+  donutContainer.appendChild(svg);
+
+  // Legend
+  const legend = document.createElement('div');
+  legend.style.display = 'flex';
+  legend.style.flexDirection = 'column';
+  legend.style.gap = '16px';
+
+  data.forEach(d => {
+    const item = document.createElement('div');
+    item.style.display = 'flex';
+    item.style.alignItems = 'center';
+    item.style.gap = '12px';
+
+    const dot = document.createElement('div');
+    dot.style.width = '12px';
+    dot.style.height = '12px';
+    dot.style.borderRadius = '50%';
+    dot.style.background = d.color;
+    dot.style.flexShrink = '0';
+
+    const textDiv = document.createElement('div');
+    const nameSpan = document.createElement('div');
+    nameSpan.style.fontSize = '14px';
+    nameSpan.style.fontWeight = '600';
+    nameSpan.style.color = '#1a1a2e';
+    nameSpan.textContent = d.label;
+
+    const valSpan = document.createElement('div');
+    valSpan.style.fontSize = '12px';
+    valSpan.style.color = '#888';
+    valSpan.textContent = '約' + d.value + '%（' + Math.round(30 * d.value / 100) + '件）';
+
+    textDiv.appendChild(nameSpan);
+    textDiv.appendChild(valSpan);
+    item.appendChild(dot);
+    item.appendChild(textDiv);
+    legend.appendChild(item);
+  });
+
+  donutContainer.appendChild(legend);
+
+  // Animate donut segments on scroll
+  const donutObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const circles = svg.querySelectorAll('circle');
+        circles.forEach(circle => {
+          const target = circle.dataset.target;
+          if (target) {
+            circle.setAttribute('stroke-dasharray', target);
+          }
+        });
+        donutObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  donutObserver.observe(donutWrapper);
+}
+
+// Run after DOM is stable
+setTimeout(createDonutChart, 100);
+
+/* ============================================
+   SCORE BADGE COMPONENT
+   ============================================ */
+function createScoreBadge() {
+  const summarySection = document.getElementById('summary');
+  if (!summarySection) return;
+
+  const container = summarySection.querySelector('.container');
+  if (!container) return;
+
+  const scoreWrapper = document.createElement('div');
+  scoreWrapper.style.display = 'flex';
+  scoreWrapper.style.justifyContent = 'center';
+  scoreWrapper.style.marginTop = '60px';
+  scoreWrapper.style.gap = '32px';
+  scoreWrapper.style.flexWrap = 'wrap';
+  scoreWrapper.className = 'fade-in';
+
+  const scores = [
+    { label: '画質', score: 4.0, max: 5 },
+    { label: '動画', score: 4.0, max: 5 },
+    { label: 'AF',   score: 3.5, max: 5 },
+    { label: '操作性', score: 3.5, max: 5 },
+    { label: 'IBIS', score: 3.0, max: 5 },
+    { label: 'バッテリー', score: 2.0, max: 5 },
+    { label: '発熱耐性', score: 2.0, max: 5 },
+    { label: 'コスパ', score: 2.5, max: 5 }
+  ];
+
+  scores.forEach((s, i) => {
+    const badge = document.createElement('div');
+    badge.style.cssText = 'text-align:center;min-width:80px;opacity:0;transform:translateY(20px);transition:all 0.5s ease ' + (i * 0.08) + 's;';
+    badge.className = 'score-badge-item';
+
+    // Circular progress
+    const circSize = 72;
+    const circR = 30;
+    const circC = 2 * Math.PI * circR;
+    const fraction = s.score / s.max;
+    const dashLen = circC * fraction;
+    const color = fraction >= 0.7 ? '#2ed573' : fraction >= 0.5 ? '#f9a825' : '#e94560';
+
+    badge.innerHTML =
+      '<svg width="' + circSize + '" height="' + circSize + '" viewBox="0 0 ' + circSize + ' ' + circSize + '" style="display:block;margin:0 auto">' +
+        '<circle cx="' + (circSize/2) + '" cy="' + (circSize/2) + '" r="' + circR + '" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="5"/>' +
+        '<circle cx="' + (circSize/2) + '" cy="' + (circSize/2) + '" r="' + circR + '" fill="none" stroke="' + color + '" stroke-width="5" ' +
+          'stroke-dasharray="0 ' + circC + '" stroke-linecap="round" ' +
+          'style="transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dasharray 1.5s ease ' + (0.3 + i * 0.1) + 's" ' +
+          'data-target="' + dashLen + ' ' + (circC - dashLen) + '"/>' +
+        '<text x="' + (circSize/2) + '" y="' + (circSize/2 + 5) + '" text-anchor="middle" font-size="16" font-weight="900" fill="#fff" font-family="Playfair Display, serif">' + s.score.toFixed(1) + '</text>' +
+      '</svg>' +
+      '<div style="margin-top:8px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.7);letter-spacing:1px">' + s.label + '</div>';
+
+    scoreWrapper.appendChild(badge);
+  });
+
+  container.appendChild(scoreWrapper);
+
+  // Observe and animate
+  const scoreObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Show badges
+        const badges = entry.target.querySelectorAll('.score-badge-item');
+        badges.forEach(b => {
+          b.style.opacity = '1';
+          b.style.transform = 'translateY(0)';
+        });
+
+        // Animate circular progress
+        const circles = entry.target.querySelectorAll('circle[data-target]');
+        circles.forEach(c => {
+          const t = c.dataset.target;
+          if (t) c.setAttribute('stroke-dasharray', t);
+        });
+
+        scoreObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  scoreObserver.observe(scoreWrapper);
+}
+
+setTimeout(createScoreBadge, 150);
+
+/* ============================================
+   COMPARISON TABLE (Dynamic Generation)
+   ============================================ */
+function createComparisonWidget() {
+  const overviewSection = document.getElementById('overview');
+  if (!overviewSection) return;
+  const container = overviewSection.querySelector('.container');
+  if (!container) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chart-card fade-in';
+  wrapper.style.marginTop = '48px';
+  wrapper.innerHTML =
+    '<h3 style="margin-bottom:4px">ユーザー属性別の投稿分布</h3>' +
+    '<p class="chart-subtitle">プロ vs 一般ユーザーの投稿件数と傾向</p>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px" id="userTypeGrid"></div>';
+
+  container.appendChild(wrapper);
+  observer.observe(wrapper);
+
+  const grid = document.getElementById('userTypeGrid');
+  if (!grid) return;
+
+  // Pro card
+  const proCard = document.createElement('div');
+  proCard.style.cssText = 'background:linear-gradient(135deg,rgba(201,168,76,0.05),rgba(201,168,76,0.02));border:1px solid rgba(201,168,76,0.15);border-radius:12px;padding:24px;text-align:center;transition:all 0.4s ease;';
+  proCard.innerHTML =
+    '<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#c9a84c,#b8942f);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;color:#fff;font-weight:900">P</div>' +
+    '<div style="font-family:Playfair Display,serif;font-size:36px;font-weight:900;color:#c9a84c;">3</div>' +
+    '<div style="font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#888;margin-top:4px">プロ投稿</div>' +
+    '<div style="margin-top:16px;font-size:13px;color:#555;line-height:1.7">イベント撮影、映像制作、15年経験の写真家など。プロからはS-Cinetoneの画質を高評価する声がある一方、低照度への期待外れの声も。</div>';
+  proCard.addEventListener('mouseenter', function() { this.style.transform = 'translateY(-4px)'; this.style.boxShadow = '0 8px 30px rgba(201,168,76,0.15)'; });
+  proCard.addEventListener('mouseleave', function() { this.style.transform = ''; this.style.boxShadow = ''; });
+
+  // General card
+  const genCard = document.createElement('div');
+  genCard.style.cssText = 'background:linear-gradient(135deg,rgba(15,52,96,0.05),rgba(15,52,96,0.02));border:1px solid rgba(15,52,96,0.15);border-radius:12px;padding:24px;text-align:center;transition:all 0.4s ease;';
+  genCard.innerHTML =
+    '<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0f3460,#1a5276);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;color:#fff;font-weight:900">G</div>' +
+    '<div style="font-family:Playfair Display,serif;font-size:36px;font-weight:900;color:#0f3460;">27</div>' +
+    '<div style="font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#888;margin-top:4px">一般ユーザー投稿</div>' +
+    '<div style="margin-top:16px;font-size:13px;color:#555;line-height:1.7">ファームウェア更新報告、バッテリー問題、発熱報告、有料機能批判など幅広いトピック。技術的知識を持つユーザーの建設的な提案も多数。</div>';
+  genCard.addEventListener('mouseenter', function() { this.style.transform = 'translateY(-4px)'; this.style.boxShadow = '0 8px 30px rgba(15,52,96,0.15)'; });
+  genCard.addEventListener('mouseleave', function() { this.style.transform = ''; this.style.boxShadow = ''; });
+
+  grid.appendChild(proCard);
+  grid.appendChild(genCard);
+}
+
+setTimeout(createComparisonWidget, 200);
+
+/* ============================================
+   SOURCE LINKS ACCORDION (Dynamic)
+   ============================================ */
+function createSourceLinks() {
+  const issueSection = document.getElementById('issues');
+  if (!issueSection) return;
+  const container = issueSection.querySelector('.container');
+  if (!container) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'fade-in';
+  wrapper.style.marginTop = '60px';
+  wrapper.style.maxWidth = '800px';
+  wrapper.style.marginLeft = 'auto';
+  wrapper.style.marginRight = 'auto';
+
+  const sources = [
+    { title: 'A7iv Awful Noise at high ISO', url: 'https://www.reddit.com/r/SonyAlpha/comments/1jtn9wb/' , sub: 'r/SonyAlpha' },
+    { title: 'Opinions on Sony A7IV', url: 'https://www.reddit.com/r/SonyAlpha/comments/1qlozvd/', sub: 'r/SonyAlpha' },
+    { title: 'Is the Sony A7 IV really that good?', url: 'https://www.reddit.com/r/Cameras/comments/1l38u8l/', sub: 'r/Cameras' },
+    { title: 'A7 IV Firmware Update 4.0', url: 'https://www.reddit.com/r/SonyAlpha/comments/1g4ver5/', sub: 'r/SonyAlpha' },
+    { title: 'A7 IV Firmware Update 6.00 released', url: 'https://www.reddit.com/r/SonyAlpha/comments/1p7825y/', sub: 'r/SonyAlpha' },
+    { title: 'A7 IV Firmware Update 5.0 is out!', url: 'https://www.reddit.com/r/SonyAlpha/comments/1j387l8/', sub: 'r/SonyAlpha' },
+    { title: 'A7IV Constant Overheat shooting 4k!', url: 'https://www.reddit.com/r/SonyAlpha/comments/1memjt5/', sub: 'r/SonyAlpha' },
+    { title: 'A7iv battery only lasts 300 shots', url: 'https://www.reddit.com/r/SonyAlpha/comments/1hv1udi/', sub: 'r/SonyAlpha' },
+    { title: 'For $150, Sony Will Let You Add Custom Gridlines', url: 'https://www.reddit.com/r/photography/comments/186gatx/', sub: 'r/photography' },
+    { title: 'PetaPixel: Custom Gridlines Article', url: 'https://petapixel.com/2023/11/28/for-150-sony-will-let-you-add-custom-gridlines-to-your-a7-iv/', sub: 'PetaPixel' }
+  ];
+
+  let linksHTML = '<div style="text-align:center;margin-bottom:32px">' +
+    '<div class="section-tag" style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent)"><span style="display:inline-block;width:24px;height:1px;background:var(--accent)"></span>Sources<span style="display:inline-block;width:24px;height:1px;background:var(--accent)"></span></div>' +
+    '<h3 style="font-family:Playfair Display,serif;font-size:28px;font-weight:800;color:var(--primary);margin-top:8px">参照元リンク</h3>' +
+    '</div>';
+
+  linksHTML += '<div style="display:flex;flex-direction:column;gap:8px">';
+  sources.forEach((src, i) => {
+    linksHTML +=
+      '<a href="' + src.url + '" target="_blank" rel="noopener" style="' +
+        'display:flex;align-items:center;gap:16px;padding:14px 20px;' +
+        'background:var(--card-bg);border:1px solid var(--border);border-radius:10px;' +
+        'text-decoration:none;transition:all 0.4s ease;opacity:0;transform:translateY(10px);' +
+      '" class="source-link-item" data-delay="' + (i * 0.05) + '">' +
+        '<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0">' + (i + 1) + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:13px;font-weight:600;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + src.title + '</div>' +
+          '<div style="font-size:11px;color:var(--text-lighter)">' + src.sub + '</div>' +
+        '</div>' +
+        '<div style="font-size:16px;color:var(--text-lighter);transition:transform 0.3s ease">→</div>' +
+      '</a>';
+  });
+  linksHTML += '</div>';
+
+  wrapper.innerHTML = linksHTML;
+  container.appendChild(wrapper);
+
+  // Animate source links on scroll
+  const srcObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const items = entry.target.querySelectorAll('.source-link-item');
+        items.forEach((item, i) => {
+          setTimeout(() => {
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+          }, i * 60);
+        });
+        srcObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  srcObserver.observe(wrapper);
+
+  // Hover effects
+  document.querySelectorAll('.source-link-item').forEach(link => {
+    link.addEventListener('mouseenter', function() {
+      this.style.borderColor = 'var(--accent)';
+      this.style.boxShadow = 'var(--shadow)';
+      this.style.transform = 'translateX(4px)';
+      this.querySelector('div:last-child').style.transform = 'translateX(4px)';
+    });
+    link.addEventListener('mouseleave', function() {
+      this.style.borderColor = '';
+      this.style.boxShadow = '';
+      this.style.transform = '';
+      this.querySelector('div:last-child').style.transform = '';
+    });
+  });
+}
+
+setTimeout(createSourceLinks, 250);
+
+/* ============================================
+   KEYBOARD NAVIGATION
+   ============================================ */
+document.addEventListener('keydown', function(e) {
+  // Press 'T' to scroll to top
+  if (e.key === 't' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+
+/* ============================================
+   PERFORMANCE: Pause particle animation when not visible
+   ============================================ */
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) {
+    if (particleAnimFrame) {
+      cancelAnimationFrame(particleAnimFrame);
+      particleAnimFrame = null;
+    }
+  } else {
+    if (!particleAnimFrame) {
+      drawParticles();
+    }
+  }
+});
+
+/* ============================================
+   SCROLL-TO-TOP BUTTON VISIBILITY
+   ============================================ */
+const backToTopBtn = document.querySelector('.back-to-top');
+if (backToTopBtn) {
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 500) {
+      backToTopBtn.style.opacity = '1';
+      backToTopBtn.style.pointerEvents = 'auto';
+    } else {
+      backToTopBtn.style.opacity = '0.3';
+      backToTopBtn.style.pointerEvents = 'none';
+    }
+  });
+}
+
+/* ============================================
+   COPY-TO-CLIPBOARD FOR QUOTES
+   ============================================ */
+document.querySelectorAll('.voice-card blockquote').forEach(quote => {
+  quote.style.cursor = 'pointer';
+  quote.title = 'クリックでコピー';
+
+  quote.addEventListener('click', function() {
+    const text = this.textContent.trim();
+    navigator.clipboard.writeText(text).then(() => {
+      // Flash feedback
+      const original = this.style.background;
+      this.style.background = 'rgba(46,213,115,0.1)';
+      this.style.transition = 'background 0.3s ease';
+      setTimeout(() => {
+        this.style.background = original || '';
+      }, 800);
+    }).catch(() => {});
+  });
+});
+
+/* ============================================
+   RIPPLE EFFECT ON BUTTONS
+   ============================================ */
+document.querySelectorAll('.btn-primary, .btn-secondary, .fw-tab').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    const ripple = document.createElement('span');
+    const rect = this.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+
+    ripple.style.cssText =
+      'position:absolute;width:' + size + 'px;height:' + size + 'px;' +
+      'left:' + x + 'px;top:' + y + 'px;' +
+      'background:rgba(255,255,255,0.3);border-radius:50%;' +
+      'transform:scale(0);animation:rippleAnim 0.6s ease forwards;' +
+      'pointer-events:none;';
+
+    this.style.position = 'relative';
+    this.style.overflow = 'hidden';
+    this.appendChild(ripple);
+
+    setTimeout(() => ripple.remove(), 600);
+  });
+});
+
+// Add ripple keyframe dynamically
+const rippleStyle = document.createElement('style');
+rippleStyle.textContent = '@keyframes rippleAnim{0%{transform:scale(0);opacity:1}100%{transform:scale(4);opacity:0}}';
+document.head.appendChild(rippleStyle);
+
+/* ============================================
+   GRADIENT TEXT ANIMATION ON HERO
+   ============================================ */
+function animateGradientText() {
+  const highlight = document.querySelector('.hero h1 .highlight');
+  if (!highlight) return;
+
+  let hue = 0;
+  function updateGradient() {
+    hue = (hue + 0.3) % 360;
+    const color1 = 'hsl(' + hue + ', 70%, 55%)';
+    const color2 = 'hsl(' + ((hue + 60) % 360) + ', 70%, 45%)';
+    highlight.style.background = 'linear-gradient(135deg,' + color1 + ',' + color2 + ')';
+    highlight.style.webkitBackgroundClip = 'text';
+    highlight.style.webkitTextFillColor = 'transparent';
+    highlight.style.backgroundClip = 'text';
+    requestAnimationFrame(updateGradient);
+  }
+  // Start after hero is visible
+  setTimeout(updateGradient, 3000);
+}
+animateGradientText();
+
+/* ============================================
+   SUMMARY SECTION COUNTER
+   ============================================ */
+function animateSummaryStats() {
+  const summarySection = document.getElementById('summary');
+  if (!summarySection) return;
+
+  const summaryObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Trigger all summary card animations
+        const cards = entry.target.querySelectorAll('.summary-card');
+        cards.forEach((card, i) => {
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, i * 150);
+        });
+        summaryObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  summaryObserver.observe(summarySection);
+}
+animateSummaryStats();
+
+/* ============================================
+   DYNAMIC SCROLL SPEED INDICATOR
+   ============================================ */
+let prevScroll = 0;
+let scrollSpeed = 0;
+
+function trackScrollSpeed() {
+  const currentScroll = window.scrollY;
+  scrollSpeed = Math.abs(currentScroll - prevScroll);
+  prevScroll = currentScroll;
+
+  // Apply subtle effects based on scroll speed
+  const progressBar = document.getElementById('readingProgress');
+  if (progressBar) {
+    const intensity = Math.min(scrollSpeed / 50, 1);
+    progressBar.style.height = (3 + intensity * 3) + 'px';
+    progressBar.style.filter = 'brightness(' + (1 + intensity * 0.3) + ')';
+  }
+
+  requestAnimationFrame(trackScrollSpeed);
+}
+trackScrollSpeed();
+
+/* ============================================
+   PREFERS-REDUCED-MOTION CHECK
+   ============================================ */
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+if (prefersReducedMotion.matches) {
+  // Disable particle animation
+  if (particleAnimFrame) {
+    cancelAnimationFrame(particleAnimFrame);
+  }
+  if (particleCanvas) {
+    particleCanvas.style.display = 'none';
+  }
+
+  // Remove floating shapes
+  const floatingShapes = document.querySelector('.floating-shapes');
+  if (floatingShapes) floatingShapes.remove();
+
+  // Simplify cursor
+  if (cursor) cursor.style.display = 'none';
+  if (cursorDot) cursorDot.style.display = 'none';
+}
+
+/* ============================================
+   EASTER EGG: Konami Code
+   ============================================ */
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let konamiIndex = 0;
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === konamiCode[konamiIndex]) {
+    konamiIndex++;
+    if (konamiIndex === konamiCode.length) {
+      // Celebrate!
+      document.body.style.transition = 'filter 0.5s ease';
+      document.body.style.filter = 'hue-rotate(180deg)';
+      setTimeout(() => {
+        document.body.style.filter = '';
+      }, 2000);
+      konamiIndex = 0;
+    }
+  } else {
+    konamiIndex = 0;
+  }
+});
+
+/* ============================================
+   INTERSECTION OBSERVER FOR ISSUE ITEMS
+   ============================================ */
+document.querySelectorAll('.issue-item').forEach((item, i) => {
+  item.style.transitionDelay = (i * 0.1) + 's';
+  observer.observe(item);
+});
+
+/* ============================================
+   PRINT STYLES (dynamic)
+   ============================================ */
+const printStyle = document.createElement('style');
+printStyle.textContent = '@media print{' +
+  'nav,.hero-scroll,.custom-cursor,.cursor-dot,#particles-canvas,.floating-shapes,.reading-progress,.back-to-top,.hamburger,.mobile-menu{display:none!important}' +
+  'section{padding:40px 0!important}' +
+  '.overview-card,.proscons-item,.voice-card,.timeline-card,.chart-card,.summary-card,.issue-item,.fw-feature-card{' +
+    'opacity:1!important;transform:none!important;break-inside:avoid;' +
+  '}' +
+  'body{font-size:12px;color:#000}' +
+  '.hero{min-height:auto;padding:40px 0}' +
+  '#summary{background:#f5f5f5!important;color:#000!important}' +
+  '#summary h3,#summary p{color:#000!important}' +
+  '.summary-icon{border:1px solid #ccc}' +
+'}';
+document.head.appendChild(printStyle);
+
+/* ============================================
+   TOOLTIP INITIALIZATION
+   ============================================ */
+document.querySelectorAll('.mention-count').forEach(el => {
+  el.classList.add('tooltip');
+  el.setAttribute('data-tip', 'Reddit投稿での言及回数');
+});
+
+/* ============================================
+   LAZY SECTION REVEAL WITH STAGGERED CHILDREN
+   ============================================ */
+function revealChildrenStaggered(parentSelector, childSelector, delayStep) {
+  const parent = document.querySelector(parentSelector);
+  if (!parent) return;
+
+  const revObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const children = entry.target.querySelectorAll(childSelector);
+        children.forEach((child, i) => {
+          child.style.opacity = '0';
+          child.style.transform = 'translateY(15px)';
+          child.style.transition = 'all 0.5s ease ' + (i * delayStep) + 's';
+          requestAnimationFrame(() => {
+            child.style.opacity = '1';
+            child.style.transform = 'translateY(0)';
+          });
+        });
+        revObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  revObserver.observe(parent);
+}
+
+revealChildrenStaggered('#firmware .firmware-tabs', '.fw-tab', 0.08);
+
+/* ============================================
+   FOCUS STATES FOR ACCESSIBILITY
+   ============================================ */
+const accessStyle = document.createElement('style');
+accessStyle.textContent =
+  'a:focus-visible,button:focus-visible,.fw-tab:focus-visible,.issue-header:focus-visible{' +
+    'outline:2px solid var(--accent);outline-offset:3px;border-radius:4px;' +
+  '}' +
+  '.fw-tab{-webkit-user-select:none;user-select:none;}';
+document.head.appendChild(accessStyle);
+
+// Make tabs keyboard accessible
+fwTabs.forEach(tab => {
+  tab.setAttribute('tabindex', '0');
+  tab.setAttribute('role', 'tab');
+  tab.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this.click();
+    }
+  });
+});
+
+// Make issue headers keyboard accessible
+document.querySelectorAll('.issue-header').forEach(header => {
+  header.setAttribute('tabindex', '0');
+  header.setAttribute('role', 'button');
+  header.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleIssue(this);
+    }
+  });
+});
+
+/* ============================================
+   DYNAMIC YEAR IN FOOTER
+   ============================================ */
+const footerYear = document.querySelector('.footer-bottom p');
+if (footerYear) {
+  const currentYear = new Date().getFullYear();
+  footerYear.innerHTML = footerYear.innerHTML.replace('2026', currentYear);
+}
+
+/* ============================================
+   INTERSECTION NUMBERS ANIMATION (dataviz)
+   ============================================ */
+function createBarLabels() {
+  document.querySelectorAll('.hbar-fill').forEach(fill => {
+    fill.addEventListener('transitionend', function() {
+      this.style.overflow = 'hidden';
+    });
+  });
+}
+createBarLabels();
+
+/* ============================================
+   WARM-UP: Force paint for smooth first scroll
+   ============================================ */
+requestAnimationFrame(() => {
+  document.body.style.willChange = 'scroll-position';
+  setTimeout(() => {
+    document.body.style.willChange = '';
+  }, 3000);
+});
+
+/* ============================================
+   RESIZE HANDLER (debounced)
+   ============================================ */
+let resizeTimer = null;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function() {
+    // Recalculate any layout-dependent stuff
+    updateTimelineProgress();
+  }, 250);
+});
+
+/* ============================================
+   CONSOLE BRANDING
+   ============================================ */
+console.log(
+  '%c SONY A7 IV Reddit Analysis %c Built with passion ',
+  'background:linear-gradient(135deg,#e94560,#0f3460);color:#fff;padding:10px 20px;font-size:14px;font-weight:bold;border-radius:4px 0 0 4px;',
+  'background:#1a1a2e;color:#c9a84c;padding:10px 20px;font-size:14px;border-radius:0 4px 4px 0;'
+);
+
+/* ============================================
+   SECTION DIVIDER ANIMATION
+   ============================================ */
+document.querySelectorAll('.section-divider').forEach(divider => {
+  const dividerObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.transition = 'all 1s ease';
+        entry.target.style.background = 'linear-gradient(90deg,transparent,var(--accent),transparent)';
+        entry.target.style.opacity = '0.3';
+        setTimeout(() => {
+          entry.target.style.background = 'linear-gradient(90deg,transparent,var(--border),transparent)';
+          entry.target.style.opacity = '1';
+        }, 1000);
+      }
+    });
+  }, { threshold: 0.5 });
+  dividerObserver.observe(divider);
+});
+
+/* ============================================
+   VOICE CARD SENTIMENT COUNTER
+   ============================================ */
+function countSentiments() {
+  const badges = document.querySelectorAll('.sentiment-badge');
+  let positive = 0, negative = 0, neutral = 0;
+  badges.forEach(b => {
+    if (b.classList.contains('positive')) positive++;
+    else if (b.classList.contains('negative')) negative++;
+    else neutral++;
+  });
+  // This data is used by the donut chart
+  return { positive, negative, neutral };
+}
+countSentiments();
+
+/* ============================================
+   SMOOTH ENTRY FOR SUMMARY DARK SECTION
+   ============================================ */
+const summarySection = document.getElementById('summary');
+if (summarySection) {
+  const sumObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.transition = 'opacity 1s ease';
+        entry.target.style.opacity = '1';
+      }
+    });
+  }, { threshold: 0.05 });
+  summarySection.style.opacity = '0';
+  sumObserver.observe(summarySection);
+}
+
+/* ============================================
+   FINAL: Mark page as fully loaded
+   ============================================ */
+window.addEventListener('load', function() {
+  document.body.classList.add('loaded');
+  console.log('Page fully loaded. All animations initialized.');
+});
+
+</script>
+</body>
+</html>
