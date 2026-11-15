@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>友達コレクション 3D - わくわく生活</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  overflow: hidden; 
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  background: #87CEEB;
+  cursor: default;
+}
+
+#canvas3d { 
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; 
+}
+
+/* === HUD Overlay === */
+#hud {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 10; pointer-events: none;
+}
+#hud > * { pointer-events: auto; }
+
+#topBar {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 56px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(240,248,255,0.9) 100%);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+  border-bottom: 3px solid #FFD700;
+}
+
+#islandName {
+  font-size: 20px; font-weight: 900; color: #FF6B35;
+  text-shadow: 1px 1px 0 #fff;
+  letter-spacing: 2px;
+}
+
+#clock {
+  font-size: 16px; font-weight: 700; color: #4A90D9;
+  background: rgba(74,144,217,0.1);
+  padding: 4px 16px; border-radius: 20px;
+}
+
+#currency {
+  font-size: 16px; font-weight: 700; color: #FFB800;
+  display: flex; align-items: center; gap: 6px;
+}
+#currency::before { content: '🪙'; }
+
+/* Bottom Menu */
+#bottomMenu {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 90px;
+  background: linear-gradient(0deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.92) 100%);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 0 10px;
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.08);
+  border-top: 3px solid #FFD700;
+}
+
+.menuBtn {
+  width: 72px; height: 72px;
+  border-radius: 18px; border: none;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; cursor: pointer;
+  font-family: inherit; font-size: 10px; font-weight: 700;
+  transition: all 0.2s;
+  color: #555;
+  background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.menuBtn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  background: linear-gradient(180deg, #FFF8E1 0%, #FFE082 100%);
+}
+.menuBtn:active { transform: translateY(0) scale(0.98); }
+.menuBtn .icon { font-size: 28px; line-height: 1; }
+.menuBtn.active {
+  background: linear-gradient(180deg, #FFE082 0%, #FFB300 100%);
+  color: #fff; box-shadow: 0 4px 16px rgba(255,179,0,0.4);
+}
+
+/* Panels */
+.panel {
+  position: absolute;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  display: none;
+  overflow: hidden;
+  border: 2px solid rgba(255,215,0,0.3);
+}
+.panel.visible { display: block; animation: panelIn 0.3s ease; }
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.panelHeader {
+  padding: 16px 20px;
+  font-size: 18px; font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8E53 100%);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.panelClose {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,0.3); border: none;
+  color: #fff; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.panelClose:hover { background: rgba(255,255,255,0.5); }
+.panelBody { padding: 20px; max-height: 400px; overflow-y: auto; }
+
+/* Mii Creator */
+#miiPanel {
+  top: 70px; left: 50%; transform: translateX(-50%);
+  width: 520px; max-width: 95vw;
+}
+.miiPreview {
+  width: 120px; height: 120px; border-radius: 50%;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, #FFE0B2 0%, #FFCC80 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 60px;
+  box-shadow: 0 4px 20px rgba(255,152,0,0.3);
+  border: 4px solid #fff;
+  position: relative;
+  overflow: hidden;
+}
+.customRow {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.customRow label {
+  min-width: 80px; font-size: 13px; font-weight: 700; color: #666;
+}
+.customRow select, .customRow input[type=text], .customRow input[type=range] {
+  flex: 1; padding: 8px 12px; border-radius: 12px;
+  border: 2px solid #e0e0e0; font-family: inherit; font-size: 14px;
+  transition: border-color 0.2s;
+}
+.customRow select:focus, .customRow input:focus {
+  border-color: #FFB300; outline: none;
+}
+
+.createBtn {
+  display: block; margin: 16px auto 0;
+  padding: 12px 40px; border-radius: 30px;
+  border: none; background: linear-gradient(135deg, #FF6B35, #FF8E53);
+  color: #fff; font-size: 16px; font-weight: 900;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 16px rgba(255,107,53,0.4);
+  transition: all 0.2s;
+}
+.createBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(255,107,53,0.5);
+}
+
+/* Residents List */
+#residentsPanel {
+  top: 70px; right: 20px; width: 340px; max-width: 90vw;
+}
+.residentCard {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: 16px;
+  background: #fafafa; margin-bottom: 8px;
+  cursor: pointer; transition: all 0.2s;
+  border: 2px solid transparent;
+}
+.residentCard:hover {
+  background: #FFF8E1; border-color: #FFD700;
+  transform: translateX(4px);
+}
+.residentAvatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.residentInfo { flex: 1; }
+.residentName { font-weight: 700; font-size: 14px; color: #333; }
+.residentMood { font-size: 11px; color: #888; margin-top: 2px; }
+.residentRelation { font-size: 10px; color: #FF6B35; font-weight: 700; }
+
+/* Island Editor */
+#islandPanel {
+  top: 70px; left: 20px; width: 300px;
+}
+.islandTool {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 14px;
+  margin-bottom: 6px; cursor: pointer;
+  transition: all 0.2s; border: 2px solid transparent;
+  background: #fafafa;
+}
+.islandTool:hover { background: #E8F5E9; border-color: #66BB6A; }
+.islandTool.selected { background: #C8E6C9; border-color: #43A047; }
+.islandTool .tIcon { font-size: 24px; }
+.islandTool .tLabel { font-size: 13px; font-weight: 700; color: #333; }
+.islandTool .tDesc { font-size: 10px; color: #888; }
+
+/* Shop Panel */
+#shopPanel {
+  top: 70px; left: 50%; transform: translateX(-50%);
+  width: 560px; max-width: 95vw;
+}
+.shopGrid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.shopItem {
+  padding: 14px; border-radius: 16px;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  text-align: center; cursor: pointer;
+  transition: all 0.2s; border: 2px solid transparent;
+}
+.shopItem:hover {
+  border-color: #FFD700; transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+.shopItem .sIcon { font-size: 36px; margin-bottom: 6px; }
+.shopItem .sName { font-size: 12px; font-weight: 700; color: #333; }
+.shopItem .sPrice { font-size: 11px; color: #FFB800; font-weight: 700; margin-top: 4px; }
+
+/* Workshop Panel */
+#workshopPanel {
+  top: 70px; left: 50%; transform: translateX(-50%);
+  width: 480px; max-width: 95vw;
+}
+#paintCanvas {
+  width: 100%; height: 200px; border-radius: 16px;
+  border: 3px dashed #ddd; cursor: crosshair;
+  background: #fff;
+  touch-action: none;
+}
+.colorPalette {
+  display: flex; gap: 6px; margin: 12px 0; justify-content: center; flex-wrap: wrap;
+}
+.colorSwatch {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 3px solid #fff; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: transform 0.15s;
+}
+.colorSwatch:hover { transform: scale(1.2); }
+.colorSwatch.active { border-color: #333; transform: scale(1.15); }
+
+.workshopCategory {
+  display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+  justify-content: center;
+}
+.catBtn {
+  padding: 6px 16px; border-radius: 20px;
+  border: 2px solid #ddd; background: #fff;
+  font-family: inherit; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; color: #555;
+}
+.catBtn:hover, .catBtn.active {
+  border-color: #9C27B0; background: #F3E5F5; color: #7B1FA2;
+}
+
+/* News Panel */
+#newsPanel {
+  top: 70px; right: 20px; width: 380px; max-width: 90vw;
+}
+.newsItem {
+  padding: 12px; border-radius: 14px;
+  background: #f8f9fa; margin-bottom: 8px;
+  border-left: 4px solid #4A90D9;
+}
+.newsTime { font-size: 10px; color: #999; margin-bottom: 4px; }
+.newsText { font-size: 13px; color: #333; line-height: 1.5; }
+
+/* Photo Studio */
+#photoPanel {
+  top: 70px; left: 50%; transform: translateX(-50%);
+  width: 440px; max-width: 95vw;
+}
+.photoFrame {
+  width: 100%; height: 220px; border-radius: 16px;
+  background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 60px; margin-bottom: 12px;
+  box-shadow: inset 0 4px 20px rgba(0,0,0,0.05);
+  border: 4px solid #fff;
+  position: relative;
+}
+.photoBg { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; }
+
+/* Notification Toast */
+.toast {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+  padding: 12px 28px; border-radius: 30px;
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: #fff; font-weight: 700; font-size: 14px;
+  z-index: 100; pointer-events: none;
+  animation: toastAnim 2.5s ease forwards;
+  box-shadow: 0 4px 20px rgba(76,175,80,0.4);
+}
+@keyframes toastAnim {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+  15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}
+
+/* Relationship overlay */
+#relationOverlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 50;
+  display: none; align-items: center; justify-content: center;
+}
+#relationOverlay.visible { display: flex; }
+#relationCard {
+  background: #fff; border-radius: 24px; padding: 30px;
+  text-align: center; max-width: 400px; width: 90%;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  animation: panelIn 0.3s ease;
+}
+.relationEmoji { font-size: 64px; margin-bottom: 12px; }
+.relationTitle { font-size: 20px; font-weight: 900; color: #333; margin-bottom: 8px; }
+.relationDesc { font-size: 14px; color: #666; margin-bottom: 16px; line-height: 1.6; }
+.relationBtns { display: flex; gap: 10px; justify-content: center; }
+.rBtn {
+  padding: 10px 24px; border-radius: 25px; border: none;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+}
+.rBtn.primary {
+  background: linear-gradient(135deg, #FF6B35, #FF8E53); color: #fff;
+  box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+}
+.rBtn.secondary {
+  background: #f0f0f0; color: #555;
+}
+.rBtn:hover { transform: translateY(-2px); }
+
+/* Thought bubble */
+.thoughtBubble {
+  position: fixed; z-index: 40; pointer-events: auto;
+  background: #fff; border-radius: 20px; padding: 14px 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  font-size: 13px; color: #333; max-width: 220px;
+  animation: bubbleIn 0.4s ease;
+  cursor: pointer;
+}
+.thoughtBubble::after {
+  content: '';
+  position: absolute; bottom: -10px; left: 30px;
+  width: 0; height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid #fff;
+}
+@keyframes bubbleIn {
+  from { opacity: 0; transform: scale(0.8) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Scrollbar custom */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+/* Drag indicator */
+#dragGhost {
+  position: fixed; z-index: 60; pointer-events: none;
+  font-size: 48px; display: none;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  transition: none;
+}
+
+/* Save indicator */
+#saveIndicator {
+  position: fixed; bottom: 100px; right: 20px;
+  background: rgba(76,175,80,0.9); color: #fff;
+  padding: 8px 16px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  z-index: 30; display: none;
+  animation: panelIn 0.3s ease;
+}
+
+/* Privacy notice */
+#privacyNotice {
+  position: fixed; bottom: 100px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(33,33,33,0.9); color: #fff;
+  padding: 10px 20px; border-radius: 16px;
+  font-size: 11px; z-index: 30;
+  max-width: 500px; text-align: center;
+  display: none;
+}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+
+<canvas id="canvas3d"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <!-- Top Bar -->
+  <div id="topBar">
+    <div id="islandName">🏝️ わくわく島</div>
+    <div id="clock">🕐 --:--</div>
+    <div id="currency"><span id="coins">5000</span></div>
+  </div>
+
+  <!-- Bottom Menu -->
+  <div id="bottomMenu">
+    <button class="menuBtn" data-action="mii"><span class="icon">👤</span>Mii作成</button>
+    <button class="menuBtn" data-action="residents"><span class="icon">👥</span>住人</button>
+    <button class="menuBtn" data-action="island"><span class="icon">🏝️</span>島作り</button>
+    <button class="menuBtn" data-action="shop"><span class="icon">🏪</span>お店</button>
+    <button class="menuBtn" data-action="workshop"><span class="icon">🎨</span>工房</button>
+    <button class="menuBtn" data-action="news"><span class="icon">📺</span>ニュース</button>
+    <button class="menuBtn" data-action="photo"><span class="icon">📸</span>写真館</button>
+    <button class="menuBtn" data-action="save"><span class="icon">💾</span>セーブ</button>
+  </div>
+
+  <!-- Mii Creation Panel -->
+  <div class="panel" id="miiPanel">
+    <div class="panelHeader">
+      ✨ Mii を つくる
+      <button class="panelClose" onclick="closePanel('miiPanel')">✕</button>
+    </div>
+    <div class="panelBody">
+      <div class="miiPreview" id="miiPreviewFace">😊</div>
+      <div class="customRow">
+        <label>名前</label>
+        <input type="text" id="miiName" placeholder="住人の名前" maxlength="10">
+      </div>
+      <div class="customRow">
+        <label>輪郭</label>
+        <select id="miiFace">
+          <option value="round">まるがお</option>
+          <option value="oval">たまご型</option>
+          <option value="square">しかくい</option>
+          <option value="long">ほそなが</option>
+          <option value="heart">ハート型</option>
+        </select>
+      </div>
+      <div class="customRow">
+        <label>髪型</label>
+        <select id="miiHair">
+          <option value="short">ショート</option>
+          <option value="medium">ミディアム</option>
+          <option value="long">ロング</option>
+          <option value="curly">カーリー</option>
+          <option value="spiky">ツンツン</option>
+          <option value="ponytail">ポニーテール</option>
+          <option value="bald">なし</option>
+        </select>
+      </div>
+      <div class="customRow">
+        <label>髪色</label>
+        <input type="range" id="miiHairColor" min="0" max="360" value="30">
+      </div>
+      <div class="customRow">
+        <label>目</label>
+        <select id="miiEyes">
+          <option value="normal">ふつう</option>
+          <option value="big">おおきい</option>
+          <option value="small">ちいさい</option>
+          <option value="droopy">タレ目</option>
+          <option value="sharp">つり目</option>
+          <option value="closed">いつも笑顔</option>
+        </select>
+      </div>
+      <div class="customRow">
+        <label>肌色</label>
+        <input type="range" id="miiSkin" min="0" max="100" value="40">
+      </div>
+      <div class="customRow">
+        <label>性別</label>
+        <select id="miiGender">
+          <option value="male">男</option>
+          <option value="female">女</option>
+          <option value="nonbinary">その他</option>
+        </select>
+      </div>
+      <div class="customRow">
+        <label>恋愛対象</label>
+        <select id="miiAttraction">
+          <option value="male">男性</option>
+          <option value="female">女性</option>
+          <option value="both">男性＆女性</option>
+          <option value="none">なし</option>
+        </select>
+      </div>
+      <div class="customRow">
+        <label>性格</label>
+        <select id="miiPersonality">
+          <option value="cheerful">げんき</option>
+          <option value="cool">クール</option>
+          <option value="shy">おとなしい</option>
+          <option value="quirky">マイペース</option>
+          <option value="passionate">あつい</option>
+        </select>
+      </div>
+      <div class="customRow">
+        <label>声の高さ</label>
+        <input type="range" id="miiVoice" min="0" max="100" value="50">
+      </div>
+      <div class="customRow">
+        <label>エネルギー</label>
+        <input type="range" id="miiEnergy" min="0" max="100" value="60">
+      </div>
+      <button class="createBtn" onclick="createMii()">✨ この住人を島に迎える！</button>
+    </div>
+  </div>
+
+  <!-- Residents Panel -->
+  <div class="panel" id="residentsPanel">
+    <div class="panelHeader">
+      👥 島の住人たち
+      <button class="panelClose" onclick="closePanel('residentsPanel')">✕</button>
+    </div>
+    <div class="panelBody" id="residentsList">
+      <p style="text-align:center;color:#999;font-size:13px;">まだ住人がいません。<br>Mii作成から住人を作りましょう！</p>
+    </div>
+  </div>
+
+  <!-- Island Editor -->
+  <div class="panel" id="islandPanel">
+    <div class="panelHeader" style="background:linear-gradient(135deg,#43A047,#66BB6A);">
+      🏝️ 島作り
+      <button class="panelClose" onclick="closePanel('islandPanel')">✕</button>
+    </div>
+    <div class="panelBody">
+      <div class="islandTool" data-tool="expand" onclick="selectIslandTool(this)">
+        <span class="tIcon">🌊</span>
+        <div><div class="tLabel">島を大きくする</div><div class="tDesc">海を陸地に塗り替える</div></div>
+      </div>
+      <div class="islandTool" data-tool="road" onclick="selectIslandTool(this)">
+        <span class="tIcon">🛤️</span>
+        <div><div class="tLabel">道を敷く</div><div class="tDesc">住人が歩く道を作る</div></div>
+      </div>
+      <div class="islandTool" data-tool="bench" onclick="selectIslandTool(this)">
+        <span class="tIcon">🪑</span>
+        <div><div class="tLabel">ベンチを置く</div><div class="tDesc">住人の憩いの場</div></div>
+      </div>
+      <div class="islandTool" data-tool="tree" onclick="selectIslandTool(this)">
+        <span class="tIcon">🌳</span>
+        <div><div class="tLabel">木を植える</div><div class="tDesc">緑豊かな島にする</div></div>
+      </div>
+      <div class="islandTool" data-tool="playground" onclick="selectIslandTool(this)">
+        <span class="tIcon">🎠</span>
+        <div><div class="tLabel">遊具を置く</div><div class="tDesc">住人が遊べる</div></div>
+      </div>
+      <div class="islandTool" data-tool="vending" onclick="selectIslandTool(this)">
+        <span class="tIcon">🥤</span>
+        <div><div class="tLabel">自動販売機</div><div class="tDesc">飲み物が買える</div></div>
+      </div>
+      <div class="islandTool" data-tool="move" onclick="selectIslandTool(this)">
+        <span class="tIcon">🏠</span>
+        <div><div class="tLabel">建物を動かす</div><div class="tDesc">家や店を移動</div></div>
+      </div>
+      <div class="islandTool" data-tool="delete" onclick="selectIslandTool(this)">
+        <span class="tIcon">🗑️</span>
+        <div><div class="tLabel">撤去する</div><div class="tDesc">設置物を片付ける</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shop Panel -->
+  <div class="panel" id="shopPanel">
+    <div class="panelHeader" style="background:linear-gradient(135deg,#1976D2,#42A5F5);">
+      🏪 お店めぐり
+      <button class="panelClose" onclick="closePanel('shopPanel')">✕</button>
+    </div>
+    <div class="panelBody">
+      <div class="workshopCategory" style="margin-bottom:16px;">
+        <button class="catBtn active" onclick="switchShop('food',this)">🍽️ 食べ物屋</button>
+        <button class="catBtn" onclick="switchShop('clothes',this)">👗 服屋</button>
+        <button class="catBtn" onclick="switchShop('reform',this)">🏠 リフォーム</button>
+        <button class="catBtn" onclick="switchShop('market',this)">🏷️ 市場</button>
+      </div>
+      <div class="shopGrid" id="shopGrid"></div>
+    </div>
+  </div>
+
+  <!-- Workshop (Atelier) Panel -->
+  <div class="panel" id="workshopPanel">
+    <div class="panelHeader" style="background:linear-gradient(135deg,#7B1FA2,#AB47BC);">
+      🎨 アイテム工房
+      <button class="panelClose" onclick="closePanel('workshopPanel')">✕</button>
+    </div>
+    <div class="panelBody">
+      <div class="workshopCategory">
+        <button class="catBtn active" data-cat="food" onclick="switchWorkshopCat(this)">🍰 食べ物</button>
+        <button class="catBtn" data-cat="clothes" onclick="switchWorkshopCat(this)">👕 服</button>
+        <button class="catBtn" data-cat="pet" onclick="switchWorkshopCat(this)">🐾 ペット</button>
+        <button class="catBtn" data-cat="building" onclick="switchWorkshopCat(this)">🏗️ 建物</button>
+        <button class="catBtn" data-cat="ground" onclick="switchWorkshopCat(this)">🟫 地面</button>
+        <button class="catBtn" data-cat="object" onclick="switchWorkshopCat(this)">🎁 オブジェ</button>
+      </div>
+      <canvas id="paintCanvas" width="440" height="200"></canvas>
+      <div class="colorPalette" id="colorPalette"></div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+        <button class="catBtn" onclick="clearCanvas()">🗑️ クリア</button>
+        <button class="createBtn" style="margin:0;padding:10px 30px;font-size:14px;" onclick="saveWorkshopItem()">✨ アイテム完成！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- News Panel -->
+  <div class="panel" id="newsPanel">
+    <div class="panelHeader" style="background:linear-gradient(135deg,#E53935,#EF5350);">
+      📺 ニュース放送局 MNN
+      <button class="panelClose" onclick="closePanel('newsPanel')">✕</button>
+    </div>
+    <div class="panelBody" id="newsList">
+      <div class="newsItem">
+        <div class="newsTime">📡 放送中...</div>
+        <div class="newsText">住人がやってくるのを待っています。島に住人を迎えると、ニュースが届きます！</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo Studio -->
+  <div class="panel" id="photoPanel">
+    <div class="panelHeader" style="background:linear-gradient(135deg,#F57C00,#FFB74D);">
+      📸 写真館 Foto-Tomo
+      <button class="panelClose" onclick="closePanel('photoPanel')">✕</button>
+    </div>
+    <div class="panelBody">
+      <div class="photoFrame" id="photoFrame">
+        <span style="font-size:18px;color:#666;">住人を選んで記念撮影！</span>
+      </div>
+      <div class="workshopCategory">
+        <button class="catBtn" onclick="setPhotoBg('beach')">🏖️ ビーチ</button>
+        <button class="catBtn" onclick="setPhotoBg('sunset')">🌅 夕焼け</button>
+        <button class="catBtn" onclick="setPhotoBg('night')">🌙 夜空</button>
+        <button class="catBtn" onclick="setPhotoBg('flower')">🌸 花畑</button>
+        <button class="catBtn" onclick="setPhotoBg('space')">🚀 宇宙</button>
+      </div>
+      <p style="font-size:10px;color:#999;text-align:center;margin-top:10px;">
+        ※ プライバシー保護のため、スマホ転送・SNS直接投稿・自動アップロード機能は使用できません。<br>
+        ゲームチャットでの画面共有は可能です。
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Relationship Overlay -->
+<div id="relationOverlay">
+  <div id="relationCard">
+    <div class="relationEmoji" id="relEmoji">💕</div>
+    <div class="relationTitle" id="relTitle">相談があります！</div>
+    <div class="relationDesc" id="relDesc"></div>
+    <div class="relationBtns" id="relBtns"></div>
+  </div>
+</div>
+
+<!-- Drag Ghost -->
+<div id="dragGhost"></div>
+
+<!-- Save Indicator -->
+<div id="saveIndicator">💾 セーブ中...</div>
+
+<!-- Privacy Notice -->
+<div id="privacyNotice">
+  🔒 画像共有制限：Miiを実在の人物に似せて作れる自由度と、予想外の出来事を考慮し、<br>
+  スマホ転送・SNS直接投稿・自動アップロードは使用できません。
+</div>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+// ============================================================
+// GAME STATE
+// ============================================================
+const GameState = {
+  coins: 5000,
+  residents: [],
+  relationships: [],
+  placedObjects: [],
+  news: [],
+  createdItems: [],
+  photos: [],
+  currentTool: null,
+  dragResident: null,
+  dayCount: 1,
+  savedAt: null,
+};
+
+const PERSONALITY_NAMES = { cheerful:'げんき', cool:'クール', shy:'おとなしい', quirky:'マイペース', passionate:'あつい' };
+const GENDER_NAMES = { male:'男', female:'女', nonbinary:'その他' };
+const FACE_EMOJIS = ['😊','😄','😎','🤗','😌','🥰','😏','😶','🙂','😋'];
+const SKIN_COLORS = ['#FDEBD0','#F5CBA7','#E5B898','#D4A574','#C68642','#8D5524','#6B3A1F'];
+const HAIR_STYLES_3D = {
+  short: { scaleY: 0.3, scaleX: 1.05 },
+  medium: { scaleY: 0.5, scaleX: 1.1 },
+  long: { scaleY: 0.8, scaleX: 1.05 },
+  curly: { scaleY: 0.55, scaleX: 1.2 },
+  spiky: { scaleY: 0.6, scaleX: 0.9 },
+  ponytail: { scaleY: 0.7, scaleX: 1.0 },
+  bald: { scaleY: 0, scaleX: 0 },
+};
+
+const MOODS = ['ごきげん 😊','ふつう 🙂','さみしい 😢','お腹すいた 🍽️','恋してる 💕','ワクワク ✨','眠い 😴','怒ってる 😤'];
+const FOOD_ITEMS = [
+  {name:'おにぎり',icon:'🍙',price:50},{name:'ラーメン',icon:'🍜',price:120},{name:'ケーキ',icon:'🍰',price:200},
+  {name:'寿司セット',icon:'🍣',price:300},{name:'カレーライス',icon:'🍛',price:150},{name:'たこ焼き',icon:'🐙',price:80},
+  {name:'パンケーキ',icon:'🥞',price:180},{name:'アイスクリーム',icon:'🍦',price:100},{name:'ピザ',icon:'🍕',price:250},
+];
+const CLOTHES_ITEMS = [
+  {name:'Tシャツ',icon:'👕',price:200},{name:'ワンピース',icon:'👗',price:400},{name:'スーツ',icon:'🤵',price:600},
+  {name:'パジャマ',icon:'🩳',price:150},{name:'制服',icon:'👔',price:350},{name:'コート',icon:'🧥',price:500},
+  {name:'帽子',icon:'🎩',price:180},{name:'スニーカー',icon:'👟',price:250},{name:'サングラス',icon:'🕶️',price:120},
+];
+const REFORM_ITEMS = [
+  {name:'モダンルーム',icon:'🏢',price:800},{name:'和室',icon:'🏯',price:700},{name:'図書室',icon:'📚',price:650},
+  {name:'スーパー風',icon:'🛒',price:750},{name:'宇宙ステーション',icon:'🚀',price:1200},{name:'水族館',icon:'🐠',price:1000},
+];
+const MARKET_ITEMS_POOL = [
+  {name:'お得セット',icon:'🎁',price:99},{name:'レア花束',icon:'💐',price:150},{name:'虹色傘',icon:'☂️',price:80},
+  {name:'星のランプ',icon:'⭐',price:120},{name:'金のベンチ',icon:'🪑',price:200},{name:'クリスタル',icon:'💎',price:350},
+];
+
+const CONSULTATION_TOPICS = [
+  { q: '{name1}が{name2}と仲良くなりたいそうです。どんな話題がいいですか？', opts: ['趣味の話','食べ物の話','旅行の話'], type: 'friend' },
+  { q: '{name1}が{name2}に告白したいそうです。どこで告白すればいい？', opts: ['ビーチで','公園で','家の中で'], type: 'love' },
+  { q: '{name1}が新しい服が欲しいと相談しています。', opts: ['カジュアル','フォーマル','個性的に'], type: 'style' },
+  { q: '{name1}が{name2}とケンカしちゃいました。どうすれば？', opts: ['謝るべき','時間を置く','プレゼントを贈る'], type: 'fight' },
+  { q: '{name1}が同居したい相手がいるそうです。許可しますか？', opts: ['もちろん！','もう少し待って','考えさせて'], type: 'roommate' },
+];
+
+const QUIRKS = ['座り方がユニーク','食べ方が独特','歩き方が面白い','寝返りが激しい','ポーズを決める','口癖がある'];
+
+// ============================================================
+// THREE.JS 3D SCENE
+// ============================================================
+let scene, camera, renderer, clock3;
+let island, water, skyDome;
+let miiMeshes = [];
+let placedMeshes = [];
+let raycaster, mouse;
+let hoveredMii = null;
+let animTime = 0;
+
+function init3D() {
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x87CEEB, 0.008);
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+  camera.position.set(0, 25, 35);
+  camera.lookAt(0, 0, 0);
+
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas3d'), antialias: true, alpha: false });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  clock3 = new THREE.Clock();
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  // Sky
+  const skyGeo = new THREE.SphereGeometry(200, 32, 32);
+  const skyMat = new THREE.MeshBasicMaterial({
+    color: 0x87CEEB,
+    side: THREE.BackSide,
+  });
+  skyDome = new THREE.Mesh(skyGeo, skyMat);
+  scene.add(skyDome);
+
+  // Clouds
+  for (let i = 0; i < 15; i++) {
+    const cloudGroup = new THREE.Group();
+    for (let j = 0; j < 3 + Math.random()*3; j++) {
+      const cg = new THREE.SphereGeometry(1.5 + Math.random()*2, 8, 6);
+      const cm = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, roughness: 1 });
+      const cloud = new THREE.Mesh(cg, cm);
+      cloud.position.set(j*2 - 3, Math.random()*0.5, Math.random()*1);
+      cloud.scale.y = 0.5;
+      cloudGroup.add(cloud);
+    }
+    cloudGroup.position.set(
+      (Math.random()-0.5)*120,
+      25 + Math.random()*15,
+      (Math.random()-0.5)*120
+    );
+    cloudGroup.userData = { speed: 0.01 + Math.random()*0.02 };
+    scene.add(cloudGroup);
+  }
+
+  // Sun
+  const sunGeo = new THREE.SphereGeometry(5, 16, 16);
+  const sunMat = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+  const sun = new THREE.Mesh(sunGeo, sunMat);
+  sun.position.set(50, 60, -80);
+  scene.add(sun);
+
+  // Lights
+  const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.6);
+  scene.add(ambientLight);
+
+  const dirLight = new THREE.DirectionalLight(0xfffaf0, 1.2);
+  dirLight.position.set(30, 50, -20);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 2048;
+  dirLight.shadow.mapSize.height = 2048;
+  dirLight.shadow.camera.left = -40;
+  dirLight.shadow.camera.right = 40;
+  dirLight.shadow.camera.top = 40;
+  dirLight.shadow.camera.bottom = -40;
+  scene.add(dirLight);
+
+  const hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x556B2F, 0.4);
+  scene.add(hemiLight);
+
+  // Water
+  const waterGeo = new THREE.PlaneGeometry(300, 300, 64, 64);
+  const waterMat = new THREE.MeshStandardMaterial({
+    color: 0x1E90FF,
+    transparent: true,
+    opacity: 0.7,
+    roughness: 0.1,
+    metalness: 0.3,
+  });
+  water = new THREE.Mesh(waterGeo, waterMat);
+  water.rotation.x = -Math.PI / 2;
+  water.position.y = -0.5;
+  water.receiveShadow = true;
+  scene.add(water);
+
+  // Island
+  createIsland();
+
+  // Buildings
+  createBuildings();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // Mouse interaction
+  window.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('click', onClick3D);
+
+  animate();
+}
+
+function createIsland() {
+  // Main island - layered for depth
+  const islandGroup = new THREE.Group();
+
+  // Base layer (sand/beach)
+  const baseGeo = new THREE.CylinderGeometry(20, 22, 2, 32, 1);
+  const baseMat = new THREE.MeshStandardMaterial({ color: 0xF4D03F, roughness: 0.9 });
+  const base = new THREE.Mesh(baseGeo, baseMat);
+  base.position.y = -1;
+  base.receiveShadow = true;
+  base.castShadow = true;
+  islandGroup.add(base);
+
+  // Grass layer
+  const grassGeo = new THREE.CylinderGeometry(18, 19.5, 1.5, 32, 1);
+  const grassMat = new THREE.MeshStandardMaterial({ color: 0x7CB342, roughness: 0.8 });
+  const grass = new THREE.Mesh(grassGeo, grassMat);
+  grass.position.y = 0.5;
+  grass.receiveShadow = true;
+  grass.castShadow = true;
+  islandGroup.add(grass);
+
+  // Elevated areas
+  for (let i = 0; i < 3; i++) {
+    const hillGeo = new THREE.SphereGeometry(3 + Math.random()*2, 16, 8, 0, Math.PI*2, 0, Math.PI/2);
+    const hillMat = new THREE.MeshStandardMaterial({ color: 0x8BC34A, roughness: 0.85 });
+    const hill = new THREE.Mesh(hillGeo, hillMat);
+    const angle = (i/3)*Math.PI*2 + 0.5;
+    hill.position.set(Math.cos(angle)*10, 0.8, Math.sin(angle)*10);
+    hill.scale.y = 0.5;
+    hill.receiveShadow = true;
+    hill.castShadow = true;
+    islandGroup.add(hill);
+  }
+
+  // Paths
+  for (let i = 0; i < 4; i++) {
+    const pathGeo = new THREE.PlaneGeometry(2, 12 + Math.random()*5);
+    const pathMat = new THREE.MeshStandardMaterial({ color: 0xD7CCC8, roughness: 0.95 });
+    const path = new THREE.Mesh(pathGeo, pathMat);
+    path.rotation.x = -Math.PI/2;
+    path.rotation.z = (i/4)*Math.PI*2;
+    path.position.y = 1.02;
+    path.position.x = Math.cos((i/4)*Math.PI*2)*4;
+    path.position.z = Math.sin((i/4)*Math.PI*2)*4;
+    islandGroup.add(path);
+  }
+
+  // Decorative trees
+  for (let i = 0; i < 12; i++) {
+    const tree = createTree();
+    const a = Math.random()*Math.PI*2;
+    const r = 5 + Math.random()*12;
+    tree.position.set(Math.cos(a)*r, 1, Math.sin(a)*r);
+    tree.scale.setScalar(0.6 + Math.random()*0.6);
+    islandGroup.add(tree);
+  }
+
+  // Flowers
+  for (let i = 0; i < 30; i++) {
+    const flowerGeo = new THREE.SphereGeometry(0.15, 6, 6);
+    const colors = [0xFF69B4, 0xFF6347, 0xFFD700, 0x9370DB, 0xFF4500];
+    const flowerMat = new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random()*colors.length)] });
+    const flower = new THREE.Mesh(flowerGeo, flowerMat);
+    const a = Math.random()*Math.PI*2;
+    const r = 3 + Math.random()*14;
+    flower.position.set(Math.cos(a)*r, 1.3, Math.sin(a)*r);
+    islandGroup.add(flower);
+  }
+
+  island = islandGroup;
+  scene.add(island);
+}
+
+function createTree() {
+  const group = new THREE.Group();
+  // Trunk
+  const trunkGeo = new THREE.CylinderGeometry(0.15, 0.2, 1.5, 6);
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x795548, roughness: 0.9 });
+  const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+  trunk.position.y = 0.75;
+  trunk.castShadow = true;
+  group.add(trunk);
+  // Leaves
+  const leafColors = [0x388E3C, 0x43A047, 0x66BB6A, 0x2E7D32];
+  for (let i = 0; i < 3; i++) {
+    const leafGeo = new THREE.SphereGeometry(0.8 - i*0.15, 8, 6);
+    const leafMat = new THREE.MeshStandardMaterial({ color: leafColors[Math.floor(Math.random()*leafColors.length)], roughness: 0.8 });
+    const leaf = new THREE.Mesh(leafGeo, leafMat);
+    leaf.position.y = 1.5 + i*0.5;
+    leaf.castShadow = true;
+    group.add(leaf);
+  }
+  return group;
+}
+
+function createBuildings() {
+  const buildings = [
+    { name: 'food', color: 0xFF7043, x: -12, z: -8, label: '🍽️' },
+    { name: 'clothes', color: 0xAB47BC, x: -12, z: 2, label: '👗' },
+    { name: 'news', color: 0xEF5350, x: 12, z: -8, label: '📺' },
+    { name: 'reform', color: 0x42A5F5, x: 12, z: 2, label: '🏠' },
+    { name: 'market', color: 0x66BB6A, x: 0, z: -14, label: '🏷️' },
+    { name: 'photo', color: 0xFFB300, x: 0, z: 13, label: '📸' },
+    { name: 'workshop', color: 0x7E57C2, x: -8, z: 12, label: '🎨' },
+  ];
+
+  buildings.forEach(b => {
+    const group = new THREE.Group();
+    
+    // Main structure
+    const wallGeo = new THREE.BoxGeometry(3.5, 2.5, 3);
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0xFAFAFA, roughness: 0.7 });
+    const wall = new THREE.Mesh(wallGeo, wallMat);
+    wall.position.y = 2.25;
+    wall.castShadow = true;
+    wall.receiveShadow = true;
+    group.add(wall);
+
+    // Roof
+    const roofGeo = new THREE.ConeGeometry(3, 1.5, 4);
+    const roofMat = new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.6 });
+    const roof = new THREE.Mesh(roofGeo, roofMat);
+    roof.position.y = 4.25;
+    roof.rotation.y = Math.PI/4;
+    roof.castShadow = true;
+    group.add(roof);
+
+    // Door
+    const doorGeo = new THREE.BoxGeometry(0.8, 1.2, 0.1);
+    const doorMat = new THREE.MeshStandardMaterial({ color: 0x795548 });
+    const door = new THREE.Mesh(doorGeo, doorMat);
+    door.position.set(0, 1.6, 1.55);
+    group.add(door);
+
+    // Windows
+    for (let wx = -1; wx <= 1; wx += 2) {
+      const winGeo = new THREE.BoxGeometry(0.5, 0.5, 0.1);
+      const winMat = new THREE.MeshStandardMaterial({ color: 0xBBDEFB, emissive: 0x4FC3F7, emissiveIntensity: 0.3 });
+      const win = new THREE.Mesh(winGeo, winMat);
+      win.position.set(wx * 1, 2.8, 1.55);
+      group.add(win);
+    }
+
+    // Color accent stripe
+    const stripeGeo = new THREE.BoxGeometry(3.6, 0.15, 3.1);
+    const stripeMat = new THREE.MeshStandardMaterial({ color: b.color });
+    const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+    stripe.position.y = 3.55;
+    group.add(stripe);
+
+    group.position.set(b.x, 0, b.z);
+    group.userData = { type: 'building', name: b.name };
+    scene.add(group);
+  });
+
+  // Houses for residents
+  for (let i = 0; i < 8; i++) {
+    const house = createHouse(i);
+    const angle = (i/8)*Math.PI*2;
+    const r = 7;
+    house.position.set(Math.cos(angle)*r, 0, Math.sin(angle)*r);
+    house.userData = { type: 'house', index: i };
+    scene.add(house);
+  }
+}
+
+function createHouse(index) {
+  const group = new THREE.Group();
+  const houseColors = [0xFFCDD2, 0xC8E6C9, 0xBBDEFB, 0xFFF9C4, 0xD1C4E9, 0xFFE0B2, 0xB2EBF2, 0xF0F4C3];
+  const color = houseColors[index % houseColors.length];
+
+  const wallGeo = new THREE.BoxGeometry(2, 1.8, 2);
+  const wallMat = new THREE.MeshStandardMaterial({ color, roughness: 0.75 });
+  const wall = new THREE.Mesh(wallGeo, wallMat);
+  wall.position.y = 1.9;
+  wall.castShadow = true;
+  wall.receiveShadow = true;
+  group.add(wall);
+
+  const roofGeo = new THREE.ConeGeometry(1.8, 1, 4);
+  const roofMat = new THREE.MeshStandardMaterial({ color: 0x795548, roughness: 0.6 });
+  const roof = new THREE.Mesh(roofGeo, roofMat);
+  roof.position.y = 3.3;
+  roof.rotation.y = Math.PI/4;
+  roof.castShadow = true;
+  group.add(roof);
+
+  const doorGeo = new THREE.BoxGeometry(0.5, 0.8, 0.1);
+  const doorMat = new THREE.MeshStandardMaterial({ color: 0x5D4037 });
+  const door = new THREE.Mesh(doorGeo, doorMat);
+  door.position.set(0, 1.4, 1.05);
+  group.add(door);
+
+  return group;
+}
+
+function createMiiMesh(resident) {
+  const group = new THREE.Group();
+  
+  const skinIdx = Math.floor((parseInt(resident.skin)||40)/100 * (SKIN_COLORS.length-1));
+  const skinColor = new THREE.Color(SKIN_COLORS[skinIdx]);
+  const hairHue = parseInt(resident.hairColor)||30;
+  const hairColor = new THREE.Color().setHSL(hairHue/360, 0.6, 0.3);
+
+  // Body
+  const bodyGeo = new THREE.CapsuleGeometry(0.4, 0.8, 8, 12);
+  const bodyMat = new THREE.MeshStandardMaterial({ 
+    color: new THREE.Color().setHSL(Math.random(), 0.5, 0.6), roughness: 0.7 
+  });
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.position.y = 1.8;
+  body.castShadow = true;
+  group.add(body);
+
+  // Head
+  const headGeo = new THREE.SphereGeometry(0.45, 16, 12);
+  const headMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.8 });
+  const head = new THREE.Mesh(headGeo, headMat);
+  head.position.y = 2.85;
+  head.castShadow = true;
+  group.add(head);
+
+  // Hair
+  const hs = HAIR_STYLES_3D[resident.hair] || HAIR_STYLES_3D.short;
+  if (hs.scaleY > 0) {
+    const hairGeo = new THREE.SphereGeometry(0.48, 12, 8);
+    const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.9 });
+    const hair = new THREE.Mesh(hairGeo, hairMat);
+    hair.position.y = 2.95 + hs.scaleY * 0.15;
+    hair.scale.set(hs.scaleX, 0.3 + hs.scaleY * 0.5, hs.scaleX * 0.9);
+    group.add(hair);
+    
+    if (resident.hair === 'ponytail') {
+      const tailGeo = new THREE.CapsuleGeometry(0.1, 0.4, 4, 6);
+      const tail = new THREE.Mesh(tailGeo, hairMat);
+      tail.position.set(0, 2.6, -0.35);
+      tail.rotation.x = 0.3;
+      group.add(tail);
+    }
+  }
+
+  // Eyes
+  const eyeSize = resident.eyes === 'big' ? 0.08 : resident.eyes === 'small' ? 0.04 : 0.06;
+  for (let ex = -1; ex <= 1; ex += 2) {
+    const eyeGeo = new THREE.SphereGeometry(eyeSize, 8, 8);
+    const eyeMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+    const eye = new THREE.Mesh(eyeGeo, eyeMat);
+    eye.position.set(ex * 0.15, 2.9, 0.4);
+    group.add(eye);
+  }
+
+  // Mouth
+  const mouthGeo = new THREE.BoxGeometry(0.12, 0.03, 0.02);
+  const mouthMat = new THREE.MeshStandardMaterial({ color: 0xE57373 });
+  const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+  mouth.position.set(0, 2.72, 0.43);
+  group.add(mouth);
+
+  // Arms
+  for (let ax = -1; ax <= 1; ax += 2) {
+    const armGeo = new THREE.CapsuleGeometry(0.1, 0.5, 4, 6);
+    const armMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.8 });
+    const arm = new THREE.Mesh(armGeo, armMat);
+    arm.position.set(ax*0.55, 2.0, 0);
+    arm.rotation.z = ax * 0.2;
+    arm.castShadow = true;
+    group.add(arm);
+  }
+
+  // Legs
+  for (let lx = -1; lx <= 1; lx += 2) {
+    const legGeo = new THREE.CapsuleGeometry(0.12, 0.4, 4, 6);
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x1565C0, roughness: 0.7 });
+    const leg = new THREE.Mesh(legGeo, legMat);
+    leg.position.set(lx*0.2, 1.1, 0);
+    leg.castShadow = true;
+    group.add(leg);
+  }
+
+  // Shadow disc
+  const shadowGeo = new THREE.CircleGeometry(0.5, 16);
+  const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.15 });
+  const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+  shadow.rotation.x = -Math.PI/2;
+  shadow.position.y = 1.02;
+  group.add(shadow);
+
+  // Name label (using sprite)
+  const canvas2 = document.createElement('canvas');
+  canvas2.width = 256; canvas2.height = 64;
+  const ctx2 = canvas2.getContext('2d');
+  ctx2.fillStyle = 'rgba(255,255,255,0.85)';
+  roundRect(ctx2, 0, 0, 256, 52, 16);
+  ctx2.fill();
+  ctx2.fillStyle = '#333';
+  ctx2.font = 'bold 28px sans-serif';
+  ctx2.textAlign = 'center';
+  ctx2.fillText(resident.name, 128, 36);
+  const tex = new THREE.CanvasTexture(canvas2);
+  const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+  const sprite = new THREE.Sprite(spriteMat);
+  sprite.position.y = 3.8;
+  sprite.scale.set(2, 0.5, 1);
+  group.add(sprite);
+
+  group.userData = {
+    resident,
+    walkTarget: null,
+    walkSpeed: 0.5 + Math.random()*0.5,
+    idleTimer: Math.random()*5,
+    bobPhase: Math.random()*Math.PI*2,
+  };
+
+  const angle = Math.random()*Math.PI*2;
+  const r = 2 + Math.random()*8;
+  group.position.set(Math.cos(angle)*r, 0, Math.sin(angle)*r);
+
+  return group;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function addPlacedObject(type, position) {
+  let mesh;
+  switch(type) {
+    case 'bench':
+      mesh = new THREE.Group();
+      const seatGeo = new THREE.BoxGeometry(1.2, 0.1, 0.5);
+      const seatMat = new THREE.MeshStandardMaterial({ color: 0x795548 });
+      const seat = new THREE.Mesh(seatGeo, seatMat);
+      seat.position.y = 1.4;
+      seat.castShadow = true;
+      mesh.add(seat);
+      const backGeo = new THREE.BoxGeometry(1.2, 0.5, 0.08);
+      const back = new THREE.Mesh(backGeo, seatMat);
+      back.position.set(0, 1.7, -0.22);
+      mesh.add(back);
+      for (let lx = -0.4; lx <= 0.4; lx += 0.8) {
+        const legGeo = new THREE.BoxGeometry(0.08, 0.5, 0.08);
+        const leg = new THREE.Mesh(legGeo, seatMat);
+        leg.position.set(lx, 1.15, 0);
+        mesh.add(leg);
+      }
+      break;
+    case 'tree':
+      mesh = createTree();
+      mesh.scale.setScalar(0.8 + Math.random()*0.4);
+      break;
+    case 'playground':
+      mesh = new THREE.Group();
+      const poleGeo = new THREE.CylinderGeometry(0.05, 0.05, 2, 8);
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0xFF5722 });
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.y = 2;
+      mesh.add(pole);
+      const topGeo = new THREE.ConeGeometry(0.8, 0.4, 8);
+      const topMat = new THREE.MeshStandardMaterial({ color: 0xFFEB3B });
+      const top = new THREE.Mesh(topGeo, topMat);
+      top.position.y = 3.2;
+      mesh.add(top);
+      break;
+    case 'vending':
+      mesh = new THREE.Group();
+      const boxGeo = new THREE.BoxGeometry(0.6, 1.2, 0.5);
+      const boxMat = new THREE.MeshStandardMaterial({ color: 0xE53935, roughness: 0.3 });
+      const box = new THREE.Mesh(boxGeo, boxMat);
+      box.position.y = 1.6;
+      box.castShadow = true;
+      mesh.add(box);
+      const screenGeo = new THREE.BoxGeometry(0.4, 0.6, 0.02);
+      const screenMat = new THREE.MeshStandardMaterial({ color: 0x81D4FA, emissive: 0x29B6F6, emissiveIntensity: 0.5 });
+      const screen = new THREE.Mesh(screenGeo, screenMat);
+      screen.position.set(0, 1.8, 0.26);
+      mesh.add(screen);
+      break;
+    case 'expand':
+      // Expand island slightly
+      const expandGeo = new THREE.CylinderGeometry(1.5, 2, 0.3, 8);
+      const expandMat = new THREE.MeshStandardMaterial({ color: 0xF4D03F, roughness: 0.9 });
+      mesh = new THREE.Mesh(expandGeo, expandMat);
+      mesh.receiveShadow = true;
+      break;
+    case 'road':
+      const roadGeo = new THREE.PlaneGeometry(1.5, 3);
+      const roadMat = new THREE.MeshStandardMaterial({ color: 0xBDBDBD, roughness: 0.95 });
+      mesh = new THREE.Mesh(roadGeo, roadMat);
+      mesh.rotation.x = -Math.PI/2;
+      mesh.position.y = 1.01;
+      break;
+    default:
+      const defGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+      const defMat = new THREE.MeshStandardMaterial({ color: 0xFF9800 });
+      mesh = new THREE.Mesh(defGeo, defMat);
+      mesh.position.y = 1.25;
+  }
+
+  mesh.position.copy(position);
+  if (type !== 'road') mesh.position.y = 0;
+  mesh.userData = { type: 'placed', objectType: type };
+  scene.add(mesh);
+  placedMeshes.push(mesh);
+  GameState.placedObjects.push({ type, x: position.x, z: position.z });
+}
+
+function onMouseMove(e) {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+  if (GameState.dragResident !== null) {
+    const ghost = document.getElementById('dragGhost');
+    ghost.style.left = (e.clientX - 24) + 'px';
+    ghost.style.top = (e.clientY - 24) + 'px';
+  }
+}
+
+function onClick3D(e) {
+  raycaster.setFromCamera(mouse, camera);
+  
+  // Check Mii clicks
+  const miiIntersects = raycaster.intersectObjects(miiMeshes.flatMap(m => m.children), true);
+  if (miiIntersects.length > 0) {
+    let target = miiIntersects[0].object;
+    while (target.parent && !target.userData.resident) target = target.parent;
+    if (target.userData.resident) {
+      if (GameState.currentTool === 'pickup') {
+        startDragResident(target);
+      } else {
+        showResidentInteraction(target.userData.resident);
+      }
+      return;
+    }
+  }
+
+  // Place objects on island
+  if (GameState.currentTool && GameState.currentTool !== 'delete' && GameState.currentTool !== 'move') {
+    const groundIntersects = raycaster.intersectObjects([water], true);
+    if (groundIntersects.length > 0) {
+      const point = groundIntersects[0].point;
+      if (Math.sqrt(point.x*point.x + point.z*point.z) < 18) {
+        addPlacedObject(GameState.currentTool, point);
+        showToast(`${GameState.currentTool} を設置しました！`);
+      }
+    }
+  }
+}
+
+// ============================================================
+// ANIMATION LOOP
+// ============================================================
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock3.getDelta();
+  animTime += dt;
+
+  // Rotate camera slowly
+  const camAngle = animTime * 0.03;
+  camera.position.x = Math.sin(camAngle) * 35;
+  camera.position.z = Math.cos(camAngle) * 35;
+  camera.position.y = 20 + Math.sin(animTime*0.1)*2;
+  camera.lookAt(0, 2, 0);
+
+  // Water animation
+  if (water.geometry.attributes.position) {
+    const positions = water.geometry.attributes.position.array;
+    for (let i = 0; i < positions.length; i += 3) {
+      positions[i+1] = Math.sin(positions[i]*0.3 + animTime) * 0.15 + 
+                        Math.cos(positions[i+2]*0.3 + animTime*0.8) * 0.1;
+    }
+    water.geometry.attributes.position.needsUpdate = true;
+  }
+
+  // Animate clouds
+  scene.children.forEach(child => {
+    if (child.userData && child.userData.speed) {
+      child.position.x += child.userData.speed;
+      if (child.position.x > 70) child.position.x = -70;
+    }
+  });
+
+  // Animate Miis (walking, bobbing, interactions)
+  miiMeshes.forEach((mii, idx) => {
+    const ud = mii.userData;
+
+    // Bobbing
+    mii.position.y = Math.sin(animTime * 2 + ud.bobPhase) * 0.08;
+
+    // Walking AI
+    ud.idleTimer -= dt;
+    if (ud.idleTimer <= 0) {
+      const angle = Math.random() * Math.PI * 2;
+      const r = 2 + Math.random() * 10;
+      ud.walkTarget = new THREE.Vector3(Math.cos(angle)*r, 0, Math.sin(angle)*r);
+      ud.idleTimer = 3 + Math.random()*8;
+    }
+
+    if (ud.walkTarget) {
+      const dir = new THREE.Vector3().subVectors(ud.walkTarget, mii.position);
+      dir.y = 0;
+      const dist = dir.length();
+      if (dist > 0.5) {
+        dir.normalize();
+        mii.position.x += dir.x * ud.walkSpeed * dt;
+        mii.position.z += dir.z * ud.walkSpeed * dt;
+        mii.rotation.y = Math.atan2(dir.x, dir.z);
+        
+        // Walking animation - arm & leg swing
+        const swing = Math.sin(animTime * 6 + idx) * 0.3;
+        if (mii.children[5]) mii.children[5].rotation.x = swing; // left arm
+        if (mii.children[6]) mii.children[6].rotation.x = -swing; // right arm
+        if (mii.children[7]) mii.children[7].rotation.x = -swing * 0.5; // left leg
+        if (mii.children[8]) mii.children[8].rotation.x = swing * 0.5; // right leg
+      } else {
+        ud.walkTarget = null;
+      }
+    }
+
+    // Keep within island bounds
+    const dist = Math.sqrt(mii.position.x**2 + mii.position.z**2);
+    if (dist > 16) {
+      mii.position.x *= 15/dist;
+      mii.position.z *= 15/dist;
+      ud.walkTarget = new THREE.Vector3(0, 0, 0);
+    }
+  });
+
+  renderer.render(scene, camera);
+}
+
+// ============================================================
+// UI LOGIC
+// ============================================================
+
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = `🕐 ${h}:${m}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Panel management
+function openPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
+}
+function closePanel(id) {
+  document.getElementById(id).classList.remove('visible');
+  document.querySelectorAll('.menuBtn').forEach(b => b.classList.remove('active'));
+}
+
+// Menu buttons
+document.querySelectorAll('.menuBtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const action = btn.dataset.action;
+    document.querySelectorAll('.menuBtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    switch(action) {
+      case 'mii': openPanel('miiPanel'); break;
+      case 'residents': refreshResidentsList(); openPanel('residentsPanel'); break;
+      case 'island': openPanel('islandPanel'); break;
+      case 'shop': loadShop('food'); openPanel('shopPanel'); break;
+      case 'workshop': openPanel('workshopPanel'); break;
+      case 'news': refreshNews(); openPanel('newsPanel'); break;
+      case 'photo': openPanel('photoPanel'); break;
+      case 'save': saveGame(); break;
+    }
+  });
+});
+
+// Mii preview updater
+['miiFace','miiHair','miiEyes','miiGender','miiPersonality'].forEach(id => {
+  document.getElementById(id).addEventListener('change', updateMiiPreview);
+});
+['miiHairColor','miiSkin','miiVoice','miiEnergy'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateMiiPreview);
+});
+
+function updateMiiPreview() {
+  const gender = document.getElementById('miiGender').value;
+  const personality = document.getElementById('miiPersonality').value;
+  const emojis = {
+    'cheerful_male': '😄', 'cheerful_female': '😊', 'cheerful_nonbinary': '🤗',
+    'cool_male': '😎', 'cool_female': '😏', 'cool_nonbinary': '🧐',
+    'shy_male': '😳', 'shy_female': '😌', 'shy_nonbinary': '🥺',
+    'quirky_male': '🤪', 'quirky_female': '😋', 'quirky_nonbinary': '🤔',
+    'passionate_male': '🔥', 'passionate_female': '💪', 'passionate_nonbinary': '⚡',
+  };
+  const key = personality + '_' + gender;
+  document.getElementById('miiPreviewFace').textContent = emojis[key] || '😊';
+
+  const skinVal = document.getElementById('miiSkin').value;
+  const skinIdx = Math.floor(skinVal/100 * (SKIN_COLORS.length-1));
+  document.getElementById('miiPreviewFace').style.background = 
+    `linear-gradient(135deg, ${SKIN_COLORS[Math.max(0,skinIdx-1)]}, ${SKIN_COLORS[skinIdx]})`;
+}
+
+function createMii() {
+  const name = document.getElementById('miiName').value.trim();
+  if (!name) { showToast('名前を入力してください！'); return; }
+  if (GameState.residents.length >= 100) { showToast('住人は100人までです！'); return; }
+
+  const resident = {
+    id: Date.now(),
+    name,
+    face: document.getElementById('miiFace').value,
+    hair: document.getElementById('miiHair').value,
+    hairColor: document.getElementById('miiHairColor').value,
+    eyes: document.getElementById('miiEyes').value,
+    skin: document.getElementById('miiSkin').value,
+    gender: document.getElementById('miiGender').value,
+    attraction: document.getElementById('miiAttraction').value,
+    personality: document.getElementById('miiPersonality').value,
+    voice: document.getElementById('miiVoice').value,
+    energy: document.getElementById('miiEnergy').value,
+    mood: MOODS[Math.floor(Math.random()*MOODS.length)],
+    quirks: [],
+    friends: [],
+    loveInterest: null,
+    houseIndex: null,
+    inventory: [],
+    createdAt: new Date().toISOString(),
+  };
+
+  GameState.residents.push(resident);
+
+  // Create 3D mesh
+  const mesh = createMiiMesh(resident);
+  miiMeshes.push(mesh);
+  scene.add(mesh);
+
+  closePanel('miiPanel');
+  showToast(`${name}が島にやってきました！ 🎉`);
+  addNews(`新しい住人「${name}」が島に引っ越してきました！`);
+
+  // Reset form
+  document.getElementById('miiName').value = '';
+
+  // Trigger consultation after a delay
+  if (GameState.residents.length >= 2) {
+    setTimeout(() => triggerConsultation(), 5000 + Math.random()*10000);
+  }
+}
+
+function refreshResidentsList() {
+  const list = document.getElementById('residentsList');
+  if (GameState.residents.length === 0) {
+    list.innerHTML = '<p style="text-align:center;color:#999;font-size:13px;">まだ住人がいません。<br>Mii作成から住人を作りましょう！</p>';
+    return;
+  }
+  list.innerHTML = GameState.residents.map((r, i) => {
+    const emoji = FACE_EMOJIS[i % FACE_EMOJIS.length];
+    const skinIdx = Math.floor((parseInt(r.skin)||40)/100 * (SKIN_COLORS.length-1));
+    const friends = r.friends.length;
+    const love = r.loveInterest ? '💕' : '';
+    return `
+      <div class="residentCard" onclick="showResidentDetail(${i})" draggable="true" ondragstart="dragMiiStart(event,${i})">
+        <div class="residentAvatar" style="background:${SKIN_COLORS[skinIdx]}">${emoji}</div>
+        <div class="residentInfo">
+          <div class="residentName">${r.name} ${love} ${GENDER_NAMES[r.gender]||''}</div>
+          <div class="residentMood">${r.mood}</div>
+          <div class="residentRelation">友達: ${friends}人 ｜ ${PERSONALITY_NAMES[r.personality]||r.personality} ${r.quirks.length > 0 ? '｜ プチ個性: '+r.quirks.join(', ') : ''}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showResidentDetail(index) {
+  const r = GameState.residents[index];
+  const overlay = document.getElementById('relationOverlay');
+  overlay.classList.add('visible');
+  document.getElementById('relEmoji').textContent = FACE_EMOJIS[index % FACE_EMOJIS.length];
+  document.getElementById('relTitle').textContent = r.name;
+  document.getElementById('relDesc').innerHTML = `
+    性格: ${PERSONALITY_NAMES[r.personality]} ｜ 気分: ${r.mood}<br>
+    性別: ${GENDER_NAMES[r.gender]} ｜ 恋愛対象: ${r.attraction}<br>
+    友達: ${r.friends.map(fid => {
+      const f = GameState.residents.find(x=>x.id===fid);
+      return f ? f.name : '';
+    }).filter(Boolean).join(', ') || 'まだいません'}<br>
+    ${r.loveInterest ? '恋人: ' + (GameState.residents.find(x=>x.id===r.loveInterest)||{}).name : ''}<br>
+    ${r.quirks.length ? 'プチ個性: ' + r.quirks.join(', ') : ''}
+  `;
+  document.getElementById('relBtns').innerHTML = `
+    <button class="rBtn secondary" onclick="giveQuirk(${index})">プチ個性を贈る</button>
+    <button class="rBtn secondary" onclick="giveFood(${index})">食べ物をあげる</button>
+    <button class="rBtn primary" onclick="closeRelation()">閉じる</button>
+  `;
+}
+
+function giveQuirk(index) {
+  const quirk = QUIRKS[Math.floor(Math.random()*QUIRKS.length)];
+  GameState.residents[index].quirks.push(quirk);
+  showToast(`${GameState.residents[index].name}に「${quirk}」を贈りました！`);
+  addNews(`${GameState.residents[index].name}が「${quirk}」という個性を身につけました！`);
+  closeRelation();
+}
+
+function giveFood(index) {
+  const food = FOOD_ITEMS[Math.floor(Math.random()*FOOD_ITEMS.length)];
+  GameState.residents[index].mood = 'ごきげん 😊';
+  showToast(`${GameState.residents[index].name}に${food.icon}${food.name}をあげました！`);
+  addNews(`${GameState.residents[index].name}が${food.name}を美味しそうに食べています！`);
+  closeRelation();
+}
+
+function closeRelation() {
+  document.getElementById('relationOverlay').classList.remove('visible');
+}
+
+function showResidentInteraction(resident) {
+  // Random thought bubble
+  const thoughts = [
+    `${resident.name}「今日はいい天気だなぁ」`,
+    `${resident.name}「お腹すいたな～」`,
+    `${resident.name}「誰かと遊びたいな」`,
+    `${resident.name}「新しい服が欲しいな」`,
+    `${resident.name}「島がどんどん素敵になるね！」`,
+    `${resident.name}「管理人さん、ありがとう！」`,
+  ];
+  showThoughtBubble(thoughts[Math.floor(Math.random()*thoughts.length)]);
+}
+
+function showThoughtBubble(text) {
+  const existing = document.querySelectorAll('.thoughtBubble');
+  existing.forEach(e => e.remove());
+  
+  const bubble = document.createElement('div');
+  bubble.className = 'thoughtBubble';
+  bubble.textContent = text;
+  bubble.style.left = (window.innerWidth/2 - 110) + 'px';
+  bubble.style.top = (window.innerHeight/2 - 100) + 'px';
+  bubble.onclick = () => bubble.remove();
+  document.body.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 4000);
+}
+
+// Drag & Drop Mii (つまむ)
+function dragMiiStart(e, index) {
+  GameState.dragResident = index;
+  const ghost = document.getElementById('dragGhost');
+  ghost.textContent = FACE_EMOJIS[index % FACE_EMOJIS.length];
+  ghost.style.display = 'block';
+  ghost.style.left = (e.clientX - 24) + 'px';
+  ghost.style.top = (e.clientY - 24) + 'px';
+
+  const onUp = (ev) => {
+    ghost.style.display = 'none';
+    // Check if dropped on another resident card
+    const target = document.elementFromPoint(ev.clientX, ev.clientY);
+    const card = target?.closest?.('.residentCard');
+    if (card) {
+      const targetIndex = Array.from(card.parentElement.children).indexOf(card);
+      if (targetIndex !== index && targetIndex >= 0) {
+        introduceMiis(index, targetIndex);
+      }
+    }
+    GameState.dragResident = null;
+    window.removeEventListener('mouseup', onUp);
+    window.removeEventListener('mousemove', onDragMove);
+  };
+  const onDragMove = (ev) => {
+    ghost.style.left = (ev.clientX - 24) + 'px';
+    ghost.style.top = (ev.clientY - 24) + 'px';
+  };
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('mousemove', onDragMove);
+}
+
+function introduceMiis(idx1, idx2) {
+  const r1 = GameState.residents[idx1];
+  const r2 = GameState.residents[idx2];
+  if (!r1 || !r2) return;
+
+  if (r1.friends.includes(r2.id)) {
+    showToast(`${r1.name}と${r2.name}はもう友達です！`);
+    return;
+  }
+
+  r1.friends.push(r2.id);
+  r2.friends.push(r1.id);
+
+  showToast(`${r1.name}と${r2.name}が顔見知りになりました！ 🤝`);
+  addNews(`${r1.name}と${r2.name}が自己紹介をして、友達になりました！`);
+
+  // 3D: Move miis near each other
+  if (miiMeshes[idx1] && miiMeshes[idx2]) {
+    const midX = (miiMeshes[idx1].position.x + miiMeshes[idx2].position.x)/2;
+    const midZ = (miiMeshes[idx1].position.z + miiMeshes[idx2].position.z)/2;
+    miiMeshes[idx1].userData.walkTarget = new THREE.Vector3(midX - 1, 0, midZ);
+    miiMeshes[idx2].userData.walkTarget = new THREE.Vector3(midX + 1, 0, midZ);
+  }
+
+  // Check for romance possibility
+  checkRomance(idx1, idx2);
+
+  refreshResidentsList();
+}
+
+function checkRomance(idx1, idx2) {
+  const r1 = GameState.residents[idx1];
+  const r2 = GameState.residents[idx2];
+  
+  const attracted = (r, other) => {
+    if (r.attraction === 'none') return false;
+    if (r.attraction === 'both') return true;
+    return r.attraction === other.gender;
+  };
+
+  if (attracted(r1, r2) && attracted(r2, r1) && !r1.loveInterest && !r2.loveInterest) {
+    if (Math.random() > 0.5) {
+      setTimeout(() => {
+        const overlay = document.getElementById('relationOverlay');
+        overlay.classList.add('visible');
+        document.getElementById('relEmoji').textContent = '💕';
+        document.getElementById('relTitle').textContent = '恋の予感...!?';
+        document.getElementById('relDesc').textContent = 
+          `${r1.name}が${r2.name}のことを気にしているようです。告白のアドバイスをしますか？`;
+        document.getElementById('relBtns').innerHTML = `
+          <button class="rBtn primary" onclick="adviceLove(${idx1},${idx2},'beach')">🏖️ ビーチで</button>
+          <button class="rBtn primary" onclick="adviceLove(${idx1},${idx2},'park')">🌳 公園で</button>
+          <button class="rBtn secondary" onclick="closeRelation()">今はやめておく</button>
+        `;
+      }, 3000);
+    }
+  }
+}
+
+function adviceLove(idx1, idx2, place) {
+  const r1 = GameState.residents[idx1];
+  const r2 = GameState.residents[idx2];
+  
+  if (Math.random() > 0.3) {
+    r1.loveInterest = r2.id;
+    r2.loveInterest = r1.id;
+    r1.mood = '恋してる 💕';
+    r2.mood = '恋してる 💕';
+    showToast(`${r1.name}と${r2.name}が恋人になりました！ 💕`);
+    addNews(`速報！${r1.name}が${place==='beach'?'ビーチ':'公園'}で${r2.name}に告白し、見事成功しました！ 💕`);
+  } else {
+    showToast(`${r2.name}にはまだ早かったようです... 😢`);
+    addNews(`${r1.name}の告白は残念ながら...。でもまだチャンスはあるはず！`);
+  }
+  closeRelation();
+  refreshResidentsList();
+}
+
+// Consultation system
+function triggerConsultation() {
+  if (GameState.residents.length < 2) return;
+
+  const topic = CONSULTATION_TOPICS[Math.floor(Math.random()*CONSULTATION_TOPICS.length)];
+  const r1 = GameState.residents[Math.floor(Math.random()*GameState.residents.length)];
+  let r2 = GameState.residents[Math.floor(Math.random()*GameState.residents.length)];
+  while (r2.id === r1.id && GameState.residents.length > 1) {
+    r2 = GameState.residents[Math.floor(Math.random()*GameState.residents.length)];
+  }
+
+  const question = topic.q.replace('{name1}', r1.name).replace('{name2}', r2.name);
+
+  const overlay = document.getElementById('relationOverlay');
+  overlay.classList.add('visible');
+  document.getElementById('relEmoji').textContent = '💭';
+  document.getElementById('relTitle').textContent = '相談があります！';
+  document.getElementById('relDesc').textContent = question;
+  document.getElementById('relBtns').innerHTML = topic.opts.map((opt, i) => 
+    `<button class="rBtn ${i===0?'primary':'secondary'}" onclick="answerConsultation('${r1.name}','${r2.name}','${opt}','${topic.type}')">${opt}</button>`
+  ).join('');
+}
+
+function answerConsultation(name1, name2, answer, type) {
+  closeRelation();
+  showToast(`「${answer}」とアドバイスしました！`);
+  
+  const messages = {
+    friend: `${name1}が「${answer}」で${name2}と話してみたようです！`,
+    love: `${name1}が${answer}で告白を計画中...!?`,
+    style: `${name1}が「${answer}」なスタイルに挑戦するようです！`,
+    fight: `${name1}は「${answer}」という方法を試すことにしました。`,
+    roommate: `${name1}の同居の件について検討中...`,
+  };
+  addNews(messages[type] || `${name1}へのアドバイスが完了しました。`);
+
+  // Schedule next consultation
+  setTimeout(() => triggerConsultation(), 15000 + Math.random()*30000);
+}
+
+// Island tools
+function selectIslandTool(el) {
+  document.querySelectorAll('.islandTool').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  GameState.currentTool = el.dataset.tool;
+  showToast(`ツール: ${el.querySelector('.tLabel').textContent} を選択中。島をクリックして設置！`);
+}
+
+// Shop
+function loadShop(category) {
+  const grid = document.getElementById('shopGrid');
+  let items;
+  switch(category) {
+    case 'food': items = FOOD_ITEMS; break;
+    case 'clothes': items = CLOTHES_ITEMS; break;
+    case 'reform': items = REFORM_ITEMS; break;
+    case 'market':
+      items = MARKET_ITEMS_POOL.sort(() => Math.random()-0.5).slice(0, 3);
+      break;
+    default: items = FOOD_ITEMS;
+  }
+  grid.innerHTML = items.map(item => `
+    <div class="shopItem" onclick="buyItem('${item.name}',${item.price},'${item.icon}')">
+      <div class="sIcon">${item.icon}</div>
+      <div class="sName">${item.name}</div>
+      <div class="sPrice">🪙 ${item.price}</div>
+    </div>
+  `).join('');
+}
+
+function switchShop(cat, btn) {
+  document.querySelectorAll('#shopPanel .catBtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadShop(cat);
+}
+
+function buyItem(name, price, icon) {
+  if (GameState.coins < price) {
+    showToast('コインが足りません！');
+    return;
+  }
+  GameState.coins -= price;
+  document.getElementById('coins').textContent = GameState.coins;
+  showToast(`${icon} ${name}を購入しました！`);
+  addNews(`管理人が「${name}」を購入しました！`);
+}
+
+// Workshop (Palette House / アイテム工房)
+let paintCtx, currentColor = '#FF6B35', isPainting = false;
+const PALETTE_COLORS = [
+  '#FF6B35','#E53935','#D81B60','#8E24AA','#5C6BC0',
+  '#1E88E5','#00ACC1','#00897B','#43A047','#7CB342',
+  '#FFB300','#FB8C00','#6D4C41','#546E7A','#212121',
+  '#FFFFFF','#F5F5F5','#BDBDBD','#757575','#FFD54F',
+];
+
+function initWorkshop() {
+  const canvas = document.getElementById('paintCanvas');
+  paintCtx = canvas.getContext('2d');
+  paintCtx.fillStyle = '#fff';
+  paintCtx.fillRect(0, 0, canvas.width, canvas.height);
+  paintCtx.lineCap = 'round';
+  paintCtx.lineJoin = 'round';
+  paintCtx.lineWidth = 4;
+  paintCtx.strokeStyle = currentColor;
+
+  canvas.addEventListener('pointerdown', (e) => {
+    isPainting = true;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    paintCtx.beginPath();
+    paintCtx.moveTo(x, y);
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!isPainting) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    paintCtx.lineTo(x, y);
+    paintCtx.stroke();
+  });
+  canvas.addEventListener('pointerup', () => isPainting = false);
+  canvas.addEventListener('pointerleave', () => isPainting = false);
+
+  // Color palette
+  const palette = document.getElementById('colorPalette');
+  palette.innerHTML = PALETTE_COLORS.map(c => 
+    `<div class="colorSwatch ${c===currentColor?'active':''}" style="background:${c}" onclick="selectColor('${c}',this)"></div>`
+  ).join('');
+}
+
+function selectColor(color, el) {
+  currentColor = color;
+  paintCtx.strokeStyle = color;
+  document.querySelectorAll('.colorSwatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function clearCanvas() {
+  const canvas = document.getElementById('paintCanvas');
+  paintCtx.fillStyle = '#fff';
+  paintCtx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function switchWorkshopCat(btn) {
+  document.querySelectorAll('#workshopPanel .catBtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  showToast(`カテゴリ: ${btn.textContent.trim()} を選択中`);
+}
+
+function saveWorkshopItem() {
+  const canvas = document.getElementById('paintCanvas');
+  const dataURL = canvas.toDataURL();
+  const cat = document.querySelector('#workshopPanel .catBtn.active')?.dataset.cat || 'object';
+  const item = {
+    id: Date.now(),
+    category: cat,
+    image: dataURL,
+    createdAt: new Date().toISOString(),
+  };
+  GameState.createdItems.push(item);
+  GameState.coins += 50;
+  document.getElementById('coins').textContent = GameState.coins;
+  showToast('✨ オリジナルアイテムが完成しました！ +50コイン');
+  addNews('管理人がアイテム工房で新しいアイテムを作りました！');
+  clearCanvas();
+}
+
+// Photo Studio
+function setPhotoBg(type) {
+  const frame = document.getElementById('photoFrame');
+  const gradients = {
+    beach: 'linear-gradient(180deg, #87CEEB 0%, #F4D03F 60%, #1E90FF 100%)',
+    sunset: 'linear-gradient(180deg, #FF6B35 0%, #FFD700 40%, #FF4500 100%)',
+    night: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+    flower: 'linear-gradient(180deg, #FCE4EC 0%, #F8BBD0 50%, #E1BEE7 100%)',
+    space: 'linear-gradient(180deg, #0d0d2b 0%, #1a1a4e 50%, #3d0066 100%)',
+  };
+  frame.style.background = gradients[type] || gradients.beach;
+
+  // Add resident emojis
+  if (GameState.residents.length > 0) {
+    const miis = GameState.residents.slice(0, 4).map((r, i) => 
+      FACE_EMOJIS[i % FACE_EMOJIS.length]
+    ).join(' ');
+    frame.innerHTML = `<span style="font-size:48px;z-index:1;position:relative;">${miis}</span>`;
+  }
+  showToast('📸 パシャ！ 思い出を写真に残しました！');
+  addNews('写真館で記念撮影が行われました！');
+}
+
+// News
+function addNews(text) {
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  GameState.news.unshift({ time, text, day: GameState.dayCount });
+  if (GameState.news.length > 50) GameState.news.pop();
+}
+
+function refreshNews() {
+  const list = document.getElementById('newsList');
+  if (GameState.news.length === 0) {
+    list.innerHTML = '<div class="newsItem"><div class="newsTime">📡 放送中...</div><div class="newsText">住人がやってくるのを待っています。島に住人を迎えると、ニュースが届きます！</div></div>';
+    return;
+  }
+  list.innerHTML = GameState.news.slice(0, 20).map(n => `
+    <div class="newsItem">
+      <div class="newsTime">📡 Day ${n.day} - ${n.time}</div>
+      <div class="newsText">${n.text}</div>
+    </div>
+  `).join('');
+}
+
+// Save system
+function saveGame() {
+  const indicator = document.getElementById('saveIndicator');
+  indicator.style.display = 'block';
+  
+  try {
+    const saveData = {
+      ...GameState,
+      savedAt: new Date().toISOString(),
+      version: '1.0',
+    };
+    localStorage.setItem('tomodachi_save', JSON.stringify(saveData));
+    setTimeout(() => {
+      indicator.textContent = '💾 セーブ完了！';
+      setTimeout(() => { indicator.style.display = 'none'; indicator.textContent = '💾 セーブ中...'; }, 1500);
+    }, 800);
+    showToast('セーブデータを保存しました！');
+  } catch(e) {
+    indicator.style.display = 'none';
+    showToast('セーブに失敗しました...');
+  }
+}
+
+function loadGame() {
+  try {
+    const data = localStorage.getItem('tomodachi_save');
+    if (data) {
+      const parsed = JSON.parse(data);
+      Object.assign(GameState, parsed);
+      document.getElementById('coins').textContent = GameState.coins;
+      
+      // Recreate 3D miis
+      GameState.residents.forEach(r => {
+        const mesh = createMiiMesh(r);
+        miiMeshes.push(mesh);
+        scene.add(mesh);
+      });
+      
+      if (GameState.residents.length > 0) {
+        showToast(`セーブデータをロードしました！ (住人${GameState.residents.length}人)`);
+      }
+    }
+  } catch(e) {
+    console.log('No save data found');
+  }
+}
+
+// Toast notification
+function showToast(text) {
+  const existing = document.querySelectorAll('.toast');
+  existing.forEach(e => e.remove());
+  
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = text;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2600);
+}
+
+// Privacy notice (shown once)
+function showPrivacyOnce() {
+  const notice = document.getElementById('privacyNotice');
+  notice.style.display = 'block';
+  setTimeout(() => { notice.style.display = 'none'; }, 8000);
+}
+
+// Random events
+function startRandomEvents() {
+  // Mood changes
+  setInterval(() => {
+    GameState.residents.forEach(r => {
+      if (Math.random() > 0.8) {
+        r.mood = MOODS[Math.floor(Math.random()*MOODS.length)];
+      }
+    });
+  }, 20000);
+
+  // Random consultations
+  setTimeout(() => {
+    if (GameState.residents.length >= 2) triggerConsultation();
+  }, 30000);
+
+  // Coin earnings from residents
+  setInterval(() => {
+    if (GameState.residents.length > 0) {
+      const earn = GameState.residents.length * 5;
+      GameState.coins += earn;
+      document.getElementById('coins').textContent = GameState.coins;
+    }
+  }, 30000);
+
+  // Day counter
+  setInterval(() => {
+    GameState.dayCount++;
+    if (GameState.residents.length > 0) {
+      addNews(`Day ${GameState.dayCount}が始まりました。島の住人たちは元気です！`);
+    }
+  }, 120000); // 2 minutes = 1 day
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  init3D();
+  initWorkshop();
+  loadGame();
+  startRandomEvents();
+  
+  // Show privacy notice
+  setTimeout(showPrivacyOnce, 3000);
+
+  // Auto-save every 60s
+  setInterval(saveGame, 60000);
+});
+</script>
+</body>
+</html>

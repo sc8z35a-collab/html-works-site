@@ -1,0 +1,6853 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YKKの品質 — 世界が認めるファスナーの真価</title>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --ykk-black: #1a1a1a;
+  --ykk-dark: #2c2c2c;
+  --ykk-gray: #666666;
+  --ykk-light: #f5f5f5;
+  --ykk-white: #ffffff;
+  --ykk-accent: #c8102e;
+  --ykk-accent2: #003da5;
+  --ykk-gold: #b8860b;
+  --ykk-silver: #a8a8a8;
+  --ykk-green: #2e7d32;
+  --ykk-gradient1: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  --ykk-gradient2: linear-gradient(135deg, #c8102e 0%, #ff4444 100%);
+  --ykk-gradient3: linear-gradient(135deg, #003da5 0%, #2196f3 100%);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.16);
+  --shadow-xl: 0 16px 60px rgba(0,0,0,0.2);
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-mid: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: "Helvetica Neue", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  background: var(--ykk-white);
+  color: var(--ykk-black);
+  line-height: 1.8;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ykk-light);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ykk-dark);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ykk-accent);
+}
+
+/* ===== LOADING SCREEN ===== */
+#loading-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: var(--ykk-white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-zipper {
+  width: 60px;
+  height: 200px;
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.zipper-track-left,
+.zipper-track-right {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.zipper-track-left { left: 16px; }
+.zipper-track-right { right: 16px; }
+
+.zipper-tooth {
+  width: 8px;
+  height: 12px;
+  background: var(--ykk-dark);
+  border-radius: 2px;
+  animation: toothPulse 1.5s ease infinite;
+}
+
+.zipper-track-left .zipper-tooth {
+  border-radius: 2px 0 0 2px;
+  transform-origin: right center;
+}
+
+.zipper-track-right .zipper-tooth {
+  border-radius: 0 2px 2px 0;
+  transform-origin: left center;
+}
+
+.zipper-tooth:nth-child(1) { animation-delay: 0s; }
+.zipper-tooth:nth-child(2) { animation-delay: 0.1s; }
+.zipper-tooth:nth-child(3) { animation-delay: 0.2s; }
+.zipper-tooth:nth-child(4) { animation-delay: 0.3s; }
+.zipper-tooth:nth-child(5) { animation-delay: 0.4s; }
+.zipper-tooth:nth-child(6) { animation-delay: 0.5s; }
+.zipper-tooth:nth-child(7) { animation-delay: 0.6s; }
+.zipper-tooth:nth-child(8) { animation-delay: 0.7s; }
+.zipper-tooth:nth-child(9) { animation-delay: 0.8s; }
+.zipper-tooth:nth-child(10) { animation-delay: 0.9s; }
+
+@keyframes toothPulse {
+  0%, 100% { transform: scaleX(1); background: var(--ykk-dark); }
+  50% { transform: scaleX(1.4); background: var(--ykk-accent); }
+}
+
+.zipper-slider {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 28px;
+  background: var(--ykk-accent);
+  border-radius: 4px 4px 8px 8px;
+  animation: sliderMove 2s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(200,16,46,0.4);
+}
+
+.zipper-slider::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 8px;
+  background: var(--ykk-accent);
+  border-radius: 6px 6px 0 0;
+}
+
+@keyframes sliderMove {
+  0%, 100% { top: 10%; }
+  50% { top: 65%; }
+}
+
+.loading-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ykk-dark);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  animation: loadTextFade 1.5s ease infinite;
+}
+
+@keyframes loadTextFade {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.loading-progress {
+  width: 200px;
+  height: 2px;
+  background: var(--ykk-light);
+  margin-top: 20px;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.loading-progress-bar {
+  width: 0%;
+  height: 100%;
+  background: var(--ykk-accent);
+  border-radius: 1px;
+  animation: progressFill 2.5s ease forwards;
+}
+
+@keyframes progressFill {
+  0% { width: 0%; }
+  30% { width: 40%; }
+  60% { width: 70%; }
+  90% { width: 90%; }
+  100% { width: 100%; }
+}
+
+/* ===== CURSOR FOLLOWER ===== */
+.cursor-follower {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ykk-accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transition: transform 0.15s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+}
+
+.cursor-follower.active {
+  width: 50px;
+  height: 50px;
+  border-color: var(--ykk-accent2);
+}
+
+/* ===== NAVIGATION ===== */
+#main-nav {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  z-index: 9999;
+  transition: all var(--transition-mid);
+  background: rgba(255,255,255,0.0);
+  backdrop-filter: blur(0px);
+}
+
+#main-nav.scrolled {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 1px 20px rgba(0,0,0,0.08);
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+  transition: height var(--transition-mid);
+}
+
+#main-nav.scrolled .nav-container {
+  height: 64px;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--ykk-black);
+  transition: var(--transition-fast);
+}
+
+.nav-logo:hover {
+  transform: scale(1.02);
+}
+
+.nav-logo-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--ykk-accent);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: 1px;
+  transition: var(--transition-mid);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-logo-icon::before {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+  animation: logoShine 3s ease infinite;
+}
+
+@keyframes logoShine {
+  0% { transform: translate(-30%, -30%); }
+  50% { transform: translate(10%, 10%); }
+  100% { transform: translate(-30%, -30%); }
+}
+
+.nav-logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.nav-logo-sub {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--ykk-gray);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: var(--ykk-dark);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+  position: relative;
+  letter-spacing: 0.5px;
+}
+
+.nav-links li a::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: var(--ykk-accent);
+  transform: scaleX(0);
+  transition: transform var(--transition-mid);
+  border-radius: 1px;
+}
+
+.nav-links li a:hover::after,
+.nav-links li a.active::after {
+  transform: scaleX(1);
+}
+
+.nav-links li a:hover {
+  color: var(--ykk-accent);
+  background: rgba(200,16,46,0.05);
+}
+
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 10001;
+}
+
+.nav-hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--ykk-dark);
+  border-radius: 1px;
+  transition: all var(--transition-mid);
+}
+
+.nav-hamburger.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+.nav-hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+.nav-hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ===== MOBILE NAV ===== */
+.mobile-nav-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255,255,255,0.98);
+  backdrop-filter: blur(20px);
+  z-index: 10000;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  opacity: 0;
+  transition: opacity var(--transition-mid);
+}
+
+.mobile-nav-overlay.open {
+  display: flex;
+  opacity: 1;
+}
+
+.mobile-nav-overlay a {
+  text-decoration: none;
+  color: var(--ykk-black);
+  font-size: 24px;
+  font-weight: 600;
+  padding: 12px 30px;
+  border-radius: 12px;
+  transition: var(--transition-fast);
+}
+
+.mobile-nav-overlay a:hover {
+  background: var(--ykk-light);
+  color: var(--ykk-accent);
+}
+
+/* ===== PROGRESS BAR ===== */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0%;
+  height: 3px;
+  background: var(--ykk-gradient2);
+  z-index: 99999;
+  transition: width 0.1s linear;
+}
+
+/* ===== HERO SECTION ===== */
+#hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--ykk-white);
+}
+
+.hero-bg-pattern {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+.hero-bg-pattern svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-grid-lines {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  opacity: 0.06;
+}
+
+.hero-grid-line {
+  position: absolute;
+  background: var(--ykk-dark);
+}
+
+.hero-grid-line.horizontal {
+  width: 100%;
+  height: 1px;
+}
+
+.hero-grid-line.vertical {
+  width: 1px;
+  height: 100%;
+}
+
+.hero-floating-shapes {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+.hero-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.06;
+  animation: floatShape 20s ease-in-out infinite;
+}
+
+.hero-shape:nth-child(1) {
+  width: 400px; height: 400px;
+  background: var(--ykk-accent);
+  top: -10%; right: -5%;
+  animation-duration: 25s;
+}
+
+.hero-shape:nth-child(2) {
+  width: 300px; height: 300px;
+  background: var(--ykk-accent2);
+  bottom: -5%; left: -3%;
+  animation-duration: 20s;
+  animation-delay: -5s;
+}
+
+.hero-shape:nth-child(3) {
+  width: 200px; height: 200px;
+  background: var(--ykk-gold);
+  top: 30%; left: 10%;
+  animation-duration: 18s;
+  animation-delay: -8s;
+}
+
+.hero-shape:nth-child(4) {
+  width: 150px; height: 150px;
+  background: var(--ykk-green);
+  top: 60%; right: 15%;
+  animation-duration: 22s;
+  animation-delay: -3s;
+}
+
+@keyframes floatShape {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-20px, 30px) scale(0.95); }
+  75% { transform: translate(20px, 20px) scale(1.02); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  max-width: 1000px;
+  padding: 0 40px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ykk-light);
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 8px 20px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ykk-gray);
+  margin-bottom: 30px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: heroFadeUp 0.8s ease 0.5s forwards;
+}
+
+.hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--ykk-accent);
+  border-radius: 50%;
+  animation: badgeDotPulse 2s ease infinite;
+}
+
+@keyframes badgeDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+
+.hero-title {
+  font-size: clamp(42px, 7vw, 96px);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--ykk-black);
+  margin-bottom: 24px;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: heroFadeUp 1s ease 0.7s forwards;
+  letter-spacing: -2px;
+}
+
+.hero-title .accent {
+  color: var(--ykk-accent);
+  position: relative;
+  display: inline-block;
+}
+
+.hero-title .accent::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: rgba(200,16,46,0.15);
+  border-radius: 4px;
+  transform: scaleX(0);
+  animation: underlineGrow 0.8s ease 1.5s forwards;
+}
+
+@keyframes underlineGrow {
+  to { transform: scaleX(1); }
+}
+
+.hero-subtitle {
+  font-size: clamp(16px, 2vw, 22px);
+  color: var(--ykk-gray);
+  max-width: 700px;
+  margin: 0 auto 40px;
+  line-height: 1.8;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroFadeUp 1s ease 0.9s forwards;
+  font-weight: 400;
+}
+
+@keyframes heroFadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
+  margin-bottom: 50px;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroFadeUp 1s ease 1.1s forwards;
+}
+
+.hero-stat {
+  text-align: center;
+  position: relative;
+}
+
+.hero-stat-number {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 900;
+  color: var(--ykk-black);
+  line-height: 1;
+  margin-bottom: 6px;
+  letter-spacing: -1px;
+}
+
+.hero-stat-number .unit {
+  font-size: 0.5em;
+  font-weight: 600;
+  color: var(--ykk-accent);
+}
+
+.hero-stat-label {
+  font-size: 12px;
+  color: var(--ykk-gray);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.hero-stat-divider {
+  width: 1px;
+  height: 50px;
+  background: rgba(0,0,0,0.1);
+  align-self: center;
+}
+
+.hero-cta-group {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroFadeUp 1s ease 1.3s forwards;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 36px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition-mid);
+  cursor: pointer;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-cta.primary {
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+}
+
+.hero-cta.primary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.hero-cta.primary:hover::before {
+  left: 100%;
+}
+
+.hero-cta.primary:hover {
+  background: var(--ykk-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(200,16,46,0.3);
+}
+
+.hero-cta.secondary {
+  background: transparent;
+  color: var(--ykk-black);
+  border: 2px solid rgba(0,0,0,0.15);
+}
+
+.hero-cta.secondary:hover {
+  border-color: var(--ykk-black);
+  background: var(--ykk-light);
+  transform: translateY(-2px);
+}
+
+.hero-cta-icon {
+  transition: transform var(--transition-mid);
+}
+
+.hero-cta:hover .hero-cta-icon {
+  transform: translateX(4px);
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: heroFadeUp 1s ease 2s forwards;
+}
+
+.hero-scroll-mouse {
+  width: 24px;
+  height: 38px;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-radius: 12px;
+  position: relative;
+}
+
+.hero-scroll-dot {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 8px;
+  background: var(--ykk-accent);
+  border-radius: 2px;
+  animation: scrollDot 2s ease infinite;
+}
+
+@keyframes scrollDot {
+  0%, 100% { top: 8px; opacity: 1; }
+  50% { top: 20px; opacity: 0.3; }
+}
+
+.hero-scroll-text {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ykk-gray);
+}
+
+/* ===== SECTION COMMON ===== */
+.section {
+  padding: 120px 0;
+  position: relative;
+}
+
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ykk-accent);
+  margin-bottom: 16px;
+}
+
+.section-label-line {
+  width: 30px;
+  height: 2px;
+  background: var(--ykk-accent);
+  border-radius: 1px;
+}
+
+.section-title {
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 800;
+  color: var(--ykk-black);
+  line-height: 1.2;
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+
+.section-desc {
+  font-size: 17px;
+  color: var(--ykk-gray);
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ===== EXECUTIVE SUMMARY SECTION ===== */
+#executive-summary {
+  background: var(--ykk-white);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.summary-main {
+  position: relative;
+}
+
+.summary-quote {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ykk-black);
+  margin-bottom: 30px;
+  position: relative;
+  padding-left: 30px;
+  border-left: 4px solid var(--ykk-accent);
+}
+
+.summary-text {
+  font-size: 16px;
+  color: var(--ykk-dark);
+  line-height: 2;
+  margin-bottom: 20px;
+}
+
+.summary-sidebar {
+  position: relative;
+}
+
+.summary-card {
+  background: var(--ykk-light);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  margin-bottom: 20px;
+  transition: all var(--transition-mid);
+  border: 1px solid rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--ykk-accent);
+  transform: scaleY(0);
+  transition: transform var(--transition-mid);
+  transform-origin: top;
+}
+
+.summary-card:hover::before {
+  transform: scaleY(1);
+}
+
+.summary-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateX(4px);
+}
+
+.summary-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+
+.summary-card-icon.red { background: rgba(200,16,46,0.1); }
+.summary-card-icon.blue { background: rgba(0,61,165,0.1); }
+.summary-card-icon.gold { background: rgba(184,134,11,0.1); }
+.summary-card-icon.green { background: rgba(46,125,50,0.1); }
+
+.summary-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 8px;
+}
+
+.summary-card-text {
+  font-size: 14px;
+  color: var(--ykk-gray);
+  line-height: 1.7;
+}
+
+/* ===== 5 PILLARS SECTION ===== */
+#five-pillars {
+  background: var(--ykk-light);
+  position: relative;
+  overflow: hidden;
+}
+
+#five-pillars::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  right: -200px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(200,16,46,0.04) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+.pillar-card {
+  background: var(--ykk-white);
+  border-radius: var(--radius-lg);
+  padding: 36px 28px;
+  text-align: center;
+  transition: all var(--transition-mid);
+  border: 1px solid rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+}
+
+.pillar-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 4px;
+  background: var(--ykk-accent);
+  transform: scaleX(0);
+  transition: transform var(--transition-mid);
+}
+
+.pillar-card:hover::after {
+  transform: scaleX(1);
+}
+
+.pillar-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+}
+
+.pillar-number {
+  font-size: 48px;
+  font-weight: 900;
+  color: rgba(0,0,0,0.05);
+  line-height: 1;
+  margin-bottom: 16px;
+  transition: color var(--transition-mid);
+}
+
+.pillar-card:hover .pillar-number {
+  color: rgba(200,16,46,0.15);
+}
+
+.pillar-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  transition: all var(--transition-mid);
+}
+
+.pillar-card:hover .pillar-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.pillar-icon.p1 { background: rgba(200,16,46,0.1); }
+.pillar-icon.p2 { background: rgba(0,61,165,0.1); }
+.pillar-icon.p3 { background: rgba(184,134,11,0.1); }
+.pillar-icon.p4 { background: rgba(46,125,50,0.1); }
+.pillar-icon.p5 { background: rgba(128,0,128,0.1); }
+
+.pillar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.pillar-desc {
+  font-size: 13px;
+  color: var(--ykk-gray);
+  line-height: 1.7;
+}
+
+/* ===== PRODUCT TYPES ===== */
+#product-types {
+  background: var(--ykk-white);
+}
+
+.product-types-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.product-type-card {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  position: relative;
+  transition: all var(--transition-mid);
+  cursor: default;
+  background: var(--ykk-white);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.product-type-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+}
+
+.product-type-visual {
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-type-visual.metal {
+  background: linear-gradient(135deg, #2c2c2c 0%, #555 100%);
+}
+
+.product-type-visual.coil {
+  background: linear-gradient(135deg, #003da5 0%, #4a90d9 100%);
+}
+
+.product-type-visual.vislon {
+  background: linear-gradient(135deg, #c8102e 0%, #ff6b6b 100%);
+}
+
+.product-type-icon-large {
+  font-size: 80px;
+  color: rgba(255,255,255,0.2);
+  position: absolute;
+  transition: all var(--transition-slow);
+}
+
+.product-type-card:hover .product-type-icon-large {
+  transform: scale(1.2) rotate(10deg);
+  color: rgba(255,255,255,0.3);
+}
+
+.product-type-label-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: rgba(0,0,0,0.3);
+  padding: 6px 14px;
+  border-radius: 6px;
+  backdrop-filter: blur(10px);
+}
+
+.zipper-svg-animation {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.zipper-svg-animation svg {
+  width: 100%;
+  height: 100%;
+}
+
+.product-type-info {
+  padding: 30px;
+}
+
+.product-type-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 10px;
+}
+
+.product-type-desc {
+  font-size: 14px;
+  color: var(--ykk-gray);
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.product-type-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.product-feature-tag {
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--ykk-light);
+  color: var(--ykk-dark);
+  transition: all var(--transition-fast);
+}
+
+.product-feature-tag:hover {
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+}
+
+/* ===== INTEGRATED PRODUCTION ===== */
+#integrated-production {
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+  position: relative;
+  overflow: hidden;
+}
+
+#integrated-production::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.integrated-label {
+  color: rgba(255,255,255,0.5);
+}
+
+.integrated-label .section-label-line {
+  background: var(--ykk-accent);
+}
+
+.integrated-title {
+  color: var(--ykk-white);
+}
+
+.integrated-desc {
+  color: rgba(255,255,255,0.6);
+}
+
+.integrated-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 60px;
+  position: relative;
+}
+
+.integrated-flow-step {
+  flex: 1;
+  text-align: center;
+  padding: 30px 16px;
+  position: relative;
+  transition: all var(--transition-mid);
+}
+
+.integrated-flow-step:hover {
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-md);
+}
+
+.flow-step-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: rgba(200,16,46,0.15);
+  border: 2px solid rgba(200,16,46,0.3);
+  transition: all var(--transition-mid);
+  position: relative;
+  z-index: 2;
+}
+
+.integrated-flow-step:hover .flow-step-icon {
+  background: var(--ykk-accent);
+  border-color: var(--ykk-accent);
+  transform: scale(1.1);
+  box-shadow: 0 0 30px rgba(200,16,46,0.4);
+}
+
+.flow-step-number {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: var(--ykk-accent);
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-step-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ykk-white);
+  margin-bottom: 8px;
+}
+
+.flow-step-desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+}
+
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--ykk-accent);
+  font-size: 20px;
+  opacity: 0.5;
+  flex-shrink: 0;
+  animation: flowArrowPulse 2s ease infinite;
+}
+
+@keyframes flowArrowPulse {
+  0%, 100% { opacity: 0.3; transform: translateX(0); }
+  50% { opacity: 0.8; transform: translateX(4px); }
+}
+
+.precision-highlight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+  margin-top: 80px;
+  flex-wrap: wrap;
+}
+
+.precision-stat {
+  text-align: center;
+  padding: 40px;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all var(--transition-mid);
+  min-width: 240px;
+}
+
+.precision-stat:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(200,16,46,0.3);
+  transform: translateY(-4px);
+}
+
+.precision-stat-value {
+  font-size: 52px;
+  font-weight: 900;
+  color: var(--ykk-accent);
+  line-height: 1;
+  margin-bottom: 8px;
+  letter-spacing: -2px;
+}
+
+.precision-stat-unit {
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+}
+
+.precision-stat-label {
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+/* ===== JIS STANDARDS TABLE ===== */
+#jis-standards {
+  background: var(--ykk-white);
+}
+
+.jis-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(0,0,0,0.06);
+  margin-top: 20px;
+}
+
+.jis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 900px;
+}
+
+.jis-table thead {
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+}
+
+.jis-table thead th {
+  padding: 18px 16px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.jis-table thead th:first-child {
+  text-align: left;
+  padding-left: 24px;
+  border-radius: var(--radius-md) 0 0 0;
+}
+
+.jis-table thead th:last-child {
+  border-radius: 0 var(--radius-md) 0 0;
+}
+
+.jis-table tbody tr {
+  transition: all var(--transition-fast);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.jis-table tbody tr:hover {
+  background: rgba(200,16,46,0.03);
+}
+
+.jis-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.jis-table tbody td {
+  padding: 16px;
+  text-align: center;
+  color: var(--ykk-dark);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.jis-table tbody td:first-child {
+  text-align: left;
+  padding-left: 24px;
+  font-weight: 600;
+  color: var(--ykk-black);
+  font-size: 13px;
+}
+
+.grade-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.grade-ul { background: rgba(200,16,46,0.08); color: var(--ykk-accent); }
+.grade-l { background: rgba(255,152,0,0.08); color: #e65100; }
+.grade-m { background: rgba(76,175,80,0.08); color: var(--ykk-green); }
+.grade-mh { background: rgba(0,61,165,0.08); color: var(--ykk-accent2); }
+.grade-h { background: rgba(128,0,128,0.08); color: purple; }
+.grade-uh { background: rgba(26,26,26,0.08); color: var(--ykk-black); }
+
+.jis-note {
+  margin-top: 24px;
+  padding: 20px 28px;
+  background: var(--ykk-light);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--ykk-accent);
+  font-size: 14px;
+  color: var(--ykk-gray);
+  line-height: 1.8;
+}
+
+.jis-note strong {
+  color: var(--ykk-black);
+}
+
+/* ===== SCALE SECTION ===== */
+#scale {
+  background: var(--ykk-light);
+  position: relative;
+}
+
+.scale-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.scale-card {
+  background: var(--ykk-white);
+  border-radius: var(--radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  transition: all var(--transition-mid);
+  border: 1px solid rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.scale-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+.scale-card-icon {
+  font-size: 36px;
+  margin-bottom: 16px;
+  display: inline-block;
+  transition: transform var(--transition-mid);
+}
+
+.scale-card:hover .scale-card-icon {
+  transform: scale(1.2);
+}
+
+.scale-card-value {
+  font-size: 42px;
+  font-weight: 900;
+  color: var(--ykk-black);
+  line-height: 1;
+  margin-bottom: 4px;
+  letter-spacing: -1px;
+}
+
+.scale-card-unit {
+  font-size: 16px;
+  color: var(--ykk-accent);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.scale-card-label {
+  font-size: 14px;
+  color: var(--ykk-gray);
+  line-height: 1.5;
+}
+
+.scale-timeline {
+  position: relative;
+  padding: 40px 0;
+}
+
+.scale-timeline-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(0,0,0,0.08);
+  transform: translateY(-50%);
+  border-radius: 1.5px;
+}
+
+.scale-timeline-fill {
+  position: absolute;
+  top: 0; left: 0;
+  width: 0%;
+  height: 100%;
+  background: var(--ykk-accent);
+  border-radius: 1.5px;
+  transition: width 2s ease;
+}
+
+.scale-timeline-points {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.scale-timeline-point {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.timeline-dot {
+  width: 20px;
+  height: 20px;
+  background: var(--ykk-white);
+  border: 3px solid var(--ykk-accent);
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  transition: all var(--transition-mid);
+  position: relative;
+}
+
+.timeline-dot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: var(--ykk-accent);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity var(--transition-mid);
+}
+
+.scale-timeline-point:hover .timeline-dot::before {
+  opacity: 1;
+}
+
+.timeline-year {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 4px;
+}
+
+.timeline-value {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--ykk-accent);
+}
+
+.timeline-unit {
+  font-size: 11px;
+  color: var(--ykk-gray);
+}
+
+/* ===== CHEMICAL MANAGEMENT ===== */
+#chemical-management {
+  background: var(--ykk-white);
+}
+
+.chemical-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.chemical-info-block {
+  background: var(--ykk-light);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  border: 1px solid rgba(0,0,0,0.04);
+  transition: all var(--transition-mid);
+}
+
+.chemical-info-block:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.chemical-info-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.chemical-info-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 12px;
+}
+
+.chemical-info-text {
+  font-size: 14px;
+  color: var(--ykk-gray);
+  line-height: 1.8;
+}
+
+.chemical-highlight {
+  margin-top: 16px;
+  padding: 16px 20px;
+  background: var(--ykk-white);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--ykk-accent);
+}
+
+.chemical-highlight-value {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--ykk-accent);
+}
+
+.chemical-highlight-label {
+  font-size: 12px;
+  color: var(--ykk-gray);
+}
+
+.complexity-visual {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.complexity-card {
+  background: var(--ykk-light);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  transition: all var(--transition-mid);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.complexity-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.complexity-value {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--ykk-accent);
+  margin-bottom: 4px;
+}
+
+.complexity-suffix {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ykk-accent2);
+}
+
+.complexity-label {
+  font-size: 14px;
+  color: var(--ykk-gray);
+  margin-top: 8px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .pillars-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+  .product-types-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .integrated-flow {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .flow-arrow {
+    transform: rotate(90deg);
+    justify-content: center;
+  }
+  .pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+  .section { padding: 80px 0; }
+  .section-container { padding: 0 20px; }
+  .hero-stats { gap: 30px; }
+  .hero-stat-divider { display: none; }
+  .product-types-grid { grid-template-columns: 1fr; }
+  .pillars-grid { grid-template-columns: 1fr; }
+  .scale-cards { grid-template-columns: 1fr; }
+  .chemical-grid { grid-template-columns: 1fr; }
+  .complexity-visual { grid-template-columns: 1fr; }
+  .precision-highlight { gap: 20px; }
+  .precision-stat { min-width: 100%; }
+  .hero-cta-group { flex-direction: column; align-items: center; }
+  .scale-timeline-points { flex-direction: column; gap: 30px; }
+  .scale-timeline-line { display: none; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { letter-spacing: -1px; }
+  .nav-container { padding: 0 20px; }
+}
+
+/* ===== PARTICLE BG (for sections) ===== */
+.particles-container {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(200,16,46,0.15);
+  border-radius: 50%;
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+}
+
+/* ===== TOOLTIP ===== */
+.tooltip-trigger {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dashed var(--ykk-accent);
+  display: inline;
+}
+
+.tooltip-content {
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-fast);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.tooltip-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--ykk-black);
+}
+
+.tooltip-trigger:hover .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) scale(1);
+}
+
+/* ===== ANIMATED COUNTER ===== */
+.counter-value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== BACK TO TOP ===== */
+.back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 48px;
+  height: 48px;
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-mid);
+  z-index: 9998;
+  box-shadow: var(--shadow-md);
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.back-to-top:hover {
+  background: var(--ykk-accent);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(200,16,46,0.3);
+}
+
+/* ===== MAGNETIC BUTTON EFFECT ===== */
+.magnetic-area {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+/* ===== MARQUEE ===== */
+.marquee-section {
+  padding: 20px 0;
+  overflow: hidden;
+  background: var(--ykk-black);
+  white-space: nowrap;
+}
+
+.marquee-content {
+  display: inline-flex;
+  animation: marqueeScroll 40s linear infinite;
+  gap: 60px;
+}
+
+.marquee-content span {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.marquee-content span.accent-text {
+  color: var(--ykk-accent);
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+
+<!-- ===== LOADING SCREEN ===== -->
+<div id="loading-screen">
+  <div class="loading-zipper">
+    <div class="zipper-track-left">
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+    </div>
+    <div class="zipper-track-right">
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+      <div class="zipper-tooth"></div>
+    </div>
+    <div class="zipper-slider"></div>
+  </div>
+  <div class="loading-text">YKK Quality</div>
+  <div class="loading-progress">
+    <div class="loading-progress-bar"></div>
+  </div>
+</div>
+
+<!-- ===== CURSOR FOLLOWER ===== -->
+<div class="cursor-follower" id="cursor-follower"></div>
+
+<!-- ===== SCROLL PROGRESS ===== -->
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<!-- ===== NAVIGATION ===== -->
+<nav id="main-nav">
+  <div class="nav-container">
+    <a href="#hero" class="nav-logo">
+      <div class="nav-logo-icon">YKK</div>
+      <div>
+        <div class="nav-logo-text">YKKの品質</div>
+        <div class="nav-logo-sub">Quality Evidence Report</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#executive-summary">概要</a></li>
+      <li><a href="#five-pillars">5つの柱</a></li>
+      <li><a href="#product-types">製品</a></li>
+      <li><a href="#integrated-production">統合生産</a></li>
+      <li><a href="#jis-standards">JIS規格</a></li>
+      <li><a href="#scale">スケール</a></li>
+      <li><a href="#chemical-management">化学物質管理</a></li>
+      <li><a href="#ip-protection">知財</a></li>
+      <li><a href="#competitors">競合比較</a></li>
+      <li><a href="#conclusion">結論</a></li>
+    </ul>
+    <div class="nav-hamburger" id="nav-hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== MOBILE NAV ===== -->
+<div class="mobile-nav-overlay" id="mobile-nav">
+  <a href="#executive-summary" class="mobile-nav-link">概要</a>
+  <a href="#five-pillars" class="mobile-nav-link">5つの柱</a>
+  <a href="#product-types" class="mobile-nav-link">製品</a>
+  <a href="#integrated-production" class="mobile-nav-link">統合生産</a>
+  <a href="#jis-standards" class="mobile-nav-link">JIS規格</a>
+  <a href="#scale" class="mobile-nav-link">スケール</a>
+  <a href="#chemical-management" class="mobile-nav-link">化学物質管理</a>
+  <a href="#ip-protection" class="mobile-nav-link">知財</a>
+  <a href="#competitors" class="mobile-nav-link">競合比較</a>
+  <a href="#conclusion" class="mobile-nav-link">結論</a>
+</div>
+
+<!-- ===== HERO ===== -->
+<section id="hero">
+  <div class="hero-floating-shapes">
+    <div class="hero-shape"></div>
+    <div class="hero-shape"></div>
+    <div class="hero-shape"></div>
+    <div class="hero-shape"></div>
+  </div>
+
+  <div class="hero-grid-lines">
+    <div class="hero-grid-line horizontal" style="top: 25%"></div>
+    <div class="hero-grid-line horizontal" style="top: 50%"></div>
+    <div class="hero-grid-line horizontal" style="top: 75%"></div>
+    <div class="hero-grid-line vertical" style="left: 25%"></div>
+    <div class="hero-grid-line vertical" style="left: 50%"></div>
+    <div class="hero-grid-line vertical" style="left: 75%"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      公開データに基づく品質分析レポート
+    </div>
+
+    <h1 class="hero-title">
+      YKKの<span class="accent">品質</span>を<br>データで証明する
+    </h1>
+
+    <p class="hero-subtitle">
+      世界シェアNo.1ファスナーメーカー YKK。その「高品質」は主観ではなく、
+      規格値・統合生産・化学物質管理・知財保護の公開データで裏づけできる。
+    </p>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-number counter-value" data-target="0.01">0.01<span class="unit">mm</span></div>
+        <div class="hero-stat-label">加工精度</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-number counter-value" data-target="300">300<span class="unit">万km+</span></div>
+        <div class="hero-stat-label">年間生産量</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-number counter-value" data-target="46305">46,305<span class="unit">人</span></div>
+        <div class="hero-stat-label">グループ従業員数</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-number counter-value" data-target="72">72<span class="unit">国/地域</span></div>
+        <div class="hero-stat-label">グローバル拠点</div>
+      </div>
+    </div>
+
+    <div class="hero-cta-group">
+      <a href="#executive-summary" class="hero-cta primary">
+        レポートを読む
+        <span class="hero-cta-icon">→</span>
+      </a>
+      <a href="#jis-standards" class="hero-cta secondary">
+        JIS強度規格を見る
+        <span class="hero-cta-icon">↓</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-scroll-indicator">
+    <div class="hero-scroll-mouse">
+      <div class="hero-scroll-dot"></div>
+    </div>
+    <span class="hero-scroll-text">Scroll Down</span>
+  </div>
+</section>
+
+<!-- ===== MARQUEE ===== -->
+<div class="marquee-section">
+  <div class="marquee-content" id="marquee-content">
+    <span>Precision</span>
+    <span class="accent-text">0.01mm</span>
+    <span>Integrated Production</span>
+    <span class="accent-text">JIS S 3015:2019</span>
+    <span>Global Quality</span>
+    <span class="accent-text">300万km+</span>
+    <span>Chemical Management</span>
+    <span class="accent-text">374,000+ SKU</span>
+    <span>IP Protection</span>
+    <span class="accent-text">5,859件</span>
+    <span>Precision</span>
+    <span class="accent-text">0.01mm</span>
+    <span>Integrated Production</span>
+    <span class="accent-text">JIS S 3015:2019</span>
+    <span>Global Quality</span>
+    <span class="accent-text">300万km+</span>
+    <span>Chemical Management</span>
+    <span class="accent-text">374,000+ SKU</span>
+    <span>IP Protection</span>
+    <span class="accent-text">5,859件</span>
+  </div>
+</div>
+
+<!-- ===== EXECUTIVE SUMMARY ===== -->
+<section id="executive-summary" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Executive Summary
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">エグゼクティブサマリー</h2>
+      <p class="section-desc">
+        YKKが「高品質の代名詞」とされる理由は、単一の優位性ではなく、<br>
+        複数の品質インフラが同時に成立するエコシステムにある
+      </p>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-main reveal-left">
+        <div class="summary-quote">
+          品質の定義（規格値）と、その再現性（工程能力）が、<br>公開資料上で最も一貫して語られている
+        </div>
+        <p class="summary-text">
+          YKKのファスナーが世界的に「高品質」と見なされやすい最大の理由は、単一の試験成績や素材単体ではなく、品質仕様の明文化、巨量生産との両立、原材料段階からの管理、グローバルで共通水準を維持する品質管理制度、知財とブランド保護を含むエコシステムが同時に成立している点にある。
+        </p>
+        <p class="summary-text">
+          これらはYKK自身の統合報告書・品質方針・JIS準拠強度表・米国規制当局向け提出文書など、一次資料で複数方面から確認できる。
+        </p>
+        <p class="summary-text" style="color: var(--ykk-accent); font-weight: 600;">
+          一方で、「YKKは競合より不良率がX％低い」「摩耗寿命がY回長い」といった競合横断の定量比較は、公開情報だけでは成立しにくい（各社が不良率・返品率・保証データを開示しないため）。本レポートでは、入手不能な指標は推定しない方針で整理する。
+        </p>
+      </div>
+
+      <div class="summary-sidebar reveal-right">
+        <div class="summary-card">
+          <div class="summary-card-icon red">📋</div>
+          <div class="summary-card-title">品質仕様の明文化</div>
+          <div class="summary-card-text">JIS等級×試験項目×基準値を公開し、製品選定に直接使える形で提示。設計・製造の自信の表れ。</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon blue">🏭</div>
+          <div class="summary-card-title">統合生産と巨量両立</div>
+          <div class="summary-card-text">原材料から製造機械まで内製する「統合生産」思想。年間300万km超・販売本数は十億本単位。</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon gold">⚗️</div>
+          <div class="summary-card-title">原材料からの化学物質管理</div>
+          <div class="summary-card-text">YKK RSLに沿った管理改善。受入検査・工程監視・生産後試験の組み合わせによる品質保証。</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon green">🔒</div>
+          <div class="summary-card-title">知財・模倣品対策</div>
+          <div class="summary-card-text">特許等5,859件、商標177国登録。品質の市場維持に不可欠なインフラ投資。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 5 PILLARS ===== -->
+<section id="five-pillars" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Five Pillars of Quality
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">品質を支える5つの柱</h2>
+      <p class="section-desc">
+        公開データから確認できる、YKK品質を形成する5つの構造的要因
+      </p>
+    </div>
+
+    <div class="pillars-grid">
+      <div class="pillar-card reveal" style="transition-delay: 0s;">
+        <div class="pillar-number">01</div>
+        <div class="pillar-icon p1">📐</div>
+        <div class="pillar-title">品質仕様の<br>明文化と公開</div>
+        <div class="pillar-desc">JIS S 3015:2019に基づく等級別基準値を表として公開。強度・安全・機能要件を定量で語る前提を提供</div>
+      </div>
+      <div class="pillar-card reveal" style="transition-delay: 0.1s;">
+        <div class="pillar-number">02</div>
+        <div class="pillar-icon p2">⚙️</div>
+        <div class="pillar-title">統合生産<br>思想</div>
+        <div class="pillar-desc">材料開発→製造機械→金型→製造ライン→製品を包含。材料と加工条件をセットで最適化できる構造</div>
+      </div>
+      <div class="pillar-card reveal" style="transition-delay: 0.2s;">
+        <div class="pillar-number">03</div>
+        <div class="pillar-icon p3">🧪</div>
+        <div class="pillar-title">化学物質・<br>原材料管理</div>
+        <div class="pillar-desc">YKK RSL準拠、受入検査・工程監視・生産後試験。CPSC提出文書でも品質保証ロジックを明示</div>
+      </div>
+      <div class="pillar-card reveal" style="transition-delay: 0.3s;">
+        <div class="pillar-number">04</div>
+        <div class="pillar-icon p4">🌐</div>
+        <div class="pillar-title">グローバル<br>品質管理</div>
+        <div class="pillar-desc">ISO認証・共通品質基準・監査で全拠点で均一品質を維持。513拠点・118社での同期品質管理</div>
+      </div>
+      <div class="pillar-card reveal" style="transition-delay: 0.4s;">
+        <div class="pillar-number">05</div>
+        <div class="pillar-icon p5">🛡️</div>
+        <div class="pillar-title">知財・ブランド<br>保護</div>
+        <div class="pillar-desc">特許等5,859件、登録商標4,780件、177国での商標登録。模倣品対策ワークショップ参加者4,090人</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRODUCT TYPES ===== -->
+<section id="product-types" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Product Categories
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">主要3分類のファスナー製品</h2>
+      <p class="section-desc">
+        Metal・Coil・VISLON® — 用途適合に応じた設計思想で<br>
+        柔軟性・外観・耐久方向を最適化
+      </p>
+    </div>
+
+    <div class="product-types-grid">
+      <div class="product-type-card reveal-scale" style="transition-delay: 0s;">
+        <div class="product-type-visual metal">
+          <div class="product-type-icon-large">
+            <svg width="80" height="120" viewBox="0 0 80 120" fill="none">
+              <rect x="15" y="10" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="55" y="10" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="15" y="24" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="55" y="24" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="15" y="38" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="55" y="38" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="15" y="52" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="55" y="52" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="15" y="66" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="55" y="66" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="15" y="80" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="55" y="80" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="15" y="94" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="55" y="94" width="10" height="8" rx="1" fill="rgba(255,255,255,0.4)"/>
+              <rect x="30" y="0" width="20" height="120" fill="rgba(255,255,255,0.08)"/>
+              <rect x="33" y="40" width="14" height="20" rx="3" fill="rgba(255,255,255,0.5)" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="product-type-label-overlay">Metal Fastener</div>
+        </div>
+        <div class="product-type-info">
+          <div class="product-type-name">Metal（メタル）</div>
+          <div class="product-type-desc">銅合金エレメントをせん断・鍛造・曲げの塑性加工で製造。高い引張強度と耐久性を持ち、ジーンズやアウトドア製品に多用される。</div>
+          <div class="product-type-features">
+            <span class="product-feature-tag">高強度</span>
+            <span class="product-feature-tag">耐久性</span>
+            <span class="product-feature-tag">塑性加工</span>
+            <span class="product-feature-tag">銅合金</span>
+            <span class="product-feature-tag">ジーンズ</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-type-card reveal-scale" style="transition-delay: 0.15s;">
+        <div class="product-type-visual coil">
+          <div class="product-type-icon-large">
+            <svg width="80" height="120" viewBox="0 0 80 120" fill="none">
+              <path d="M20,10 Q40,5 60,10 Q40,15 20,20 Q40,25 60,30 Q40,35 20,40 Q40,45 60,50 Q40,55 20,60 Q40,65 60,70 Q40,75 20,80 Q40,85 60,90 Q40,95 20,100 Q40,105 60,110" stroke="rgba(255,255,255,0.4)" stroke-width="3" fill="none"/>
+              <rect x="33" y="45" width="14" height="18" rx="3" fill="rgba(255,255,255,0.5)" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="product-type-label-overlay">Coil Fastener</div>
+        </div>
+        <div class="product-type-info">
+          <div class="product-type-name">Coil（コイル）</div>
+          <div class="product-type-desc">ナイロンやポリエステルのモノフィラメントをコイル状に成形。軽量かつ柔軟で衣料品全般に対応。滑らかな操作感が特徴。</div>
+          <div class="product-type-features">
+            <span class="product-feature-tag">軽量</span>
+            <span class="product-feature-tag">柔軟性</span>
+            <span class="product-feature-tag">衣料品</span>
+            <span class="product-feature-tag">滑らか</span>
+            <span class="product-feature-tag">多色展開</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-type-card reveal-scale" style="transition-delay: 0.3s;">
+        <div class="product-type-visual vislon">
+          <div class="product-type-icon-large">
+            <svg width="80" height="120" viewBox="0 0 80 120" fill="none">
+              <rect x="18" y="8" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="50" y="8" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="18" y="24" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="50" y="24" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="18" y="40" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="50" y="40" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="18" y="56" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="50" y="56" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="18" y="72" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="50" y="72" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="18" y="88" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="50" y="88" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="18" y="104" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="50" y="104" width="12" height="10" rx="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="34" y="0" width="12" height="120" fill="rgba(255,255,255,0.06)"/>
+              <rect x="33" y="50" width="14" height="18" rx="3" fill="rgba(255,255,255,0.5)" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="product-type-label-overlay">VISLON® Fastener</div>
+        </div>
+        <div class="product-type-info">
+          <div class="product-type-name">VISLON®（ヴィスロン）</div>
+          <div class="product-type-desc">射出成形樹脂エレメントをテープに直接成形。デザイン自由度が高く、スポーツウェアやバッグなど幅広い用途に展開。</div>
+          <div class="product-type-features">
+            <span class="product-feature-tag">射出成形</span>
+            <span class="product-feature-tag">デザイン性</span>
+            <span class="product-feature-tag">スポーツ</span>
+            <span class="product-feature-tag">バッグ</span>
+            <span class="product-feature-tag">樹脂</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INTEGRATED PRODUCTION ===== -->
+<section id="integrated-production" class="section">
+  <div class="particles-container" id="particles-integrated"></div>
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label integrated-label">
+        <span class="section-label-line"></span>
+        Integrated Production System
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title integrated-title">統合生産が品質を押し上げる理由</h2>
+      <p class="section-desc integrated-desc">
+        材料開発→製造機械→金型→製造ライン→製品を包含する垂直統合思想<br>
+        「品質＝人手の熟練ではなく、工程を安定させる仕組み」
+      </p>
+    </div>
+
+    <div class="integrated-flow reveal">
+      <div class="integrated-flow-step">
+        <div class="flow-step-icon">
+          🧪
+          <span class="flow-step-number">1</span>
+        </div>
+        <div class="flow-step-title">材料開発</div>
+        <div class="flow-step-desc">線材・樹脂・テープの材料特性を内製で最適化</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="integrated-flow-step">
+        <div class="flow-step-icon">
+          🔧
+          <span class="flow-step-number">2</span>
+        </div>
+        <div class="flow-step-title">設備・金型開発</div>
+        <div class="flow-step-desc">専用設備・治工具を社内で設計・製造</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="integrated-flow-step">
+        <div class="flow-step-icon">
+          ⚙️
+          <span class="flow-step-number">3</span>
+        </div>
+        <div class="flow-step-title">工程設計</div>
+        <div class="flow-step-desc">せん断・鍛造・曲げ・めっき・射出の条件最適化</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="integrated-flow-step">
+        <div class="flow-step-icon">
+          🏭
+          <span class="flow-step-number">4</span>
+        </div>
+        <div class="flow-step-title">量産・検査</div>
+        <div class="flow-step-desc">自動化ライン・AI活用による安定品質の大量生産</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="integrated-flow-step">
+        <div class="flow-step-icon">
+          📦
+          <span class="flow-step-number">5</span>
+        </div>
+        <div class="flow-step-title">製品出荷</div>
+        <div class="flow-step-desc">ロット管理とトレーサビリティで品質を保証</div>
+      </div>
+    </div>
+
+    <div class="precision-highlight reveal">
+      <div class="precision-stat">
+        <div class="precision-stat-value">0.01<span class="precision-stat-unit">mm</span></div>
+        <div class="precision-stat-label">加工精度</div>
+      </div>
+      <div class="precision-stat">
+        <div class="precision-stat-value">300<span class="precision-stat-unit">万km+</span></div>
+        <div class="precision-stat-label">年間生産量</div>
+      </div>
+      <div class="precision-stat">
+        <div class="precision-stat-value">7.79<span class="precision-stat-unit">十億本</span></div>
+        <div class="precision-stat-label">FY2020 販売本数</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== JIS STANDARDS ===== -->
+<section id="jis-standards" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        JIS S 3015:2019 Strength Standards
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">JIS準拠の強度規格表</h2>
+      <p class="section-desc">
+        「何を満たせば良品か」という品質合格基準を、<br>
+        汎用規格（JIS）に接続して等級別に公開
+      </p>
+    </div>
+
+    <div class="jis-table-wrapper reveal-scale">
+      <table class="jis-table">
+        <thead>
+          <tr>
+            <th>試験項目（単位）</th>
+            <th><span class="grade-badge grade-ul">UL</span></th>
+            <th><span class="grade-badge grade-l">L</span></th>
+            <th><span class="grade-badge grade-m">M</span></th>
+            <th><span class="grade-badge grade-mh">MH</span></th>
+            <th><span class="grade-badge grade-h">H</span></th>
+            <th><span class="grade-badge grade-uh">UH</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>チェーン横引強度（N）<br><small style="color:var(--ykk-gray)">単独エレメント × 化繊テープ</small></td>
+            <td>150</td>
+            <td>230</td>
+            <td>300</td>
+            <td>390</td>
+            <td>490</td>
+            <td>690</td>
+          </tr>
+          <tr>
+            <td>チェーン横引強度（N）<br><small style="color:var(--ykk-gray)">単独エレメント × 補強化繊テープ</small></td>
+            <td>300</td>
+            <td>400</td>
+            <td>500</td>
+            <td>600</td>
+            <td>700</td>
+            <td>800</td>
+          </tr>
+          <tr>
+            <td>開部横引強度（N）<br><small style="color:var(--ykk-gray)">単独エレメント</small></td>
+            <td>50</td>
+            <td>70</td>
+            <td>80</td>
+            <td>120</td>
+            <td>150</td>
+            <td>300</td>
+          </tr>
+          <tr>
+            <td>上止部縦引強度（N）<br><small style="color:var(--ykk-gray)">金属/樹脂スライダー</small></td>
+            <td>40/30</td>
+            <td>50/40</td>
+            <td>70/60</td>
+            <td>100/80</td>
+            <td>120/100</td>
+            <td>200/170</td>
+          </tr>
+          <tr>
+            <td>下止部引裂強度（N）<br><small style="color:var(--ykk-gray)">単独エレメント × 化繊テープ</small></td>
+            <td>15</td>
+            <td>40/30</td>
+            <td>50/40</td>
+            <td>80/60</td>
+            <td>100/100</td>
+            <td>150/150</td>
+          </tr>
+          <tr>
+            <td>スライダー引手ねじり強度（N・m）</td>
+            <td>0.15/0.10</td>
+            <td>0.15/0.10</td>
+            <td>0.45/0.35</td>
+            <td>0.70/0.45</td>
+            <td>0.70/0.60</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="jis-note reveal">
+      <strong>📌 この表の意義：</strong> YKKが「実測値」を公開しているということではなく、"何を満たせば良品か"という品質合格基準（仕様）を、汎用規格（JIS）に接続して提示している点にある。大量生産品ほど、品質を"言語化・数値化"できないとグローバルで同一品質を維持できないため、この形式自体が品質管理成熟度の証拠となる。YKKは「スタンダードファスナーはJIS規格値をクリア」と明記し、さらに独自の品質規格も持つとしている。
+    </div>
+  </div>
+</section>
+
+<!-- ===== SCALE ===== -->
+<section id="scale" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Scale & Organizational Capability
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">数値で見るYKKのスケール</h2>
+      <p class="section-desc">
+        品質は局所最適では成立しにくい。<br>
+        原材料・化学物質・設備・検査の多拠点同期が要るため、<br>
+        この規模は品質"運用能力"の前提条件になる。
+      </p>
+    </div>
+
+    <div class="scale-cards">
+      <div class="scale-card reveal" style="transition-delay: 0s;">
+        <div class="scale-card-icon">🏢</div>
+        <div class="scale-card-value counter-animate" data-target="46305">46,305</div>
+        <div class="scale-card-unit">人</div>
+        <div class="scale-card-label">グループ従業員数</div>
+      </div>
+      <div class="scale-card reveal" style="transition-delay: 0.1s;">
+        <div class="scale-card-icon">🌍</div>
+        <div class="scale-card-value counter-animate" data-target="118">118</div>
+        <div class="scale-card-unit">社</div>
+        <div class="scale-card-label">グループ会社数</div>
+      </div>
+      <div class="scale-card reveal" style="transition-delay: 0.2s;">
+        <div class="scale-card-icon">📍</div>
+        <div class="scale-card-value counter-animate" data-target="513">513</div>
+        <div class="scale-card-unit">拠点</div>
+        <div class="scale-card-label">世界の事業拠点数</div>
+      </div>
+    </div>
+
+    <div class="scale-cards">
+      <div class="scale-card reveal" style="transition-delay: 0.3s;">
+        <div class="scale-card-icon">💰</div>
+        <div class="scale-card-value">9,982</div>
+        <div class="scale-card-unit">億円</div>
+        <div class="scale-card-label">グループ売上高</div>
+      </div>
+      <div class="scale-card reveal" style="transition-delay: 0.4s;">
+        <div class="scale-card-icon">🔗</div>
+        <div class="scale-card-value">4,331</div>
+        <div class="scale-card-unit">億円</div>
+        <div class="scale-card-label">ファスニング事業売上高</div>
+      </div>
+      <div class="scale-card reveal" style="transition-delay: 0.5s;">
+        <div class="scale-card-icon">🏅</div>
+        <div class="scale-card-value">38</div>
+        <div class="scale-card-unit">拠点</div>
+        <div class="scale-card-label">Oeko-Tex Class I 取得拠点<br><small>（2021年3月時点）</small></div>
+      </div>
+    </div>
+
+    <div class="section-header reveal" style="margin-top:60px; margin-bottom:40px;">
+      <h3 class="section-title" style="font-size: 28px;">販売本数の推移（十億本単位）</h3>
+    </div>
+
+    <div class="scale-timeline reveal">
+      <div class="scale-timeline-line">
+        <div class="scale-timeline-fill" id="timeline-fill"></div>
+      </div>
+      <div class="scale-timeline-points">
+        <div class="scale-timeline-point">
+          <div class="timeline-dot"></div>
+          <div class="timeline-year">FY2017</div>
+          <div class="timeline-value">9.53</div>
+          <div class="timeline-unit">十億本</div>
+        </div>
+        <div class="scale-timeline-point">
+          <div class="timeline-dot"></div>
+          <div class="timeline-year">FY2018</div>
+          <div class="timeline-value">10.07</div>
+          <div class="timeline-unit">十億本</div>
+        </div>
+        <div class="scale-timeline-point">
+          <div class="timeline-dot"></div>
+          <div class="timeline-year">FY2019</div>
+          <div class="timeline-value">9.55</div>
+          <div class="timeline-unit">十億本</div>
+        </div>
+        <div class="scale-timeline-point">
+          <div class="timeline-dot"></div>
+          <div class="timeline-year">FY2020</div>
+          <div class="timeline-value">7.79</div>
+          <div class="timeline-unit">十億本</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHEMICAL MANAGEMENT ===== -->
+<section id="chemical-management" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Chemical & Material Management
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">原材料・化学物質管理とトレーサビリティ</h2>
+      <p class="section-desc">
+        「壊れにくさ」だけでなく、安全・規制適合を品質の一部として扱う
+      </p>
+    </div>
+
+    <div class="chemical-grid">
+      <div class="chemical-info-block reveal-left">
+        <div class="chemical-info-icon">🧪</div>
+        <div class="chemical-info-title">化学物質管理（YKK RSL）</div>
+        <div class="chemical-info-text">
+          YKKのサステナビリティ資料では、化学物質の影響低減を含む品質方針（中期品質方針）や、改訂されたYKK Restricted Substances List（YKK RSL）に沿った化学物質管理の改善が述べられている。これは安全・規制適合を品質の一部として扱う姿勢を示す。
+        </div>
+        <div class="chemical-highlight">
+          <div class="chemical-highlight-value">&lt; 90 ppm</div>
+          <div class="chemical-highlight-label">表面コーティング/含有の鉛（CPSC提出文書）</div>
+        </div>
+      </div>
+      <div class="chemical-info-block reveal-right">
+        <div class="chemical-info-icon">📋</div>
+        <div class="chemical-info-title">CPSC提出文書の品質保証ロジック</div>
+        <div class="chemical-info-text">
+          米国消費者製品安全委員会（CPSC）に提出された文書では、品質を確保するために以下の4段階を明示している：
+        </div>
+        <div style="margin-top: 16px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+            <div style="width:32px;height:32px;background:rgba(200,16,46,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">a</div>
+            <div style="font-size:14px;color:var(--ykk-dark);">信頼できる供給元から高品質原材料を購入</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+            <div style="width:32px;height:32px;background:rgba(200,16,46,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">b</div>
+            <div style="font-size:14px;color:var(--ykk-dark);">受入時に原材料・部品を試験</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+            <div style="width:32px;height:32px;background:rgba(200,16,46,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">c</div>
+            <div style="font-size:14px;color:var(--ykk-dark);">工程を監視して汚染リスクを制御</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;">
+            <div style="width:32px;height:32px;background:rgba(200,16,46,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">d</div>
+            <div style="font-size:14px;color:var(--ykk-dark);">生産後にも選抜サンプルを試験</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="complexity-visual reveal">
+      <div class="complexity-card">
+        <div class="complexity-value">374,000<span class="complexity-suffix">+</span></div>
+        <div class="complexity-label">中国でのジッパーSKU種類数</div>
+      </div>
+      <div class="complexity-card">
+        <div class="complexity-value">578<span class="complexity-suffix">+</span></div>
+        <div class="complexity-label">在庫色数</div>
+      </div>
+      <div class="complexity-card">
+        <div class="complexity-value">多数</div>
+        <div class="complexity-label">サブコンポーネント構成</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BACK TO TOP ===== -->
+<button class="back-to-top" id="back-to-top" aria-label="トップへ戻る">↑</button>
+
+<!-- ==================== JAVASCRIPT (PART 1) ==================== -->
+<script>
+/* ===== LOADING SCREEN ===== */
+(function() {
+  const loadingScreen = document.getElementById('loading-screen');
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      loadingScreen.classList.add('hidden');
+    }, 2800);
+  });
+  setTimeout(function() {
+    loadingScreen.classList.add('hidden');
+  }, 5000);
+})();
+
+/* ===== CURSOR FOLLOWER ===== */
+(function() {
+  const cursor = document.getElementById('cursor-follower');
+  let mouseX = 0, mouseY = 0;
+  let cursorX = 0, cursorY = 0;
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+  if (isTouchDevice) {
+    cursor.style.display = 'none';
+    return;
+  }
+
+  document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  function animateCursor() {
+    cursorX += (mouseX - cursorX) * 0.12;
+    cursorY += (mouseY - cursorY) * 0.12;
+    cursor.style.left = cursorX + 'px';
+    cursor.style.top = cursorY + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  const interactiveElements = document.querySelectorAll('a, button, .pillar-card, .product-type-card, .summary-card, .scale-card, .chemical-info-block, .complexity-card, .precision-stat');
+  interactiveElements.forEach(function(el) {
+    el.addEventListener('mouseenter', function() {
+      cursor.classList.add('active');
+    });
+    el.addEventListener('mouseleave', function() {
+      cursor.classList.remove('active');
+    });
+  });
+})();
+
+/* ===== SCROLL PROGRESS ===== */
+(function() {
+  const progressBar = document.getElementById('scroll-progress');
+  function updateProgress() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const progress = (scrollTop / docHeight) * 100;
+    progressBar.style.width = progress + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+})();
+
+/* ===== NAV SCROLL EFFECT ===== */
+(function() {
+  const nav = document.getElementById('main-nav');
+  let lastScrollY = 0;
+
+  function handleNavScroll() {
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    if (scrollY > 100) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+    lastScrollY = scrollY;
+  }
+
+  window.addEventListener('scroll', handleNavScroll, { passive: true });
+})();
+
+/* ===== ACTIVE NAV LINK ===== */
+(function() {
+  const navLinks = document.querySelectorAll('.nav-links li a');
+  const sections = document.querySelectorAll('section[id]');
+
+  function setActiveNav() {
+    const scrollY = window.pageYOffset;
+    sections.forEach(function(section) {
+      const sectionTop = section.offsetTop - 200;
+      const sectionHeight = section.offsetHeight;
+      const sectionId = section.getAttribute('id');
+
+      if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+        navLinks.forEach(function(link) {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + sectionId) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  }
+
+  window.addEventListener('scroll', setActiveNav, { passive: true });
+})();
+
+/* ===== MOBILE NAV ===== */
+(function() {
+  const hamburger = document.getElementById('nav-hamburger');
+  const mobileNav = document.getElementById('mobile-nav');
+  const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+
+  hamburger.addEventListener('click', function() {
+    hamburger.classList.toggle('open');
+    mobileNav.classList.toggle('open');
+    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  });
+
+  mobileLinks.forEach(function(link) {
+    link.addEventListener('click', function() {
+      hamburger.classList.remove('open');
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+})();
+
+/* ===== SCROLL REVEAL ANIMATIONS ===== */
+(function() {
+  const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px 0px -80px 0px',
+    threshold: 0.1
+  };
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const delay = entry.target.style.transitionDelay;
+        entry.target.classList.add('visible');
+      }
+    });
+  }, observerOptions);
+
+  revealElements.forEach(function(el) {
+    observer.observe(el);
+  });
+})();
+
+/* ===== BACK TO TOP ===== */
+(function() {
+  const btn = document.getElementById('back-to-top');
+
+  window.addEventListener('scroll', function() {
+    if (window.pageYOffset > 600) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }, { passive: true });
+
+  btn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+
+/* ===== TIMELINE FILL ANIMATION ===== */
+(function() {
+  const timelineFill = document.getElementById('timeline-fill');
+  if (!timelineFill) return;
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        timelineFill.style.width = '100%';
+      }
+    });
+  }, { threshold: 0.3 });
+
+  observer.observe(timelineFill.parentElement);
+})();
+
+/* ===== PARTICLE BACKGROUND ===== */
+(function() {
+  const container = document.getElementById('particles-integrated');
+  if (!container) return;
+
+  for (let i = 0; i < 30; i++) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.width = (Math.random() * 4 + 2) + 'px';
+    particle.style.height = particle.style.width;
+    particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    particle.style.animationDelay = (Math.random() * 10) + 's';
+    particle.style.opacity = Math.random() * 0.3 + 0.1;
+    container.appendChild(particle);
+  }
+})();
+
+/* ===== ANIMATED COUNTERS ===== */
+(function() {
+  const counters = document.querySelectorAll('.counter-animate');
+
+  function animateCounter(el) {
+    const target = parseInt(el.getAttribute('data-target'));
+    const duration = 2000;
+    const startTime = performance.now();
+    const startValue = 0;
+
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const currentValue = Math.floor(startValue + (target - startValue) * eased);
+
+      el.textContent = currentValue.toLocaleString();
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        el.textContent = target.toLocaleString();
+      }
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        animateCounter(entry.target);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(function(counter) {
+    observer.observe(counter);
+  });
+})();
+
+/* ===== SMOOTH ANCHOR SCROLL ===== */
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href');
+      const targetEl = document.querySelector(targetId);
+      if (targetEl) {
+        const navHeight = document.getElementById('main-nav').offsetHeight;
+        const targetPosition = targetEl.offsetTop - navHeight - 20;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+})();
+
+/* ===== TABLE ROW HOVER ANIMATION ===== */
+(function() {
+  const rows = document.querySelectorAll('.jis-table tbody tr');
+  rows.forEach(function(row) {
+    row.addEventListener('mouseenter', function() {
+      const cells = row.querySelectorAll('td:not(:first-child)');
+      cells.forEach(function(cell, index) {
+        cell.style.transition = 'transform 0.3s ease ' + (index * 0.05) + 's';
+        cell.style.transform = 'scale(1.05)';
+      });
+    });
+    row.addEventListener('mouseleave', function() {
+      const cells = row.querySelectorAll('td:not(:first-child)');
+      cells.forEach(function(cell) {
+        cell.style.transform = 'scale(1)';
+      });
+    });
+  });
+})();
+
+/* ===== MAGNETIC BUTTON EFFECT ===== */
+(function() {
+  const magneticElements = document.querySelectorAll('.hero-cta');
+
+  magneticElements.forEach(function(el) {
+    el.addEventListener('mousemove', function(e) {
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      el.style.transform = 'translate(' + (x * 0.15) + 'px, ' + (y * 0.15) + 'px)';
+    });
+
+    el.addEventListener('mouseleave', function() {
+      el.style.transform = 'translate(0, 0)';
+    });
+  });
+})();
+
+/* ===== PARALLAX EFFECT FOR HERO SHAPES ===== */
+(function() {
+  const shapes = document.querySelectorAll('.hero-shape');
+  let ticking = false;
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        const scrollY = window.pageYOffset;
+        shapes.forEach(function(shape, index) {
+          const speed = (index + 1) * 0.05;
+          shape.style.transform = 'translateY(' + (scrollY * speed) + 'px)';
+        });
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+
+/* ===== STAGGERED CARD ANIMATIONS ===== */
+(function() {
+  function addStaggerAnimation(selector, baseDelay) {
+    const cards = document.querySelectorAll(selector);
+    cards.forEach(function(card, index) {
+      card.style.transitionDelay = (baseDelay + index * 0.1) + 's';
+    });
+  }
+
+  addStaggerAnimation('.summary-card', 0.1);
+  addStaggerAnimation('.pillar-card', 0.1);
+  addStaggerAnimation('.scale-card', 0);})();
+
+/* ===== TYPING EFFECT FOR HERO BADGE ===== */
+(function() {
+  const badge = document.querySelector('.hero-badge');
+  if (!badge) return;
+  const originalText = badge.textContent.trim();
+  // Already animated via CSS, enhance with subtle pulse
+  setInterval(function() {
+    badge.style.boxShadow = '0 0 0 4px rgba(200,16,46,0.08)';
+    setTimeout(function() {
+      badge.style.boxShadow = 'none';
+    }, 1000);
+  }, 3000);
+})();
+
+/* ===== JIS TABLE CELL COLOR CODING ===== */
+(function() {
+  const cells = document.querySelectorAll('.jis-table tbody td:not(:first-child)');
+  cells.forEach(function(cell) {
+    const text = cell.textContent.trim();
+    const value = parseFloat(text);
+    if (!isNaN(value) && value > 0) {
+      if (value >= 500) {
+        cell.style.color = '#c8102e';
+        cell.style.fontWeight = '700';
+      } else if (value >= 200) {
+        cell.style.color = '#003da5';
+        cell.style.fontWeight = '600';
+      }
+    }
+  });
+})();
+
+/* ===== INTERSECTION OBSERVER DEBOUNCE ===== */
+(function() {
+  let rafId = null;
+  const elementsToAnimate = [];
+
+  function processAnimations() {
+    elementsToAnimate.forEach(function(item) {
+      if (item.shouldAnimate && !item.animated) {
+        item.element.classList.add('visible');
+        item.animated = true;
+      }
+    });
+    rafId = null;
+  }
+
+  function scheduleAnimation() {
+    if (!rafId) {
+      rafId = requestAnimationFrame(processAnimations);
+    }
+  }
+
+  const lazyObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      const item = elementsToAnimate.find(function(i) { return i.element === entry.target; });
+      if (item) {
+        item.shouldAnimate = entry.isIntersecting;
+        scheduleAnimation();
+      }
+    });
+  }, { rootMargin: '0px 0px -50px 0px', threshold: 0.05 });
+
+  document.querySelectorAll('.lazy-reveal').forEach(function(el) {
+    elementsToAnimate.push({ element: el, shouldAnimate: false, animated: false });
+    lazyObserver.observe(el);
+  });
+})();
+
+/* ===== TILT CARD EFFECT ===== */
+(function() {
+  const tiltCards = document.querySelectorAll('.tilt-card');
+  tiltCards.forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (y - centerY) / centerY * -6;
+      const rotateY = (x - centerX) / centerX * 6;
+      card.style.transform = 'perspective(1000px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale(1.02)';
+    });
+    card.addEventListener('mouseleave', function() {
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+    });
+  });
+})();
+
+/* ===== RIPPLE EFFECT ===== */
+(function() {
+  document.querySelectorAll('.ripple-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple-effect');
+      ripple.style.left = (e.clientX - rect.left) + 'px';
+      ripple.style.top = (e.clientY - rect.top) + 'px';
+      btn.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 800);
+    });
+  });
+})();
+
+</script>
+
+<!-- ===== PART 2 ADDITIONAL STYLES ===== -->
+<style>
+/* ===== RIPPLE ===== */
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-effect {
+  position: absolute;
+  width: 0; height: 0;
+  border-radius: 50%;
+  background: rgba(200,16,46,0.2);
+  transform: translate(-50%, -50%);
+  animation: rippleExpand 0.8s ease forwards;
+  pointer-events: none;
+}
+@keyframes rippleExpand {
+  to { width: 400px; height: 400px; opacity: 0; }
+}
+
+/* ===== TILT ===== */
+.tilt-card {
+  transition: transform 0.2s ease;
+  will-change: transform;
+}
+
+/* ===== IP PROTECTION SECTION ===== */
+#ip-protection {
+  background: var(--ykk-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.ip-hero-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.ip-main-content h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.ip-main-content p {
+  font-size: 15px;
+  color: var(--ykk-gray);
+  line-height: 1.9;
+  margin-bottom: 20px;
+}
+
+.ip-stats-cluster {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.ip-stat-box {
+  background: var(--ykk-white);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  text-align: center;
+  border: 1px solid rgba(0,0,0,0.04);
+  transition: all var(--transition-mid);
+  position: relative;
+  overflow: hidden;
+}
+
+.ip-stat-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: var(--ykk-accent);
+  transform: scaleX(0);
+  transition: transform var(--transition-mid);
+  transform-origin: left;
+}
+
+.ip-stat-box:hover::before {
+  transform: scaleX(1);
+}
+
+.ip-stat-box:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.ip-stat-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.ip-stat-value {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--ykk-accent);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.ip-stat-label {
+  font-size: 12px;
+  color: var(--ykk-gray);
+  line-height: 1.4;
+  letter-spacing: 0.5px;
+}
+
+.ip-visual-panel {
+  position: relative;
+}
+
+.ip-shield-container {
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 400px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ip-shield-svg {
+  width: 200px;
+  height: 240px;
+  position: relative;
+  z-index: 3;
+}
+
+.ip-orbit-ring {
+  position: absolute;
+  border: 1px solid rgba(200,16,46,0.12);
+  border-radius: 50%;
+  animation: orbitSpin linear infinite;
+}
+
+.ip-orbit-ring:nth-child(1) {
+  width: 260px; height: 260px;
+  animation-duration: 20s;
+}
+.ip-orbit-ring:nth-child(2) {
+  width: 340px; height: 340px;
+  animation-duration: 30s;
+  animation-direction: reverse;
+}
+.ip-orbit-ring:nth-child(3) {
+  width: 400px; height: 400px;
+  animation-duration: 25s;
+  border-style: dashed;
+  opacity: 0.5;
+}
+
+@keyframes orbitSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.ip-orbit-dot {
+  position: absolute;
+  width: 10px; height: 10px;
+  background: var(--ykk-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(200,16,46,0.4);
+}
+
+.ip-orbit-ring:nth-child(1) .ip-orbit-dot { top: -5px; left: 50%; transform: translateX(-50%); }
+.ip-orbit-ring:nth-child(2) .ip-orbit-dot { bottom: -5px; right: 20%; }
+.ip-orbit-ring:nth-child(3) .ip-orbit-dot { top: 30%; left: -5px; }
+
+/* ===== QUALITY FLOW DIAGRAM ===== */
+#quality-flow {
+  background: var(--ykk-white);
+  overflow: hidden;
+}
+
+.flow-diagram {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  position: relative;
+  margin-top: 40px;
+}
+
+.flow-node {
+  background: var(--ykk-light);
+  border-radius: var(--radius-md);
+  padding: 24px 16px;
+  text-align: center;
+  position: relative;
+  transition: all var(--transition-mid);
+  border: 1px solid rgba(0,0,0,0.04);
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-node::after {
+  content: '→';
+  position: absolute;
+  right: -18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--ykk-accent);
+  opacity: 0.5;
+  z-index: 5;
+  animation: nodeArrowPulse 2s ease infinite;
+}
+
+.flow-node:last-child::after {
+  content: '';
+  display: none;
+}
+
+@keyframes nodeArrowPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+.flow-node:hover {
+  background: var(--ykk-white);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  border-color: var(--ykk-accent);
+}
+
+.flow-node-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 12px;
+  transition: all var(--transition-mid);
+}
+
+.flow-node:hover .flow-node-icon {
+  transform: scale(1.15);
+}
+
+.fn-i1 { background: rgba(200,16,46,0.1); }
+.fn-i2 { background: rgba(0,61,165,0.1); }
+.fn-i3 { background: rgba(184,134,11,0.1); }
+.fn-i4 { background: rgba(46,125,50,0.1); }
+.fn-i5 { background: rgba(128,0,128,0.1); }
+
+.flow-node-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.flow-node-desc {
+  font-size: 11px;
+  color: var(--ykk-gray);
+  line-height: 1.5;
+}
+
+.flow-row-2 {
+  margin-top: 12px;
+}
+
+.flow-feedback-loop {
+  margin-top: 30px;
+  text-align: center;
+  padding: 20px;
+  border: 2px dashed rgba(200,16,46,0.15);
+  border-radius: var(--radius-lg);
+  position: relative;
+}
+
+.flow-feedback-loop::before {
+  content: '↻ フィードバックループ';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ykk-white);
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ykk-accent);
+  white-space: nowrap;
+}
+
+.flow-feedback-text {
+  font-size: 14px;
+  color: var(--ykk-gray);
+  line-height: 1.7;
+}
+
+/* ===== COMPETITORS SECTION ===== */
+#competitors {
+  background: var(--ykk-white);
+  position: relative;
+}
+
+.competitor-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.competitor-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 1000px;
+}
+
+.competitor-table thead {
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+}
+
+.competitor-table thead th {
+  padding: 18px 14px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.competitor-table thead th:first-child {
+  text-align: left;
+  padding-left: 24px;
+  min-width: 160px;
+}
+
+.competitor-table thead th.ykk-col {
+  background: var(--ykk-accent);
+  position: relative;
+}
+
+.competitor-table thead th.ykk-col::after {
+  content: '★';
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.competitor-table tbody tr {
+  transition: all var(--transition-fast);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.competitor-table tbody tr:hover {
+  background: rgba(200,16,46,0.02);
+}
+
+.competitor-table tbody td {
+  padding: 14px;
+  text-align: center;
+  color: var(--ykk-dark);
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+.competitor-table tbody td:first-child {
+  text-align: left;
+  padding-left: 24px;
+  font-weight: 600;
+  color: var(--ykk-black);
+  font-size: 13px;
+}
+
+.competitor-table tbody td.ykk-cell {
+  background: rgba(200,16,46,0.03);
+  border-left: 2px solid rgba(200,16,46,0.15);
+  border-right: 2px solid rgba(200,16,46,0.15);
+}
+
+.status-confirmed {
+  color: var(--ykk-green);
+  font-weight: 600;
+}
+
+.status-unconfirmed {
+  color: var(--ykk-silver);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.competitor-note {
+  margin-top: 24px;
+  padding: 24px 28px;
+  background: var(--ykk-light);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--ykk-accent2);
+  font-size: 14px;
+  color: var(--ykk-gray);
+  line-height: 1.8;
+}
+
+.competitor-note strong {
+  color: var(--ykk-black);
+}
+
+/* ===== CUSTOMER ADOPTION ===== */
+#customer-adoption {
+  background: var(--ykk-light);
+}
+
+.customer-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.customer-card {
+  background: var(--ykk-white);
+  border-radius: var(--radius-lg);
+  padding: 32px 20px;
+  text-align: center;
+  transition: all var(--transition-mid);
+  border: 1px solid rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.customer-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: var(--ykk-gradient2);
+  opacity: 0;
+  transition: opacity var(--transition-mid);
+  z-index: 0;
+}
+
+.customer-card:hover::before {
+  opacity: 0.04;
+}
+
+.customer-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.customer-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.customer-logo-placeholder {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--ykk-light);
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--ykk-dark);
+  transition: all var(--transition-mid);
+  border: 2px solid rgba(0,0,0,0.06);
+}
+
+.customer-card:hover .customer-logo-placeholder {
+  background: var(--ykk-accent);
+  color: var(--ykk-white);
+  border-color: var(--ykk-accent);
+  transform: scale(1.1);
+}
+
+.customer-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 6px;
+}
+
+.customer-desc {
+  font-size: 12px;
+  color: var(--ykk-gray);
+  line-height: 1.5;
+}
+
+.customer-additional {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.customer-additional-card {
+  background: var(--ykk-white);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  border: 1px solid rgba(0,0,0,0.04);
+  transition: all var(--transition-mid);
+}
+
+.customer-additional-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.customer-additional-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.customer-additional-text {
+  font-size: 14px;
+  color: var(--ykk-gray);
+  line-height: 1.8;
+}
+
+/* ===== STRENGTHS & WEAKNESSES ===== */
+#strengths-weaknesses {
+  background: var(--ykk-white);
+}
+
+.sw-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.sw-column {
+  position: relative;
+}
+
+.sw-column-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid;
+}
+
+.sw-column-header.strengths {
+  border-color: var(--ykk-green);
+}
+
+.sw-column-header.weaknesses {
+  border-color: var(--ykk-accent);
+}
+
+.sw-column-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.sw-column-icon.str { background: rgba(46,125,50,0.1); }
+.sw-column-icon.wk { background: rgba(200,16,46,0.1); }
+
+.sw-column-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ykk-black);
+}
+
+.sw-item {
+  padding: 20px;
+  background: var(--ykk-light);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+  transition: all var(--transition-mid);
+  border-left: 4px solid transparent;
+  cursor: default;
+}
+
+.sw-item.str-item {
+  border-left-color: var(--ykk-green);
+}
+
+.sw-item.wk-item {
+  border-left-color: var(--ykk-accent);
+}
+
+.sw-item:hover {
+  transform: translateX(6px);
+  box-shadow: var(--shadow-sm);
+}
+
+.sw-item-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 6px;
+}
+
+.sw-item-text {
+  font-size: 13px;
+  color: var(--ykk-gray);
+  line-height: 1.7;
+}
+
+/* ===== CONCLUSION SECTION ===== */
+#conclusion {
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+  position: relative;
+  overflow: hidden;
+}
+
+#conclusion::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at center, rgba(200,16,46,0.06) 0%, transparent 50%);
+  animation: conclusionGlow 10s ease-in-out infinite;
+}
+
+@keyframes conclusionGlow {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(5%, 5%); }
+}
+
+.conclusion-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.conclusion-headline {
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.3;
+  margin-bottom: 40px;
+  letter-spacing: -1px;
+}
+
+.conclusion-headline .highlight {
+  color: var(--ykk-accent);
+  position: relative;
+}
+
+.conclusion-body {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.conclusion-block {
+  padding: 32px;
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all var(--transition-mid);
+}
+
+.conclusion-block:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(200,16,46,0.2);
+  transform: translateX(4px);
+}
+
+.conclusion-block-number {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  background: var(--ykk-accent);
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.conclusion-block-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--ykk-white);
+}
+
+.conclusion-block-text {
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.8;
+}
+
+.conclusion-final {
+  text-align: center;
+  margin-top: 60px;
+  padding: 40px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.conclusion-final-text {
+  font-size: 18px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.9;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.conclusion-final-text strong {
+  color: var(--ykk-accent);
+  font-weight: 700;
+}
+
+/* ===== EVALUATION CRITERIA SECTION ===== */
+#evaluation-criteria {
+  background: var(--ykk-light);
+}
+
+.eval-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.eval-card {
+  background: var(--ykk-white);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  transition: all var(--transition-mid);
+  border: 1px solid rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.eval-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--ykk-gradient2);
+  transform: scaleX(0);
+  transition: transform var(--transition-mid);
+  transform-origin: left;
+}
+
+.eval-card:hover::before {
+  transform: scaleX(1);
+}
+
+.eval-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.eval-number {
+  width: 36px;
+  height: 36px;
+  background: rgba(200,16,46,0.08);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ykk-accent);
+  margin-bottom: 16px;
+}
+
+.eval-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.eval-text {
+  font-size: 13px;
+  color: var(--ykk-gray);
+  line-height: 1.7;
+}
+
+/* ===== FOOTER ===== */
+#site-footer {
+  background: var(--ykk-black);
+  color: rgba(255,255,255,0.5);
+  padding: 60px 0 30px;
+  position: relative;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 30px;
+}
+
+.footer-brand-text {
+  font-size: 13px;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.4);
+  margin-top: 12px;
+}
+
+.footer-col-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  padding: 4px 0;
+  transition: color var(--transition-fast);
+}
+
+.footer-col a:hover {
+  color: var(--ykk-accent);
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-bottom-text {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+}
+
+.footer-source-note {
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  text-align: center;
+  margin-top: 20px;
+  line-height: 1.7;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ===== ANIMATED GRADIENT BORDER ===== */
+.gradient-border-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  padding: 3px;
+  background: linear-gradient(135deg, var(--ykk-accent), var(--ykk-accent2), var(--ykk-gold), var(--ykk-accent));
+  background-size: 300% 300%;
+  animation: gradientBorderMove 6s ease infinite;
+}
+
+@keyframes gradientBorderMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-border-inner {
+  background: var(--ykk-white);
+  border-radius: calc(var(--radius-lg) - 3px);
+  padding: 40px;
+}
+
+/* ===== PULSE DOT ===== */
+.pulse-dot {
+  width: 8px; height: 8px;
+  background: var(--ykk-green);
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulseDot 2s ease infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(46,125,50,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(46,125,50,0); }
+}
+
+/* ===== GLOWING TEXT ===== */
+.glow-text {
+  animation: textGlow 3s ease-in-out infinite;
+}
+
+@keyframes textGlow {
+  0%, 100% { text-shadow: 0 0 20px rgba(200,16,46,0.0); }
+  50% { text-shadow: 0 0 30px rgba(200,16,46,0.3); }
+}
+
+/* ===== COMPARISON BAR ===== */
+.comparison-bar-container {
+  margin: 8px 0;
+}
+
+.comparison-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.comparison-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.comparison-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1.5s ease;
+  width: 0%;
+}
+
+.bar-red { background: var(--ykk-accent); }
+.bar-blue { background: var(--ykk-accent2); }
+.bar-gold { background: var(--ykk-gold); }
+.bar-green { background: var(--ykk-green); }
+
+/* ===== RESPONSIVE ADDITIONS ===== */
+@media (max-width: 1024px) {
+  .ip-hero-grid { grid-template-columns: 1fr; }
+  .ip-shield-container { max-width: 300px; margin-top: 40px; }
+  .flow-diagram { grid-template-columns: repeat(3, 1fr); }
+  .customer-grid { grid-template-columns: repeat(3, 1fr); }
+  .customer-additional { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .ip-stats-cluster { grid-template-columns: 1fr; }
+  .flow-diagram { grid-template-columns: 1fr 1fr; }
+  .flow-node::after { display: none; }
+  .customer-grid { grid-template-columns: 1fr 1fr; }
+  .sw-grid { grid-template-columns: 1fr; }
+  .eval-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .customer-grid { grid-template-columns: 1fr; }
+  .flow-diagram { grid-template-columns: 1fr; }
+}
+</style>
+
+<!-- ===== IP PROTECTION SECTION ===== -->
+<section id="ip-protection" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Intellectual Property & Brand Protection
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">知財・ブランド保護が品質認知を支える</h2>
+      <p class="section-desc">
+        品質は"本物が使われていること"が前提。<br>模倣品が多い市場では品質評判が破壊されやすい。
+      </p>
+    </div>
+
+    <div class="ip-hero-grid">
+      <div class="ip-main-content reveal-left">
+        <h3>品質を市場で維持するための知財インフラ投資</h3>
+        <p>
+          YKK統合報告書（2024）では、2024年3月末時点での知的財産・ブランド保護の活動量を数値で開示している。これは品質そのものの試験結果ではないが、品質を市場で維持するためのインフラ投資として極めて重要な意味を持つ。模倣品が流通することで「YKK品質」の認知が毀損されるリスクに対し、組織的な対策を講じていることが確認できる。
+        </p>
+
+        <div class="ip-stats-cluster">
+          <div class="ip-stat-box tilt-card reveal" style="transition-delay:0s;">
+            <div class="ip-stat-icon">📜</div>
+            <div class="ip-stat-value">5,859</div>
+            <div class="ip-stat-label">特許・実用新案・意匠<br>（出願中含む）</div>
+          </div>
+          <div class="ip-stat-box tilt-card reveal" style="transition-delay:0.1s;">
+            <div class="ip-stat-icon">™️</div>
+            <div class="ip-stat-value">4,780</div>
+            <div class="ip-stat-label">ファスナー等の登録商標<br>（出願中含む）</div>
+          </div>
+          <div class="ip-stat-box tilt-card reveal" style="transition-delay:0.2s;">
+            <div class="ip-stat-icon">🌍</div>
+            <div class="ip-stat-value">177</div>
+            <div class="ip-stat-label">商標登録の<br>国・地域数</div>
+          </div>
+          <div class="ip-stat-box tilt-card reveal" style="transition-delay:0.3s;">
+            <div class="ip-stat-icon">👥</div>
+            <div class="ip-stat-value">4,090</div>
+            <div class="ip-stat-label">模倣品対策WS参加者<br>（2,317組織）</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ip-visual-panel reveal-right">
+        <div class="ip-shield-container">
+          <div class="ip-orbit-ring"><div class="ip-orbit-dot"></div></div>
+          <div class="ip-orbit-ring"><div class="ip-orbit-dot"></div></div>
+          <div class="ip-orbit-ring"><div class="ip-orbit-dot"></div></div>
+          <svg class="ip-shield-svg" viewBox="0 0 200 240" fill="none">
+            <path d="M100 10 L180 50 L180 130 C180 180 140 220 100 235 C60 220 20 180 20 130 L20 50 Z" fill="rgba(200,16,46,0.08)" stroke="rgba(200,16,46,0.3)" stroke-width="2"/>
+            <path d="M100 30 L165 62 L165 128 C165 170 133 205 100 218 C67 205 35 170 35 128 L35 62 Z" fill="rgba(200,16,46,0.05)" stroke="rgba(200,16,46,0.15)" stroke-width="1"/>
+            <text x="100" y="110" text-anchor="middle" fill="rgba(200,16,46,0.6)" font-size="28" font-weight="900" font-family="Helvetica Neue, sans-serif">YKK</text>
+            <text x="100" y="135" text-anchor="middle" fill="rgba(200,16,46,0.3)" font-size="11" font-weight="600" font-family="Helvetica Neue, sans-serif" letter-spacing="3">PROTECTED</text>
+            <path d="M80 155 L95 170 L125 140" stroke="rgba(46,125,50,0.5)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== QUALITY FLOW DIAGRAM ===== -->
+<section id="quality-flow" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Quality Management Process
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">品質管理プロセスの標準形</h2>
+      <p class="section-desc">
+        調達方針・RSL・JIS強度規格・受入検査の考え方から再構成した<br>YKKの品質管理フロー
+      </p>
+    </div>
+
+    <div class="flow-diagram reveal">
+      <div class="flow-node">
+        <div class="flow-node-icon fn-i1">🎯</div>
+        <div class="flow-node-title">顧客要求・<br>用途条件</div>
+        <div class="flow-node-desc">強度/外観/安全/規制</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-node-icon fn-i2">📐</div>
+        <div class="flow-node-title">設計・<br>仕様策定</div>
+        <div class="flow-node-desc">JIS等級/社内規格</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-node-icon fn-i3">📦</div>
+        <div class="flow-node-title">原材料・<br>部品調達</div>
+        <div class="flow-node-desc">CSR/化学物質/RSL</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-node-icon fn-i4">🔬</div>
+        <div class="flow-node-title">受入検査</div>
+        <div class="flow-node-desc">材料・部品サンプリング試験</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-node-icon fn-i5">🔧</div>
+        <div class="flow-node-title">工程設計・<br>設備/治具</div>
+        <div class="flow-node-desc">統合生産:材料×設備×工程</div>
+      </div>
+    </div>
+
+    <div class="flow-diagram flow-row-2 reveal" style="transition-delay: 0.2s;">
+      <div class="flow-node">
+        <div class="flow-node-icon fn-i1">🏭</div>
+        <div class="flow-node-title">量産工程</div>
+        <div class="flow-node-desc">監視・パラメータ管理/自動化</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-node-icon fn-i2">🔎</div>
+        <div class="flow-node-title">工程内検査</div>
+        <div class="flow-node-desc">抜取・寸法/外観/機能</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-node-icon fn-i3">✅</div>
+        <div class="flow-node-title">最終検査</div>
+        <div class="flow-node-desc">横引/縦引/ロック/ねじり等</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-node-icon fn-i4">📋</div>
+        <div class="flow-node-title">出荷・<br>ロット管理</div>
+        <div class="flow-node-desc">品番・SKU・色・工程情報</div>
+      </div>
+      <div class="flow-node" style="border-color: rgba(200,16,46,0.2);">
+        <div class="flow-node-icon fn-i5">💬</div>
+        <div class="flow-node-title">市場・顧客<br>フィードバック</div>
+        <div class="flow-node-desc">不具合/改善要求→設計へ</div>
+      </div>
+    </div>
+
+    <div class="flow-feedback-loop reveal" style="transition-delay: 0.4s;">
+      <p class="flow-feedback-text">
+        市場・顧客からのフィードバック（不具合報告・改善要求）は設計・仕様策定に還元され、<br>
+        <strong style="color: var(--ykk-accent);">継続的改善（PDCA）</strong>サイクルとして品質管理プロセスの中核を成す。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EVALUATION CRITERIA ===== -->
+<section id="evaluation-criteria" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Evaluation Framework
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">本調査の6つの評価軸</h2>
+      <p class="section-desc">
+        一次資料（YKK公式）→ 標準・公的資料 → 第三者 → 競合公式の順に参照
+      </p>
+    </div>
+
+    <div class="eval-grid">
+      <div class="eval-card reveal" style="transition-delay:0s;">
+        <div class="eval-number">1</div>
+        <div class="eval-title">製品性能の試験規格・基準値</div>
+        <div class="eval-text">引張、横引、ロック強度、腐食、染色堅ろう度等の試験規格・基準値がJIS等で明示されているか</div>
+      </div>
+      <div class="eval-card reveal" style="transition-delay:0.1s;">
+        <div class="eval-number">2</div>
+        <div class="eval-title">品質管理プロセスの運用</div>
+        <div class="eval-text">原材料→工程→検査→出荷→アフターの品質管理プロセスが運用として説明されているか</div>
+      </div>
+      <div class="eval-card reveal" style="transition-delay:0.2s;">
+        <div class="eval-number">3</div>
+        <div class="eval-title">グローバル均一品質の仕組み</div>
+        <div class="eval-text">ISO認証、共通品質基準、監査によってグローバルで均一品質を維持する仕組みを持つか</div>
+      </div>
+      <div class="eval-card reveal" style="transition-delay:0.3s;">
+        <div class="eval-number">4</div>
+        <div class="eval-title">トレーサビリティ/コンプライアンス</div>
+        <div class="eval-text">多品種・多拠点でも破綻しない化学物質管理・ロット管理・模倣品対策が語られているか</div>
+      </div>
+      <div class="eval-card reveal" style="transition-delay:0.4s;">
+        <div class="eval-number">5</div>
+        <div class="eval-title">技術開発・知財</div>
+        <div class="eval-text">特許等の知的財産が品質と工程能力を下支えしているか。技術開発への投資実態</div>
+      </div>
+      <div class="eval-card reveal" style="transition-delay:0.5s;">
+        <div class="eval-number">6</div>
+        <div class="eval-title">顧客採用・用途実績</div>
+        <div class="eval-text">品質が要求される用途で採用されているか。グローバルブランドでの採用状況の確認</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COMPETITORS SECTION ===== -->
+<section id="competitors" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Competitive Analysis
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">競合比較（公開データに限定）</h2>
+      <p class="section-desc">
+        RIRI・SBS・IDEALとの比較。<br>
+        耐久寿命・不良率・リコール件数等の"核心KPI"は各社が比較可能な形で開示していない
+      </p>
+    </div>
+
+    <div class="competitor-table-wrapper reveal-scale">
+      <table class="competitor-table">
+        <thead>
+          <tr>
+            <th>比較軸</th>
+            <th class="ykk-col">YKK</th>
+            <th>RIRI</th>
+            <th>SBS</th>
+            <th>IDEAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>主要製品カテゴリ</td>
+            <td class="ykk-cell"><span class="status-confirmed">Metal / Coil / VISLON® の3分類を明示</span></td>
+            <td>金属・樹脂系などグループ会社別に生産機能を明記</td>
+            <td>公式サイト上で広範な製品群を提示（数値仕様は限定的）</td>
+            <td>製品群提示（試験規格値の公開は限定的）</td>
+          </tr>
+          <tr>
+            <td>強度規格（JIS等）の基準値公開</td>
+            <td class="ykk-cell"><span class="status-confirmed">JIS S 3015:2019 等級×基準値を表で公開</span></td>
+            <td><span class="status-unconfirmed">未確認（ISO中心）</span></td>
+            <td><span class="status-unconfirmed">未確認（ISO/社内品質訴求中心）</span></td>
+            <td><span class="status-unconfirmed">未確認（品質方針中心）</span></td>
+          </tr>
+          <tr>
+            <td>統合生産の公式強調</td>
+            <td class="ykk-cell"><span class="status-confirmed">統合報告書で中核思想として説明 / 0.01mm精度・300万km超</span></td>
+            <td>生産が複数工業領域にまたがる旨（第三者紹介）</td>
+            <td>自社で製造設備開発も行う旨・特許多数を主張</td>
+            <td>「製造の各段階を管理」との方針</td>
+          </tr>
+          <tr>
+            <td>ISO 9001等（品質MS）</td>
+            <td class="ykk-cell"><span class="status-confirmed">取得・多拠点 / Oeko-Tex Class I 38拠点（2021/3）</span></td>
+            <td>グループ拠点のISO 9001/14001/45001を列挙、Oeko-Tex 2010〜</td>
+            <td>ISO取得を掲げる（公式）</td>
+            <td><span class="status-unconfirmed">ISO認証の主張あり→詳細未確認</span></td>
+          </tr>
+          <tr>
+            <td>特許等（件数開示）</td>
+            <td class="ykk-cell"><span class="status-confirmed">5,859件（出願中含む 2024/3末）</span></td>
+            <td><span class="status-unconfirmed">未確認（年次PDF取得不可）</span></td>
+            <td>830+特許・年55件以上出願など主張</td>
+            <td>USPTO上で確認可能（企業開示は未確認）</td>
+          </tr>
+          <tr>
+            <td>不良率（ppm等）</td>
+            <td class="ykk-cell"><span class="status-unconfirmed">公式の一律KPIは未確認。規制文脈では受入・工程監視を明示</span></td>
+            <td><span class="status-unconfirmed">未確認</span></td>
+            <td><span class="status-unconfirmed">未確認</span></td>
+            <td><span class="status-unconfirmed">未確認</span></td>
+          </tr>
+          <tr>
+            <td>リコール件数（ジッパー起因）</td>
+            <td class="ykk-cell"><span class="status-unconfirmed">公開比較データは未確認</span></td>
+            <td><span class="status-unconfirmed">未確認</span></td>
+            <td><span class="status-unconfirmed">未確認</span></td>
+            <td><span class="status-unconfirmed">未確認</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="competitor-note reveal">
+      <strong>📊 この表から言えること：</strong> 「YKKが競合より物理性能で必ず上」という断定ではなく、YKKは"強度規格（JIS）を等級×試験項目で公開し、用途選定に接続する"という<strong>透明性の高い品質提示</strong>ができている点が、公開情報としては際立つ。競合もISOやOeko-Tex等の枠組みは整っているが、強度の基準値公開や巨大スケールの販売本数開示まで揃う例は相対的に少ない。
+    </div>
+  </div>
+</section>
+
+<!-- ===== CUSTOMER ADOPTION ===== -->
+<section id="customer-adoption" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Customer Adoption & Usage
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">顧客採用事例</h2>
+      <p class="section-desc">
+        「品質が要求される用途で選ばれている」という状況証拠
+      </p>
+    </div>
+
+    <div class="customer-grid">
+      <div class="customer-card reveal" style="transition-delay: 0s;">
+        <div class="customer-logo-placeholder">U</div>
+        <div class="customer-name">ユニクロ</div>
+        <div class="customer-desc">グローバル展開する<br>カジュアルウェア</div>
+      </div>
+      <div class="customer-card reveal" style="transition-delay: 0.1s;">
+        <div class="customer-logo-placeholder">N</div>
+        <div class="customer-name">Nike</div>
+        <div class="customer-desc">世界最大級の<br>スポーツブランド</div>
+      </div>
+      <div class="customer-card reveal" style="transition-delay: 0.2s;">
+        <div class="customer-logo-placeholder">A</div>
+        <div class="customer-name">Adidas</div>
+        <div class="customer-desc">ドイツ発の<br>スポーツブランド</div>
+      </div>
+      <div class="customer-card reveal" style="transition-delay: 0.3s;">
+        <div class="customer-logo-placeholder">D</div>
+        <div class="customer-name">Decathlon</div>
+        <div class="customer-desc">フランス発の<br>スポーツ用品大手</div>
+      </div>
+      <div class="customer-card reveal" style="transition-delay: 0.4s;">
+        <div class="customer-logo-placeholder">C</div>
+        <div class="customer-name">Columbia</div>
+        <div class="customer-desc">アウトドア<br>ウェアブランド</div>
+      </div>
+    </div>
+
+    <div class="customer-additional">
+      <div class="customer-additional-card reveal-left">
+        <div class="customer-additional-title">
+          <span style="font-size:22px;">🏔️</span>
+          新型ジッパー「AiryString」の採用
+        </div>
+        <div class="customer-additional-text">
+          WIREDの記事によると、YKKの新型ジッパー（AiryString）がザ・ノース・フェイスやデサントで採用された。開発にはJUKIが関与し、「新機構が既存工程に与える影響」まで含めて設備から再設計する点が強調されている。これは統合生産と品質の関係を補強する事例である。
+        </div>
+      </div>
+      <div class="customer-additional-card reveal-right">
+        <div class="customer-additional-title">
+          <span style="font-size:22px;">🇻🇳</span>
+          YKKベトナム：年間約10億本を生産
+        </div>
+        <div class="customer-additional-text">
+          YKKベトナムの企業記事では、ベトナムで「年間約10億本を生産」とし、主な供給先として上記ブランドを挙げている。企業側発信であり第三者監査による採用数量の検証ではない点に注意が必要だが、大規模供給能力の証拠となる。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STRENGTHS & WEAKNESSES ===== -->
+<section id="strengths-weaknesses" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Strengths & Limitations
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">強みと弱み（限界）</h2>
+      <p class="section-desc">
+        公開根拠から評価できるYKK品質の構造的な強みと、<br>
+        情報の限界に基づく弱み
+      </p>
+    </div>
+
+    <div class="sw-grid">
+      <div class="sw-column reveal-left">
+        <div class="sw-column-header strengths">
+          <div class="sw-column-icon str">✓</div>
+          <div class="sw-column-title">強み</div>
+        </div>
+
+        <div class="sw-item str-item">
+          <div class="sw-item-title"><span class="pulse-dot"></span>規格適合と透明性</div>
+          <div class="sw-item-text">JIS等級×試験項目×基準値を公開。「スタンダード品はクリア」と明記し、社内独自規格の存在も述べる。品質の説明責任が高い。</div>
+        </div>
+        <div class="sw-item str-item">
+          <div class="sw-item-title"><span class="pulse-dot"></span>統合生産と高精度加工</div>
+          <div class="sw-item-text">0.01mm精度を年間300万km超・十億本単位と同時に成立。品質の"再現性"を強く示す状況証拠。</div>
+        </div>
+        <div class="sw-item str-item">
+          <div class="sw-item-title"><span class="pulse-dot"></span>原材料からの規制適合</div>
+          <div class="sw-item-text">CPSC提出文書で受入試験・工程監視・生産後試験を明示。SKU 374,000超の複雑性下での品質保証ロジック。</div>
+        </div>
+        <div class="sw-item str-item">
+          <div class="sw-item-title"><span class="pulse-dot"></span>巨大スケールでの均一品質</div>
+          <div class="sw-item-text">46,305人・513拠点・118社。品質は局所最適では成立しにくく、この規模での品質維持が運用能力を証明。</div>
+        </div>
+        <div class="sw-item str-item">
+          <div class="sw-item-title"><span class="pulse-dot"></span>知財・模倣品対策</div>
+          <div class="sw-item-text">特許等5,859件、商標177国・地域登録。品質の市場維持に不可欠なインフラ投資を数値で開示。</div>
+        </div>
+      </div>
+
+      <div class="sw-column reveal-right">
+        <div class="sw-column-header weaknesses">
+          <div class="sw-column-icon wk">!</div>
+          <div class="sw-column-title">弱み・限界</div>
+        </div>
+
+        <div class="sw-item wk-item">
+          <div class="sw-item-title">多品種化による品質管理負荷</div>
+          <div class="sw-item-text">製品が極めて多品種であるほど品質管理の負荷が増す。374,000+SKU、578+色という複雑性は管理コストの増大を意味する。</div>
+        </div>
+        <div class="sw-item wk-item">
+          <div class="sw-item-title">模倣品リスク</div>
+          <div class="sw-item-text">模倣品が市場に流通すると"YKK品質"の認知を毀損し得る。対策は講じているが、完全な排除は困難。</div>
+        </div>
+        <div class="sw-item wk-item">
+          <div class="sw-item-title">高級領域での競合</div>
+          <div class="sw-item-text">RIRIのように意匠・高級感で選ばれる競合が存在。品質の多面性（機能的品質 vs 知覚品質）による棲み分け。</div>
+        </div>
+        <div class="sw-item wk-item">
+          <div class="sw-item-title">統一KPIの非公開</div>
+          <div class="sw-item-text">競合比較に必要な不良率・返品率・リコール件数等の統一KPIが公開されにくい。「競合より圧倒的に優れる」と断言する根拠が揃わない。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONCLUSION ===== -->
+<section id="conclusion" class="section">
+  <div class="section-container">
+    <div class="conclusion-inner">
+      <div class="section-header reveal">
+        <div class="section-label" style="color: rgba(255,255,255,0.4);">
+          <span class="section-label-line" style="background: var(--ykk-accent);"></span>
+          Conclusion
+          <span class="section-label-line" style="background: var(--ykk-accent);"></span>
+        </div>
+      </div>
+
+      <h2 class="conclusion-headline reveal glow-text">
+        YKKが<span class="highlight">"高品質の代名詞"</span>として<br>扱われる理由
+      </h2>
+
+      <div class="conclusion-body">
+        <div class="conclusion-block reveal" style="transition-delay: 0s;">
+          <div class="conclusion-block-number">1</div>
+          <div class="conclusion-block-title">品質枠組みの透明性</div>
+          <div class="conclusion-block-text">JIS等級×試験項目×基準値を公開し、製品選定に直接使える形で提示。チェーン横引・上止縦引・下止引裂・ロック強度・ねじり強度などの基準値を提示し、「スタンダード品はクリア」と明記しつつ、社内独自規格の存在も述べる姿勢は、品質の説明責任が高い。</div>
+        </div>
+
+        <div class="conclusion-block reveal" style="transition-delay: 0.1s;">
+          <div class="conclusion-block-number">2</div>
+          <div class="conclusion-block-title">高精度と巨量生産の同時成立</div>
+          <div class="conclusion-block-text">統合生産（材料→設備→工程→製品）と高精度加工（0.01mm）を、巨量生産（年間300万km超、販売本数は十億本単位）と同時に成立させていることが、信頼性の強い状況証拠。品質は"運用の再現性"であり、巨量販売が持続していること自体が、工程管理・検査体制の成熟を示す。</div>
+        </div>
+
+        <div class="conclusion-block reveal" style="transition-delay: 0.2s;">
+          <div class="conclusion-block-number">3</div>
+          <div class="conclusion-block-title">規制対応による品質保証の裏づけ</div>
+          <div class="conclusion-block-text">CPSC公開PDFに収録された提出文書では、SKUの膨大さ（374,000超）や色数（578超）という複雑性を前提に、受入試験・工程監視・生産後試験を組み合わせる品質保証ロジックを明示。鉛90ppm未満といった数値にも言及している。</div>
+        </div>
+
+        <div class="conclusion-block reveal" style="transition-delay: 0.3s;">
+          <div class="conclusion-block-number">4</div>
+          <div class="conclusion-block-title">知財による品質の市場維持</div>
+          <div class="conclusion-block-text">特許等5,859件、商標177国・地域登録、模倣品対策WS参加者4,090人（2,317組織）。品質そのものの試験結果ではないが、品質を市場で維持するためのインフラ投資として意義がある。</div>
+        </div>
+      </div>
+
+      <div class="conclusion-final reveal">
+        <div class="gradient-border-card" style="display: inline-block; max-width: 900px;">
+          <div class="gradient-border-inner" style="background: rgba(26,26,26,0.95);">
+            <p class="conclusion-final-text">
+              厳密な言い方をすると、本レポートが出典付きで言えるのは<br>
+              「YKKが高品質を実現しやすい<strong>構造</strong>（統合生産・高精度・規格提示・巨量販売・規制適合・知財/模倣品対策）を、数値と一次資料で説明できる」ことであり、「競合より常に物理性能が上」といった断定ではない。<br><br>
+              にもかかわらずYKKが"高品質の代名詞"として扱われやすいのは、<br>
+              <strong>品質の定義（規格値）と、その再現性（工程能力）が、<br>公開資料上で最も一貫して語られているため</strong>である。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer id="site-footer">
+  <div class="footer-content">
+    <div class="footer-top">
+      <div class="footer-col">
+        <a href="#hero" class="nav-logo" style="margin-bottom: 8px;">
+          <div class="nav-logo-icon" style="width:36px;height:36px;font-size:13px;">YKK</div>
+          <div>
+            <div class="nav-logo-text" style="color:rgba(255,255,255,0.8);font-size:16px;">YKKの品質</div>
+          </div>
+        </a>
+        <div class="footer-brand-text">
+          本サイトは公開資料に基づくYKK品質の分析レポートです。YKK株式会社の公式サイトではありません。掲載情報はレポート作成時点のものであり、最新情報はYKK公式サイトをご確認ください。
+        </div>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">セクション</div>
+        <a href="#executive-summary">エグゼクティブサマリー</a>
+        <a href="#five-pillars">5つの柱</a>
+        <a href="#product-types">製品分類</a>
+        <a href="#integrated-production">統合生産</a>
+        <a href="#jis-standards">JIS強度規格</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">分析</div>
+        <a href="#scale">スケール</a>
+        <a href="#chemical-management">化学物質管理</a>
+        <a href="#ip-protection">知財保護</a>
+        <a href="#competitors">競合比較</a>
+        <a href="#conclusion">結論</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">主要出典</div>
+        <a href="https://www.ykk.com/english/csr/eco/report/pdf/2024/This_is_YKK_2024_all_en.pdf" target="_blank" rel="noopener">YKK統合報告書2024</a>
+        <a href="https://lyncs.ykkfastening.com/shop/pages/about_products_07.aspx" target="_blank" rel="noopener">YKK強度規格表</a>
+        <a href="https://www.cpsc.gov/s3fs-public/pdfs/blk_pdf_certification2.pdf" target="_blank" rel="noopener">CPSC公開PDF</a>
+        <a href="https://www.ykkfastening.com/quality/management.html" target="_blank" rel="noopener">YKK品質管理</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-bottom-text">
+        © 2025 YKK Quality Evidence Report. This is an independent analysis, not affiliated with YKK Corporation.
+      </div>
+      <div class="footer-bottom-text">
+        Based on publicly available primary sources
+      </div>
+    </div>
+
+    <div class="footer-source-note">
+      本レポートで「未確認（非公開）」とした指標（不良率、リコール件数、摩耗寿命、保証返品率など）は、一次資料または独立第三者が同条件で比較したデータが見つからない限り推定していません。情報の正確性には細心の注意を払っていますが、最新の公式情報は各社のウェブサイトをご確認ください。
+    </div>
+  </div>
+</footer>
+
+<!-- ===== PART 2 JAVASCRIPT ===== -->
+<script>
+/* ===== COMPARISON BAR ANIMATION ===== */
+(function() {
+  const bars = document.querySelectorAll('.comparison-bar-fill');
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const targetWidth = entry.target.getAttribute('data-width');
+        entry.target.style.width = targetWidth + '%';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  bars.forEach(function(bar) { observer.observe(bar); });
+})();
+
+/* ===== TILT CARD RE-INIT (for new cards) ===== */
+(function() {
+  const tiltCards = document.querySelectorAll('.tilt-card');
+  tiltCards.forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (y - centerY) / centerY * -5;
+      const rotateY = (x - centerX) / centerX * 5;
+      card.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateY(-4px) scale(1.01)';
+    });
+    card.addEventListener('mouseleave', function() {
+      card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)';
+    });
+  });
+})();
+
+/* ===== REVEAL ANIMATIONS RE-INIT (for new sections) ===== */
+(function() {
+  const revealElements = document.querySelectorAll('#ip-protection .reveal, #ip-protection .reveal-left, #ip-protection .reveal-right, #ip-protection .reveal-scale, #quality-flow .reveal, #evaluation-criteria .reveal, #competitors .reveal, #competitors .reveal-scale, #customer-adoption .reveal, #customer-adoption .reveal-left, #customer-adoption .reveal-right, #strengths-weaknesses .reveal-left, #strengths-weaknesses .reveal-right, #strengths-weaknesses .reveal, #conclusion .reveal');
+
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px 0px -60px 0px',
+    threshold: 0.08
+  };
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, observerOptions);
+
+  revealElements.forEach(function(el) {
+    observer.observe(el);
+  });
+})();
+
+/* ===== CURSOR FOLLOWER UPDATE (for new interactive elements) ===== */
+(function() {
+  const cursor = document.getElementById('cursor-follower');
+  if (!cursor || cursor.style.display === 'none') return;
+
+  const newInteractive = document.querySelectorAll('#ip-protection .ip-stat-box, #competitors .competitor-table tbody tr, #customer-adoption .customer-card, #strengths-weaknesses .sw-item, #conclusion .conclusion-block, .eval-card, .flow-node, .customer-additional-card');
+  newInteractive.forEach(function(el) {
+    el.addEventListener('mouseenter', function() { cursor.classList.add('active'); });
+    el.addEventListener('mouseleave', function() { cursor.classList.remove('active'); });
+  });
+})();
+
+/* ===== COMPETITOR TABLE ROW HIGHLIGHT ===== */
+(function() {
+  const rows = document.querySelectorAll('.competitor-table tbody tr');
+  rows.forEach(function(row) {
+    row.addEventListener('mouseenter', function() {
+      rows.forEach(function(r) { r.style.opacity = '0.5'; });
+      row.style.opacity = '1';
+    });
+    row.addEventListener('mouseleave', function() {
+      rows.forEach(function(r) { r.style.opacity = '1'; });
+    });
+  });
+})();
+
+/* ===== CUSTOMER CARD SEQUENTIAL ANIMATION ===== */
+(function() {
+  const cards = document.querySelectorAll('.customer-card');
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        cards.forEach(function(card, index) {
+          setTimeout(function() {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, index * 100);
+        });
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.2 });
+
+  if (cards.length > 0) {
+    observer.observe(cards[0]);
+  }
+})();
+
+/* ===== FLOW NODE SEQUENTIAL HIGHLIGHT ===== */
+(function() {
+  const nodes = document.querySelectorAll('.flow-node');
+  let currentIndex = 0;
+  let isFlowVisible = false;
+
+  function highlightNext() {
+    if (!isFlowVisible) return;
+    nodes.forEach(function(node) { node.style.borderColor = 'rgba(0,0,0,0.04)'; });
+    if (nodes[currentIndex]) {
+      nodes[currentIndex].style.borderColor = 'rgba(200,16,46,0.3)';
+      nodes[currentIndex].style.boxShadow = '0 4px 20px rgba(200,16,46,0.08)';
+      setTimeout(function() {
+        if (nodes[currentIndex]) {
+          nodes[currentIndex].style.boxShadow = 'none';
+        }
+      }, 1500);
+    }
+    currentIndex = (currentIndex + 1) % nodes.length;
+  }
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        isFlowVisible = true;
+        setInterval(highlightNext, 2000);
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const flowSection = document.getElementById('quality-flow');
+  if (flowSection) observer.observe(flowSection);
+})();
+
+/* ===== SW ITEMS STAGGER ===== */
+(function() {
+  const items = document.querySelectorAll('.sw-item');
+  items.forEach(function(item, index) {
+    item.style.transitionDelay = (0.05 * index) + 's';
+  });
+})();
+
+/* ===== CONCLUSION BLOCKS COUNT-UP ===== */
+(function() {
+  const blocks = document.querySelectorAll('.conclusion-block');
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        blocks.forEach(function(block, i) {
+          setTimeout(function() {
+            block.style.opacity = '1';
+            block.style.transform = 'translateX(0)';
+          }, i * 150);
+        });
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.2 });
+
+  if (blocks.length > 0) observer.observe(blocks[0]);
+})();
+
+/* ===== ORBIT ANIMATION SPEED VARIATION ===== */
+(function() {
+  const orbits = document.querySelectorAll('.ip-orbit-ring');
+  orbits.forEach(function(orbit, index) {
+    orbit.addEventListener('mouseenter', function() {
+      orbit.style.animationPlayState = 'paused';
+    });
+    orbit.addEventListener('mouseleave', function() {
+      orbit.style.animationPlayState = 'running';
+    });
+  });
+})();
+
+/* ===== SMOOTH SCROLL SECTION INDICATOR ===== */
+(function() {
+  const allSections = document.querySelectorAll('section[id]');
+  const sectionNames = {};
+  allSections.forEach(function(section) {
+    const header = section.querySelector('.section-title, .conclusion-headline');
+    if (header) {
+      sectionNames[section.id] = header.textContent.trim().substring(0, 30);
+    }
+  });
+})();
+
+/* ===== KEYBOARD NAVIGATION ===== */
+(function() {
+  const sectionIds = [];
+  document.querySelectorAll('section[id]').forEach(function(s) {
+    sectionIds.push(s.id);
+  });
+
+  let currentSectionIdx = 0;
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowDown' && e.altKey) {
+      e.preventDefault();
+      currentSectionIdx = Math.min(currentSectionIdx + 1, sectionIds.length - 1);
+      document.getElementById(sectionIds[currentSectionIdx]).scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'ArrowUp' && e.altKey) {
+      e.preventDefault();
+      currentSectionIdx = Math.max(currentSectionIdx - 1, 0);
+      document.getElementById(sectionIds[currentSectionIdx]).scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+})();
+
+/* ===== EVAL CARD HOVER COUNTER ===== */
+(function() {
+  const evalCards = document.querySelectorAll('.eval-card');
+  evalCards.forEach(function(card) {
+    let hoverCount = 0;
+    card.addEventListener('mouseenter', function() {
+      hoverCount++;
+      if (hoverCount >= 3) {
+        card.style.borderColor = 'rgba(200,16,46,0.2)';
+      }
+    });
+  });
+})();
+
+/* ===== FOOTER YEAR AUTO-UPDATE ===== */
+(function() {
+  const yearElements = document.querySelectorAll('.auto-year');
+  const currentYear = new Date().getFullYear();
+  yearElements.forEach(function(el) {
+    el.textContent = currentYear;
+  });
+})();
+
+/* ===== LAZY IMAGE PLACEHOLDER EFFECT ===== */
+(function() {
+  const placeholders = document.querySelectorAll('.customer-logo-placeholder');
+  placeholders.forEach(function(ph) {
+    const colors = ['#c8102e', '#003da5', '#2e7d32', '#b8860b', '#6a1b9a'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    ph.style.setProperty('--hover-bg', randomColor);
+  });
+})();
+
+/* ===== PRINT STYLES SUPPORT ===== */
+(function() {
+  const style = document.createElement('style');
+  style.textContent = '@media print { .cursor-follower, .scroll-progress, #main-nav, .back-to-top, .hero-floating-shapes, .particles-container, .hero-scroll-indicator, .marquee-section { display: none !important; } .reveal, .reveal-left, .reveal-right, .reveal-scale { opacity: 1 !important; transform: none !important; } body { color: #000; } #integrated-production, #conclusion { background: #fff !important; color: #000 !important; } }';
+  document.head.appendChild(style);
+})();
+</script>
+
+<!-- ============================================================ -->
+<!-- ===== END OF PART 2 — パート3で残りの高度な機能を追加 ===== -->
+<!-- ============================================================ -->
+<!-- ====================================================================== -->
+<!-- ===== PART 3 START: 超高度インタラクション・最終仕上げ ============= -->
+<!-- ====================================================================== -->
+
+<!-- ===== PART 3 MEGA STYLES ===== -->
+<style>
+/* ===== DARK MODE ===== */
+body.dark-mode {
+  --ykk-black: #f0f0f0;
+  --ykk-dark: #e0e0e0;
+  --ykk-gray: #aaaaaa;
+  --ykk-light: #1e1e1e;
+  --ykk-white: #121212;
+  background: #121212;
+  color: #f0f0f0;
+}
+
+body.dark-mode #main-nav.scrolled {
+  background: rgba(18,18,18,0.95);
+}
+
+body.dark-mode .nav-logo-icon {
+  background: var(--ykk-accent);
+}
+
+body.dark-mode .jis-table thead {
+  background: #2a2a2a;
+}
+
+body.dark-mode .competitor-table thead {
+  background: #2a2a2a;
+}
+
+body.dark-mode .competitor-table thead th.ykk-col {
+  background: var(--ykk-accent);
+}
+
+body.dark-mode .jis-table tbody tr:hover,
+body.dark-mode .competitor-table tbody tr:hover {
+  background: rgba(200,16,46,0.06);
+}
+
+body.dark-mode .summary-card,
+body.dark-mode .pillar-card,
+body.dark-mode .product-type-card,
+body.dark-mode .scale-card,
+body.dark-mode .chemical-info-block,
+body.dark-mode .complexity-card,
+body.dark-mode .ip-stat-box,
+body.dark-mode .flow-node,
+body.dark-mode .eval-card,
+body.dark-mode .customer-card,
+body.dark-mode .customer-additional-card,
+body.dark-mode .sw-item {
+  background: #1e1e1e;
+  border-color: rgba(255,255,255,0.06);
+}
+
+body.dark-mode .gradient-border-inner {
+  background: #1a1a1a;
+}
+
+body.dark-mode #integrated-production {
+  background: #0a0a0a;
+}
+
+body.dark-mode #conclusion {
+  background: #0a0a0a;
+}
+
+body.dark-mode #site-footer {
+  background: #0a0a0a;
+}
+
+body.dark-mode .jis-note,
+body.dark-mode .competitor-note {
+  background: #1e1e1e;
+}
+
+body.dark-mode .loading-text { color: #ccc; }
+
+body.dark-mode .hero-grid-line { background: rgba(255,255,255,0.04); }
+
+body.dark-mode ::-webkit-scrollbar-track { background: #1e1e1e; }
+body.dark-mode ::-webkit-scrollbar-thumb { background: #555; }
+
+body.dark-mode .marquee-section { background: #0a0a0a; }
+
+body.dark-mode .product-type-info { background: #1e1e1e; }
+
+body.dark-mode .product-feature-tag {
+  background: #2a2a2a;
+  color: #ccc;
+}
+
+body.dark-mode .jis-table-wrapper,
+body.dark-mode .competitor-table-wrapper {
+  border-color: rgba(255,255,255,0.08);
+}
+
+body.dark-mode .flow-feedback-loop {
+  border-color: rgba(200,16,46,0.25);
+}
+
+body.dark-mode .flow-feedback-loop::before {
+  background: #121212;
+}
+
+body.dark-mode .sw-column-header.strengths { border-color: var(--ykk-green); }
+body.dark-mode .sw-column-header.weaknesses { border-color: var(--ykk-accent); }
+
+/* ===== DARK MODE TOGGLE ===== */
+.dark-mode-toggle {
+  position: fixed;
+  bottom: 90px;
+  right: 30px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.1);
+  background: var(--ykk-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  z-index: 9997;
+  transition: all var(--transition-mid);
+  box-shadow: var(--shadow-md);
+}
+
+body.dark-mode .dark-mode-toggle {
+  border-color: rgba(255,255,255,0.15);
+  background: #1e1e1e;
+}
+
+.dark-mode-toggle:hover {
+  transform: translateY(-3px) rotate(20deg);
+  box-shadow: var(--shadow-lg);
+}
+
+.dark-mode-toggle .icon-sun,
+.dark-mode-toggle .icon-moon {
+  position: absolute;
+  transition: all var(--transition-mid);
+}
+
+.dark-mode-toggle .icon-moon { opacity: 1; transform: rotate(0deg); }
+.dark-mode-toggle .icon-sun { opacity: 0; transform: rotate(-90deg); }
+
+body.dark-mode .dark-mode-toggle .icon-moon { opacity: 0; transform: rotate(90deg); }
+body.dark-mode .dark-mode-toggle .icon-sun { opacity: 1; transform: rotate(0deg); }
+
+/* ===== SIDE NAVIGATION DOTS ===== */
+.side-nav {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9996;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity var(--transition-mid);
+}
+
+.side-nav.visible {
+  opacity: 1;
+}
+
+.side-nav-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: all var(--transition-mid);
+  position: relative;
+}
+
+body.dark-mode .side-nav-dot {
+  background: rgba(255,255,255,0.15);
+}
+
+.side-nav-dot.active {
+  background: var(--ykk-accent);
+  transform: scale(1.3);
+  box-shadow: 0 0 10px rgba(200,16,46,0.4);
+}
+
+.side-nav-dot:hover {
+  background: var(--ykk-accent);
+  transform: scale(1.2);
+}
+
+.side-nav-tooltip {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--ykk-accent);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition-fast);
+}
+
+.side-nav-dot:hover .side-nav-tooltip {
+  opacity: 1;
+  right: 28px;
+}
+
+/* ===== INTERACTIVE CHART SECTION ===== */
+#interactive-charts {
+  background: var(--ykk-white);
+  position: relative;
+}
+
+body.dark-mode #interactive-charts {
+  background: #121212;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.chart-panel {
+  background: var(--ykk-light);
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  border: 1px solid rgba(0,0,0,0.04);
+  transition: all var(--transition-mid);
+  position: relative;
+  overflow: hidden;
+}
+
+body.dark-mode .chart-panel {
+  background: #1e1e1e;
+  border-color: rgba(255,255,255,0.06);
+}
+
+.chart-panel:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.chart-panel-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 8px;
+}
+
+.chart-panel-subtitle {
+  font-size: 13px;
+  color: var(--ykk-gray);
+  margin-bottom: 24px;
+}
+
+/* BAR CHART */
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  height: 220px;
+  padding-top: 20px;
+  border-bottom: 2px solid rgba(0,0,0,0.06);
+  position: relative;
+}
+
+body.dark-mode .bar-chart { border-bottom-color: rgba(255,255,255,0.08); }
+
+.bar-chart-y-axis {
+  position: absolute;
+  left: -8px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--ykk-gray);
+  pointer-events: none;
+}
+
+.bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.bar-fill {
+  width: 100%;
+  max-width: 50px;
+  border-radius: 8px 8px 0 0;
+  transition: height 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  height: 0%;
+  position: relative;
+  cursor: pointer;
+  min-height: 4px;
+}
+
+.bar-fill.animated {
+  /* Height set via JS */
+}
+
+.bar-fill:hover {
+  filter: brightness(1.15);
+}
+
+.bar-fill::after {
+  content: attr(data-value);
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+}
+
+.bar-fill:hover::after {
+  opacity: 1;
+}
+
+.bar-label {
+  font-size: 11px;
+  color: var(--ykk-gray);
+  font-weight: 600;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.bar-fy17 { background: linear-gradient(to top, #c8102e, #ff4444); }
+.bar-fy18 { background: linear-gradient(to top, #c8102e, #e8384f); }
+.bar-fy19 { background: linear-gradient(to top, #003da5, #4a90d9); }
+.bar-fy20 { background: linear-gradient(to top, #003da5, #6ba5e7); }
+
+/* DONUT CHART */
+.donut-chart-container {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  justify-content: center;
+}
+
+.donut-svg-wrap {
+  width: 180px;
+  height: 180px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.donut-svg-wrap svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.donut-center-value {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--ykk-accent);
+  line-height: 1;
+}
+
+.donut-center-label {
+  font-size: 10px;
+  color: var(--ykk-gray);
+  letter-spacing: 1px;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ykk-dark);
+  transition: all var(--transition-fast);
+  cursor: default;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.donut-legend-item:hover {
+  background: rgba(0,0,0,0.03);
+}
+
+body.dark-mode .donut-legend-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* RADAR CHART */
+.radar-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.radar-chart-svg {
+  width: 280px;
+  height: 280px;
+}
+
+/* HORIZONTAL BAR CHART */
+.h-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.h-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.h-bar-label {
+  width: 120px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ykk-dark);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.h-bar-track {
+  flex: 1;
+  height: 24px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+body.dark-mode .h-bar-track {
+  background: rgba(255,255,255,0.06);
+}
+
+.h-bar-fill {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  width: 0%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  position: relative;
+}
+
+.h-bar-fill.bar-red { background: linear-gradient(90deg, #c8102e, #ff5555); }
+.h-bar-fill.bar-blue { background: linear-gradient(90deg, #003da5, #5b9bd5); }
+.h-bar-fill.bar-gold { background: linear-gradient(90deg, #b8860b, #d4a843); }
+.h-bar-fill.bar-green { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
+.h-bar-fill.bar-purple { background: linear-gradient(90deg, #6a1b9a, #ab47bc); }
+
+/* ===== 3D FLIP CARDS ===== */
+#flip-cards-section {
+  background: var(--ykk-light);
+}
+
+body.dark-mode #flip-cards-section {
+  background: #161616;
+}
+
+.flip-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.flip-card-wrapper {
+  perspective: 1200px;
+  height: 320px;
+}
+
+.flip-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.flip-card.flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  backface-visibility: hidden;
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.flip-card-front {
+  background: var(--ykk-white);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-md);
+}
+
+body.dark-mode .flip-card-front {
+  background: #1e1e1e;
+  border-color: rgba(255,255,255,0.06);
+}
+
+.flip-card-back {
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+  transform: rotateY(180deg);
+}
+
+body.dark-mode .flip-card-back {
+  background: #c8102e;
+}
+
+.flip-card-front-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  transition: transform var(--transition-mid);
+}
+
+.flip-card:hover .flip-card-front-icon {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.flip-card-front-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ykk-black);
+  margin-bottom: 8px;
+}
+
+.flip-card-front-hint {
+  font-size: 11px;
+  color: var(--ykk-gray);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 12px;
+  opacity: 0.6;
+}
+
+.flip-card-back-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+body.dark-mode .flip-card-back-title { color: #fff; }
+
+.flip-card-back-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.8);
+}
+
+.flip-card-back-stat {
+  font-size: 36px;
+  font-weight: 900;
+  margin-top: 16px;
+  line-height: 1;
+}
+
+body.dark-mode .flip-card-back-stat { color: #fff; }
+
+.flip-card-back-stat-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* ===== MORPHING SVG SECTION ===== */
+#morphing-section {
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+  padding: 100px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+body.dark-mode #morphing-section {
+  background: #0a0a0a;
+}
+
+.morphing-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+.morphing-svg-area {
+  flex: 0 0 400px;
+  height: 400px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.morphing-svg-area svg {
+  width: 300px;
+  height: 300px;
+}
+
+.morph-path {
+  transition: d 1.5s cubic-bezier(0.4, 0, 0.2, 1), fill 1s ease;
+}
+
+.morphing-text-area {
+  flex: 1;
+}
+
+.morphing-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.morph-tab {
+  padding: 10px 20px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-mid);
+}
+
+.morph-tab:hover {
+  border-color: rgba(200,16,46,0.5);
+  color: rgba(255,255,255,0.9);
+}
+
+.morph-tab.active {
+  background: var(--ykk-accent);
+  border-color: var(--ykk-accent);
+  color: white;
+}
+
+.morphing-content-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  transition: all var(--transition-mid);
+}
+
+.morphing-content-text {
+  font-size: 15px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.9;
+  transition: all var(--transition-mid);
+}
+
+/* ===== TYPING ANIMATION ===== */
+.typing-section {
+  padding: 80px 0;
+  text-align: center;
+  background: var(--ykk-light);
+}
+
+body.dark-mode .typing-section {
+  background: #161616;
+}
+
+.typing-text {
+  font-size: clamp(18px, 3vw, 32px);
+  font-weight: 700;
+  color: var(--ykk-black);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1em;
+  background: var(--ykk-accent);
+  margin-left: 4px;
+  animation: typingCursorBlink 0.8s step-end infinite;
+  vertical-align: text-bottom;
+}
+
+@keyframes typingCursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ===== PARALLAX IMAGE CARDS ===== */
+#parallax-cards {
+  padding: 120px 0;
+  background: var(--ykk-white);
+  overflow: hidden;
+}
+
+body.dark-mode #parallax-cards { background: #121212; }
+
+.parallax-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.parallax-card {
+  height: 350px;
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: all var(--transition-mid);
+}
+
+.parallax-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-xl);
+}
+
+.parallax-card-bg {
+  position: absolute;
+  top: -20px; left: -20px;
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+  transition: transform 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parallax-card:hover .parallax-card-bg {
+  transform: scale(1.05);
+}
+
+.parallax-card-bg.bg-1 { background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%); }
+.parallax-card-bg.bg-2 { background: linear-gradient(135deg, #c8102e 0%, #ff5555 100%); }
+.parallax-card-bg.bg-3 { background: linear-gradient(135deg, #003da5 0%, #5ba3e7 100%); }
+.parallax-card-bg.bg-4 { background: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%); }
+
+.parallax-card-bg-icon {
+  font-size: 120px;
+  opacity: 0.1;
+  color: white;
+}
+
+.parallax-card-content {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  padding: 30px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+  color: white;
+}
+
+.parallax-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 8px;
+}
+
+.parallax-card-title {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.parallax-card-desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.5;
+}
+
+/* ===== SCROLL-TRIGGERED NUMBER COUNTER STRIP ===== */
+.number-strip {
+  padding: 60px 0;
+  background: var(--ykk-accent);
+  color: white;
+  overflow: hidden;
+}
+
+.number-strip-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.number-strip-item {
+  text-align: center;
+  flex: 1;
+  min-width: 150px;
+}
+
+.number-strip-value {
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.number-strip-label {
+  font-size: 12px;
+  opacity: 0.75;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ===== TOAST NOTIFICATION ===== */
+.toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--ykk-black);
+  color: var(--ykk-white);
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-xl);
+  z-index: 99999;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+body.dark-mode .toast {
+  background: var(--ykk-accent);
+  color: white;
+}
+
+.toast.visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== SECTION DIVIDER SVG ===== */
+.section-divider {
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.section-divider svg {
+  display: block;
+  width: 100%;
+  height: 60px;
+}
+
+.section-divider.white svg path { fill: var(--ykk-white); }
+.section-divider.light svg path { fill: var(--ykk-light); }
+.section-divider.dark svg path { fill: var(--ykk-black); }
+
+/* ===== ANIMATED LOGO WATERMARK ===== */
+.watermark {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  font-size: 80px;
+  font-weight: 900;
+  color: rgba(0,0,0,0.015);
+  letter-spacing: -3px;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  transition: color var(--transition-mid);
+}
+
+body.dark-mode .watermark {
+  color: rgba(255,255,255,0.02);
+}
+
+/* ===== RESPONSIVE PART 3 ===== */
+@media (max-width: 1024px) {
+  .charts-grid { grid-template-columns: 1fr; }
+  .morphing-container { flex-direction: column; }
+  .morphing-svg-area { flex: none; width: 100%; height: 300px; }
+  .parallax-cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .flip-cards-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .side-nav { display: none; }
+  .parallax-cards-grid { grid-template-columns: 1fr; }
+  .flip-cards-grid { grid-template-columns: 1fr; }
+  .number-strip-inner { justify-content: center; }
+  .watermark { display: none; }
+  .dark-mode-toggle { bottom: 85px; right: 20px; width: 42px; height: 42px; font-size: 18px; }
+  .morphing-svg-area { height: 240px; }
+  .morphing-svg-area svg { width: 200px; height: 200px; }
+}
+</style>
+
+<!-- ===== SIDE NAVIGATION ===== -->
+<nav class="side-nav" id="side-nav">
+  <div class="side-nav-dot" data-target="hero">
+    <span class="side-nav-tooltip">トップ</span>
+  </div>
+  <div class="side-nav-dot" data-target="executive-summary">
+    <span class="side-nav-tooltip">概要</span>
+  </div>
+  <div class="side-nav-dot" data-target="five-pillars">
+    <span class="side-nav-tooltip">5つの柱</span>
+  </div>
+  <div class="side-nav-dot" data-target="product-types">
+    <span class="side-nav-tooltip">製品</span>
+  </div>
+  <div class="side-nav-dot" data-target="integrated-production">
+    <span class="side-nav-tooltip">統合生産</span>
+  </div>
+  <div class="side-nav-dot" data-target="jis-standards">
+    <span class="side-nav-tooltip">JIS規格</span>
+  </div>
+  <div class="side-nav-dot" data-target="scale">
+    <span class="side-nav-tooltip">スケール</span>
+  </div>
+  <div class="side-nav-dot" data-target="chemical-management">
+    <span class="side-nav-tooltip">化学物質管理</span>
+  </div>
+  <div class="side-nav-dot" data-target="interactive-charts">
+    <span class="side-nav-tooltip">データ可視化</span>
+  </div>
+  <div class="side-nav-dot" data-target="ip-protection">
+    <span class="side-nav-tooltip">知財保護</span>
+  </div>
+  <div class="side-nav-dot" data-target="competitors">
+    <span class="side-nav-tooltip">競合比較</span>
+  </div>
+  <div class="side-nav-dot" data-target="conclusion">
+    <span class="side-nav-tooltip">結論</span>
+  </div>
+</nav>
+
+<!-- ===== DARK MODE TOGGLE ===== -->
+<button class="dark-mode-toggle" id="dark-mode-toggle" aria-label="ダークモード切替">
+  <span class="icon-moon">🌙</span>
+  <span class="icon-sun">☀️</span>
+</button>
+
+<!-- ===== WATERMARK ===== -->
+<div class="watermark">YKK</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== SECTION DIVIDER (after Chemical Management) ===== -->
+<div class="section-divider light">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+    <path d="M0,0 C480,60 960,60 1440,0 L1440,60 L0,60 Z"/>
+  </svg>
+</div>
+
+<!-- ===== INTERACTIVE CHARTS ===== -->
+<section id="interactive-charts" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Data Visualization
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">データで見るYKKの実力</h2>
+      <p class="section-desc">
+        統合報告書および公開データから抽出した主要指標のインタラクティブ可視化
+      </p>
+    </div>
+
+    <div class="charts-grid">
+      <!-- Bar Chart: Sales Volume -->
+      <div class="chart-panel reveal-left">
+        <div class="chart-panel-title">ファスナー販売本数の推移</div>
+        <div class="chart-panel-subtitle">単位：十億本（統合報告書データ）</div>
+        <div class="bar-chart" id="bar-chart-sales">
+          <div class="bar-item">
+            <div class="bar-fill bar-fy17" data-value="9.53B" data-height="94"></div>
+            <div class="bar-label">FY2017</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-fill bar-fy18" data-value="10.07B" data-height="100"></div>
+            <div class="bar-label">FY2018</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-fill bar-fy19" data-value="9.55B" data-height="95"></div>
+            <div class="bar-label">FY2019</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-fill bar-fy20" data-value="7.79B" data-height="77"></div>
+            <div class="bar-label">FY2020</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Donut: Revenue Split -->
+      <div class="chart-panel reveal-right">
+        <div class="chart-panel-title">売上構成（事業別）</div>
+        <div class="chart-panel-subtitle">FY2025.3末 — 全体 9,982億円</div>
+        <div class="donut-chart-container">
+          <div class="donut-svg-wrap">
+            <svg viewBox="0 0 180 180">
+              <circle cx="90" cy="90" r="70" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="24"/>
+              <circle cx="90" cy="90" r="70" fill="none" stroke="#c8102e" stroke-width="24"
+                      stroke-dasharray="191 249" stroke-dashoffset="0" stroke-linecap="round"
+                      class="donut-segment donut-seg-1" style="transition: stroke-dasharray 2s ease;"/>
+              <circle cx="90" cy="90" r="70" fill="none" stroke="#003da5" stroke-width="24"
+                      stroke-dasharray="150 290" stroke-dashoffset="-191" stroke-linecap="round"
+                      class="donut-segment donut-seg-2" style="transition: stroke-dasharray 2s ease;"/>
+              <circle cx="90" cy="90" r="70" fill="none" stroke="#b8860b" stroke-width="24"
+                      stroke-dasharray="99 341" stroke-dashoffset="-341" stroke-linecap="round"
+                      class="donut-segment donut-seg-3" style="transition: stroke-dasharray 2s ease;"/>
+            </svg>
+            <div class="donut-center-text">
+              <div class="donut-center-value">9,982</div>
+              <div class="donut-center-label">億円</div>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="donut-legend-item"><div class="legend-color" style="background:#c8102e;"></div>ファスニング 4,331億円</div>
+            <div class="donut-legend-item"><div class="legend-color" style="background:#003da5;"></div>AP事業 ※推定領域</div>
+            <div class="donut-legend-item"><div class="legend-color" style="background:#b8860b;"></div>その他事業</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Horizontal Bar: JIS Strength Comparison -->
+      <div class="chart-panel reveal-left">
+        <div class="chart-panel-title">JIS等級別：チェーン横引強度</div>
+        <div class="chart-panel-subtitle">単独エレメント×化繊テープ（N）</div>
+        <div class="h-bar-chart" id="h-bar-chart-jis">
+          <div class="h-bar-item">
+            <div class="h-bar-label">UL級</div>
+            <div class="h-bar-track"><div class="h-bar-fill bar-red" data-width="22" data-label="150N">150</div></div>
+          </div>
+          <div class="h-bar-item">
+            <div class="h-bar-label">L級</div>
+            <div class="h-bar-track"><div class="h-bar-fill bar-red" data-width="33" data-label="230N">230</div></div>
+          </div>
+          <div class="h-bar-item">
+            <div class="h-bar-label">M級</div>
+            <div class="h-bar-track"><div class="h-bar-fill bar-blue" data-width="43" data-label="300N">300</div></div>
+          </div>
+          <div class="h-bar-item">
+            <div class="h-bar-label">MH級</div>
+            <div class="h-bar-track"><div class="h-bar-fill bar-blue" data-width="57" data-label="390N">390</div></div>
+          </div>
+          <div class="h-bar-item">
+            <div class="h-bar-label">H級</div>
+            <div class="h-bar-track"><div class="h-bar-fill bar-gold" data-width="71" data-label="490N">490</div></div>
+          </div>
+          <div class="h-bar-item">
+            <div class="h-bar-label">UH級</div>
+            <div class="h-bar-track"><div class="h-bar-fill bar-green" data-width="100" data-label="690N">690</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Radar: 6-Axis Eval -->
+      <div class="chart-panel reveal-right">
+        <div class="chart-panel-title">6軸品質評価（公開情報の充実度）</div>
+        <div class="chart-panel-subtitle">YKKの各評価軸における情報開示レベル</div>
+        <div class="radar-chart-container">
+          <svg class="radar-chart-svg" viewBox="0 0 280 280" id="radar-chart">
+            <!-- Grid -->
+            <polygon points="140,30 230,85 230,195 140,250 50,195 50,85" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+            <polygon points="140,58 212,99 212,181 140,222 68,181 68,99" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>
+            <polygon points="140,86 194,113 194,167 140,194 86,167 86,113" fill="none" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+            <!-- Axes -->
+            <line x1="140" y1="30" x2="140" y2="250" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+            <line x1="50" y1="85" x2="230" y2="195" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+            <line x1="230" y1="85" x2="50" y2="195" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+            <!-- Data polygon -->
+            <polygon id="radar-polygon" points="140,40 222,90 225,185 140,235 60,185 55,92"
+                     fill="rgba(200,16,46,0.12)" stroke="var(--ykk-accent)" stroke-width="2"
+                     style="transition: all 1.5s ease;"/>
+            <!-- Data points -->
+            <circle cx="140" cy="40" r="5" fill="var(--ykk-accent)" class="radar-point"/>
+            <circle cx="222" cy="90" r="5" fill="var(--ykk-accent)" class="radar-point"/>
+            <circle cx="225" cy="185" r="5" fill="var(--ykk-accent)" class="radar-point"/>
+            <circle cx="140" cy="235" r="5" fill="var(--ykk-accent)" class="radar-point"/>
+            <circle cx="60" cy="185" r="5" fill="var(--ykk-accent)" class="radar-point"/>
+            <circle cx="55" cy="92" r="5" fill="var(--ykk-accent)" class="radar-point"/>
+            <!-- Labels -->
+            <text x="140" y="20" text-anchor="middle" font-size="10" font-weight="600" fill="currentColor">試験規格</text>
+            <text x="245" y="88" text-anchor="start" font-size="10" font-weight="600" fill="currentColor">品質管理</text>
+            <text x="245" y="200" text-anchor="start" font-size="10" font-weight="600" fill="currentColor">グローバル</text>
+            <text x="140" y="268" text-anchor="middle" font-size="10" font-weight="600" fill="currentColor">トレーサビリティ</text>
+            <text x="35" y="200" text-anchor="end" font-size="10" font-weight="600" fill="currentColor">技術/知財</text>
+            <text x="35" y="88" text-anchor="end" font-size="10" font-weight="600" fill="currentColor">顧客採用</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NUMBER STRIP ===== -->
+<div class="number-strip" id="number-strip">
+  <div class="number-strip-inner">
+    <div class="number-strip-item">
+      <div class="number-strip-value" data-count="5859">0</div>
+      <div class="number-strip-label">特許・意匠（件）</div>
+    </div>
+    <div class="number-strip-item">
+      <div class="number-strip-value" data-count="177">0</div>
+      <div class="number-strip-label">商標登録国・地域</div>
+    </div>
+    <div class="number-strip-item">
+      <div class="number-strip-value" data-count="374000">0</div>
+      <div class="number-strip-label">ジッパーSKU数</div>
+    </div>
+    <div class="number-strip-item">
+      <div class="number-strip-value" data-count="578">0</div>
+      <div class="number-strip-label">在庫色数</div>
+    </div>
+    <div class="number-strip-item">
+      <div class="number-strip-value" data-count="513">0</div>
+      <div class="number-strip-label">事業拠点数</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3D FLIP CARDS ===== -->
+<section id="flip-cards-section" class="section">
+  <div class="section-container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Deep Dive Cards
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">品質を深掘りする</h2>
+      <p class="section-desc">カードをクリックして裏面の詳細情報を確認</p>
+    </div>
+
+    <div class="flip-cards-grid">
+      <div class="flip-card-wrapper">
+        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-front">
+            <div class="flip-card-front-icon">⚙️</div>
+            <div class="flip-card-front-title">塑性加工と精度</div>
+            <div class="flip-card-front-hint">Click to reveal</div>
+          </div>
+          <div class="flip-card-back">
+            <div class="flip-card-back-title">せん断・鍛造・曲げの連続工程</div>
+            <div class="flip-card-back-text">日本機械学会の講演論文でも、金属ファスナーの"歯"が銅合金で構成され、塑性加工プロセスが連続・高スループットで運用される製造前提が説明されている。</div>
+            <div class="flip-card-back-stat">0.01mm</div>
+            <div class="flip-card-back-stat-label">加工精度</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card-wrapper">
+        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-front">
+            <div class="flip-card-front-icon">🤖</div>
+            <div class="flip-card-front-title">スマートファクトリー</div>
+            <div class="flip-card-front-hint">Click to reveal</div>
+          </div>
+          <div class="flip-card-back">
+            <div class="flip-card-back-title">故障許容・全自動ライン</div>
+            <div class="flip-card-back-text">統合報告書ではロボット・AI等の活用に触れ、「故障許容・全自動ライン」を志向する旨を記述。品質＝工程を安定させる仕組みという設計思想。</div>
+            <div class="flip-card-back-stat">300万+</div>
+            <div class="flip-card-back-stat-label">年間生産km</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card-wrapper">
+        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-front">
+            <div class="flip-card-front-icon">🧪</div>
+            <div class="flip-card-front-title">JIS性能項目</div>
+            <div class="flip-card-front-hint">Click to reveal</div>
+          </div>
+          <div class="flip-card-back">
+            <div class="flip-card-back-title">強度以外の品質要素</div>
+            <div class="flip-card-back-text">JIS本文では洗濯による寸法変化、めっき耐食性（塩化ナトリウム溶液浸せき等）、滑り抵抗、染色堅ろう度など複数性能を扱う。</div>
+            <div class="flip-card-back-stat">6等級</div>
+            <div class="flip-card-back-stat-label">UL〜UH</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card-wrapper">
+        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-front">
+            <div class="flip-card-front-icon">🧵</div>
+            <div class="flip-card-front-title">AiryString</div>
+            <div class="flip-card-front-hint">Click to reveal</div>
+          </div>
+          <div class="flip-card-back">
+            <div class="flip-card-back-title">100年ぶりのジッパー革新</div>
+            <div class="flip-card-back-text">WIREDが報じた新型ジッパー。ザ・ノース・フェイス、デサントで採用。JUKIと共同開発し、設備から再設計した統合生産の象徴例。</div>
+            <div class="flip-card-back-stat">New</div>
+            <div class="flip-card-back-stat-label">次世代技術</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card-wrapper">
+        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-front">
+            <div class="flip-card-front-icon">🏷️</div>
+            <div class="flip-card-front-title">Oeko-Tex認証</div>
+            <div class="flip-card-front-hint">Click to reveal</div>
+          </div>
+          <div class="flip-card-back">
+            <div class="flip-card-back-title">安全性の第三者認証</div>
+            <div class="flip-card-back-text">Oeko-Tex Standard 100 Class I（乳幼児対応）を38拠点で取得（2021年3月時点）。安全性は品質の重要な一側面。</div>
+            <div class="flip-card-back-stat">38</div>
+            <div class="flip-card-back-stat-label">認証拠点数</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card-wrapper">
+        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-front">
+            <div class="flip-card-front-icon">🔍</div>
+            <div class="flip-card-front-title">RIRIとの棲み分け</div>
+            <div class="flip-card-front-hint">Click to reveal</div>
+          </div>
+          <div class="flip-card-back">
+            <div class="flip-card-back-title">高級市場での競合構造</div>
+            <div class="flip-card-back-text">RIRIは意匠・高級感で高級ブランドに選ばれる。品質の多面性（機能品質 vs 知覚品質）により市場は棲み分けが存在する。</div>
+            <div class="flip-card-back-stat">Luxury</div>
+            <div class="flip-card-back-stat-label">異なる品質軸</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MORPHING SVG SECTION ===== -->
+<section id="morphing-section">
+  <div class="morphing-container">
+    <div class="morphing-svg-area reveal-left">
+      <svg viewBox="0 0 300 300">
+        <defs>
+          <linearGradient id="morph-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#c8102e" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#ff5555" stop-opacity="0.3"/>
+          </linearGradient>
+          <linearGradient id="morph-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#003da5" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#5ba3e7" stop-opacity="0.3"/>
+          </linearGradient>
+          <linearGradient id="morph-grad-3" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2e7d32" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#66bb6a" stop-opacity="0.3"/>
+          </linearGradient>
+        </defs>
+        <path id="morph-shape" class="morph-path"
+              d="M150,30 C220,30 270,80 270,150 C270,220 220,270 150,270 C80,270 30,220 30,150 C30,80 80,30 150,30 Z"
+              fill="url(#morph-grad-1)" stroke="rgba(200,16,46,0.4)" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="morphing-text-area reveal-right">
+      <div class="morphing-tabs">
+        <button class="morph-tab active" data-morph="0">統合生産</button>
+        <button class="morph-tab" data-morph="1">品質管理</button>
+        <button class="morph-tab" data-morph="2">グローバル展開</button>
+      </div>
+      <h3 class="morphing-content-title" id="morph-title">統合生産思想</h3>
+      <p class="morphing-content-text" id="morph-text">
+        創業者が"材料段階からの統合生産が品質向上に必要"と考えた思想。材料特性と加工条件をセットで最適化し、専用設備を内製。検査規格と工程能力を同一組織内で往復できる。これが0.01mm精度と年間300万km超の生産を同時に実現する基盤となっている。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TYPING SECTION ===== -->
+<div class="typing-section">
+  <div class="section-container">
+    <div class="typing-text" id="typing-text">
+      <span id="typing-output"></span><span class="typing-cursor"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PARALLAX CARDS ===== -->
+<section id="parallax-cards">
+  <div class="section-container" style="padding:0;">
+    <div class="section-header reveal" style="padding:0 40px; margin-bottom:60px;">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        Key Insights
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">4つの重要インサイト</h2>
+    </div>
+  </div>
+
+  <div class="parallax-cards-grid">
+    <div class="parallax-card reveal" style="transition-delay:0s;">
+      <div class="parallax-card-bg bg-1">
+        <div class="parallax-card-bg-icon">📐</div>
+      </div>
+      <div class="parallax-card-content">
+        <div class="parallax-card-label">Insight 01</div>
+        <div class="parallax-card-title">規格の透明性が<br>信頼を生む</div>
+        <div class="parallax-card-desc">JIS基準値を公開し用途選定に接続する姿勢</div>
+      </div>
+    </div>
+
+    <div class="parallax-card reveal" style="transition-delay:0.1s;">
+      <div class="parallax-card-bg bg-2">
+        <div class="parallax-card-bg-icon">⚙️</div>
+      </div>
+      <div class="parallax-card-content">
+        <div class="parallax-card-label">Insight 02</div>
+        <div class="parallax-card-title">精度とスケールの<br>同時成立</div>
+        <div class="parallax-card-desc">0.01mmの精度で十億本を量産する工程能力</div>
+      </div>
+    </div>
+
+    <div class="parallax-card reveal" style="transition-delay:0.2s;">
+      <div class="parallax-card-bg bg-3">
+        <div class="parallax-card-bg-icon">🧪</div>
+      </div>
+      <div class="parallax-card-content">
+        <div class="parallax-card-label">Insight 03</div>
+        <div class="parallax-card-title">材料段階からの<br>品質統制</div>
+        <div class="parallax-card-desc">規制対応の厳しい環境で証明された管理体制</div>
+      </div>
+    </div>
+
+    <div class="parallax-card reveal" style="transition-delay:0.3s;">
+      <div class="parallax-card-bg bg-4">
+        <div class="parallax-card-bg-icon">🛡️</div>
+      </div>
+      <div class="parallax-card-content">
+        <div class="parallax-card-label">Insight 04</div>
+        <div class="parallax-card-title">知財が品質の<br>市場価値を守る</div>
+        <div class="parallax-card-desc">177国での商標登録と模倣品対策活動</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PART 3 MEGA JAVASCRIPT ===== -->
+<script>
+/* ===== DARK MODE TOGGLE ===== */
+(function() {
+  const toggle = document.getElementById('dark-mode-toggle');
+  const body = document.body;
+  const stored = localStorage.getItem('ykk-dark-mode');
+
+  if (stored === 'true') {
+    body.classList.add('dark-mode');
+  }
+
+  toggle.addEventListener('click', function() {
+    body.classList.toggle('dark-mode');
+    const isDark = body.classList.contains('dark-mode');
+    localStorage.setItem('ykk-dark-mode', isDark);
+    showToast(isDark ? '🌙 ダークモードに切り替えました' : '☀️ ライトモードに切り替えました');
+  });
+})();
+
+/* ===== TOAST SYSTEM ===== */
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('visible');
+  setTimeout(function() {
+    toast.classList.remove('visible');
+  }, 2500);
+}
+
+/* ===== SIDE NAVIGATION ===== */
+(function() {
+  const sideNav = document.getElementById('side-nav');
+  const dots = sideNav.querySelectorAll('.side-nav-dot');
+  const sections = [];
+
+  dots.forEach(function(dot) {
+    const targetId = dot.getAttribute('data-target');
+    sections.push(document.getElementById(targetId));
+
+    dot.addEventListener('click', function() {
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  function updateSideNav() {
+    const scrollY = window.pageYOffset + window.innerHeight / 3;
+
+    if (window.pageYOffset > 300) {
+      sideNav.classList.add('visible');
+    } else {
+      sideNav.classList.remove('visible');
+    }
+
+    dots.forEach(function(dot, index) {
+      dot.classList.remove('active');
+      const section = sections[index];
+      if (section) {
+        const top = section.offsetTop;
+        const bottom = top + section.offsetHeight;
+        if (scrollY >= top && scrollY < bottom) {
+          dot.classList.add('active');
+        }
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateSideNav, { passive: true });
+  updateSideNav();
+})();
+
+/* ===== BAR CHART ANIMATION ===== */
+(function() {
+  const barFills = document.querySelectorAll('#bar-chart-sales .bar-fill');
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        barFills.forEach(function(bar) {
+          const height = bar.getAttribute('data-height');
+          setTimeout(function() {
+            bar.style.height = height + '%';
+            bar.classList.add('animated');
+          }, 200);
+        });
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const chart = document.getElementById('bar-chart-sales');
+  if (chart) observer.observe(chart);
+})();
+
+/* ===== H-BAR CHART ANIMATION ===== */
+(function() {
+  const hBarFills = document.querySelectorAll('#h-bar-chart-jis .h-bar-fill');
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        hBarFills.forEach(function(bar, index) {
+          const width = bar.getAttribute('data-width');
+          setTimeout(function() {
+            bar.style.width = width + '%';
+          }, index * 150);
+        });
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const chart = document.getElementById('h-bar-chart-jis');
+  if (chart) observer.observe(chart);
+})();
+
+/* ===== NUMBER STRIP COUNTER ===== */
+(function() {
+  const strip = document.getElementById('number-strip');
+  if (!strip) return;
+  const values = strip.querySelectorAll('.number-strip-value');
+  let animated = false;
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !animated) {
+        animated = true;
+        values.forEach(function(el) {
+          const target = parseInt(el.getAttribute('data-count'));
+          const duration = 2500;
+          const startTime = performance.now();
+
+          function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 4);
+            const current = Math.floor(target * eased);
+            el.textContent = current.toLocaleString();
+            if (progress < 1) {
+              requestAnimationFrame(update);
+            } else {
+              el.textContent = target.toLocaleString();
+            }
+          }
+          requestAnimationFrame(update);
+        });
+      }
+    });
+  }, { threshold: 0.4 });
+
+  observer.observe(strip);
+})();
+
+/* ===== MORPHING SVG ===== */
+(function() {
+  const shape = document.getElementById('morph-shape');
+  const title = document.getElementById('morph-title');
+  const text = document.getElementById('morph-text');
+  const tabs = document.querySelectorAll('.morph-tab');
+
+  const morphData = [
+    {
+      path: 'M150,30 C220,30 270,80 270,150 C270,220 220,270 150,270 C80,270 30,220 30,150 C30,80 80,30 150,30 Z',
+      fill: 'url(#morph-grad-1)',
+      stroke: 'rgba(200,16,46,0.4)',
+      title: '統合生産思想',
+      text: '創業者が"材料段階からの統合生産が品質向上に必要"と考えた思想。材料特性と加工条件をセットで最適化し、専用設備を内製。検査規格と工程能力を同一組織内で往復できる。これが0.01mm精度と年間300万km超の生産を同時に実現する基盤となっている。'
+    },
+    {
+      path: 'M150,20 C200,40 260,60 270,120 C280,180 250,230 200,260 C150,290 80,270 50,220 C20,170 20,100 60,60 C100,20 130,15 150,20 Z',
+      fill: 'url(#morph-grad-2)',
+      stroke: 'rgba(0,61,165,0.4)',
+      title: '多層品質管理プロセス',
+      text: '顧客要求→設計→調達→受入検査→工程設計→量産→工程内検査→最終検査→出荷→フィードバックという10段階のプロセスを運用。米国CPSC向け提出文書では、374,000超のSKUを管理するための受入試験・工程監視・生産後試験の組み合わせを明示している。'
+    },
+    {
+      path: 'M150,25 C190,25 240,50 260,90 C280,130 280,170 260,210 C240,250 190,275 150,275 C110,275 60,250 40,210 C20,170 20,130 40,90 C60,50 110,25 150,25 Z',
+      fill: 'url(#morph-grad-3)',
+      stroke: 'rgba(46,125,50,0.4)',
+      title: 'グローバル品質展開',
+      text: '46,305人・513拠点・118社にわたるグローバルネットワーク。ISO認証と共通品質基準により全拠点で均一品質を維持。ベトナムだけで年間約10億本を生産し、ユニクロ・Nike・Adidas等のグローバルブランドに供給。品質は局所最適では成立しない。'
+    }
+  ];
+
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      const idx = parseInt(tab.getAttribute('data-morph'));
+      const data = morphData[idx];
+
+      shape.setAttribute('d', data.path);
+      shape.setAttribute('fill', data.fill);
+      shape.setAttribute('stroke', data.stroke);
+
+      title.style.opacity = '0';
+      text.style.opacity = '0';
+      setTimeout(function() {
+        title.textContent = data.title;
+        text.textContent = data.text;
+        title.style.opacity = '1';
+        text.style.opacity = '1';
+      }, 300);
+    });
+  });
+
+  // Auto-cycle
+  let currentMorph = 0;
+  setInterval(function() {
+    currentMorph = (currentMorph + 1) % morphData.length;
+    tabs[currentMorph].click();
+  }, 6000);
+})();
+
+/* ===== TYPING ANIMATION ===== */
+(function() {
+  const output = document.getElementById('typing-output');
+  if (!output) return;
+
+  const phrases = [
+    '品質とは、規格値と再現性の両立である。',
+    'YKKは0.01mm精度で十億本を量産する。',
+    '統合生産が品質を工程産業として成立させる。',
+    '374,000超のSKUを管理する品質インフラ。',
+    '品質の定義を数値で語れることが、信頼の源泉。'
+  ];
+
+  let phraseIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  let isPaused = false;
+
+  function type() {
+    const currentPhrase = phrases[phraseIndex];
+
+    if (isPaused) {
+      setTimeout(type, 50);
+      return;
+    }
+
+    if (!isDeleting) {
+      output.textContent = currentPhrase.substring(0, charIndex + 1);
+      charIndex++;
+      if (charIndex === currentPhrase.length) {
+        isPaused = true;
+        setTimeout(function() {
+          isPaused = false;
+          isDeleting = true;
+        }, 2500);
+      }
+    } else {
+      output.textContent = currentPhrase.substring(0, charIndex - 1);
+      charIndex--;
+      if (charIndex === 0) {
+        isDeleting = false;
+        phraseIndex = (phraseIndex + 1) % phrases.length;
+      }
+    }
+
+    const speed = isDeleting ? 30 : 60;
+    setTimeout(type, speed);
+  }
+
+  // Start when visible
+  const observer = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting) {
+      type();
+      observer.disconnect();
+    }
+  }, { threshold: 0.5 });
+
+  observer.observe(output.parentElement);
+})();
+
+/* ===== PARALLAX CARD MOUSE EFFECT ===== */
+(function() {
+  const cards = document.querySelectorAll('.parallax-card');
+  cards.forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      const bg = card.querySelector('.parallax-card-bg');
+      if (bg) {
+        bg.style.transform = 'translate(' + (x * 15) + 'px, ' + (y * 15) + 'px) scale(1.05)';
+      }
+    });
+    card.addEventListener('mouseleave', function() {
+      const bg = card.querySelector('.parallax-card-bg');
+      if (bg) {
+        bg.style.transform = 'translate(0, 0) scale(1)';
+      }
+    });
+  });
+})();
+
+/* ===== REVEAL FOR PART 3 SECTIONS ===== */
+(function() {
+  const elements = document.querySelectorAll('#interactive-charts .reveal, #interactive-charts .reveal-left, #interactive-charts .reveal-right, #flip-cards-section .reveal, #parallax-cards .reveal, #morphing-section .reveal-left, #morphing-section .reveal-right');
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { rootMargin: '0px 0px -60px 0px', threshold: 0.08 });
+
+  elements.forEach(function(el) { observer.observe(el); });
+})();
+
+/* ===== CURSOR UPDATE FOR NEW ELEMENTS ===== */
+(function() {
+  const cursor = document.getElementById('cursor-follower');
+  if (!cursor || cursor.style.display === 'none') return;
+
+  const interactiveNew = document.querySelectorAll('.chart-panel, .flip-card, .morph-tab, .parallax-card, .side-nav-dot, .dark-mode-toggle, .ip-stat-box');
+  interactiveNew.forEach(function(el) {
+    el.addEventListener('mouseenter', function() { cursor.classList.add('active'); });
+    el.addEventListener('mouseleave', function() { cursor.classList.remove('active'); });
+  });
+})();
+
+/* ===== RADAR CHART PULSE ===== */
+(function() {
+  const polygon = document.getElementById('radar-polygon');
+  if (!polygon) return;
+  const points = document.querySelectorAll('.radar-point');
+
+  let expanded = false;
+  setInterval(function() {
+    if (expanded) {
+      polygon.setAttribute('points', '140,40 222,90 225,185 140,235 60,185 55,92');
+      points.forEach(function(p) { p.setAttribute('r', '5'); });
+    } else {
+      polygon.setAttribute('points', '140,35 225,87 228,188 140,240 55,188 50,88');
+      points.forEach(function(p) { p.setAttribute('r', '6'); });
+    }
+    expanded = !expanded;
+  }, 3000);
+})();
+
+/* ===== DONUT CHART ANIMATION ===== */
+(function() {
+  const segments = document.querySelectorAll('.donut-segment');
+  const observer = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting) {
+      // Already animated via CSS, add hover interactivity
+      segments.forEach(function(seg) {
+        seg.addEventListener('mouseenter', function() {
+          seg.style.strokeWidth = '28';
+          seg.style.filter = 'brightness(1.2)';
+        });
+        seg.addEventListener('mouseleave', function() {
+          seg.style.strokeWidth = '24';
+          seg.style.filter = 'none';
+        });
+      });
+      observer.disconnect();
+    }
+  }, { threshold: 0.3 });
+
+  if (segments.length > 0) observer.observe(segments[0].closest('.chart-panel'));
+})();
+
+/* ===== KONAMI CODE EASTER EGG ===== */
+(function() {
+  const code = [38,38,40,40,37,39,37,39,66,65];
+  let idx = 0;
+
+  document.addEventListener('keydown', function(e) {
+    if (e.keyCode === code[idx]) {
+      idx++;
+      if (idx === code.length) {
+        showToast('🎉 You found the easter egg! YKK Quality Level: LEGENDARY');
+        document.body.style.transition = 'filter 1s ease';
+        document.body.style.filter = 'hue-rotate(360deg)';
+        setTimeout(function() { document.body.style.filter = ''; }, 2000);
+        idx = 0;
+      }
+    } else {
+      idx = 0;
+    }
+  });
+})();
+
+/* ===== SCROLL VELOCITY DETECTOR ===== */
+(function() {
+  let lastScrollY = window.pageYOffset;
+  let lastTime = Date.now();
+  let velocity = 0;
+
+  function checkVelocity() {
+    const now = Date.now();
+    const currentScrollY = window.pageYOffset;
+    const dt = now - lastTime;
+    if (dt > 0) {
+      velocity = Math.abs(currentScrollY - lastScrollY) / dt * 1000;
+    }
+    lastScrollY = currentScrollY;
+    lastTime = now;
+
+    // Reduce animations when scrolling fast
+    if (velocity > 3000) {
+      document.body.style.setProperty('--transition-mid', '0.1s ease');
+    } else {
+      document.body.style.setProperty('--transition-mid', '0.4s cubic-bezier(0.4, 0, 0.2, 1)');
+    }
+
+    requestAnimationFrame(checkVelocity);
+  }
+  checkVelocity();
+})();
+
+/* ===== AUTO MORPH SHAPES IN BACKGROUND ===== */
+(function() {
+  const shapes = document.querySelectorAll('.hero-shape');
+  shapes.forEach(function(shape, i) {
+    setInterval(function() {
+      const scale = 0.9 + Math.random() * 0.2;
+      const tx = (Math.random() - 0.5) * 40;
+      const ty = (Math.random() - 0.5) * 40;
+      shape.style.transition = 'transform 4s ease';
+      shape.style.transform = 'translate(' + tx + 'px, ' + ty + 'px) scale(' + scale + ')';
+    }, 4000 + i * 1000);
+  });
+})();
+
+/* ===== SECTION TRANSITION EFFECTS ===== */
+(function() {
+  const allSections = document.querySelectorAll('section');
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, {
+    rootMargin: '0px 0px -10% 0px',
+    threshold: 0.01
+  });
+
+  allSections.forEach(function(section) {
+    observer.observe(section);
+  });
+})();
+
+/* ===== ACCESSIBILITY: REDUCED MOTION ===== */
+(function() {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function handleReducedMotion() {
+    if (prefersReducedMotion.matches) {
+      document.documentElement.style.setProperty('--transition-fast', '0s');
+      document.documentElement.style.setProperty('--transition-mid', '0s');
+      document.documentElement.style.setProperty('--transition-slow', '0s');
+      document.documentElement.style.setProperty('--transition-spring', '0s');
+
+      // Disable all CSS animations
+      const style = document.createElement('style');
+      style.textContent = '*, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }';
+      document.head.appendChild(style);
+    }
+  }
+
+  handleReducedMotion();
+  prefersReducedMotion.addEventListener('change', handleReducedMotion);
+})();
+
+/* ===== PERFORMANCE: LAZY LOAD SECTIONS ===== */
+(function() {
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(function() {
+      // Pre-compute layout for off-screen sections
+      document.querySelectorAll('section').forEach(function(section) {
+        section.getBoundingClientRect();
+      });
+    });
+  }
+})();
+
+/* ===== VIEWPORT RESIZE HANDLER ===== */
+(function() {
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    document.body.classList.add('resizing');
+    resizeTimeout = setTimeout(function() {
+      document.body.classList.remove('resizing');
+    }, 300);
+  });
+})();
+
+/* ===== FINAL: Welcome toast on load ===== */
+(function() {
+  setTimeout(function() {
+    showToast('📊 YKK品質レポートへようこそ — Alt+↑↓でセクション移動');
+  }, 4000);
+})();
+
+/* ===== CONSOLE BRANDING ===== */
+(function() {
+  console.log(
+    '%c YKK Quality Report ',
+    'background: #c8102e; color: white; font-size: 18px; font-weight: bold; padding: 8px 16px; border-radius: 4px;'
+  );
+  console.log(
+    '%c Built with precision — just like YKK fasteners.',
+    'color: #666; font-size: 12px;'
+  );
+})();
+</script>
+
+<!-- ===== CLOSE BODY & HTML ===== -->
+</body>
+</html>

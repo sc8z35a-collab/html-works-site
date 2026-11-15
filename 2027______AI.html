@@ -1,0 +1,2269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2027年1月 AI技術予測</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --black: #1a1a1a;
+  --dark: #2d2d2d;
+  --gray: #6b7280;
+  --light-gray: #e5e7eb;
+  --lighter-gray: #f3f4f6;
+  --white: #ffffff;
+  --accent-blue: #2563eb;
+  --accent-blue-light: #3b82f6;
+  --accent-indigo: #4f46e5;
+  --accent-purple: #7c3aed;
+  --accent-cyan: #06b6d4;
+  --accent-emerald: #059669;
+  --accent-amber: #d97706;
+  --accent-rose: #e11d48;
+  --accent-orange: #ea580c;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  background: var(--white);
+  color: var(--black);
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--lighter-gray); }
+::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 4px; }
+
+/* ===== HERO ===== */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  overflow: hidden;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(37,99,235,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37,99,235,0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(60px, 60px); }
+}
+
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFloat 8s ease-in-out infinite;
+}
+
+.particle:nth-child(1) { width: 6px; height: 6px; background: var(--accent-blue); top: 20%; left: 10%; animation-delay: 0s; }
+.particle:nth-child(2) { width: 8px; height: 8px; background: var(--accent-purple); top: 60%; left: 80%; animation-delay: 1s; }
+.particle:nth-child(3) { width: 5px; height: 5px; background: var(--accent-cyan); top: 80%; left: 30%; animation-delay: 2s; }
+.particle:nth-child(4) { width: 10px; height: 10px; background: var(--accent-emerald); top: 30%; left: 70%; animation-delay: 3s; }
+.particle:nth-child(5) { width: 7px; height: 7px; background: var(--accent-amber); top: 50%; left: 50%; animation-delay: 4s; }
+.particle:nth-child(6) { width: 4px; height: 4px; background: var(--accent-rose); top: 10%; left: 90%; animation-delay: 5s; }
+.particle:nth-child(7) { width: 9px; height: 9px; background: var(--accent-blue-light); top: 70%; left: 15%; animation-delay: 1.5s; }
+.particle:nth-child(8) { width: 6px; height: 6px; background: var(--accent-indigo); top: 40%; left: 40%; animation-delay: 2.5s; }
+
+@keyframes particleFloat {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+  25% { opacity: 0.8; }
+  50% { opacity: 0.6; transform: translateY(-80px) scale(1.2); }
+  75% { opacity: 0.3; }
+}
+
+.hero-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.08;
+}
+
+.hero-shape-1 {
+  width: 600px; height: 600px;
+  background: var(--accent-blue);
+  top: -200px; right: -200px;
+  animation: shapeFloat1 12s ease-in-out infinite;
+}
+
+.hero-shape-2 {
+  width: 500px; height: 500px;
+  background: var(--accent-purple);
+  bottom: -150px; left: -150px;
+  animation: shapeFloat2 15s ease-in-out infinite;
+}
+
+.hero-shape-3 {
+  width: 300px; height: 300px;
+  background: var(--accent-cyan);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: shapeFloat3 10s ease-in-out infinite;
+}
+
+@keyframes shapeFloat1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-40px, 40px) rotate(10deg); }
+}
+
+@keyframes shapeFloat2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(30px, -30px) rotate(-8deg); }
+}
+
+@keyframes shapeFloat3 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.3); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem;
+  max-width: 1000px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--lighter-gray);
+  border: 1px solid var(--light-gray);
+  border-radius: 100px;
+  padding: 8px 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray);
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards 0.3s;
+}
+
+.badge-dot {
+  width: 8px; height: 8px;
+  background: var(--accent-emerald);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--black);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeInUp 1s ease forwards 0.5s;
+}
+
+.hero-title .gradient-text {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: var(--gray);
+  font-weight: 400;
+  max-width: 700px;
+  margin: 0 auto 2.5rem;
+  opacity: 0;
+  animation: fadeInUp 1s ease forwards 0.7s;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeInUp 1s ease forwards 0.9s;
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.hero-stat-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--accent-blue);
+  font-family: 'Inter', sans-serif;
+}
+
+.hero-stat-label {
+  font-size: 0.85rem;
+  color: var(--gray);
+  margin-top: 4px;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: fadeIn 1s ease forwards 1.5s;
+}
+
+.scroll-mouse {
+  width: 26px; height: 42px;
+  border: 2px solid var(--gray);
+  border-radius: 13px;
+  position: relative;
+}
+
+.scroll-mouse::after {
+  content: '';
+  position: absolute;
+  width: 4px; height: 8px;
+  background: var(--gray);
+  border-radius: 2px;
+  top: 8px; left: 50%;
+  transform: translateX(-50%);
+  animation: scrollWheel 2s ease-in-out infinite;
+}
+
+@keyframes scrollWheel {
+  0%, 100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 0.3; transform: translateX(-50%) translateY(12px); }
+}
+
+.scroll-text {
+  font-size: 0.7rem;
+  color: var(--gray);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== NAV ===== */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  transform: translateY(-100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav.visible {
+  transform: translateY(0);
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.8rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--black);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--gray);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.3s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 2px;
+  background: var(--accent-blue);
+  transition: width 0.3s;
+}
+
+.nav-links a:hover { color: var(--black); }
+.nav-links a:hover::after { width: 100%; }
+
+/* ===== SECTIONS ===== */
+.section {
+  padding: 100px 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent-blue);
+  margin-bottom: 1rem;
+}
+
+.section-tag-line {
+  width: 30px; height: 2px;
+  background: var(--accent-blue);
+  border-radius: 1px;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.section-desc {
+  font-size: 1.05rem;
+  color: var(--gray);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Divider */
+.section-divider {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.divider-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--light-gray), transparent);
+}
+
+/* ===== EXECUTIVE SUMMARY ===== */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.summary-card {
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.summary-card.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  border-color: transparent;
+}
+
+.summary-card-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 16px 16px 0 0;
+}
+
+.summary-card-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.summary-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 0.8rem;
+}
+
+.summary-card-text {
+  font-size: 0.92rem;
+  color: var(--gray);
+  line-height: 1.7;
+}
+
+/* ===== SCENARIOS ===== */
+.scenarios-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 900px) {
+  .scenarios-container { grid-template-columns: 1fr; }
+}
+
+.scenario-card {
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scenario-card.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scenario-card:hover {
+  transform: translateY(-6px) scale(1.02);
+}
+
+.scenario-accel {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border: 1px solid #bfdbfe;
+}
+
+.scenario-base {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1px solid #bbf7d0;
+}
+
+.scenario-constrain {
+  background: linear-gradient(135deg, #fef2f2, #fecaca);
+  border: 1px solid #fca5a5;
+}
+
+.scenario-icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: 1.2rem;
+}
+
+.scenario-accel .scenario-icon { background: rgba(37,99,235,0.15); }
+.scenario-base .scenario-icon { background: rgba(5,150,105,0.15); }
+.scenario-constrain .scenario-icon { background: rgba(225,29,72,0.15); }
+
+.scenario-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+}
+
+.scenario-accel .scenario-label { color: var(--accent-blue); }
+.scenario-base .scenario-label { color: var(--accent-emerald); }
+.scenario-constrain .scenario-label { color: var(--accent-rose); }
+
+.scenario-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 0.8rem;
+}
+
+.scenario-text {
+  font-size: 0.92rem;
+  color: var(--dark);
+  line-height: 1.7;
+}
+
+/* ===== CAUSAL FLOW ===== */
+.causal-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 2rem 0;
+}
+
+.causal-node {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--white);
+  border: 2px solid var(--light-gray);
+  border-radius: 16px;
+  padding: 1.2rem 2rem;
+  max-width: 500px;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s ease;
+}
+
+.causal-node.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.causal-node:hover {
+  border-color: var(--accent-blue);
+  box-shadow: 0 8px 30px rgba(37,99,235,0.1);
+}
+
+.causal-node-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.causal-node-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.causal-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  color: var(--accent-blue);
+  font-size: 1.2rem;
+  opacity: 0;
+  animation: none;
+}
+
+.causal-arrow.in-view {
+  opacity: 1;
+  animation: arrowPulse 2s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(4px); opacity: 1; }
+}
+
+.causal-side-inputs {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.causal-side-node {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--lighter-gray);
+  border: 1px solid var(--light-gray);
+  border-radius: 12px;
+  padding: 0.8rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--dark);
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: all 0.5s ease;
+}
+
+.causal-side-node.in-view {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ===== TIMELINE ===== */
+.timeline {
+  position: relative;
+  padding: 2rem 0;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--accent-blue), var(--accent-purple), transparent);
+  transform: translateX(-50%);
+}
+
+@media (max-width: 900px) {
+  .timeline-line { left: 24px; }
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 3rem;
+  position: relative;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.timeline-item.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.timeline-item:nth-child(odd) {
+  flex-direction: row;
+}
+
+.timeline-item:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px; height: 16px;
+  background: var(--white);
+  border: 3px solid var(--accent-blue);
+  border-radius: 50%;
+  z-index: 2;
+  transition: all 0.3s;
+}
+
+.timeline-item:hover .timeline-dot {
+  background: var(--accent-blue);
+  transform: translateX(-50%) scale(1.3);
+  box-shadow: 0 0 0 6px rgba(37,99,235,0.15);
+}
+
+@media (max-width: 900px) {
+  .timeline-dot { left: 24px; }
+}
+
+.timeline-content {
+  width: 45%;
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: 16px;
+  padding: 1.8rem;
+  transition: all 0.3s;
+}
+
+.timeline-item:nth-child(odd) .timeline-content { margin-right: auto; margin-left: 0; }
+.timeline-item:nth-child(even) .timeline-content { margin-left: auto; margin-right: 0; }
+
+@media (max-width: 900px) {
+  .timeline-item, .timeline-item:nth-child(even) { flex-direction: row; }
+  .timeline-content,
+  .timeline-item:nth-child(odd) .timeline-content,
+  .timeline-item:nth-child(even) .timeline-content {
+    width: calc(100% - 60px);
+    margin-left: 60px;
+    margin-right: 0;
+  }
+}
+
+.timeline-content:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+  border-color: transparent;
+}
+
+.timeline-month {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 0.8rem;
+  line-height: 1.4;
+}
+
+.timeline-text {
+  font-size: 0.9rem;
+  color: var(--gray);
+  line-height: 1.7;
+}
+
+.timeline-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 1rem;
+}
+
+.timeline-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--lighter-gray);
+  color: var(--gray);
+}
+
+.timeline-tag.low { background: #dcfce7; color: #166534; }
+.timeline-tag.mid { background: #fef3c7; color: #92400e; }
+.timeline-tag.high { background: #fecaca; color: #991b1b; }
+
+/* ===== TECH DOMAINS ===== */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.tech-card {
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: 20px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tech-card.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tech-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.07);
+  border-color: transparent;
+}
+
+.tech-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.tech-card-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.tech-card-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.tech-card-direction {
+  font-size: 0.82rem;
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+.tech-card-body {
+  font-size: 0.9rem;
+  color: var(--gray);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.tech-card-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tech-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--dark);
+}
+
+.tech-item-bullet {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.tech-card-risk {
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--light-gray);
+  font-size: 0.82rem;
+  color: var(--gray);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== COMMERCIAL ===== */
+.commercial-table-wrapper {
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid var(--light-gray);
+}
+
+.commercial-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.commercial-table thead {
+  background: var(--lighter-gray);
+}
+
+.commercial-table th {
+  padding: 1rem 1.2rem;
+  text-align: left;
+  font-weight: 700;
+  color: var(--black);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid var(--light-gray);
+}
+
+.commercial-table td {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--lighter-gray);
+  color: var(--dark);
+  vertical-align: top;
+}
+
+.commercial-table tr {
+  transition: background 0.2s;
+}
+
+.commercial-table tbody tr:hover {
+  background: rgba(37,99,235,0.03);
+}
+
+.uncertainty-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.uncertainty-badge.mid { background: #fef3c7; color: #92400e; }
+.uncertainty-badge.high { background: #fecaca; color: #991b1b; }
+
+/* ===== REGULATION MAP ===== */
+.reg-map {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.reg-card {
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid var(--light-gray);
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.5s ease;
+}
+
+.reg-card.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reg-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+}
+
+.reg-flag {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.reg-region {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 0.3rem;
+}
+
+.reg-subtitle {
+  font-size: 0.82rem;
+  color: var(--accent-blue);
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.reg-text {
+  font-size: 0.9rem;
+  color: var(--gray);
+  line-height: 1.7;
+}
+
+.reg-capability {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--lighter-gray);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--dark);
+}
+
+.reg-capability strong {
+  color: var(--black);
+}
+
+/* ===== RISK MATRIX ===== */
+.risk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.risk-card {
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: 16px;
+  padding: 1.8rem;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.5s ease;
+}
+
+.risk-card.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.risk-card:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+  transform: translateY(-3px);
+}
+
+.risk-severity {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.risk-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.risk-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.risk-type {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.risk-desc {
+  font-size: 0.88rem;
+  color: var(--gray);
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+}
+
+.risk-countermeasure {
+  font-size: 0.82rem;
+  color: var(--dark);
+  padding: 0.7rem 1rem;
+  background: var(--lighter-gray);
+  border-radius: 8px;
+}
+
+/* ===== ACTION PLAN ===== */
+.action-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 2rem;
+}
+
+.action-col {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.5s ease;
+}
+
+.action-col.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.action-col-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.action-col-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.action-col-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.action-period {
+  margin-bottom: 1.5rem;
+}
+
+.action-period-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.7rem;
+  padding: 4px 12px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.action-period-label.short {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.action-period-label.mid {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--dark);
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+}
+
+.action-check {
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  background: var(--lighter-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: var(--accent-emerald);
+  margin-top: 2px;
+}
+
+/* ===== INDICATORS ===== */
+.indicator-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.indicator-card {
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: 16px;
+  padding: 1.8rem;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.5s ease;
+}
+
+.indicator-card.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.indicator-card:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+  transform: translateY(-3px);
+}
+
+.indicator-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray);
+  margin-bottom: 0.5rem;
+}
+
+.indicator-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--black);
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 0.5rem;
+}
+
+.indicator-bar {
+  height: 6px;
+  background: var(--lighter-gray);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.8rem;
+}
+
+.indicator-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0;
+  transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.indicator-card.in-view .indicator-bar-fill {
+  width: var(--fill);
+}
+
+.indicator-note {
+  font-size: 0.82rem;
+  color: var(--gray);
+  line-height: 1.5;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  background: var(--black);
+  color: var(--white);
+  padding: 4rem 2rem;
+  margin-top: 80px;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2rem;
+}
+
+.footer-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.footer-sources {
+  max-width: 700px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.8;
+}
+
+.footer-sources a {
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-sources a:hover { color: var(--accent-blue-light); }
+
+.footer-bottom {
+  width: 100%;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  .section { padding: 60px 1.2rem; }
+  .hero-stats { gap: 1.5rem; }
+  .nav-links { display: none; }
+  .summary-grid, .tech-grid, .risk-grid, .indicator-cards { grid-template-columns: 1fr; }
+  .scenarios-container { grid-template-columns: 1fr; }
+  .action-columns { grid-template-columns: 1fr; }
+  .reg-map { grid-template-columns: 1fr; }
+}
+
+/* ===== COUNTER ANIMATION ===== */
+.count-up {
+  font-variant-numeric: tabular-nums;
+}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">AI</div>
+      AI技術予測 2027
+    </div>
+    <ul class="nav-links">
+      <li><a href="#summary">概要</a></li>
+      <li><a href="#scenarios">シナリオ</a></li>
+      <li><a href="#timeline">タイムライン</a></li>
+      <li><a href="#tech">技術分野</a></li>
+      <li><a href="#commercial">商用化</a></li>
+      <li><a href="#regulation">規制</a></li>
+      <li><a href="#risks">リスク</a></li>
+      <li><a href="#action">アクション</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-particles">
+    <div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div>
+  </div>
+  <div class="hero-shape hero-shape-1"></div>
+  <div class="hero-shape hero-shape-2"></div>
+  <div class="hero-shape hero-shape-3"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      2026年2月〜2027年1月 予測レポート
+    </div>
+    <h1 class="hero-title">
+      <span class="gradient-text">2027年1月</span><br>AI技術進化予測
+    </h1>
+    <p class="hero-subtitle">
+      計算資源・データ・アルゴリズム効率・規制・投資の5要因から分解した、月次タイムラインと技術分野別の確率論的予測レポート
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-number count-up" data-target="2587">0</div>
+        <div class="hero-stat-label">億ドル AI VC投資（2025年）</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-number">61<span style="font-size:1.5rem">%</span></div>
+        <div class="hero-stat-label">世界VC投資に占めるAI比率</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-number">12</div>
+        <div class="hero-stat-label">ヶ月間の予測期間</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <div class="scroll-mouse"></div>
+    <span class="scroll-text">Scroll</span>
+  </div>
+</section>
+
+<!-- EXECUTIVE SUMMARY -->
+<section class="section" id="summary">
+  <div class="section-header">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      Executive Summary
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="section-title">エグゼクティブサマリー</h2>
+    <p class="section-desc">この期間の技術進化は5つの中心テーマに収束する。「技術進歩＝事業成功」ではなく「統合/運用能力が勝敗を決める」局面が強まる。</p>
+  </div>
+  <div class="summary-grid">
+    <div class="summary-card" data-delay="0">
+      <div class="summary-card-accent" style="background:linear-gradient(90deg,#2563eb,#4f46e5)"></div>
+      <div class="summary-card-icon" style="background:#eff6ff;color:#2563eb">🤖</div>
+      <div class="summary-card-title">エージェント化</div>
+      <div class="summary-card-text">ReAct/Toolformer等の「推論と行動の統合」が産業実装へ近づく。モデル単体から「モデル＋ツール＋メモリ＋監査」の複合システムへ最適化が進む。</div>
+    </div>
+    <div class="summary-card" data-delay="100">
+      <div class="summary-card-accent" style="background:linear-gradient(90deg,#059669,#06b6d4)"></div>
+      <div class="summary-card-icon" style="background:#f0fdf4;color:#059669">📉</div>
+      <div class="summary-card-title">推論コストの構造的低下</div>
+      <div class="summary-card-text">次世代GPU（Rubin等）とMoE最適化により推論トークン単価が大幅に低下。APIの価格・レイテンシが競争軸として表面化する。</div>
+    </div>
+    <div class="summary-card" data-delay="200">
+      <div class="summary-card-accent" style="background:linear-gradient(90deg,#7c3aed,#e11d48)"></div>
+      <div class="summary-card-icon" style="background:#faf5ff;color:#7c3aed">🎬</div>
+      <div class="summary-card-title">マルチモーダルの実用域拡大</div>
+      <div class="summary-card-text">画像は高品質のコモディティ化が進み、動画が主戦場に。「一貫性・制御性・真正性」が三大課題として浮上する。</div>
+    </div>
+    <div class="summary-card" data-delay="300">
+      <div class="summary-card-accent" style="background:linear-gradient(90deg,#d97706,#ea580c)"></div>
+      <div class="summary-card-icon" style="background:#fffbeb;color:#d97706">📱</div>
+      <div class="summary-card-title">エッジでの小型モデル普及</div>
+      <div class="summary-card-text">PC/端末のNPU強化（45〜80 TOPS級）により13B級までの端末内LLM実行が現実化。プライバシー・レイテンシ優位で企業利用が伸びる。</div>
+    </div>
+    <div class="summary-card" data-delay="400">
+      <div class="summary-card-accent" style="background:linear-gradient(90deg,#e11d48,#7c3aed)"></div>
+      <div class="summary-card-icon" style="background:#fef2f2;color:#e11d48">🛡️</div>
+      <div class="summary-card-title">安全・セキュリティの運用技術化</div>
+      <div class="summary-card-text">標準（OWASP Top10、MITRE ATLAS）・脅威モデリング・ガバナンスが「開発手法」から「製品要件」へ移行し、監査証跡が定着する。</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><div class="divider-line"></div></div>
+
+<!-- 3 SCENARIOS -->
+<section class="section" id="scenarios">
+  <div class="section-header">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      Three Scenarios
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="section-title">3つのシナリオ</h2>
+    <p class="section-desc">将来は単一シナリオではなく、3つの幅を持って予測する。</p>
+  </div>
+  <div class="scenarios-container">
+    <div class="scenario-card scenario-accel">
+      <div class="scenario-icon">🚀</div>
+      <div class="scenario-label">Accelerated</div>
+      <div class="scenario-title">加速シナリオ</div>
+      <div class="scenario-text">Rubin等の新世代ハードの立ち上がりが順調で、推論単価が急低下し、エージェント化が業務の主流に近づく。HBM供給も順調で、投資が加速する。</div>
+    </div>
+    <div class="scenario-card scenario-base">
+      <div class="scenario-icon">⚖️</div>
+      <div class="scenario-label">Baseline</div>
+      <div class="scenario-title">ベースシナリオ</div>
+      <div class="scenario-text">ハードは段階的に普及し、規制対応の摩擦があるが、エージェントは限定用途から拡大する。最も蓋然性の高いシナリオ。</div>
+    </div>
+    <div class="scenario-card scenario-constrain">
+      <div class="scenario-icon">⚠️</div>
+      <div class="scenario-label">Constrained</div>
+      <div class="scenario-title">制約シナリオ</div>
+      <div class="scenario-text">HBM/電力/資本コストや規制・訴訟リスクで投入が鈍化し、技術進歩が「実装停滞」に直面する。政策当局もこの可能性を言及。</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><div class="divider-line"></div></div>
+
+<!-- CAUSAL STRUCTURE -->
+<section class="section" id="causal">
+  <div class="section-header">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      Causal Structure
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="section-title">因果構造</h2>
+    <p class="section-desc">5つの推進要因がどのように技術進化を構造的に駆動するかの概略。</p>
+  </div>
+  <div class="causal-flow">
+    <div class="causal-node" style="transition-delay:0s">
+      <div class="causal-node-icon" style="background:#dbeafe;color:#2563eb">⚡</div>
+      <div class="causal-node-text">計算資源：GPU/TPU/ASIC + HBM + ネットワーク</div>
+    </div>
+    <div class="causal-arrow">▼</div>
+    <div class="causal-node" style="transition-delay:0.1s">
+      <div class="causal-node-icon" style="background:#dcfce7;color:#059669">💰</div>
+      <div class="causal-node-text">学習/推論コスト低下</div>
+    </div>
+    <div class="causal-arrow">▼</div>
+    <div class="causal-node" style="transition-delay:0.2s">
+      <div class="causal-node-icon" style="background:#faf5ff;color:#7c3aed">🧠</div>
+      <div class="causal-node-text">モデル能力：推論/長文脈/マルチモーダル</div>
+    </div>
+    <div class="causal-arrow">▼</div>
+    <div class="causal-node" style="transition-delay:0.3s">
+      <div class="causal-node-icon" style="background:#fef3c7;color:#d97706">📦</div>
+      <div class="causal-node-text">製品化：API/エージェント/業務統合</div>
+    </div>
+    <div class="causal-arrow">▼</div>
+    <div class="causal-node" style="transition-delay:0.4s">
+      <div class="causal-node-icon" style="background:#e0e7ff;color:#4f46e5">🏢</div>
+      <div class="causal-node-text">導入拡大：企業・行政・個人</div>
+    </div>
+    <div class="causal-arrow">▼</div>
+    <div class="causal-node" style="transition-delay:0.5s">
+      <div class="causal-node-icon" style="background:#fef2f2;color:#e11d48">🌍</div>
+      <div class="causal-node-text">社会影響：生産性/雇用/情報環境</div>
+    </div>
+    <div class="causal-arrow">▼</div>
+    <div class="causal-node" style="transition-delay:0.6s">
+      <div class="causal-node-icon" style="background:#fecaca;color:#991b1b">📋</div>
+      <div class="causal-node-text">規制・標準：監査/安全/真正性 → 製品化へフィードバック</div>
+    </div>
+    <div class="causal-side-inputs">
+      <div class="causal-side-node" style="transition-delay:0.7s">📊 データ：高品質枯渇/合成データ/権利</div>
+      <div class="causal-side-node" style="transition-delay:0.8s">💸 投資：VC/特許/メガディール</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><div class="divider-line"></div></div>
+
+<!-- TIMELINE -->
+<section class="section" id="timeline">
+  <div class="section-header">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      Monthly Timeline
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="section-title">月次タイムライン予測</h2>
+    <p class="section-desc">2026年2月〜2027年1月の各月について、主要な技術進展予測を時系列で整理。</p>
+  </div>
+  <div class="timeline">
+    <div class="timeline-line"></div>
+
+    <!-- 2026-02 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-month">2026年2月</div>
+        <div class="timeline-heading">生成AIライフサイクルの「工場化」</div>
+        <div class="timeline-text">日本で「企業内で生成AIライフサイクル（開発→運用→追加学習）を自律的に回す」製品設計が前面化。エージェント運用の"工場化"が議論の中心に。富士通「Enterprise AI Factory」のトライアル受付開始。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag mid">不確実性：中</span>
+          <span class="timeline-tag">エージェント</span>
+          <span class="timeline-tag">運用基盤</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-03 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-month">2026年3月</div>
+        <div class="timeline-heading">エージェントの安全が「セキュリティ製品要件」へ</div>
+        <div class="timeline-text">「エージェントの安全（権限・監査・プロンプト注入対策）」が開発手法からセキュリティ製品要件へ移行。OWASP LLMアプリTop10に合わせた社内統制が広がる。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag low">不確実性：低〜中</span>
+          <span class="timeline-tag">セキュリティ</span>
+          <span class="timeline-tag">OWASP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-04 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-month">2026年4月</div>
+        <div class="timeline-heading">ICLR 2026 ＆ 研究テーマの露出増</div>
+        <div class="timeline-text">ICLR 2026（4/23-27）開催。エージェント評価・推論効率化・マルチモーダル理解の論文が増加。製品は「チャットUI」より「業務フロー統合」が主語に。PFN等が液冷高効率基盤を検証。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag mid">不確実性：中</span>
+          <span class="timeline-tag">ICLR</span>
+          <span class="timeline-tag">液冷基盤</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-05 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-month">2026年5月</div>
+        <div class="timeline-heading">推論コスト削減がKPI化</div>
+        <div class="timeline-text">「推論コスト削減（圧縮、蒸留、MoE、KV/メモリ最適化）」が性能向上と同格のKPIとして扱われ、API価格・レイテンシが競争軸として表面化。NVIDIAがRubinで推論トークンコスト削減を強く訴求。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag mid">不確実性：中</span>
+          <span class="timeline-tag">推論コスト</span>
+          <span class="timeline-tag">Rubin</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-06 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-month">2026年6月</div>
+        <div class="timeline-heading">動画生成・真正性の「二正面作戦」</div>
+        <div class="timeline-text">CVPR 2026（6/3-7）開催。画像・動画生成は「時間的一貫性」と「真正性（来歴）」の二正面作戦に。CV研究の場で動画生成・動画理解がさらに主流化。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag mid">不確実性：中</span>
+          <span class="timeline-tag">CVPR</span>
+          <span class="timeline-tag">動画生成</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-07 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-month">2026年7月</div>
+        <div class="timeline-heading">ICML + ACL：エージェント/ツール利用が横断テーマ</div>
+        <div class="timeline-text">ICML 2026（7/6-11）、ACL 2026（7/2-7）開催。研究と実装の接続が強まり、エージェント/ツール利用/評価が横断テーマとして定着。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag low">不確実性：低〜中</span>
+          <span class="timeline-tag">ICML</span>
+          <span class="timeline-tag">ACL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-08 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content" style="border-color:#e11d48">
+        <div class="timeline-month" style="color:#e11d48">2026年8月 ★分水嶺</div>
+        <div class="timeline-heading">EU AI Act 本格適用</div>
+        <div class="timeline-text">EU AI Actの多くの規定が2026-08-02に本格適用。GPAI/基盤モデル提供者の文書化、企業のAIリテラシー、監査証跡整備が「待ったなし」となり、製品要件が規制駆動で変化する重大な転換点。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag high">不確実性：高（影響の大きさ）</span>
+          <span class="timeline-tag">EU AI Act</span>
+          <span class="timeline-tag">コンプライアンス</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-09 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-month">2026年9月</div>
+        <div class="timeline-heading">脅威モデリングと監査の接続</div>
+        <div class="timeline-text">NeurIPS投稿サイクルに合わせ、エージェント評価やセキュリティの体系化が進行。MITRE ATLASによる脅威モデリングが監査と接続し始める。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag mid">不確実性：中</span>
+          <span class="timeline-tag">ATLAS</span>
+          <span class="timeline-tag">レッドチーム</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-10 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-month">2026年10月</div>
+        <div class="timeline-heading">「過剰な自律性」が実害として顕在化</div>
+        <div class="timeline-text">生成AIの過剰な自律性（excessive agency）が誤操作・漏えいとして実害を生み、権限管理・サンドボックス・ヒューマンインザループが標準設計になる。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag mid">不確実性：中</span>
+          <span class="timeline-tag">権限管理</span>
+          <span class="timeline-tag">RBAC</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-11 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-month">2026年11月</div>
+        <div class="timeline-heading">推論基盤の設計原理が拡張</div>
+        <div class="timeline-text">新ハード立ち上がりの現実味。推論基盤の設計原理が「GPU＋HBM」だけでなく「ネットワーク＋メモリ階層＋ストレージ（文脈メモリ）」へ広がる。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag high">不確実性：中〜高</span>
+          <span class="timeline-tag">Rubin</span>
+          <span class="timeline-tag">メモリ階層</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-12 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-month">2026年12月</div>
+        <div class="timeline-heading">NeurIPS 2026：研究成果の集約</div>
+        <div class="timeline-text">NeurIPS 2026（12/6-12、Sydney）で推論効率、マルチモーダル（動画/ロボ）、安全・評価が一段整理され、翌年の製品設計に反映される。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag mid">不確実性：中（内容）</span>
+          <span class="timeline-tag">NeurIPS</span>
+          <span class="timeline-tag">ベンチマーク</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2027-01 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content" style="border-color:#2563eb">
+        <div class="timeline-month" style="color:#4f46e5">2027年1月 ★到達点</div>
+        <div class="timeline-heading">AI導入が「点」から「線（業務プロセス）」へ</div>
+        <div class="timeline-text">「規制対応済みのエージェント運用」「高効率推論（新世代ハード＋最適化）」「端末内推論」の三つ巴で、AI導入が点から線（業務プロセス）へ移る企業が増加。</div>
+        <div class="timeline-tags">
+          <span class="timeline-tag high">不確実性：高</span>
+          <span class="timeline-tag">統合</span>
+          <span class="timeline-tag">業務KPI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><div class="divider-line"></div></div>
+
+<!-- TECH DOMAINS -->
+<section class="section" id="tech">
+  <div class="section-header">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      Technology Domains
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="section-title">技術分野別予測</h2>
+    <p class="section-desc">各技術分野で「何が伸びやすいか」「どこが詰まりやすいか」をベースシナリオ中心に整理。</p>
+  </div>
+  <div class="tech-grid">
+    <!-- LLM -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <div class="tech-card-icon" style="background:#eff6ff;color:#2563eb">🧠</div>
+        <div>
+          <div class="tech-card-name">大規模言語モデル（LLM）</div>
+          <div class="tech-card-direction">「能力の伸び」より「推論単価・運用性・統合性」</div>
+        </div>
+      </div>
+      <div class="tech-card-items">
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#2563eb"></div>DPO等の軽量アラインメントがさらに普及（RLHFの運用コスト圧縮）</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#2563eb"></div>tool-use前提の評価・運用（ログ、権限、回復手順）が標準部品化</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#2563eb"></div>長文脈は"単純拡大"ではなくメモリ階層化へ</div>
+      </div>
+      <div class="tech-card-risk">⚠️ 不確実性：計算資源（HBM/電力）、訴訟・規制によるデータ/モデル透明性要求</div>
+    </div>
+
+    <!-- マルチモーダル -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <div class="tech-card-icon" style="background:#faf5ff;color:#7c3aed">👁️</div>
+        <div>
+          <div class="tech-card-name">マルチモーダルモデル</div>
+          <div class="tech-card-direction">「画像理解」から「画像＋動画＋言語の統合」へ</div>
+        </div>
+      </div>
+      <div class="tech-card-items">
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#7c3aed"></div>業務で動画入力（監視・点検・教育）を扱うVLMが増加</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#7c3aed"></div>マルチモーダルRAGの普及</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#7c3aed"></div>視覚入力の真正性（改ざん耐性）が要件化</div>
+      </div>
+      <div class="tech-card-risk">⚠️ 不確実性：データ権利（映像）、評価の難しさ、人間の主観評価コスト</div>
+    </div>
+
+    <!-- 生成AI -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <div class="tech-card-icon" style="background:#fef3c7;color:#d97706">🎨</div>
+        <div>
+          <div class="tech-card-name">生成AI（画像・音声・動画）</div>
+          <div class="tech-card-direction">画像はコモディティ化、動画が主戦場</div>
+        </div>
+      </div>
+      <div class="tech-card-items">
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#d97706"></div>長尺・高解像動画生成の改善</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#d97706"></div>編集（inpainting/差分編集）と生成の融合</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#d97706"></div>来歴（provenance）標準の実装は進むが流通側は遅れうる</div>
+      </div>
+      <div class="tech-card-risk">⚠️ 不確実性：著作権・肖像権、検出/表示の流通側実装、悪用の加速</div>
+    </div>
+
+    <!-- ロボティクス -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <div class="tech-card-icon" style="background:#f0fdf4;color:#059669">🦾</div>
+        <div>
+          <div class="tech-card-name">ロボティクス</div>
+          <div class="tech-card-direction">「単能」から「基盤モデル（VLA/一般方策）」へ</div>
+        </div>
+      </div>
+      <div class="tech-card-items">
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#059669"></div>VLA（視覚・言語・行動）の一般化が進み実務利用増加</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#059669"></div>オープン基盤（Octo）の派生が増え、ソフトウェア更新で制御改善</div>
+      </div>
+      <div class="tech-card-risk">⚠️ 不確実性：実機安全、コスト、データ、規制（安全認証）</div>
+    </div>
+
+    <!-- エッジAI -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <div class="tech-card-icon" style="background:#ecfdf5;color:#06b6d4">📱</div>
+        <div>
+          <div class="tech-card-name">エッジAI</div>
+          <div class="tech-card-direction">NPU強化で端末内推論が拡大</div>
+        </div>
+      </div>
+      <div class="tech-card-items">
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#06b6d4"></div>13B級までの端末内LLM実行が現実化（要約/翻訳/検索補助）</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#06b6d4"></div>端末内とクラウドの「ハイブリッド推論」が標準化</div>
+      </div>
+      <div class="tech-card-risk">⚠️ 不確実性：バッテリー/熱、OS・アプリ統合、モデル軽量化限界</div>
+    </div>
+
+    <!-- セキュリティ -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <div class="tech-card-icon" style="background:#fef2f2;color:#e11d48">🔒</div>
+        <div>
+          <div class="tech-card-name">セキュリティ・対抗技術</div>
+          <div class="tech-card-direction">標準化された防御が実装される</div>
+        </div>
+      </div>
+      <div class="tech-card-items">
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#e11d48"></div>LLMアプリ脅威Top10の統制導入</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#e11d48"></div>MITRE ATLASによるレッドチームのマトリクス化</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#e11d48"></div>C2PA来歴標準と表示UIの普及は遅い可能性</div>
+      </div>
+      <div class="tech-card-risk">⚠️ 不確実性：プラットフォーム側の実装遅延、メタデータ除去、攻撃者の適応</div>
+    </div>
+
+    <!-- AIハードウェア -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <div class="tech-card-icon" style="background:#e0e7ff;color:#4f46e5">🖥️</div>
+        <div>
+          <div class="tech-card-name">AIハードウェア</div>
+          <div class="tech-card-direction">GPU優位は続くが「選択肢」が拡大</div>
+        </div>
+      </div>
+      <div class="tech-card-items">
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#4f46e5"></div>Rubin世代が推論単価を押し下げる</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#4f46e5"></div>TPU/Trainium/Gaudiでハイパースケーラーがコスト支配力を向上</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#4f46e5"></div>HBM4供給が重要競争要因、日本でも国産プロセッサ開発（PFN等）</div>
+      </div>
+      <div class="tech-card-risk">⚠️ 不確実性：HBM供給/価格、輸出規制、設備投資の循環、電力制約</div>
+    </div>
+
+    <!-- 量子ML -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <div class="tech-card-icon" style="background:#f0f9ff;color:#0284c7">⚛️</div>
+        <div>
+          <div class="tech-card-name">量子機械学習（QML）</div>
+          <div class="tech-card-direction">研究継続、大規模実用は限定的</div>
+        </div>
+      </div>
+      <div class="tech-card-items">
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#0284c7"></div>信頼性/検証やレビューが充実、ベンチマーク整備が進む</div>
+        <div class="tech-item"><div class="tech-item-bullet" style="background:#0284c7"></div>ハイブリッド手法・特定タスク（異常検知等）が中心</div>
+      </div>
+      <div class="tech-card-risk">⚠️ 不確実性：量子ハードの成熟、誇張された優位性主張、検証可能性</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><div class="divider-line"></div></div>
+
+<!-- COMMERCIAL -->
+<section class="section" id="commercial">
+  <div class="section-header">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      Commercialization
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="section-title">商用化・製品化の見通し</h2>
+    <p class="section-desc">2026年は「モデル性能」そのものより、推論コスト・業務統合・安全監査・独自チップ投資の4点で商用競争が進む。</p>
+  </div>
+  <div class="commercial-table-wrapper">
+    <table class="commercial-table">
+      <thead>
+        <tr>
+          <th>領域</th>
+          <th>起こりやすい製品化</th>
+          <th>不確実性</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>エージェント型業務自動化</strong></td>
+          <td>「社内データ＋ツール実行＋監査ログ」一体化の業務エージェント基盤が増加。統合プラットフォーム＋SIが伸びる。</td>
+          <td><span class="uncertainty-badge mid">中</span></td>
+        </tr>
+        <tr>
+          <td><strong>コーディング/開発者支援</strong></td>
+          <td>最大の商用牽引役が継続。IDE/CI/CD連携とセキュリティ統制が差別化要因。</td>
+          <td><span class="uncertainty-badge mid">中</span></td>
+        </tr>
+        <tr>
+          <td><strong>生成動画/広告・コンテンツ</strong></td>
+          <td>動画生成スタートアップへの資金流入が継続。規制/権利/真正性対策が製品要件として重くなる。</td>
+          <td><span class="uncertainty-badge high">高</span></td>
+        </tr>
+        <tr>
+          <td><strong>端末内AI（エッジ）</strong></td>
+          <td>オフライン・プライバシーの価値で普及。ハイブリッド（端末＋クラウド）設計が標準に。</td>
+          <td><span class="uncertainty-badge mid">中</span></td>
+        </tr>
+        <tr>
+          <td><strong>インフラ（GPU以外）</strong></td>
+          <td>TPU/Trainium/Gaudi等の採用が進み、「単一ベンダー依存回避」が設計方針に。</td>
+          <td><span class="uncertainty-badge mid">中</span></td>
+        </tr>
+        <tr>
+          <td><strong>日本の国産基盤・計算基盤</strong></td>
+          <td>国産LLM/計算基盤（液冷等）とAI基本計画に沿った調達・実装が進展。NTT tsuzumi、NEC等。</td>
+          <td><span class="uncertainty-badge mid">中</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="section-divider"><div class="divider-line"></div></div>
+
+<!-- KEY INDICATORS -->
+<section class="section" id="indicators">
+  <div class="section-header">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      Key Indicators
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="section-title">注目すべき指標</h2>
+    <p class="section-desc">「投資の勢い」そのものより「どの領域に再配分されているか」が重要になる。</p>
+  </div>
+  <div class="indicator-cards">
+    <div class="indicator-card">
+      <div class="indicator-label">AI VC投資（世界）</div>
+      <div class="indicator-value" style="color:#2563eb">61%</div>
+      <div class="indicator-bar"><div class="indicator-bar-fill" style="background:linear-gradient(90deg,#2563eb,#4f46e5);--fill:61%"></div></div>
+      <div class="indicator-note">世界VC投資に占めるAI比率。メガディールの比率が高止まりしやすい。上位数社への集中は基盤モデル/計算資源偏重を意味する。</div>
+    </div>
+    <div class="indicator-card">
+      <div class="indicator-label">GenAI特許</div>
+      <div class="indicator-value" style="color:#7c3aed">拡大↑</div>
+      <div class="indicator-bar"><div class="indicator-bar-fill" style="background:linear-gradient(90deg,#7c3aed,#a78bfa);--fill:72%"></div></div>
+      <div class="indicator-note">「生成」そのものより、評価・安全・運用・応用（業務/製造/医療等）で増えやすい。モデルのコモディティ化で周辺が特許化。</div>
+    </div>
+    <div class="indicator-card">
+      <div class="indicator-label">企業AI導入率（OECD）</div>
+      <div class="indicator-value" style="color:#059669">上昇↑</div>
+      <div class="indicator-bar"><div class="indicator-bar-fill" style="background:linear-gradient(90deg,#059669,#34d399);--fill:55%"></div></div>
+      <div class="indicator-note">導入率は上昇基調だが成果は二極化。「導入率」より「本番適用率・業務KPI」が重要な指標に。</div>
+    </div>
+    <div class="indicator-card">
+      <div class="indicator-label">HBM供給（HBM4等）</div>
+      <div class="indicator-value" style="color:#e11d48">制約 ⚡</div>
+      <div class="indicator-bar"><div class="indicator-bar-fill" style="background:linear-gradient(90deg,#e11d48,#f87171);--fill:40%"></div></div>
+      <div class="indicator-note">供給制約が続くと推論単価低下にブレーキ。モデル改善より「供給網/調達力」が技術速度を決める局面がある。</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><div class="divider-line"></div></div>
+
+<!-- REGULATION -->
+<section class="section" id="regulation">
+  <div class="section-header">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      Regulation
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="section-title">規制動向予測（4地域）</h2>
+    <p class="section-desc">EU AI Actの全面適用を分水嶺に、各地域で規制環境が大きく動く。</p>
+  </div>
+  <div class="reg-map">
+    <div class="reg-card">
+      <div class="reg-flag">🇪🇺</div>
+      <div class="reg-region">EU</div>
+      <div class="reg-subtitle">2026-08-02 全面適用 ★分水嶺</div>
+      <div class="reg-text">AI Actの多くの規定が本格適用。GPAI/高リスク分類に応じた文書化・ガバナンスが要求される。製品要件が「監査可能性」へ寄る。</div>
+      <div class="reg-capability"><strong>必要能力：</strong>モデル/データ文書化、評価・監査ログ、AIリテラシー、供給網管理</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-flag">🇺🇸</div>
+      <div class="reg-region">米国</div>
+      <div class="reg-subtitle">NIST RMFが事実上の共通言語</div>
+      <div class="reg-text">包括法よりNIST AI RMF等の枠組みや行政ガイダンス・州法の積み重ねで「事実上の標準」が形成。政治で改訂議論の余地あり。</div>
+      <div class="reg-capability"><strong>必要能力：</strong>自主ガバナンス（Map/Measure/Manage/Govern）、セキュリティ統制</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-flag">🇯🇵</div>
+      <div class="reg-region">日本</div>
+      <div class="reg-subtitle">AI基本計画 + AI Promotion Act</div>
+      <div class="reg-text">国の司令塔と基本計画に基づく推進が明確化。政府調達・利用ガイドラインの整備、相談窓口・助言体制の設置が進む。</div>
+      <div class="reg-capability"><strong>必要能力：</strong>官民調達・運用ルール整備、国産モデル/データ主権、実装の横展開</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-flag">🇨🇳</div>
+      <div class="reg-region">中国</div>
+      <div class="reg-subtitle">生成AI + Deep Synthesis規定</div>
+      <div class="reg-text">暫定規定に加えdeep synthesis規定で本人確認、表示、苦情受付、安全評価等の運用要件が積み上がる。</div>
+      <div class="reg-capability"><strong>必要能力：</strong>コンテンツ表示・審査、本人確認、当局対応、データ越境管理</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><div class="divider-line"></div></div>
+
+<!-- RISKS -->
+<section class="section" id="risks">
+  <div class="section-header">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      Risk Assessment
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="section-title">リスク評価</h2>
+    <p class="section-desc">リスクが最も増大しやすいのは「能力が上がる」ことよりも「エージェント化で行動が入る」ことによる攻撃面の拡大。</p>
+  </div>
+  <div class="risk-grid">
+    <div class="risk-card">
+      <div class="risk-severity" style="background:linear-gradient(90deg,#d97706,#f59e0b)"></div>
+      <div class="risk-card-header">
+        <div class="risk-icon" style="background:#fef3c7;color:#d97706">⚙️</div>
+        <div class="risk-type">技術的リスク</div>
+      </div>
+      <div class="risk-desc">ハルシネーション、長文脈の誤参照、ツール実行の誤操作。エージェント普及で「実害」として顕在化しやすい。</div>
+      <div class="risk-countermeasure">💡 対抗策：権限分離、承認フロー、監査ログ、評価（回帰テスト）</div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-severity" style="background:linear-gradient(90deg,#e11d48,#f43f5e)"></div>
+      <div class="risk-card-header">
+        <div class="risk-icon" style="background:#fef2f2;color:#e11d48">🎭</div>
+        <div class="risk-type">誤用リスク</div>
+      </div>
+      <div class="risk-desc">ディープフェイク、詐欺、なりすまし、情報操作。動画生成の進歩でリスクが増大する。</div>
+      <div class="risk-countermeasure">💡 対抗策：来歴標準＋プラットフォーム表示、検出と法制度の併用</div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-severity" style="background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>
+      <div class="risk-card-header">
+        <div class="risk-icon" style="background:#faf5ff;color:#7c3aed">🔓</div>
+        <div class="risk-type">セキュリティ</div>
+      </div>
+      <div class="risk-desc">プロンプト注入、データ汚染、供給網攻撃、モデル抽出。「LLMアプリ」が新たな攻撃面として定着。</div>
+      <div class="risk-countermeasure">💡 対抗策：OWASP/ATLASで脅威を定義し統制を実装</div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-severity" style="background:linear-gradient(90deg,#2563eb,#3b82f6)"></div>
+      <div class="risk-card-header">
+        <div class="risk-icon" style="background:#eff6ff;color:#2563eb">👥</div>
+        <div class="risk-type">経済・労働</div>
+      </div>
+      <div class="risk-desc">タスク置換による職種再編、ジュニア層の需要減。進歩速度次第で急増も停滞もあり得る（不確実性が高い）。</div>
+      <div class="risk-countermeasure">💡 対抗策：リスキリング、職務設計、セーフティネット設計</div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-severity" style="background:linear-gradient(90deg,#059669,#34d399)"></div>
+      <div class="risk-card-header">
+        <div class="risk-icon" style="background:#f0fdf4;color:#059669">🏗️</div>
+        <div class="risk-type">インフラ制約</div>
+      </div>
+      <div class="risk-desc">HBM/電力/資本コストで進歩が鈍化。供給制約が続けば「制約シナリオ」を押し上げる。</div>
+      <div class="risk-countermeasure">💡 対抗策：代替アクセラレータ採用、効率化、調達戦略</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><div class="divider-line"></div></div>
+
+<!-- ACTION PLAN -->
+<section class="section" id="action">
+  <div class="section-header">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      Action Plan
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="section-title">実用的示唆とアクションプラン</h2>
+    <p class="section-desc">企業・研究者・政策立案者の3つの視点から、短期（3ヶ月）と中期（6〜12ヶ月）のアクションを整理。</p>
+  </div>
+  <div class="action-columns">
+    <!-- 企業 -->
+    <div class="action-col">
+      <div class="action-col-header">
+        <div class="action-col-icon" style="background:#eff6ff;color:#2563eb">🏢</div>
+        <div class="action-col-title">企業向け</div>
+      </div>
+      <div class="action-period">
+        <div class="action-period-label short">短期（〜2026年5月）</div>
+        <div class="action-item"><div class="action-check">✓</div>監査ログ（プロンプト/ツール呼出/外部データ参照）と権限設計を「最小実装」し、エージェントPoCを本番想定で回す</div>
+        <div class="action-item"><div class="action-check">✓</div>EU向け事業がある場合、2026-08-02から逆算してモデル/データ文書化とAIリテラシー計画を着手</div>
+      </div>
+      <div class="action-period">
+        <div class="action-period-label mid">中期（〜2027年1月）</div>
+        <div class="action-item"><div class="action-check">✓</div>推論単価のKPI（トークン単価、遅延、GPU必要数）を経営指標に入れ、ハード調達・最適化を結びつける</div>
+        <div class="action-item"><div class="action-check">✓</div>データ主権・機密要件が強い領域では、専有環境での「生成AI工場」型の導入を検討</div>
+      </div>
+    </div>
+
+    <!-- 研究者 -->
+    <div class="action-col">
+      <div class="action-col-header">
+        <div class="action-col-icon" style="background:#faf5ff;color:#7c3aed">🔬</div>
+        <div class="action-col-title">研究者向け</div>
+      </div>
+      <div class="action-period">
+        <div class="action-period-label short">短期（〜2026年5月）</div>
+        <div class="action-item"><div class="action-check">✓</div>ICLR/CVPR/ACL/ICMLの2026年会期を見据え、エージェント評価・推論効率・動画生成/理解・安全を高確度テーマとして選択</div>
+      </div>
+      <div class="action-period">
+        <div class="action-period-label mid">中期（〜2027年1月）</div>
+        <div class="action-item"><div class="action-check">✓</div>NeurIPS 2026での研究集約を見越し、データ・評価・安全を含む「再現可能なベンチマーク/プロトコル」の構築</div>
+      </div>
+    </div>
+
+    <!-- 政策 -->
+    <div class="action-col">
+      <div class="action-col-header">
+        <div class="action-col-icon" style="background:#f0fdf4;color:#059669">🏛️</div>
+        <div class="action-col-title">政策立案者向け</div>
+      </div>
+      <div class="action-period">
+        <div class="action-period-label short">短期（〜2026年5月）</div>
+        <div class="action-item"><div class="action-check">✓</div>政府自身の調達・利用ガイドラインを運用に落とし（相談窓口、評価、監査）、産業側の実装負担を軽減</div>
+      </div>
+      <div class="action-period">
+        <div class="action-period-label mid">中期（〜2027年1月）</div>
+        <div class="action-item"><div class="action-check">✓</div>AI基本計画に沿い、計算資源と人材の両輪を政策KPI化。雇用影響シナリオ（急激/緩やか/停滞）に備えた制度設計</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <div class="footer-logo-icon">AI</div>
+      2027年1月 AI技術予測
+    </div>
+    <div class="footer-sources">
+      主要参考情報源：<a href="https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai">EU AI Act</a> / <a href="https://www.nist.gov/itl/ai-risk-management-framework">NIST AI RMF</a> / <a href="https://www8.cao.go.jp/cstp/ai/ai_plan/aiplan_eng_20260116.pdf">日本AI基本計画</a> / <a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/">OWASP Top10 for LLM</a> / <a href="https://atlas.mitre.org/">MITRE ATLAS</a> / <a href="https://c2pa.org/specifications/specifications/2.3/specs/C2PA_Specification.html">C2PA仕様</a> / <a href="https://www.oecd.org/en/topics/policy-issues/artificial-intelligence.html">OECD AI Policy</a> / <a href="https://hai.stanford.edu/ai-index/2025-ai-index-report">Stanford HAI AI Index 2025</a> / <a href="https://www.wipo.int/web-publications/patent-landscape-report-generative-artificial-intelligence-genai/">WIPO GenAI特許</a> / arXiv（スケーリング則、DPO、ReAct、Toolformer、Video Diffusion Models、RT-2、Octo 等）
+    </div>
+    <div class="footer-bottom">
+      本レポートは2026年2月19日〜2027年1月31日の期間に関する確率論的予測です。予測は「起こりやすい方向性」として記述されており、単一の未来を断定するものではありません。
+    </div>
+  </div>
+</footer>
+
+<script>
+// ===== NAV VISIBILITY =====
+const nav = document.getElementById('nav');
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+  const st = window.scrollY;
+  if (st > 600) {
+    nav.classList.add('visible');
+  } else {
+    nav.classList.remove('visible');
+  }
+  lastScroll = st;
+});
+
+// ===== INTERSECTION OBSERVER =====
+const observerOptions = {
+  threshold: 0.15,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const delay = entry.target.dataset.delay || 0;
+      setTimeout(() => {
+        entry.target.classList.add('in-view');
+      }, delay);
+    }
+  });
+}, observerOptions);
+
+// Observe all animatable elements
+document.querySelectorAll('.summary-card, .scenario-card, .causal-node, .causal-arrow, .causal-side-node, .timeline-item, .tech-card, .reg-card, .risk-card, .action-col, .indicator-card').forEach(el => {
+  observer.observe(el);
+});
+
+// ===== COUNT UP ANIMATION =====
+function animateCountUp() {
+  const counters = document.querySelectorAll('.count-up[data-target]');
+  counters.forEach(counter => {
+    const target = parseInt(counter.dataset.target);
+    const duration = 2000;
+    const startTime = performance.now();
+
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+      counter.textContent = current.toLocaleString();
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    }
+
+    requestAnimationFrame(update);
+  });
+}
+
+const heroObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      setTimeout(animateCountUp, 1000);
+      heroObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+
+const heroStats = document.querySelector('.hero-stats');
+if (heroStats) heroObserver.observe(heroStats);
+
+// ===== SMOOTH SCROLL FOR NAV =====
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+</body>
+</html>

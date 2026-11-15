@@ -1,0 +1,3317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WD BLUE 8TB – Technical Deep Dive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ROOT VARIABLES & RESET
+   ============================================================ */
+:root {
+  --color-bg: #ffffff;
+  --color-bg-alt: #f4f6f8;
+  --color-bg-dark: #0a0e17;
+  --color-bg-dark-2: #111827;
+  --color-text: #1a1a2e;
+  --color-text-light: #6b7280;
+  --color-text-dark: #e5e7eb;
+  --color-accent: #0066ff;
+  --color-accent-light: #3b82f6;
+  --color-accent-dark: #0044cc;
+  --color-accent-glow: rgba(0, 102, 255, 0.3);
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-border: #e5e7eb;
+  --color-border-dark: #374151;
+  --font-primary: 'Inter', 'Noto Sans JP', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  --space-4xl: 6rem;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,0.15);
+  --shadow-glow: 0 0 30px var(--color-accent-glow);
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { font-family: var(--font-primary); color: var(--color-text); background: var(--color-bg); line-height: 1.7; overflow-x: hidden; }
+img { max-width: 100%; display: block; }
+a { text-decoration: none; color: inherit; }
+button { border: none; background: none; cursor: pointer; font-family: inherit; }
+.container { max-width: 1280px; margin: 0 auto; padding: 0 var(--space-xl); }
+
+/* ============================================================
+   SCROLL PROGRESS BAR
+   ============================================================ */
+.scroll-progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--color-accent), #00d4ff, var(--color-accent)); z-index: 10000; width: 0%; transition: width 0.1s linear; }
+
+/* ============================================================
+   LOADING SCREEN
+   ============================================================ */
+.loading-screen { position: fixed; inset: 0; background: var(--color-bg-dark); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
+.loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.loading-rings { position: relative; width: 120px; height: 120px; }
+.loading-ring { position: absolute; inset: 0; border: 2px solid transparent; border-radius: 50%; }
+.loading-ring:nth-child(1) { border-top-color: var(--color-accent); animation: loadRing 1.2s linear infinite; }
+.loading-ring:nth-child(2) { inset: 10px; border-right-color: #00d4ff; animation: loadRing 1.5s linear infinite reverse; }
+.loading-ring:nth-child(3) { inset: 20px; border-bottom-color: var(--color-success); animation: loadRing 1s linear infinite; }
+@keyframes loadRing { to { transform: rotate(360deg); } }
+.loading-text { color: var(--color-text-dark); font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase; margin-top: var(--space-xl); font-weight: 500; }
+.loading-bar { width: 200px; height: 2px; background: var(--color-border-dark); margin-top: var(--space-md); border-radius: 2px; overflow: hidden; }
+.loading-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--color-accent), #00d4ff); transition: width 0.3s ease; }
+
+/* ============================================================
+   CUSTOM CURSOR
+   ============================================================ */
+.custom-cursor-dot { position: fixed; width: 6px; height: 6px; background: var(--color-accent); border-radius: 50%; pointer-events: none; z-index: 99998; transform: translate(-50%, -50%); transition: transform 0.1s ease, background 0.2s ease; }
+.custom-cursor-ring { position: fixed; width: 36px; height: 36px; border: 1.5px solid var(--color-accent); border-radius: 50%; pointer-events: none; z-index: 99997; transform: translate(-50%, -50%); transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease; }
+.custom-cursor-dot.hovering { transform: translate(-50%, -50%) scale(2.5); background: #00d4ff; }
+.custom-cursor-ring.hovering { width: 54px; height: 54px; border-color: #00d4ff; }
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; padding: var(--space-lg) 0; transition: all var(--transition-base); }
+.nav.scrolled { background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); box-shadow: var(--shadow-sm); padding: var(--space-md) 0; }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; max-width: 1280px; margin: 0 auto; padding: 0 var(--space-xl); }
+.nav-brand { display: flex; align-items: center; gap: var(--space-sm); }
+.nav-logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--color-accent), #00d4ff); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.75rem; }
+.nav-title { font-weight: 700; font-size: 1.1rem; color: #fff; transition: color var(--transition-base); }
+.nav.scrolled .nav-title { color: var(--color-text); }
+.nav-links { display: flex; gap: var(--space-lg); align-items: center; }
+.nav-link { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.7); transition: color var(--transition-base); position: relative; padding: var(--space-xs) 0; }
+.nav-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: var(--color-accent); transition: width var(--transition-base); }
+.nav-link:hover, .nav-link.active { color: #fff; }
+.nav-link:hover::after, .nav-link.active::after { width: 100%; }
+.nav.scrolled .nav-link { color: var(--color-text-light); }
+.nav.scrolled .nav-link:hover, .nav.scrolled .nav-link.active { color: var(--color-accent); }
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+.nav-hamburger span { width: 24px; height: 2px; background: #fff; transition: all var(--transition-base); }
+.nav.scrolled .nav-hamburger span { background: var(--color-text); }
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+.hero { position: relative; min-height: 100vh; display: flex; align-items: center; background: var(--color-bg-dark); overflow: hidden; }
+.hero-canvas { position: absolute; inset: 0; z-index: 1; }
+.hero-gradient { position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 50%, rgba(0,102,255,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(0,212,255,0.1) 0%, transparent 50%); z-index: 2; }
+.hero-noise { position: absolute; inset: 0; opacity: 0.03; z-index: 2; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.hero-grid { position: absolute; inset: 0; z-index: 2; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 60px 60px; }
+.hero-content { position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4xl); align-items: center; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 var(--space-xl); }
+.hero-text { animation: heroTextIn 1s ease 0.5s both; }
+@keyframes heroTextIn { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+.hero-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) var(--space-md); background: rgba(0,102,255,0.15); border: 1px solid rgba(0,102,255,0.3); border-radius: var(--radius-full); margin-bottom: var(--space-lg); }
+.hero-badge-dot { width: 6px; height: 6px; background: var(--color-accent); border-radius: 50%; animation: pulse 2s ease infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.5); } }
+.hero-badge-text { font-size: 0.75rem; font-weight: 600; color: var(--color-accent-light); text-transform: uppercase; letter-spacing: 2px; }
+.hero-title { font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: var(--space-lg); }
+.hero-title-accent { background: linear-gradient(135deg, var(--color-accent), #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); line-height: 1.8; margin-bottom: var(--space-2xl); max-width: 500px; }
+.hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-lg); margin-bottom: var(--space-2xl); }
+.hero-stat { text-align: center; padding: var(--space-md); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); transition: all var(--transition-base); }
+.hero-stat:hover { background: rgba(0,102,255,0.1); border-color: rgba(0,102,255,0.3); transform: translateY(-4px); }
+.hero-stat-value { font-size: 1.8rem; font-weight: 800; color: #fff; font-family: var(--font-mono); }
+.hero-stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.hero-cta { display: flex; gap: var(--space-md); flex-wrap: wrap; }
+.btn-primary { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-md) var(--space-xl); background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark)); color: #fff; font-weight: 600; font-size: 0.9rem; border-radius: var(--radius-full); transition: all var(--transition-base); box-shadow: 0 4px 20px rgba(0,102,255,0.3); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,102,255,0.4); }
+.btn-secondary { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-md) var(--space-xl); background: transparent; color: #fff; font-weight: 600; font-size: 0.9rem; border: 1.5px solid rgba(255,255,255,0.2); border-radius: var(--radius-full); transition: all var(--transition-base); }
+.btn-secondary:hover { border-color: var(--color-accent); color: var(--color-accent); transform: translateY(-2px); }
+
+/* HDD 3D Visual */
+.hero-visual { position: relative; display: flex; align-items: center; justify-content: center; animation: heroVisualIn 1.2s ease 0.8s both; }
+@keyframes heroVisualIn { from { opacity: 0; transform: scale(0.8) rotateY(20deg); } to { opacity: 1; transform: scale(1) rotateY(0); } }
+.hdd-3d { position: relative; width: 380px; height: 380px; perspective: 1000px; }
+.hdd-body { position: absolute; inset: 0; background: linear-gradient(145deg, #1e293b, #0f172a); border-radius: var(--radius-lg); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05); transform: rotateX(5deg) rotateY(-5deg); transition: transform 0.5s ease; }
+.hdd-body:hover { transform: rotateX(8deg) rotateY(-8deg); }
+.hdd-platter { position: absolute; top: 50%; left: 45%; width: 200px; height: 200px; transform: translate(-50%, -50%); }
+.hdd-platter-disc { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: radial-gradient(circle, rgba(0,102,255,0.05) 0%, rgba(0,102,255,0.02) 40%, transparent 70%); animation: platterSpin 6s linear infinite; }
+@keyframes platterSpin { to { transform: rotate(360deg); } }
+.hdd-platter-rings { position: absolute; inset: 0; }
+.hdd-platter-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(255,255,255,0.04); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: platterSpin 6s linear infinite; }
+.hdd-platter-center { position: absolute; top: 50%; left: 50%; width: 30px; height: 30px; transform: translate(-50%, -50%); background: linear-gradient(135deg, #334155, #1e293b); border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); z-index: 2; }
+.hdd-arm { position: absolute; top: 30%; right: 20%; width: 120px; height: 4px; background: linear-gradient(90deg, #475569, #64748b); transform-origin: right center; transform: rotate(-25deg); border-radius: 2px; animation: armSeek 4s ease-in-out infinite; z-index: 3; }
+.hdd-arm::after { content: ''; position: absolute; left: -4px; top: -4px; width: 12px; height: 12px; background: #64748b; border-radius: 2px; transform: rotate(45deg); }
+@keyframes armSeek { 0%, 100% { transform: rotate(-25deg); } 25% { transform: rotate(-15deg); } 50% { transform: rotate(-30deg); } 75% { transform: rotate(-20deg); } }
+.hdd-label { position: absolute; bottom: 30px; left: 30px; right: 30px; }
+.hdd-label-brand { font-size: 1.4rem; font-weight: 800; color: rgba(255,255,255,0.9); letter-spacing: 2px; }
+.hdd-label-model { font-size: 0.7rem; color: rgba(255,255,255,0.3); font-family: var(--font-mono); margin-top: 2px; }
+.hdd-led { position: absolute; top: 20px; right: 20px; width: 6px; height: 6px; background: var(--color-accent); border-radius: 50%; box-shadow: 0 0 10px var(--color-accent-glow); animation: ledBlink 2s ease infinite; }
+@keyframes ledBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* Scroll indicator */
+.scroll-indicator { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); cursor: pointer; }
+.scroll-mouse { width: 24px; height: 38px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; position: relative; }
+.scroll-mouse-wheel { position: absolute; top: 8px; left: 50%; width: 3px; height: 8px; background: #fff; border-radius: 2px; transform: translateX(-50%); animation: scrollWheel 2s ease infinite; }
+@keyframes scrollWheel { 0% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(12px); } }
+.scroll-text { font-size: 0.65rem; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 3px; }
+
+/* ============================================================
+   SECTIONS COMMON
+   ============================================================ */
+.section { padding: var(--space-4xl) 0; position: relative; }
+.section-dark { background: var(--color-bg-dark); color: var(--color-text-dark); }
+.section-alt { background: var(--color-bg-alt); }
+.section-header { text-align: center; margin-bottom: var(--space-4xl); }
+.section-label { display: inline-flex; align-items: center; gap: var(--space-sm); font-size: 0.75rem; font-weight: 600; color: var(--color-accent); text-transform: uppercase; letter-spacing: 3px; margin-bottom: var(--space-md); }
+.section-label-line { width: 30px; height: 1px; background: var(--color-accent); }
+.section-title { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; line-height: 1.2; margin-bottom: var(--space-md); }
+.section-title-gradient { background: linear-gradient(135deg, var(--color-accent), #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.section-desc { font-size: 1.05rem; color: var(--color-text-light); max-width: 650px; margin: 0 auto; line-height: 1.8; }
+.section-dark .section-desc { color: rgba(255,255,255,0.5); }
+
+/* ============================================================
+   REVEAL ANIMATIONS
+   ============================================================ */
+.reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.reveal.revealed { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* ============================================================
+   OVERVIEW CARDS
+   ============================================================ */
+.overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-xl); }
+.overview-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-lg); padding: var(--space-2xl); transition: all var(--transition-base); position: relative; overflow: hidden; }
+.overview-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,102,255,0.05), transparent); opacity: 0; transition: opacity var(--transition-base); }
+.overview-card:hover { transform: translateY(-8px); border-color: rgba(0,102,255,0.2); box-shadow: var(--shadow-glow); }
+.overview-card:hover::before { opacity: 1; }
+.overview-card-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--color-accent), #00d4ff); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-lg); font-size: 1.4rem; color: #fff; position: relative; z-index: 1; }
+.overview-card-title { font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: var(--space-sm); position: relative; z-index: 1; }
+.overview-card-text { font-size: 0.9rem; color: rgba(255,255,255,0.5); line-height: 1.7; position: relative; z-index: 1; margin-bottom: var(--space-md); }
+.overview-card-metric { display: flex; align-items: baseline; gap: var(--space-xs); position: relative; z-index: 1; }
+.overview-card-metric-value { font-size: 1.6rem; font-weight: 800; color: var(--color-accent-light); font-family: var(--font-mono); }
+.overview-card-metric-unit { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+
+/* ============================================================
+   SPECS SECTION (TABBED)
+   ============================================================ */
+.specs-section { background: var(--color-bg-alt); }
+.specs-tabs { display: flex; justify-content: center; gap: var(--space-sm); margin-bottom: var(--space-2xl); flex-wrap: wrap; }
+.specs-tab { padding: var(--space-sm) var(--space-lg); font-size: 0.85rem; font-weight: 600; color: var(--color-text-light); border: 1.5px solid var(--color-border); border-radius: var(--radius-full); transition: all var(--transition-base); cursor: pointer; }
+.specs-tab.active, .specs-tab:hover { color: #fff; background: var(--color-accent); border-color: var(--color-accent); }
+.specs-table-wrap { display: none; }
+.specs-table-wrap.active { display: block; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.specs-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+.specs-table th, .specs-table td { padding: var(--space-md) var(--space-lg); text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--color-border); }
+.specs-table th { background: var(--color-bg-dark); color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; }
+.specs-table tr:last-child td { border-bottom: none; }
+.specs-table tr:hover td { background: rgba(0,102,255,0.03); }
+.specs-table td:first-child { font-weight: 600; color: var(--color-text); }
+.specs-table td:last-child { color: var(--color-text-light); font-family: var(--font-mono); font-size: 0.85rem; }
+
+/* ============================================================
+   SMR TECHNOLOGY SECTION
+   ============================================================ */
+.smr-section { background: var(--color-bg-dark); overflow: hidden; }
+.smr-compare { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); margin-bottom: var(--space-4xl); }
+.smr-compare-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg); padding: var(--space-2xl); position: relative; overflow: hidden; }
+.smr-compare-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.smr-compare-card.cmr::after { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+.smr-compare-card.smr-card::after { background: linear-gradient(90deg, var(--color-accent), #00d4ff); }
+.smr-card-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--color-accent-light); margin-bottom: var(--space-sm); }
+.smr-card-title { font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: var(--space-md); }
+.smr-card-specs { list-style: none; }
+.smr-card-specs li { padding: var(--space-sm) 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+.smr-card-specs li span:last-child { color: #fff; font-weight: 600; font-family: var(--font-mono); }
+.smr-canvas-wrap { position: relative; width: 100%; height: 200px; margin: var(--space-lg) 0; border-radius: var(--radius-md); overflow: hidden; background: rgba(0,0,0,0.3); }
+.smr-canvas-wrap canvas { width: 100%; height: 100%; }
+.smr-zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); margin-bottom: var(--space-2xl); }
+.smr-zone-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; transition: all var(--transition-base); }
+.smr-zone-card:hover { transform: translateY(-4px); border-color: rgba(0,102,255,0.3); }
+.smr-zone-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); font-size: 1.2rem; }
+.smr-zone-icon.conv { background: rgba(16,185,129,0.15); color: var(--color-success); }
+.smr-zone-icon.swr { background: rgba(0,102,255,0.15); color: var(--color-accent); }
+.smr-zone-icon.swp { background: rgba(245,158,11,0.15); color: var(--color-warning); }
+.smr-zone-name { font-weight: 700; color: #fff; margin-bottom: var(--space-xs); font-size: 0.95rem; }
+.smr-zone-desc { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+
+/* SMR Flow */
+.smr-flow { display: flex; align-items: center; justify-content: center; gap: var(--space-md); flex-wrap: wrap; margin-top: var(--space-2xl); }
+.smr-flow-step { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); padding: var(--space-lg); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); min-width: 140px; transition: all var(--transition-base); }
+.smr-flow-step:hover { border-color: rgba(0,102,255,0.3); transform: translateY(-3px); }
+.smr-flow-step-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--color-accent), #00d4ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.9rem; }
+.smr-flow-step-text { font-size: 0.8rem; color: rgba(255,255,255,0.7); font-weight: 500; text-align: center; }
+.smr-flow-arrow { font-size: 1.2rem; color: rgba(255,255,255,0.2); }
+
+/* ============================================================
+   SATA / NCQ ARCHITECTURE
+   ============================================================ */
+.arch-section { background: var(--color-bg); }
+.arch-stack { display: grid; grid-template-columns: 1fr; gap: var(--space-md); max-width: 700px; margin: 0 auto var(--space-4xl); }
+.arch-layer { display: flex; align-items: center; gap: var(--space-lg); padding: var(--space-lg) var(--space-xl); background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); transition: all var(--transition-base); position: relative; overflow: hidden; }
+.arch-layer::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+.arch-layer:nth-child(1)::before { background: var(--color-accent); }
+.arch-layer:nth-child(2)::before { background: #00d4ff; }
+.arch-layer:nth-child(3)::before { background: var(--color-success); }
+.arch-layer:nth-child(4)::before { background: var(--color-warning); }
+.arch-layer:hover { transform: translateX(8px); box-shadow: var(--shadow-md); }
+.arch-layer-icon { width: 44px; height: 44px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.arch-layer:nth-child(1) .arch-layer-icon { background: rgba(0,102,255,0.1); color: var(--color-accent); }
+.arch-layer:nth-child(2) .arch-layer-icon { background: rgba(0,212,255,0.1); color: #00d4ff; }
+.arch-layer:nth-child(3) .arch-layer-icon { background: rgba(16,185,129,0.1); color: var(--color-success); }
+.arch-layer:nth-child(4) .arch-layer-icon { background: rgba(245,158,11,0.1); color: var(--color-warning); }
+.arch-layer-info { flex: 1; }
+.arch-layer-name { font-weight: 700; font-size: 1rem; margin-bottom: 2px; }
+.arch-layer-desc { font-size: 0.8rem; color: var(--color-text-light); }
+
+/* SATA specs grid */
+.sata-specs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-lg); margin-bottom: var(--space-4xl); }
+.sata-spec-card { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-xl); text-align: center; transition: all var(--transition-base); }
+.sata-spec-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--color-accent); }
+.sata-spec-value { font-size: 1.5rem; font-weight: 800; color: var(--color-accent); font-family: var(--font-mono); }
+.sata-spec-label { font-size: 0.75rem; color: var(--color-text-light); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+/* NCQ Visualizer */
+.ncq-visual { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-2xl); box-shadow: var(--shadow-md); }
+.ncq-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg); }
+.ncq-title { font-size: 1.1rem; font-weight: 700; }
+.ncq-badge { padding: var(--space-xs) var(--space-md); background: rgba(0,102,255,0.1); color: var(--color-accent); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; }
+.ncq-queue { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-bottom: var(--space-lg); }
+.ncq-slot { aspect-ratio: 1; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; font-family: var(--font-mono); border: 1px solid var(--color-border); color: var(--color-text-light); transition: all var(--transition-fast); }
+.ncq-slot.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); box-shadow: 0 2px 8px rgba(0,102,255,0.3); }
+.ncq-slot.processing { background: var(--color-success); color: #fff; border-color: var(--color-success); animation: ncqPulse 0.6s ease infinite; }
+@keyframes ncqPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.ncq-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); }
+.ncq-stat { text-align: center; padding: var(--space-md); background: var(--color-bg-alt); border-radius: var(--radius-sm); }
+.ncq-stat-value { font-size: 1.3rem; font-weight: 800; color: var(--color-text); font-family: var(--font-mono); }
+.ncq-stat-label { font-size: 0.7rem; color: var(--color-text-light); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+/* ============================================================
+   CACHE ARCHITECTURE
+   ============================================================ */
+.cache-section { background: var(--color-bg-dark); }
+.cache-hierarchy { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); margin-bottom: var(--space-4xl); }
+.cache-block { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-lg); padding: var(--space-2xl); }
+.cache-block-title { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: var(--space-lg); }
+.cache-item { display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.cache-item:last-child { border-bottom: none; }
+.cache-item-name { font-size: 0.85rem; color: rgba(255,255,255,0.7); }
+.cache-item-value { font-size: 0.9rem; font-weight: 700; color: var(--color-accent-light); font-family: var(--font-mono); }
+.cache-bar-wrap { margin-top: var(--space-lg); }
+.cache-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.05); overflow: hidden; display: flex; }
+.cache-bar-seg { height: 100%; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+.cache-bar-seg.read { background: var(--color-accent); }
+.cache-bar-seg.write { background: #00d4ff; }
+.cache-bar-seg.meta { background: var(--color-warning); }
+.cache-legend { display: flex; gap: var(--space-lg); margin-top: var(--space-sm); }
+.cache-legend-item { display: flex; align-items: center; gap: var(--space-xs); font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+.cache-legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+/* Cache Algorithm Tabs */
+.cache-algo-tabs { display: flex; gap: var(--space-sm); margin-bottom: var(--space-lg); }
+.cache-algo-tab { padding: var(--space-xs) var(--space-md); font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-full); transition: all var(--transition-base); cursor: pointer; }
+.cache-algo-tab.active { color: #fff; background: var(--color-accent); border-color: var(--color-accent); }
+.cache-algo-content { display: none; }
+.cache-algo-content.active { display: block; }
+.cache-code { background: rgba(0,0,0,0.4); border-radius: var(--radius-md); padding: var(--space-lg); font-family: var(--font-mono); font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.9; overflow-x: auto; }
+.cache-code .keyword { color: var(--color-accent-light); }
+.cache-code .comment { color: rgba(255,255,255,0.3); }
+.cache-code .string { color: var(--color-success); }
+
+/* ============================================================
+   PERFORMANCE SECTION
+   ============================================================ */
+.perf-section { background: var(--color-bg-dark); }
+.perf-charts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); margin-bottom: var(--space-4xl); }
+.perf-chart-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-lg); padding: var(--space-2xl); }
+.perf-chart-title { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: var(--space-lg); }
+.perf-chart-canvas { width: 100%; height: 250px; }
+.perf-bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-lg); }
+.perf-bar-item { text-align: center; }
+.perf-bar-track { height: 180px; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm); position: relative; overflow: hidden; margin-bottom: var(--space-sm); }
+.perf-bar-fill { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, var(--color-accent), #00d4ff); border-radius: var(--radius-sm); transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+.perf-bar-value { font-size: 1.1rem; font-weight: 700; color: #fff; font-family: var(--font-mono); }
+.perf-bar-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+/* ============================================================
+   SMART SECTION
+   ============================================================ */
+.smart-section { background: var(--color-bg); }
+.smart-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); margin-bottom: var(--space-2xl); }
+.smart-table th { background: var(--color-bg-dark); color: #fff; padding: var(--space-md) var(--space-lg); text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+.smart-table td { padding: var(--space-md) var(--space-lg); border-bottom: 1px solid var(--color-border); font-size: 0.85rem; }
+.smart-table tr:last-child td { border-bottom: none; }
+.smart-table tr:hover td { background: rgba(0,102,255,0.02); }
+.smart-status { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: var(--radius-full); font-size: 0.7rem; font-weight: 600; }
+.smart-status.ok { background: rgba(16,185,129,0.1); color: var(--color-success); }
+.smart-status.warn { background: rgba(245,158,11,0.1); color: var(--color-warning); }
+.smart-status.crit { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+
+/* ============================================================
+   ECC SECTION
+   ============================================================ */
+.ecc-section { background: var(--color-bg-dark); }
+.ecc-layers { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-xl); margin-bottom: var(--space-2xl); }
+.ecc-layer-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-lg); padding: var(--space-2xl); text-align: center; transition: all var(--transition-base); }
+.ecc-layer-card:hover { transform: translateY(-6px); border-color: rgba(0,102,255,0.2); }
+.ecc-layer-num { font-size: 2.5rem; font-weight: 900; color: var(--color-accent); font-family: var(--font-mono); opacity: 0.3; margin-bottom: var(--space-sm); }
+.ecc-layer-name { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: var(--space-sm); }
+.ecc-layer-desc { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.7; }
+.ecc-layer-rate { margin-top: var(--space-md); font-size: 0.9rem; font-weight: 700; color: var(--color-success); font-family: var(--font-mono); }
+
+/* ============================================================
+   COMPARISON SECTION
+   ============================================================ */
+.compare-section { background: var(--color-bg-alt); }
+.compare-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-xl); margin-bottom: var(--space-4xl); }
+.compare-card { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-2xl); text-align: center; transition: all var(--transition-base); position: relative; }
+.compare-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+.compare-card.featured { border-color: var(--color-accent); }
+.compare-card.featured::before { content: 'FEATURED'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--color-accent); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 3px 14px; border-radius: var(--radius-full); letter-spacing: 1px; }
+.compare-card-brand { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: var(--color-text-light); margin-bottom: var(--space-sm); }
+.compare-card-name { font-size: 1.3rem; font-weight: 800; margin-bottom: var(--space-md); }
+.compare-card-specs { list-style: none; text-align: left; }
+.compare-card-specs li { padding: var(--space-sm) 0; border-bottom: 1px solid var(--color-border); font-size: 0.85rem; display: flex; justify-content: space-between; }
+.compare-card-specs li:last-child { border-bottom: none; }
+.compare-card-specs li span:last-child { font-weight: 600; font-family: var(--font-mono); font-size: 0.8rem; }
+
+/* Radar Chart */
+.compare-radar { display: flex; justify-content: center; margin-bottom: var(--space-4xl); }
+.compare-radar canvas { max-width: 450px; max-height: 450px; }
+
+/* Comparison Table */
+.compare-detail-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+.compare-detail-table th { padding: var(--space-md) var(--space-lg); background: var(--color-bg-dark); color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
+.compare-detail-table th:first-child { text-align: left; }
+.compare-detail-table td { padding: var(--space-md) var(--space-lg); border-bottom: 1px solid var(--color-border); font-size: 0.85rem; text-align: center; }
+.compare-detail-table td:first-child { text-align: left; font-weight: 600; }
+.compare-detail-table tr:last-child td { border-bottom: none; }
+.compare-detail-table tr:hover td { background: rgba(0,102,255,0.02); }
+.compare-winner { background: rgba(0,102,255,0.08); font-weight: 700; color: var(--color-accent); }
+
+/* ============================================================
+   PHYSICAL STRUCTURE SECTION
+   ============================================================ */
+.physical-section { background: var(--color-bg); }
+.physical-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4xl); align-items: start; margin-bottom: var(--space-4xl); }
+.platter-visual { position: relative; background: var(--color-bg-alt); border-radius: var(--radius-lg); padding: var(--space-2xl); border: 1px solid var(--color-border); }
+.platter-canvas { width: 100%; height: 350px; }
+.physical-specs { display: grid; gap: var(--space-md); }
+.physical-spec-item { display: flex; justify-content: space-between; align-items: center; padding: var(--space-md) var(--space-lg); background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); transition: all var(--transition-base); }
+.physical-spec-item:hover { border-color: var(--color-accent); transform: translateX(4px); }
+.physical-spec-name { font-weight: 600; font-size: 0.9rem; }
+.physical-spec-val { font-family: var(--font-mono); font-weight: 700; color: var(--color-accent); font-size: 0.9rem; }
+
+/* Head Technology Tabs */
+.head-tabs { display: flex; gap: var(--space-sm); margin-bottom: var(--space-lg); }
+.head-tab { padding: var(--space-xs) var(--space-md); font-size: 0.8rem; font-weight: 600; color: var(--color-text-light); border: 1px solid var(--color-border); border-radius: var(--radius-full); cursor: pointer; transition: all var(--transition-base); }
+.head-tab.active { color: #fff; background: var(--color-accent); border-color: var(--color-accent); }
+.head-content { display: none; padding: var(--space-lg); background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.head-content.active { display: block; animation: fadeIn 0.4s ease; }
+.head-content h4 { font-size: 1rem; font-weight: 700; margin-bottom: var(--space-sm); }
+.head-content p { font-size: 0.85rem; color: var(--color-text-light); line-height: 1.7; }
+
+/* ============================================================
+   FIRMWARE ARCHITECTURE
+   ============================================================ */
+.firmware-section { background: var(--color-bg-dark); }
+.fw-stack { display: grid; grid-template-columns: 1fr; gap: var(--space-md); max-width: 800px; margin: 0 auto var(--space-4xl); }
+.fw-layer { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); padding: var(--space-lg) var(--space-xl); display: flex; align-items: center; gap: var(--space-lg); transition: all var(--transition-base); }
+.fw-layer:hover { transform: translateX(6px); border-color: rgba(0,102,255,0.2); }
+.fw-layer-num { font-size: 1.8rem; font-weight: 900; color: var(--color-accent); font-family: var(--font-mono); opacity: 0.5; min-width: 50px; }
+.fw-layer-info { flex: 1; }
+.fw-layer-name { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.fw-layer-desc { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+.fw-sched-canvas { width: 100%; height: 300px; background: rgba(0,0,0,0.2); border-radius: var(--radius-lg); }
+
+/* ============================================================
+   ADVANCED FORMAT
+   ============================================================ */
+.af-section { background: var(--color-bg); }
+.af-compare { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); margin-bottom: var(--space-4xl); }
+.af-card { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-2xl); text-align: center; transition: all var(--transition-base); }
+.af-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.af-card-value { font-size: 2.5rem; font-weight: 900; font-family: var(--font-mono); }
+.af-card-label { font-size: 0.75rem; color: var(--color-text-light); text-transform: uppercase; letter-spacing: 1px; margin-top: var(--space-xs); }
+.af-card-overhead { margin-top: var(--space-md); padding: var(--space-sm) var(--space-md); background: var(--color-bg-alt); border-radius: var(--radius-full); display: inline-block; font-size: 0.8rem; font-weight: 600; }
+.af-benefits { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
+.af-benefit { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-xl); text-align: center; transition: all var(--transition-base); }
+.af-benefit:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.af-benefit-icon { width: 48px; height: 48px; background: rgba(0,102,255,0.1); color: var(--color-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); font-size: 1.2rem; }
+.af-benefit-title { font-weight: 700; margin-bottom: var(--space-xs); }
+.af-benefit-desc { font-size: 0.8rem; color: var(--color-text-light); line-height: 1.6; }
+
+/* ============================================================
+   MAINTENANCE SECTION
+   ============================================================ */
+.maint-section { background: var(--color-bg-alt); }
+.maint-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-xl); margin-bottom: var(--space-2xl); }
+.maint-card { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-2xl); transition: all var(--transition-base); }
+.maint-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.maint-card-icon { width: 48px; height: 48px; background: rgba(0,102,255,0.1); color: var(--color-accent); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: var(--space-md); }
+.maint-card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: var(--space-sm); }
+.maint-card-text { font-size: 0.85rem; color: var(--color-text-light); line-height: 1.7; margin-bottom: var(--space-md); }
+.maint-cmd { background: var(--color-bg-dark); color: var(--color-text-dark); padding: var(--space-md); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.8rem; overflow-x: auto; }
+
+/* ============================================================
+   SUMMARY SECTION
+   ============================================================ */
+.summary-section { background: var(--color-bg-dark); position: relative; overflow: hidden; }
+.summary-content { text-align: center; position: relative; z-index: 2; }
+.summary-pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); margin: var(--space-4xl) 0; text-align: left; }
+.summary-list { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-lg); padding: var(--space-2xl); }
+.summary-list-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+.summary-list ul { list-style: none; }
+.summary-list ul li { padding: var(--space-sm) 0; font-size: 0.9rem; color: rgba(255,255,255,0.6); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: flex-start; gap: var(--space-sm); }
+.summary-list ul li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; margin-top: 8px; flex-shrink: 0; }
+.summary-list.pros ul li::before { background: var(--color-success); }
+.summary-list.cons ul li::before { background: var(--color-danger); }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer { background: #050810; padding: var(--space-4xl) 0 var(--space-xl); }
+.footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--space-2xl); margin-bottom: var(--space-4xl); }
+.footer-brand-text { font-size: 0.85rem; color: rgba(255,255,255,0.4); line-height: 1.7; margin-top: var(--space-md); max-width: 300px; }
+.footer-col-title { font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 2px; margin-bottom: var(--space-md); }
+.footer-links { list-style: none; }
+.footer-links li { margin-bottom: var(--space-sm); }
+.footer-links a { font-size: 0.85rem; color: rgba(255,255,255,0.4); transition: color var(--transition-base); }
+.footer-links a:hover { color: var(--color-accent); }
+.footer-badges { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-lg); }
+.footer-badge { padding: 4px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-full); font-size: 0.7rem; color: rgba(255,255,255,0.5); font-family: var(--font-mono); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: var(--space-xl); display: flex; justify-content: space-between; align-items: center; }
+.footer-copy { font-size: 0.8rem; color: rgba(255,255,255,0.3); }
+.back-to-top { width: 44px; height: 44px; background: var(--color-accent); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: all var(--transition-base); opacity: 0; visibility: hidden; position: fixed; bottom: 30px; right: 30px; z-index: 999; box-shadow: var(--shadow-md); }
+.back-to-top.visible { opacity: 1; visibility: visible; }
+.back-to-top:hover { transform: translateY(-3px); box-shadow: var(--shadow-glow); }
+
+/* ============================================================
+   SIDE NAVIGATION
+   ============================================================ */
+.side-nav { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 9998; display: flex; flex-direction: column; gap: 8px; }
+.side-nav-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.3); cursor: pointer; transition: all var(--transition-base); position: relative; }
+.side-nav-dot.active { background: var(--color-accent); border-color: var(--color-accent); transform: scale(1.3); }
+.side-nav-dot:hover { border-color: var(--color-accent); }
+.side-nav-dot::after { content: attr(data-label); position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 0.7rem; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.8); padding: 2px 8px; border-radius: 4px; white-space: nowrap; opacity: 0; transition: opacity var(--transition-fast); pointer-events: none; }
+.side-nav-dot:hover::after { opacity: 1; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+  .hero-content { grid-template-columns: 1fr; text-align: center; }
+  .hero-visual { display: none; }
+  .hero-subtitle { margin: 0 auto var(--space-2xl); }
+  .hero-cta { justify-content: center; }
+  .overview-grid, .ecc-layers, .compare-cards, .af-benefits { grid-template-columns: 1fr 1fr; }
+  .smr-compare, .cache-hierarchy, .perf-charts, .af-compare, .physical-grid, .summary-pros-cons { grid-template-columns: 1fr; }
+  .sata-specs-grid { grid-template-columns: 1fr 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .side-nav { display: none; }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+  .hero-stats { grid-template-columns: 1fr 1fr; }
+  .overview-grid, .ecc-layers, .compare-cards, .smr-zones, .af-benefits, .maint-grid { grid-template-columns: 1fr; }
+  .ncq-queue { grid-template-columns: repeat(4, 1fr); }
+  .perf-bars { grid-template-columns: 1fr 1fr; }
+  .footer-top { grid-template-columns: 1fr; }
+  .custom-cursor-dot, .custom-cursor-ring { display: none; }
+}
+@media (max-width: 480px) {
+  .hero-stats { grid-template-columns: 1fr; }
+  .hero-title { font-size: 2rem; }
+  .sata-specs-grid { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+  .nav, .loading-screen, .custom-cursor-dot, .custom-cursor-ring, .scroll-progress, .side-nav, .back-to-top, .hero-canvas, .scroll-indicator { display: none !important; }
+  .section-dark, .hero { background: #fff !important; color: #000 !important; }
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Loading Screen -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-rings">
+    <div class="loading-ring"></div>
+    <div class="loading-ring"></div>
+    <div class="loading-ring"></div>
+  </div>
+  <div class="loading-text">WD BLUE 8TB</div>
+  <div class="loading-bar"><div class="loading-bar-fill" id="loadingBarFill"></div></div>
+</div>
+
+<!-- Custom Cursor -->
+<div class="custom-cursor-dot" id="cursorDot"></div>
+<div class="custom-cursor-ring" id="cursorRing"></div>
+
+<!-- Side Navigation -->
+<div class="side-nav" id="sideNav">
+  <div class="side-nav-dot active" data-section="hero" data-label="Hero" onclick="scrollToSection('hero')"></div>
+  <div class="side-nav-dot" data-section="overview" data-label="Overview" onclick="scrollToSection('overview')"></div>
+  <div class="side-nav-dot" data-section="smr-tech" data-label="SMR" onclick="scrollToSection('smr-tech')"></div>
+  <div class="side-nav-dot" data-section="architecture" data-label="SATA/NCQ" onclick="scrollToSection('architecture')"></div>
+  <div class="side-nav-dot" data-section="cache" data-label="Cache" onclick="scrollToSection('cache')"></div>
+  <div class="side-nav-dot" data-section="performance" data-label="Performance" onclick="scrollToSection('performance')"></div>
+  <div class="side-nav-dot" data-section="smart" data-label="SMART" onclick="scrollToSection('smart')"></div>
+  <div class="side-nav-dot" data-section="ecc" data-label="ECC" onclick="scrollToSection('ecc')"></div>
+  <div class="side-nav-dot" data-section="comparison" data-label="Comparison" onclick="scrollToSection('comparison')"></div>
+  <div class="side-nav-dot" data-section="physical" data-label="Physical" onclick="scrollToSection('physical')"></div>
+  <div class="side-nav-dot" data-section="firmware" data-label="Firmware" onclick="scrollToSection('firmware')"></div>
+  <div class="side-nav-dot" data-section="advanced-format" data-label="4K Format" onclick="scrollToSection('advanced-format')"></div>
+  <div class="side-nav-dot" data-section="maintenance" data-label="Maintenance" onclick="scrollToSection('maintenance')"></div>
+</div>
+
+<!-- Navigation -->
+<nav class="nav" id="mainNav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand" onclick="scrollToTop()">
+      <div class="nav-logo">WD</div>
+      <span class="nav-title">BLUE 8TB</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="#overview" class="nav-link" onclick="scrollToSection('overview')">Overview</a>
+      <a href="#smr-tech" class="nav-link" onclick="scrollToSection('smr-tech')">SMR</a>
+      <a href="#architecture" class="nav-link" onclick="scrollToSection('architecture')">Architecture</a>
+      <a href="#performance" class="nav-link" onclick="scrollToSection('performance')">Performance</a>
+      <a href="#comparison" class="nav-link" onclick="scrollToSection('comparison')">Comparison</a>
+      <a href="#firmware" class="nav-link" onclick="scrollToSection('firmware')">Firmware</a>
+    </div>
+    <div class="nav-hamburger" onclick="toggleMobileNav()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================================================
+     HERO SECTION
+     ============================================================ -->
+<section class="hero" id="hero">
+  <canvas class="hero-canvas" id="heroCanvas"></canvas>
+  <div class="hero-gradient"></div>
+  <div class="hero-noise"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        <span class="hero-badge-text">Technical Deep Dive</span>
+      </div>
+      <h1 class="hero-title">
+        WD Blue<br><span class="hero-title-accent">8TB HDD</span>
+      </h1>
+      <p class="hero-subtitle">
+        Western Digital WD80EAAZ — 5640 RPM、SATA 6 Gb/s、256 MB キャッシュ搭載の高容量デスクトップHDDの全技術仕様を徹底解説。
+      </p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count="8">0</div>
+          <div class="hero-stat-label">TB Capacity</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count="256">0</div>
+          <div class="hero-stat-label">MB Cache</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count="6">0</div>
+          <div class="hero-stat-label">Gb/s SATA III</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count="5640">0</div>
+          <div class="hero-stat-label">RPM</div>
+        </div>
+      </div>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="scrollToSection('overview')">
+          ▸ Explore Specs
+        </button>
+        <button class="btn-secondary" onclick="scrollToSection('comparison')">
+          ◆ Compare
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hdd-3d">
+        <div class="hdd-body">
+          <div class="hdd-platter">
+            <div class="hdd-platter-disc"></div>
+            <div class="hdd-platter-rings">
+              <div class="hdd-platter-ring" style="width:180px;height:180px;"></div>
+              <div class="hdd-platter-ring" style="width:140px;height:140px;"></div>
+              <div class="hdd-platter-ring" style="width:100px;height:100px;"></div>
+              <div class="hdd-platter-ring" style="width:60px;height:60px;"></div>
+            </div>
+            <div class="hdd-platter-center"></div>
+          </div>
+          <div class="hdd-arm"></div>
+          <div class="hdd-label">
+            <div class="hdd-label-brand">WD BLUE</div>
+            <div class="hdd-label-model">WD80EAAZ · 8TB · SATA 6Gb/s</div>
+          </div>
+          <div class="hdd-led"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator" onclick="scrollToSection('overview')">
+    <div class="scroll-mouse">
+      <div class="scroll-mouse-wheel"></div>
+    </div>
+    <span class="scroll-text">Scroll to Explore</span>
+  </div>
+</section>
+<!-- ============================================================
+     OVERVIEW SECTION
+     ============================================================ -->
+<section class="section section-dark" id="overview">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        OVERVIEW
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">主要テクノロジー<span class="section-title-gradient">概要</span></h2>
+      <p class="section-desc">WD Blue 8TB（WD80EAAZ）に搭載された先進技術の全体像をカード形式で俯瞰します。</p>
+    </div>
+    <div class="overview-grid">
+      <div class="overview-card reveal reveal-delay-1">
+        <div class="overview-card-icon">◎</div>
+        <h3 class="overview-card-title">CMR 記録方式</h3>
+        <p class="overview-card-text">従来型磁気記録（Conventional Magnetic Recording）を採用。トラック間の干渉を避ける設計で、ランダムライト性能が安定しています。</p>
+        <div class="overview-card-metric">
+          <span class="overview-card-metric-value">CMR</span>
+          <span class="overview-card-metric-unit">Recording</span>
+        </div>
+      </div>
+      <div class="overview-card reveal reveal-delay-2">
+        <div class="overview-card-icon">▦</div>
+        <h3 class="overview-card-title">256 MB キャッシュ</h3>
+        <p class="overview-card-text">大容量DDR3キャッシュがリード/ライトリクエストをバッファリングし、体感速度とスループットを向上させます。</p>
+        <div class="overview-card-metric">
+          <span class="overview-card-metric-value">256</span>
+          <span class="overview-card-metric-unit">MB DDR3</span>
+        </div>
+      </div>
+      <div class="overview-card reveal reveal-delay-3">
+        <div class="overview-card-icon">⇌</div>
+        <h3 class="overview-card-title">SATA III 6 Gb/s</h3>
+        <p class="overview-card-text">第3世代SATAインタフェースでホスト間の最大転送レート6 Gb/sを確保。NCQ 32コマンドキュー対応。</p>
+        <div class="overview-card-metric">
+          <span class="overview-card-metric-value">6</span>
+          <span class="overview-card-metric-unit">Gb/s Interface</span>
+        </div>
+      </div>
+      <div class="overview-card reveal reveal-delay-1">
+        <div class="overview-card-icon">⟳</div>
+        <h3 class="overview-card-title">5640 RPM</h3>
+        <p class="overview-card-text">5640 RPMの回転速度で、静音性と発熱抑制を維持しつつ十分なデータ転送スループットを実現します。</p>
+        <div class="overview-card-metric">
+          <span class="overview-card-metric-value">5640</span>
+          <span class="overview-card-metric-unit">RPM</span>
+        </div>
+      </div>
+      <div class="overview-card reveal reveal-delay-2">
+        <div class="overview-card-icon">✓</div>
+        <h3 class="overview-card-title">ECC エラー訂正</h3>
+        <p class="overview-card-text">多段階ECC（リードソロモン＋LDPC）により、データ整合性を強力に保護。UBER 10⁻¹⁵以下。</p>
+        <div class="overview-card-metric">
+          <span class="overview-card-metric-value">10⁻¹⁵</span>
+          <span class="overview-card-metric-unit">UBER</span>
+        </div>
+      </div>
+      <div class="overview-card reveal reveal-delay-3">
+        <div class="overview-card-icon">▣</div>
+        <h3 class="overview-card-title">4K セクターサイズ</h3>
+        <p class="overview-card-text">Advanced Format（4Kネイティブ / 512eエミュレーション）で、ECC効率向上とフォーマットオーバーヘッド削減を実現。</p>
+        <div class="overview-card-metric">
+          <span class="overview-card-metric-value">4096</span>
+          <span class="overview-card-metric-unit">Bytes/Sector</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SPECS SECTION (TABBED TABLES)
+     ============================================================ -->
+<section class="section specs-section" id="specs">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        SPECIFICATIONS
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">詳細<span class="section-title-gradient">スペック表</span></h2>
+      <p class="section-desc">WD80EAAZの全仕様をカテゴリ別に整理しています。</p>
+    </div>
+    <div class="specs-tabs reveal">
+      <button class="specs-tab active" onclick="switchSpecsTab('basic')">基本仕様</button>
+      <button class="specs-tab" onclick="switchSpecsTab('perf')">パフォーマンス</button>
+      <button class="specs-tab" onclick="switchSpecsTab('phys')">物理仕様</button>
+      <button class="specs-tab" onclick="switchSpecsTab('power')">電力・環境</button>
+    </div>
+    <!-- Basic -->
+    <div class="specs-table-wrap active" id="specsBasic">
+      <table class="specs-table reveal">
+        <thead><tr><th>項目</th><th>仕様</th></tr></thead>
+        <tbody>
+          <tr><td>モデル番号</td><td>WD80EAAZ</td></tr>
+          <tr><td>容量</td><td>8 TB</td></tr>
+          <tr><td>記録方式</td><td>CMR（Conventional Magnetic Recording）</td></tr>
+          <tr><td>インタフェース</td><td>SATA 6 Gb/s</td></tr>
+          <tr><td>キャッシュ</td><td>256 MB (DDR3)</td></tr>
+          <tr><td>回転数</td><td>5640 RPM</td></tr>
+          <tr><td>フォームファクタ</td><td>3.5 インチ</td></tr>
+          <tr><td>セクターサイズ</td><td>4096 バイト (512e エミュレーション対応)</td></tr>
+          <tr><td>MTBF</td><td>1,000,000 時間</td></tr>
+          <tr><td>保証</td><td>2年間限定保証</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Performance -->
+    <div class="specs-table-wrap" id="specsPerf">
+      <table class="specs-table reveal">
+        <thead><tr><th>項目</th><th>仕様</th></tr></thead>
+        <tbody>
+          <tr><td>最大転送レート</td><td>Up to 150 MB/s</td></tr>
+          <tr><td>インタフェース速度</td><td>6 Gb/s (SATA III)</td></tr>
+          <tr><td>NCQ</td><td>32 コマンドキュー</td></tr>
+          <tr><td>平均シークタイム（リード）</td><td>~12 ms</td></tr>
+          <tr><td>平均シークタイム（ライト）</td><td>~14 ms</td></tr>
+          <tr><td>平均レイテンシ</td><td>~5.33 ms (5640 RPM)</td></tr>
+          <tr><td>スタートアップ時間</td><td>≤ 15 秒</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Physical -->
+    <div class="specs-table-wrap" id="specsPhys">
+      <table class="specs-table reveal">
+        <thead><tr><th>項目</th><th>仕様</th></tr></thead>
+        <tbody>
+          <tr><td>外形寸法 (W × H × D)</td><td>101.6 × 26.1 × 147.0 mm</td></tr>
+          <tr><td>重量</td><td>~680 g</td></tr>
+          <tr><td>プラッタ枚数</td><td>4 枚</td></tr>
+          <tr><td>ヘッド数</td><td>8</td></tr>
+          <tr><td>記録面密度</td><td>~800 Gb/in²</td></tr>
+          <tr><td>コネクタ</td><td>SATA データ (7ピン) + 電源 (15ピン)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Power -->
+    <div class="specs-table-wrap" id="specsPower">
+      <table class="specs-table reveal">
+        <thead><tr><th>項目</th><th>仕様</th></tr></thead>
+        <tbody>
+          <tr><td>リード/ライト時消費電力</td><td>~5.3 W</td></tr>
+          <tr><td>アイドル時消費電力</td><td>~3.7 W</td></tr>
+          <tr><td>スタンバイ/スリープ</td><td>~0.4 W</td></tr>
+          <tr><td>動作温度</td><td>0 ℃ 〜 60 ℃</td></tr>
+          <tr><td>保管温度</td><td>-40 ℃ 〜 70 ℃</td></tr>
+          <tr><td>動作時振動</td><td>65 G (2 ms)</td></tr>
+          <tr><td>非動作時振動</td><td>250 G (2 ms)</td></tr>
+          <tr><td>動作時騒音</td><td>≤ 23 dBA (アイドル)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SMR TECHNOLOGY SECTION
+     ============================================================ -->
+<section class="section section-dark smr-section" id="smr-tech">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        RECORDING TECHNOLOGY
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">磁気記録方式<span class="section-title-gradient">CMR vs SMR</span></h2>
+      <p class="section-desc">WD80EAAZはCMR（従来型磁気記録）を採用。SMRとの技術的差異と、それぞれの特性を可視化します。</p>
+    </div>
+
+    <!-- CMR vs SMR comparison -->
+    <div class="smr-compare reveal">
+      <div class="smr-compare-card cmr">
+        <div class="smr-card-label">Conventional</div>
+        <h3 class="smr-card-title">CMR 記録方式</h3>
+        <div class="smr-canvas-wrap"><canvas id="cmrCanvas"></canvas></div>
+        <ul class="smr-card-specs">
+          <li><span>トラック密度</span><span>200–300 kTPI</span></li>
+          <li><span>ランダムライト</span><span>高速（非制限）</span></li>
+          <li><span>書換メカニズム</span><span>直接上書き</span></li>
+          <li><span>ユースケース</span><span>汎用・頻繁な書込</span></li>
+          <li><span>WD80EAAZ</span><span>✓ 採用</span></li>
+        </ul>
+      </div>
+      <div class="smr-compare-card smr-card">
+        <div class="smr-card-label">Shingled</div>
+        <h3 class="smr-card-title">SMR 記録方式</h3>
+        <div class="smr-canvas-wrap"><canvas id="smrCanvas"></canvas></div>
+        <ul class="smr-card-specs">
+          <li><span>トラック密度</span><span>500–800+ kTPI</span></li>
+          <li><span>ランダムライト</span><span>要最適化</span></li>
+          <li><span>書換メカニズム</span><span>バンド単位リライト</span></li>
+          <li><span>ユースケース</span><span>アーカイブ・大容量</span></li>
+          <li><span>WD80EAAZ</span><span>✗ 不採用</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Zones -->
+    <h3 class="section-title reveal" style="text-align:center;font-size:1.4rem;margin-bottom:var(--space-2xl);">ゾーンタイプ比較</h3>
+    <div class="smr-zones reveal">
+      <div class="smr-zone-card">
+        <div class="smr-zone-icon conv">◉</div>
+        <div class="smr-zone-name">Conventional Zone</div>
+        <div class="smr-zone-desc">CMR方式の通常ゾーン。WD80EAAZのディスク全域がこの方式で動作します。</div>
+      </div>
+      <div class="smr-zone-card">
+        <div class="smr-zone-icon swr">▤</div>
+        <div class="smr-zone-name">Sequential-Write-Required</div>
+        <div class="smr-zone-desc">SMR HDDにおける書込制約ゾーン。シーケンシャル書込のみ許可されます。</div>
+      </div>
+      <div class="smr-zone-card">
+        <div class="smr-zone-icon swp">◈</div>
+        <div class="smr-zone-name">Sequential-Write-Preferred</div>
+        <div class="smr-zone-desc">SMR HDDでランダム書込も可能だが、シーケンシャルが推奨されるゾーンです。</div>
+      </div>
+    </div>
+
+    <!-- Device-Managed SMR Flow -->
+    <h3 class="section-title reveal" style="text-align:center;font-size:1.4rem;margin-top:var(--space-4xl);margin-bottom:var(--space-xl);">Device-Managed SMR フロー（参考）</h3>
+    <div class="smr-flow reveal">
+      <div class="smr-flow-step">
+        <div class="smr-flow-step-icon">①</div>
+        <div class="smr-flow-step-text">ホストから<br>ライト要求</div>
+      </div>
+      <div class="smr-flow-arrow">→</div>
+      <div class="smr-flow-step">
+        <div class="smr-flow-step-icon">②</div>
+        <div class="smr-flow-step-text">キャッシュへ<br>一時書込</div>
+      </div>
+      <div class="smr-flow-arrow">→</div>
+      <div class="smr-flow-step">
+        <div class="smr-flow-step-icon">③</div>
+        <div class="smr-flow-step-text">バンド内RMW<br>処理</div>
+      </div>
+      <div class="smr-flow-arrow">→</div>
+      <div class="smr-flow-step">
+        <div class="smr-flow-step-icon">④</div>
+        <div class="smr-flow-step-text">シーケンシャル<br>フラッシュ</div>
+      </div>
+      <div class="smr-flow-arrow">→</div>
+      <div class="smr-flow-step">
+        <div class="smr-flow-step-icon">⑤</div>
+        <div class="smr-flow-step-text">完了確認<br>応答</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SATA / NCQ ARCHITECTURE
+     ============================================================ -->
+<section class="section arch-section" id="architecture">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        INTERFACE ARCHITECTURE
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">SATA III &amp; <span class="section-title-gradient">NCQ アーキテクチャ</span></h2>
+      <p class="section-desc">シリアルATA第3世代のプロトコルスタックと、Native Command Queuing（NCQ）の動作を解説します。</p>
+    </div>
+
+    <!-- Protocol Stack -->
+    <div class="arch-stack reveal">
+      <div class="arch-layer">
+        <div class="arch-layer-icon">▲</div>
+        <div class="arch-layer-info">
+          <div class="arch-layer-name">Application Layer</div>
+          <div class="arch-layer-desc">ATA コマンドセット（ACS-4）、SMART、NCQ コマンド発行</div>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-icon">◆</div>
+        <div class="arch-layer-info">
+          <div class="arch-layer-name">Transport Layer</div>
+          <div class="arch-layer-desc">FIS（Frame Information Structure）の構成と解釈</div>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-icon">■</div>
+        <div class="arch-layer-info">
+          <div class="arch-layer-name">Link Layer</div>
+          <div class="arch-layer-desc">8b/10b エンコーディング、CRC、フロー制御</div>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-icon">●</div>
+        <div class="arch-layer-info">
+          <div class="arch-layer-name">Physical Layer</div>
+          <div class="arch-layer-desc">差動信号 400–700 mV、インピーダンス 100 Ω ± 15%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SATA Specs -->
+    <div class="sata-specs-grid reveal">
+      <div class="sata-spec-card">
+        <div class="sata-spec-value">8b/10b</div>
+        <div class="sata-spec-label">Encoding</div>
+      </div>
+      <div class="sata-spec-card">
+        <div class="sata-spec-value">600</div>
+        <div class="sata-spec-label">MB/s Max Throughput</div>
+      </div>
+      <div class="sata-spec-card">
+        <div class="sata-spec-value">100 Ω</div>
+        <div class="sata-spec-label">Impedance</div>
+      </div>
+      <div class="sata-spec-card">
+        <div class="sata-spec-value">32</div>
+        <div class="sata-spec-label">NCQ Queue Depth</div>
+      </div>
+    </div>
+
+    <!-- NCQ Visualizer -->
+    <div class="ncq-visual reveal">
+      <div class="ncq-header">
+        <div class="ncq-title">NCQ コマンドキュー ビジュアライザ</div>
+        <div class="ncq-badge">リアルタイムシミュレーション</div>
+      </div>
+      <div class="ncq-queue" id="ncqQueue">
+        <!-- 32 slots generated by JS -->
+      </div>
+      <div class="ncq-stats">
+        <div class="ncq-stat">
+          <div class="ncq-stat-value" id="ncqDepth">0</div>
+          <div class="ncq-stat-label">Queue Depth</div>
+        </div>
+        <div class="ncq-stat">
+          <div class="ncq-stat-value" id="ncqReorder">0</div>
+          <div class="ncq-stat-label">Reorders</div>
+        </div>
+        <div class="ncq-stat">
+          <div class="ncq-stat-value">+40%</div>
+          <div class="ncq-stat-label">Random Perf Gain</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CACHE ARCHITECTURE
+     ============================================================ -->
+<section class="section section-dark cache-section" id="cache">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        CACHE SYSTEM
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">256 MB <span class="section-title-gradient">キャッシュアーキテクチャ</span></h2>
+      <p class="section-desc">多層キャッシュ設計とインテリジェントなアルゴリズムによりアクセスパターンに応じた最適化を行います。</p>
+    </div>
+
+    <div class="cache-hierarchy reveal">
+      <!-- DRAM Cache -->
+      <div class="cache-block">
+        <h3 class="cache-block-title">DRAM キャッシュ階層 (256 MB)</h3>
+        <div class="cache-item">
+          <span class="cache-item-name">Host Interface Buffer</span>
+          <span class="cache-item-value">16 MB</span>
+        </div>
+        <div class="cache-item">
+          <span class="cache-item-name">Command Queue Buffer</span>
+          <span class="cache-item-value">8 MB</span>
+        </div>
+        <div class="cache-item">
+          <span class="cache-item-name">Read Cache Pool</span>
+          <span class="cache-item-value">116 MB</span>
+        </div>
+        <div class="cache-item">
+          <span class="cache-item-name">Write Cache Pool</span>
+          <span class="cache-item-value">100 MB</span>
+        </div>
+        <div class="cache-item">
+          <span class="cache-item-name">Metadata Cache</span>
+          <span class="cache-item-value">16 MB</span>
+        </div>
+        <div class="cache-bar-wrap">
+          <div class="cache-bar">
+            <div class="cache-bar-seg read" id="cacheRead" style="width:0%"></div>
+            <div class="cache-bar-seg write" id="cacheWrite" style="width:0%"></div>
+            <div class="cache-bar-seg meta" id="cacheMeta" style="width:0%"></div>
+          </div>
+          <div class="cache-legend">
+            <div class="cache-legend-item"><div class="cache-legend-dot" style="background:var(--color-accent)"></div>Read</div>
+            <div class="cache-legend-item"><div class="cache-legend-dot" style="background:#00d4ff"></div>Write</div>
+            <div class="cache-legend-item"><div class="cache-legend-dot" style="background:var(--color-warning)"></div>Metadata</div>
+          </div>
+        </div>
+      </div>
+      <!-- Algorithm -->
+      <div class="cache-block">
+        <h3 class="cache-block-title">キャッシュアルゴリズム</h3>
+        <div class="cache-algo-tabs">
+          <button class="cache-algo-tab active" onclick="switchCacheTab('read')">Read</button>
+          <button class="cache-algo-tab" onclick="switchCacheTab('write')">Write</button>
+          <button class="cache-algo-tab" onclick="switchCacheTab('adaptive')">Adaptive</button>
+        </div>
+        <div class="cache-algo-content active" id="cacheAlgoRead">
+          <div class="cache-code">
+<span class="comment">// Read-Ahead Algorithm</span>
+<span class="keyword">function</span> readAhead(lba, size) {
+  <span class="keyword">if</span> (cache.contains(lba)) {
+    <span class="keyword">return</span> cache.get(lba); <span class="comment">// Cache HIT</span>
+  }
+  pattern = detectPattern(history);
+  <span class="keyword">if</span> (pattern === <span class="string">'SEQUENTIAL'</span>) {
+    prefetch(lba + size, size * 4);
+  } <span class="keyword">else if</span> (pattern === <span class="string">'STRIDED'</span>) {
+    stride = calcStride(history);
+    prefetch(lba + stride, size);
+  }
+  data = media.read(lba, size);
+  cache.insert(lba, data, <span class="string">'LRU'</span>);
+  <span class="keyword">return</span> data;
+}
+          </div>
+        </div>
+        <div class="cache-algo-content" id="cacheAlgoWrite">
+          <div class="cache-code">
+<span class="comment">// Write-Back Algorithm</span>
+<span class="keyword">function</span> writeBack(lba, data) {
+  cache.insertWrite(lba, data);
+  markDirty(lba);
+  sendAck(); <span class="comment">// Immediate ACK</span>
+
+  <span class="keyword">if</span> (dirtyRatio > 0.8) {
+    flushSequential(); <span class="comment">// Sort & flush</span>
+  }
+  <span class="comment">// Background thread:</span>
+  scheduler.enqueue({
+    type: <span class="string">'FLUSH'</span>,
+    sort: <span class="string">'LBA_ORDER'</span>,
+    priority: calcPriority(lba)
+  });
+}
+          </div>
+        </div>
+        <div class="cache-algo-content" id="cacheAlgoAdaptive">
+          <div class="cache-code">
+<span class="comment">// Adaptive Partition</span>
+<span class="keyword">function</span> rebalance() {
+  stats = monitor.getStats();
+  <span class="keyword">if</span> (stats.readHitRate &lt; 0.6) {
+    expandPool(<span class="string">'READ'</span>, 16);
+    shrinkPool(<span class="string">'WRITE'</span>, 16);
+  } <span class="keyword">else if</span> (stats.writePending > 80) {
+    expandPool(<span class="string">'WRITE'</span>, 32);
+    shrinkPool(<span class="string">'READ'</span>, 32);
+  }
+  <span class="comment">// Runs every 500ms</span>
+  setTimeout(rebalance, 500);
+}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PERFORMANCE SECTION
+     ============================================================ -->
+<section class="section section-dark perf-section" id="performance">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        PERFORMANCE
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">パフォーマンス<span class="section-title-gradient">分析</span></h2>
+      <p class="section-desc">シーケンシャル・ランダム各種ワークロードにおける転送速度をグラフで可視化します。</p>
+    </div>
+
+    <div class="perf-charts reveal">
+      <div class="perf-chart-card">
+        <div class="perf-chart-title">シーケンシャル転送速度</div>
+        <canvas class="perf-chart-canvas" id="seqChart"></canvas>
+      </div>
+      <div class="perf-chart-card">
+        <div class="perf-chart-title">ランダム IOPS</div>
+        <canvas class="perf-chart-canvas" id="randChart"></canvas>
+      </div>
+    </div>
+
+    <h3 class="section-title reveal" style="text-align:center;font-size:1.3rem;margin-bottom:var(--space-2xl);color:#fff;">主要ベンチマーク指標</h3>
+    <div class="perf-bars reveal">
+      <div class="perf-bar-item">
+        <div class="perf-bar-track">
+          <div class="perf-bar-fill" data-height="83" style="height:0%"></div>
+        </div>
+        <div class="perf-bar-value">150</div>
+        <div class="perf-bar-label">MB/s Seq Read</div>
+      </div>
+      <div class="perf-bar-item">
+        <div class="perf-bar-track">
+          <div class="perf-bar-fill" data-height="75" style="height:0%"></div>
+        </div>
+        <div class="perf-bar-value">145</div>
+        <div class="perf-bar-label">MB/s Seq Write</div>
+      </div>
+      <div class="perf-bar-item">
+        <div class="perf-bar-track">
+          <div class="perf-bar-fill" data-height="35" style="height:0%"></div>
+        </div>
+        <div class="perf-bar-value">~75</div>
+        <div class="perf-bar-label">IOPS 4K Rand R</div>
+      </div>
+      <div class="perf-bar-item">
+        <div class="perf-bar-track">
+          <div class="perf-bar-fill" data-height="30" style="height:0%"></div>
+        </div>
+        <div class="perf-bar-value">~65</div>
+        <div class="perf-bar-label">IOPS 4K Rand W</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SMART MONITORING
+     ============================================================ -->
+<section class="section smart-section" id="smart">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        S.M.A.R.T.
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">S.M.A.R.T. <span class="section-title-gradient">モニタリング</span></h2>
+      <p class="section-desc">Self-Monitoring, Analysis and Reporting Technology の主要属性と健康状態の読み方を解説します。</p>
+    </div>
+
+    <table class="smart-table reveal">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>属性名</th>
+          <th>説明</th>
+          <th>閾値</th>
+          <th>正常範囲</th>
+          <th>状態</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-family:var(--font-mono)">01</td>
+          <td>Raw Read Error Rate</td>
+          <td>読取エラーレート（ベンダー独自正規化）</td>
+          <td>51</td>
+          <td>100–200</td>
+          <td><span class="smart-status ok">● OK</span></td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono)">03</td>
+          <td>Spin Up Time</td>
+          <td>プラッタ回転開始時間</td>
+          <td>21</td>
+          <td>&lt; 8000 ms</td>
+          <td><span class="smart-status ok">● OK</span></td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono)">04</td>
+          <td>Start/Stop Count</td>
+          <td>スピンアップ/ダウン回数</td>
+          <td>0</td>
+          <td>&lt; 50,000</td>
+          <td><span class="smart-status ok">● OK</span></td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono)">05</td>
+          <td>Reallocated Sector Count</td>
+          <td>代替済みセクタ数（重要指標）</td>
+          <td>140</td>
+          <td>0</td>
+          <td><span class="smart-status ok">● OK</span></td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono)">07</td>
+          <td>Seek Error Rate</td>
+          <td>シークエラー率</td>
+          <td>67</td>
+          <td>&gt; 100</td>
+          <td><span class="smart-status ok">● OK</span></td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono)">09</td>
+          <td>Power-On Hours</td>
+          <td>累計通電時間</td>
+          <td>0</td>
+          <td>&lt; 35,000 h</td>
+          <td><span class="smart-status ok">● OK</span></td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono)">0C</td>
+          <td>Power Cycle Count</td>
+          <td>電源ON/OFF回数</td>
+          <td>0</td>
+          <td>&lt; 10,000</td>
+          <td><span class="smart-status ok">● OK</span></td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono)">C0</td>
+          <td>Unsafe Shutdown Count</td>
+          <td>異常シャットダウン回数</td>
+          <td>0</td>
+          <td>0–5</td>
+          <td><span class="smart-status warn">● WARN</span></td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono)">C2</td>
+          <td>Temperature</td>
+          <td>現在温度 (℃)</td>
+          <td>0</td>
+          <td>25–45 ℃</td>
+          <td><span class="smart-status ok">● OK</span></td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono)">C5</td>
+          <td>Current Pending Sector</td>
+          <td>保留中の不良セクタ候補数</td>
+          <td>0</td>
+          <td>0</td>
+          <td><span class="smart-status ok">● OK</span></td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono)">C6</td>
+          <td>Uncorrectable Sector Count</td>
+          <td>訂正不能セクタ数</td>
+          <td>0</td>
+          <td>0</td>
+          <td><span class="smart-status crit">● CRIT</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================
+     ECC ERROR CORRECTION
+     ============================================================ -->
+<section class="section section-dark ecc-section" id="ecc">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        ERROR CORRECTION
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">多段階 <span class="section-title-gradient">ECC エラー訂正</span></h2>
+      <p class="section-desc">3層のエラー訂正コードにより、記録密度の向上と高いデータ信頼性を両立しています。</p>
+    </div>
+
+    <div class="ecc-layers reveal">
+      <div class="ecc-layer-card">
+        <div class="ecc-layer-num">01</div>
+        <div class="ecc-layer-name">Reed-Solomon Code</div>
+        <div class="ecc-layer-desc">セクタ単位でのバイトレベル訂正。読取時に検出された短バーストエラーを即座に訂正します。</div>
+        <div class="ecc-layer-rate">訂正率: ~10⁻³</div>
+      </div>
+      <div class="ecc-layer-card">
+        <div class="ecc-layer-num">02</div>
+        <div class="ecc-layer-name">LDPC (Low-Density Parity Check)</div>
+        <div class="ecc-layer-desc">反復復号による強力な誤り訂正。RSで訂正できなかったエラーをソフトデコーディングで回復します。</div>
+        <div class="ecc-layer-rate">訂正率: ~10⁻⁹</div>
+      </div>
+      <div class="ecc-layer-card">
+        <div class="ecc-layer-num">03</div>
+        <div class="ecc-layer-name">Post-Processing Recovery</div>
+        <div class="ecc-layer-desc">メディアリトライ、オフトラック補正、信号再処理による最終段階のデータ回復メカニズムです。</div>
+        <div class="ecc-layer-rate">最終 UBER: &lt; 10⁻¹⁵</div>
+      </div>
+    </div>
+
+    <!-- ECC Pipeline Visualization -->
+    <div class="smr-flow reveal" style="margin-top:var(--space-4xl);">
+      <div class="smr-flow-step">
+        <div class="smr-flow-step-icon">◎</div>
+        <div class="smr-flow-step-text">磁気信号<br>読取</div>
+      </div>
+      <div class="smr-flow-arrow">→</div>
+      <div class="smr-flow-step">
+        <div class="smr-flow-step-icon">RS</div>
+        <div class="smr-flow-step-text">Reed-Solomon<br>デコード</div>
+      </div>
+      <div class="smr-flow-arrow">→</div>
+      <div class="smr-flow-step">
+        <div class="smr-flow-step-icon">LP</div>
+        <div class="smr-flow-step-text">LDPC<br>反復復号</div>
+      </div>
+      <div class="smr-flow-arrow">→</div>
+      <div class="smr-flow-step">
+        <div class="smr-flow-step-icon">PP</div>
+        <div class="smr-flow-step-text">Post-Process<br>リカバリ</div>
+      </div>
+      <div class="smr-flow-arrow">→</div>
+      <div class="smr-flow-step">
+        <div class="smr-flow-step-icon">✓</div>
+        <div class="smr-flow-step-text">データ<br>出力</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COMPARISON SECTION
+     ============================================================ -->
+<section class="section compare-section" id="comparison">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        COMPARISON
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">競合製品<span class="section-title-gradient">比較分析</span></h2>
+      <p class="section-desc">8TBクラスのデスクトップHDD主要製品との詳細比較を行います。</p>
+    </div>
+
+    <!-- Product Cards -->
+    <div class="compare-cards reveal">
+      <div class="compare-card featured">
+        <div class="compare-card-brand">Western Digital</div>
+        <h3 class="compare-card-name">WD Blue 8TB</h3>
+        <ul class="compare-card-specs">
+          <li><span>モデル</span><span>WD80EAAZ</span></li>
+          <li><span>記録方式</span><span>CMR</span></li>
+          <li><span>RPM</span><span>5640</span></li>
+          <li><span>キャッシュ</span><span>256 MB</span></li>
+          <li><span>転送速度</span><span>150 MB/s</span></li>
+          <li><span>消費電力</span><span>5.3 W</span></li>
+          <li><span>保証</span><span>2年</span></li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <div class="compare-card-brand">Seagate</div>
+        <h3 class="compare-card-name">BarraCuda 8TB</h3>
+        <ul class="compare-card-specs">
+          <li><span>モデル</span><span>ST8000DM004</span></li>
+          <li><span>記録方式</span><span>SMR</span></li>
+          <li><span>RPM</span><span>5400</span></li>
+          <li><span>キャッシュ</span><span>256 MB</span></li>
+          <li><span>転送速度</span><span>190 MB/s</span></li>
+          <li><span>消費電力</span><span>5.3 W</span></li>
+          <li><span>保証</span><span>2年</span></li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <div class="compare-card-brand">Toshiba</div>
+        <h3 class="compare-card-name">N300 8TB</h3>
+        <ul class="compare-card-specs">
+          <li><span>モデル</span><span>HDWG480</span></li>
+          <li><span>記録方式</span><span>CMR</span></li>
+          <li><span>RPM</span><span>7200</span></li>
+          <li><span>キャッシュ</span><span>256 MB</span></li>
+          <li><span>転送速度</span><span>248 MB/s</span></li>
+          <li><span>消費電力</span><span>10.4 W</span></li>
+          <li><span>保証</span><span>3年</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Radar Chart -->
+    <div class="compare-radar reveal">
+      <canvas id="radarChart" width="450" height="450"></canvas>
+    </div>
+
+    <!-- Detail Table -->
+    <table class="compare-detail-table reveal">
+      <thead>
+        <tr>
+          <th>比較項目</th>
+          <th>WD Blue 8TB</th>
+          <th>BarraCuda 8TB</th>
+          <th>Toshiba N300 8TB</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>記録方式</td><td class="compare-winner">CMR</td><td>SMR</td><td class="compare-winner">CMR</td></tr>
+        <tr><td>回転数</td><td>5640 RPM</td><td>5400 RPM</td><td class="compare-winner">7200 RPM</td></tr>
+        <tr><td>キャッシュ</td><td>256 MB</td><td>256 MB</td><td>256 MB</td></tr>
+        <tr><td>Seq Read</td><td>150 MB/s</td><td class="compare-winner">190 MB/s</td><td class="compare-winner">248 MB/s</td></tr>
+        <tr><td>消費電力 (R/W)</td><td class="compare-winner">5.3 W</td><td class="compare-winner">5.3 W</td><td>10.4 W</td></tr>
+        <tr><td>騒音 (Idle)</td><td class="compare-winner">23 dBA</td><td class="compare-winner">24 dBA</td><td>29 dBA</td></tr>
+        <tr><td>保証期間</td><td>2年</td><td>2年</td><td class="compare-winner">3年</td></tr>
+        <tr><td>対象用途</td><td>デスクトップPC</td><td>大容量ストレージ</td><td>NAS / 24x7</td></tr>
+        <tr><td>MTBF</td><td>1,000,000 h</td><td>—</td><td class="compare-winner">1,200,000 h</td></tr>
+        <tr><td>ランダムライト</td><td class="compare-winner">安定</td><td>要最適化</td><td class="compare-winner">安定</td></tr>
+        <tr><td>価格帯</td><td class="compare-winner">低</td><td class="compare-winner">低</td><td>中〜高</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================
+     PHYSICAL STRUCTURE
+     ============================================================ -->
+<section class="section physical-section" id="physical">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        PHYSICAL STRUCTURE
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">物理構造と<span class="section-title-gradient">ヘッド技術</span></h2>
+      <p class="section-desc">プラッタ構成、磁気ヘッド技術、アクチュエータ機構の内部構造を解説します。</p>
+    </div>
+
+    <div class="physical-grid reveal">
+      <!-- Platter Visual -->
+      <div class="platter-visual">
+        <canvas class="platter-canvas" id="platterCanvas"></canvas>
+      </div>
+      <!-- Specs -->
+      <div class="physical-specs">
+        <div class="physical-spec-item"><span class="physical-spec-name">プラッタ枚数</span><span class="physical-spec-val">4 枚</span></div>
+        <div class="physical-spec-item"><span class="physical-spec-name">ヘッド数</span><span class="physical-spec-val">8 ヘッド</span></div>
+        <div class="physical-spec-item"><span class="physical-spec-name">プラッタ直径</span><span class="physical-spec-val">3.5 インチ (95 mm)</span></div>
+        <div class="physical-spec-item"><span class="physical-spec-name">面記録密度</span><span class="physical-spec-val">~800 Gb/in²</span></div>
+        <div class="physical-spec-item"><span class="physical-spec-name">ヘッド浮上高</span><span class="physical-spec-val">~10 nm</span></div>
+        <div class="physical-spec-item"><span class="physical-spec-name">基板材質</span><span class="physical-spec-val">ガラス / アルミ</span></div>
+        <div class="physical-spec-item"><span class="physical-spec-name">磁性層</span><span class="physical-spec-val">CoCrPt グラニュラー</span></div>
+        <div class="physical-spec-item"><span class="physical-spec-name">保護層</span><span class="physical-spec-val">DLC (Diamond-Like Carbon)</span></div>
+
+        <!-- Head Tech Tabs -->
+        <div style="margin-top:var(--space-xl);">
+          <div class="head-tabs">
+            <button class="head-tab active" onclick="switchHeadTab('gmr')">GMR</button>
+            <button class="head-tab" onclick="switchHeadTab('tmr')">TMR</button>
+            <button class="head-tab" onclick="switchHeadTab('writer')">Writer</button>
+          </div>
+          <div class="head-content active" id="headGmr">
+            <h4>GMR (Giant Magnetoresistive)</h4>
+            <p>巨大磁気抵抗効果を利用したリードヘッド。固定層とフリー層の磁化方向の差による抵抗変化で信号を検出します。初期の高密度記録を支えた技術です。</p>
+          </div>
+          <div class="head-content" id="headTmr">
+            <h4>TMR (Tunneling Magnetoresistive)</h4>
+            <p>トンネル磁気抵抗効果を利用した次世代リードヘッド。MgOバリア層を介した量子力学的トンネリングにより、GMRの2–3倍のMR比を実現。WD Blue 8TBが採用する現行技術です。</p>
+          </div>
+          <div class="head-content" id="headWriter">
+            <h4>Write Head Technology</h4>
+            <p>単磁極型（Perpendicular）ライトヘッドを採用。強力なソフト磁性シールドとメインポールにより垂直方向の磁場を集中させ、高密度書込を可能にしています。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FIRMWARE ARCHITECTURE
+     ============================================================ -->
+<section class="section section-dark firmware-section" id="firmware">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        FIRMWARE
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">ファームウェア<span class="section-title-gradient">アーキテクチャ</span></h2>
+      <p class="section-desc">HDD内蔵コントローラで動作する4層ファームウェアスタックの構造と役割。</p>
+    </div>
+
+    <div class="fw-stack reveal">
+      <div class="fw-layer">
+        <div class="fw-layer-num">04</div>
+        <div class="fw-layer-info">
+          <div class="fw-layer-name">Application Layer</div>
+          <div class="fw-layer-desc">SMART管理、キャッシュアルゴリズム、NCQ最適化、省電力制御、Background Media Scan</div>
+        </div>
+      </div>
+      <div class="fw-layer">
+        <div class="fw-layer-num">03</div>
+        <div class="fw-layer-info">
+          <div class="fw-layer-name">System Layer</div>
+          <div class="fw-layer-desc">タスクスケジューラ（5優先度レベル）、メモリ管理、割り込みハンドラ、ウォッチドッグタイマ</div>
+        </div>
+      </div>
+      <div class="fw-layer">
+        <div class="fw-layer-num">02</div>
+        <div class="fw-layer-info">
+          <div class="fw-layer-name">HAL (Hardware Abstraction)</div>
+          <div class="fw-layer-desc">モータドライバ制御、VCMサーボ、ADC/DAC制御、温度センサ、プリアンプ</div>
+        </div>
+      </div>
+      <div class="fw-layer">
+        <div class="fw-layer-num">01</div>
+        <div class="fw-layer-info">
+          <div class="fw-layer-name">Hardware Layer</div>
+          <div class="fw-layer-desc">ARM Cortex-R SoC、DRAM コントローラ、SATAphy、チャネル ASIC、電源IC</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Scheduler Canvas -->
+    <h3 class="section-title reveal" style="text-align:center;font-size:1.2rem;margin-bottom:var(--space-xl);color:#fff;">タスクスケジューラ ビジュアライザ</h3>
+    <div class="reveal">
+      <canvas class="fw-sched-canvas" id="fwSchedCanvas"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ADVANCED FORMAT (4K)
+     ============================================================ -->
+<section class="section af-section" id="advanced-format">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        ADVANCED FORMAT
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">4K セクター<span class="section-title-gradient">Advanced Format</span></h2>
+      <p class="section-desc">512バイトセクタから4096バイトセクタへの移行と、512eエミュレーションの仕組みを解説します。</p>
+    </div>
+
+    <div class="af-compare reveal">
+      <div class="af-card">
+        <div class="af-card-value" style="color:var(--color-text-light);">512 B</div>
+        <div class="af-card-label">従来セクターサイズ</div>
+        <div class="af-card-overhead">オーバーヘッド: ~2.34%</div>
+      </div>
+      <div class="af-card">
+        <div class="af-card-value" style="color:var(--color-accent);">4096 B</div>
+        <div class="af-card-label">Advanced Format</div>
+        <div class="af-card-overhead" style="background:rgba(0,102,255,0.1);color:var(--color-accent);">オーバーヘッド: ~0.29%</div>
+      </div>
+    </div>
+
+    <h3 class="section-title reveal" style="text-align:center;font-size:1.2rem;margin-bottom:var(--space-2xl);">Advanced Format のメリット</h3>
+    <div class="af-benefits reveal">
+      <div class="af-benefit">
+        <div class="af-benefit-icon">✓</div>
+        <h4 class="af-benefit-title">ECC 効率向上</h4>
+        <p class="af-benefit-desc">4KBセクタ単位で1つのECCブロックを割り当てることで、より強力なエラー訂正が可能になります。冗長度は512B時の約1/8に削減。</p>
+      </div>
+      <div class="af-benefit">
+        <div class="af-benefit-icon">◎</div>
+        <h4 class="af-benefit-title">フォーマット効率</h4>
+        <p class="af-benefit-desc">セクタヘッダ・ギャップの数が1/8に減り、利用可能な記録面積が増加。オーバーヘッドが2.34%→0.29%へ大幅低減。</p>
+      </div>
+      <div class="af-benefit">
+        <div class="af-benefit-icon">⚡</div>
+        <h4 class="af-benefit-title">処理効率</h4>
+        <p class="af-benefit-desc">OS/ファイルシステムの4Kブロックとセクタサイズが一致し、Read-Modify-Writeペナルティを回避できます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MAINTENANCE
+     ============================================================ -->
+<section class="section maint-section" id="maintenance">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        MAINTENANCE
+        <span class="section-label-line"></span>
+      </div>
+      <h2 class="section-title">メンテナンス &amp; <span class="section-title-gradient">トラブルシューティング</span></h2>
+      <p class="section-desc">長期運用のためのヘルスチェック手法と、一般的なトラブルシューティング手順を解説します。</p>
+    </div>
+
+    <div class="maint-grid reveal">
+      <div class="maint-card">
+        <div class="maint-card-icon">◉</div>
+        <h3 class="maint-card-title">SMART ヘルスチェック</h3>
+        <p class="maint-card-text">定期的にSMART値を確認し、Reallocated Sector Count、Current Pending Sector、温度を監視してください。</p>
+        <div class="maint-cmd">$ sudo smartctl -a /dev/sda</div>
+      </div>
+      <div class="maint-card">
+        <div class="maint-card-icon">▤</div>
+        <h3 class="maint-card-title">セクタスキャン</h3>
+        <p class="maint-card-text">不良セクタの早期発見のため、Extended Self-Testを定期実行することを推奨します。</p>
+        <div class="maint-cmd">$ sudo smartctl -t long /dev/sda</div>
+      </div>
+      <div class="maint-card">
+        <div class="maint-card-icon">⟳</div>
+        <h3 class="maint-card-title">4K アライメント確認</h3>
+        <p class="maint-card-text">パーティションが4Kバウンダリに正しくアラインされているか確認し、性能劣化を防止します。</p>
+        <div class="maint-cmd">$ sudo parted /dev/sda align-check opt 1</div>
+      </div>
+      <div class="maint-card">
+        <div class="maint-card-icon">▣</div>
+        <h3 class="maint-card-title">温度管理</h3>
+        <p class="maint-card-text">動作温度45℃以下を推奨。エアフロー確保とHDD温度のリアルタイム監視が重要です。</p>
+        <div class="maint-cmd">$ sudo hddtemp /dev/sda</div>
+      </div>
+    </div>
+
+    <!-- Windows Optimization -->
+    <h3 class="section-title reveal" style="font-size:1.2rem;margin-top:var(--space-2xl);margin-bottom:var(--space-lg);">Windows 最適化設定</h3>
+    <div class="reveal" style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-xl);margin-bottom:var(--space-xl);">
+      <div class="maint-cmd" style="background:var(--color-bg-dark);">
+REM === Windows: HDD Write Cache Policy ===
+REM Device Manager → Disk drives → WD80EAAZ → Policies
+REM ☑ Enable write caching on the device
+REM ☐ Turn off Windows write-cache buffer flushing
+
+REM === 4K Alignment Check (PowerShell) ===
+Get-Partition | Format-Table -Property DiskNumber, PartitionNumber, Offset
+
+REM === Defrag (HDD only, NOT SSD) ===
+defrag C: /O /V
+      </div>
+    </div>
+
+    <!-- Linux Optimization -->
+    <h3 class="section-title reveal" style="font-size:1.2rem;margin-bottom:var(--space-lg);">Linux 最適化設定</h3>
+    <div class="reveal" style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-xl);">
+      <div class="maint-cmd" style="background:var(--color-bg-dark);">
+# === I/O Scheduler (推奨: mq-deadline for HDD) ===
+echo mq-deadline | sudo tee /sys/block/sda/queue/scheduler
+
+# === Read-Ahead Buffer ===
+sudo blockdev --setra 4096 /dev/sda
+
+# === fstab: noatime for reduced writes ===
+UUID=xxx  /data  ext4  defaults,noatime  0  2
+
+# === Periodic SMART Check (cron) ===
+0 3 * * 0 /usr/sbin/smartctl -t long /dev/sda
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SUMMARY
+     ============================================================ -->
+<section class="section section-dark summary-section" id="summary">
+  <div class="container">
+    <div class="summary-content">
+      <div class="section-header reveal">
+        <div class="section-label">
+          <span class="section-label-line"></span>
+          SUMMARY
+          <span class="section-label-line"></span>
+        </div>
+        <h2 class="section-title">総合<span class="section-title-gradient">評価</span></h2>
+        <p class="section-desc">WD Blue 8TB (WD80EAAZ) の強みと留意点を整理します。</p>
+      </div>
+
+      <div class="summary-pros-cons reveal">
+        <div class="summary-list pros">
+          <div class="summary-list-title">✓ 強み (Pros)</div>
+          <ul>
+            <li>CMR記録方式による安定したランダムライト性能</li>
+            <li>8TB大容量ながら優れたGB単価</li>
+            <li>5.3W / 3.7Wの低消費電力設計</li>
+            <li>3層ECC（RS + LDPC + Post-Process）による高信頼性</li>
+            <li>256MB大容量DDR3キャッシュ</li>
+            <li>23dBA以下の静音アイドル動作</li>
+            <li>Advanced Format (4K/512e) 対応</li>
+          </ul>
+        </div>
+        <div class="summary-list cons">
+          <div class="summary-list-title">✗ 留意点 (Cons)</div>
+          <ul>
+            <li>5640 RPMのため7200 RPM比でシーケンシャル速度に差</li>
+            <li>NAS/サーバー用途にはWD Red/Ultrastarが推奨</li>
+            <li>保証期間が2年（NAS用は3年以上が一般的）</li>
+            <li>4Kアライメント未対応環境ではパフォーマンス低下</li>
+            <li>SSDと比較した場合のランダムアクセス性能差</li>
+          </ul>
+        </div>
+      </div>
+
+      <button class="btn-primary reveal" onclick="scrollToTop()" style="margin-top:var(--space-xl);">
+        ▲ トップに戻る
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="nav-brand">
+          <div class="nav-logo">WD</div>
+          <span class="nav-title" style="color:#fff;">BLUE 8TB</span>
+        </div>
+        <p class="footer-brand-text">WD Blue 8TB (WD80EAAZ) のすべての技術仕様を網羅した技術解説サイトです。記載情報はWestern Digital公開資料に基づいています。</p>
+        <div class="footer-badges">
+          <span class="footer-badge">CMR</span>
+          <span class="footer-badge">SATA III</span>
+          <span class="footer-badge">256 MB Cache</span>
+          <span class="footer-badge">4K AF</span>
+          <span class="footer-badge">5640 RPM</span>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Technology</div>
+        <ul class="footer-links">
+          <li><a href="#smr-tech">記録方式 (CMR)</a></li>
+          <li><a href="#architecture">SATA / NCQ</a></li>
+          <li><a href="#cache">キャッシュ</a></li>
+          <li><a href="#ecc">ECC</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Analysis</div>
+        <ul class="footer-links">
+          <li><a href="#performance">パフォーマンス</a></li>
+          <li><a href="#smart">SMART</a></li>
+          <li><a href="#comparison">競合比較</a></li>
+          <li><a href="#physical">物理構造</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Guide</div>
+        <ul class="footer-links">
+          <li><a href="#firmware">ファームウェア</a></li>
+          <li><a href="#advanced-format">4K Format</a></li>
+          <li><a href="#maintenance">メンテナンス</a></li>
+          <li><a href="#summary">総合評価</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">&copy; 2026 WD Blue 8TB Technical Reference. All specifications from Western Digital.</span>
+      <span style="font-size:0.75rem;color:rgba(255,255,255,0.3);">Built with precision.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" onclick="scrollToTop()">▲</button>
+<script>
+/* ============================================================
+   UTILITY FUNCTIONS
+   ============================================================ */
+function scrollToSection(id) {
+  var el = document.getElementById(id);
+  if (el) {
+    var offset = 80;
+    var top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: top, behavior: 'smooth' });
+  }
+  // Close mobile nav if open
+  var mob = document.getElementById('mobileMenu');
+  if (mob && mob.classList.contains('open')) mob.classList.remove('open');
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function switchSpecsTab(tab) {
+  var map = { basic: 'specsBasic', perf: 'specsPerf', phys: 'specsPhys', power: 'specsPower' };
+  Object.values(map).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  document.querySelectorAll('.specs-tab').forEach(function(btn) { btn.classList.remove('active'); });
+  var target = document.getElementById(map[tab]);
+  if (target) target.classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function switchCacheTab(tab) {
+  var map = { read: 'cacheAlgoRead', write: 'cacheAlgoWrite', adaptive: 'cacheAlgoAdaptive' };
+  Object.values(map).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  document.querySelectorAll('.cache-algo-tab').forEach(function(btn) { btn.classList.remove('active'); });
+  var target = document.getElementById(map[tab]);
+  if (target) target.classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function switchHeadTab(tab) {
+  var map = { gmr: 'headGmr', tmr: 'headTmr', writer: 'headWriter' };
+  Object.values(map).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  document.querySelectorAll('.head-tab').forEach(function(btn) { btn.classList.remove('active'); });
+  var target = document.getElementById(map[tab]);
+  if (target) target.classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function toggleMobileNav() {
+  var links = document.getElementById('navLinks');
+  if (links) links.classList.toggle('mobile-open');
+}
+
+/* ============================================================
+   1. LOADING CONTROLLER
+   ============================================================ */
+var LoadingController = {
+  progress: 0,
+  barEl: null,
+  screenEl: null,
+
+  init: function() {
+    this.barEl = document.getElementById('loadingBarFill');
+    this.screenEl = document.getElementById('loadingScreen');
+    this.simulate();
+  },
+
+  simulate: function() {
+    var self = this;
+    var iv = setInterval(function() {
+      self.progress += Math.random() * 15 + 5;
+      if (self.progress > 90) self.progress = 90;
+      if (self.barEl) self.barEl.style.width = self.progress + '%';
+    }, 200);
+
+    window.addEventListener('load', function() {
+      clearInterval(iv);
+      if (self.barEl) self.barEl.style.width = '100%';
+      setTimeout(function() {
+        if (self.screenEl) self.screenEl.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 600);
+    });
+  }
+};
+
+/* ============================================================
+   2. CUSTOM CURSOR
+   ============================================================ */
+var CustomCursor = {
+  dot: null,
+  ring: null,
+  mx: 0,
+  my: 0,
+  dx: 0,
+  dy: 0,
+
+  init: function() {
+    this.dot = document.getElementById('cursorDot');
+    this.ring = document.getElementById('cursorRing');
+    if (!this.dot || !this.ring) return;
+    if ('ontouchstart' in window) { this.dot.style.display = 'none'; this.ring.style.display = 'none'; return; }
+    var self = this;
+    document.addEventListener('mousemove', function(e) {
+      self.mx = e.clientX;
+      self.my = e.clientY;
+      self.dot.style.left = e.clientX + 'px';
+      self.dot.style.top = e.clientY + 'px';
+    });
+    this.animate();
+    this.bindHovers();
+  },
+
+  animate: function() {
+    var self = this;
+    (function loop() {
+      self.dx += (self.mx - self.dx) * 0.15;
+      self.dy += (self.my - self.dy) * 0.15;
+      if (self.ring) {
+        self.ring.style.left = self.dx + 'px';
+        self.ring.style.top = self.dy + 'px';
+      }
+      requestAnimationFrame(loop);
+    })();
+  },
+
+  bindHovers: function() {
+    var self = this;
+    var hoverEls = document.querySelectorAll('a, button, .overview-card, .compare-card, .smr-zone-card, .specs-tab, .cache-algo-tab, .head-tab, .maint-card, .arch-layer, .fw-layer, .af-card, .af-benefit, .sata-spec-card, .physical-spec-item, .ecc-layer-card, .smr-compare-card, .smr-flow-step, .ncq-slot');
+    hoverEls.forEach(function(el) {
+      el.addEventListener('mouseenter', function() {
+        if (self.dot) self.dot.classList.add('hovering');
+        if (self.ring) self.ring.classList.add('hovering');
+      });
+      el.addEventListener('mouseleave', function() {
+        if (self.dot) self.dot.classList.remove('hovering');
+        if (self.ring) self.ring.classList.remove('hovering');
+      });
+    });
+  }
+};
+
+/* ============================================================
+   3. HERO PARTICLE CANVAS
+   ============================================================ */
+var HeroCanvas = {
+  canvas: null,
+  ctx: null,
+  particles: [],
+  mouse: { x: -999, y: -999 },
+  raf: null,
+
+  init: function() {
+    this.canvas = document.getElementById('heroCanvas');
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    this.createParticles();
+    this.bindEvents();
+    this.animate();
+  },
+
+  resize: function() {
+    this.canvas.width = this.canvas.offsetWidth;
+    this.canvas.height = this.canvas.offsetHeight;
+  },
+
+  createParticles: function() {
+    var count = Math.min(80, Math.floor(this.canvas.width * this.canvas.height / 15000));
+    this.particles = [];
+    for (var i = 0; i < count; i++) {
+      this.particles.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        r: Math.random() * 2 + 0.5,
+        o: Math.random() * 0.5 + 0.2
+      });
+    }
+  },
+
+  bindEvents: function() {
+    var self = this;
+    window.addEventListener('resize', function() {
+      self.resize();
+      self.createParticles();
+    });
+    this.canvas.addEventListener('mousemove', function(e) {
+      var rect = self.canvas.getBoundingClientRect();
+      self.mouse.x = e.clientX - rect.left;
+      self.mouse.y = e.clientY - rect.top;
+    });
+    this.canvas.addEventListener('mouseleave', function() {
+      self.mouse.x = -999;
+      self.mouse.y = -999;
+    });
+  },
+
+  animate: function() {
+    var self = this;
+    var w = this.canvas.width;
+    var h = this.canvas.height;
+    var ctx = this.ctx;
+
+    (function loop() {
+      ctx.clearRect(0, 0, w, h);
+      var pts = self.particles;
+
+      for (var i = 0; i < pts.length; i++) {
+        var p = pts[i];
+        // Mouse attraction
+        var ddx = self.mouse.x - p.x;
+        var ddy = self.mouse.y - p.y;
+        var dist = Math.sqrt(ddx * ddx + ddy * ddy);
+        if (dist < 150 && dist > 0) {
+          p.vx += ddx / dist * 0.02;
+          p.vy += ddy / dist * 0.02;
+        }
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.99;
+        p.vy *= 0.99;
+
+        // Wrap
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+
+        // Draw particle
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 102, 255, ' + p.o + ')';
+        ctx.fill();
+
+        // Connections
+        for (var j = i + 1; j < pts.length; j++) {
+          var dx = p.x - pts[j].x;
+          var dy = p.y - pts[j].y;
+          var d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 120) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(pts[j].x, pts[j].y);
+            ctx.strokeStyle = 'rgba(0, 102, 255, ' + (1 - d / 120) * 0.15 + ')';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      self.raf = requestAnimationFrame(loop);
+    })();
+  }
+};
+
+/* ============================================================
+   4. SCROLL REVEAL (IntersectionObserver)
+   ============================================================ */
+var ScrollReveal = {
+  init: function() {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('revealed'); });
+      return;
+    }
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(function(el) {
+      observer.observe(el);
+    });
+  }
+};
+
+/* ============================================================
+   5. NAV CONTROLLER
+   ============================================================ */
+var NavController = {
+  nav: null,
+  sections: [],
+
+  init: function() {
+    this.nav = document.getElementById('mainNav');
+    this.sections = document.querySelectorAll('.section, .hero');
+    var self = this;
+    window.addEventListener('scroll', function() { self.onScroll(); });
+    this.onScroll();
+  },
+
+  onScroll: function() {
+    var scrollY = window.pageYOffset;
+    // Nav style
+    if (this.nav) {
+      if (scrollY > 50) this.nav.classList.add('scrolled');
+      else this.nav.classList.remove('scrolled');
+    }
+    // Active link
+    var current = '';
+    this.sections.forEach(function(section) {
+      var top = section.offsetTop - 120;
+      if (scrollY >= top) current = section.getAttribute('id');
+    });
+    document.querySelectorAll('.nav-link').forEach(function(link) {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+    });
+  }
+};
+
+/* ============================================================
+   6. COUNTER ANIMATION
+   ============================================================ */
+var CounterAnimation = {
+  init: function() {
+    var counters = document.querySelectorAll('[data-count]');
+    if (!('IntersectionObserver' in window)) {
+      counters.forEach(function(el) { el.textContent = el.getAttribute('data-count'); });
+      return;
+    }
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var el = entry.target;
+          var target = parseFloat(el.getAttribute('data-count'));
+          var duration = 2000;
+          var start = performance.now();
+          (function update(now) {
+            var elapsed = now - start;
+            var progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            var ease = 1 - Math.pow(1 - progress, 3);
+            var value = Math.round(target * ease);
+            el.textContent = value.toLocaleString();
+            if (progress < 1) requestAnimationFrame(update);
+          })(performance.now());
+          observer.unobserve(el);
+        }
+      });
+    }, { threshold: 0.5 });
+    counters.forEach(function(el) { observer.observe(el); });
+  }
+};
+
+/* ============================================================
+   7. SCROLL PROGRESS BAR
+   ============================================================ */
+var ScrollProgress = {
+  bar: null,
+  init: function() {
+    this.bar = document.getElementById('scrollProgress');
+    if (!this.bar) return;
+    var self = this;
+    window.addEventListener('scroll', function() { self.update(); });
+  },
+  update: function() {
+    var scrollTop = window.pageYOffset;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var percent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    this.bar.style.width = percent + '%';
+  }
+};
+
+/* ============================================================
+   8. SIDE NAVIGATION
+   ============================================================ */
+var SideNavigation = {
+  dots: [],
+  init: function() {
+    this.dots = document.querySelectorAll('.side-nav-dot');
+    if (!this.dots.length) return;
+    var self = this;
+    window.addEventListener('scroll', function() { self.update(); });
+  },
+  update: function() {
+    var scrollY = window.pageYOffset;
+    var current = '';
+    document.querySelectorAll('.section, .hero').forEach(function(s) {
+      if (scrollY >= s.offsetTop - 200) current = s.getAttribute('id');
+    });
+    this.dots.forEach(function(dot) {
+      dot.classList.remove('active');
+      if (dot.getAttribute('data-section') === current) dot.classList.add('active');
+    });
+  }
+};
+
+/* ============================================================
+   9. BACK TO TOP BUTTON
+   ============================================================ */
+var BackToTop = {
+  btn: null,
+  init: function() {
+    this.btn = document.getElementById('backToTop');
+    if (!this.btn) return;
+    var self = this;
+    window.addEventListener('scroll', function() { self.update(); });
+  },
+  update: function() {
+    if (window.pageYOffset > 600) this.btn.classList.add('visible');
+    else this.btn.classList.remove('visible');
+  }
+};
+
+/* ============================================================
+   10. NCQ QUEUE VISUALIZER
+   ============================================================ */
+var NCQVisualizer = {
+  container: null,
+  slots: [],
+  depthEl: null,
+  reorderEl: null,
+  reorderCount: 0,
+  interval: null,
+
+  init: function() {
+    this.container = document.getElementById('ncqQueue');
+    this.depthEl = document.getElementById('ncqDepth');
+    this.reorderEl = document.getElementById('ncqReorder');
+    if (!this.container) return;
+    this.buildSlots();
+    this.startSimulation();
+  },
+
+  buildSlots: function() {
+    this.container.innerHTML = '';
+    this.slots = [];
+    for (var i = 0; i < 32; i++) {
+      var slot = document.createElement('div');
+      slot.className = 'ncq-slot';
+      slot.textContent = i;
+      this.container.appendChild(slot);
+      this.slots.push(slot);
+    }
+  },
+
+  startSimulation: function() {
+    var self = this;
+    this.interval = setInterval(function() {
+      // Random state changes
+      var activeCount = 0;
+      self.slots.forEach(function(slot) {
+        var rand = Math.random();
+        if (rand < 0.08) {
+          slot.className = 'ncq-slot active';
+        } else if (rand < 0.12) {
+          slot.className = 'ncq-slot processing';
+        } else if (rand < 0.25) {
+          slot.className = 'ncq-slot';
+        }
+        if (slot.classList.contains('active') || slot.classList.contains('processing')) activeCount++;
+      });
+      if (self.depthEl) self.depthEl.textContent = activeCount;
+      if (Math.random() < 0.3) {
+        self.reorderCount++;
+        if (self.reorderEl) self.reorderEl.textContent = self.reorderCount;
+      }
+    }, 400);
+  }
+};
+
+/* ============================================================
+   11. CMR TRACK VISUALIZATION
+   ============================================================ */
+var CMRTrackViz = {
+  canvas: null,
+  ctx: null,
+
+  init: function() {
+    this.canvas = document.getElementById('cmrCanvas');
+    if (!this.canvas) return;
+    this.canvas.width = this.canvas.parentElement.offsetWidth;
+    this.canvas.height = this.canvas.parentElement.offsetHeight;
+    this.ctx = this.canvas.getContext('2d');
+    this.draw();
+  },
+
+  draw: function() {
+    var ctx = this.ctx;
+    var w = this.canvas.width;
+    var h = this.canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    var trackCount = 8;
+    var trackHeight = h / (trackCount + 2);
+    var gap = 4;
+
+    for (var i = 0; i < trackCount; i++) {
+      var y = (i + 1) * trackHeight;
+      var hue = 30 + i * 5;
+
+      // Track
+      ctx.fillStyle = 'rgba(245, 158, 11, ' + (0.3 + i * 0.05) + ')';
+      ctx.fillRect(30, y, w - 60, trackHeight - gap);
+
+      // Guard band
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.fillRect(30, y + trackHeight - gap, w - 60, gap);
+
+      // Label
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillText('Track ' + i, w - 55, y + trackHeight / 2);
+    }
+
+    // Title
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = 'bold 11px Inter';
+    ctx.fillText('CMR: Non-overlapping Tracks', 30, 18);
+
+    // Arrow showing gap
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(15, trackHeight);
+    ctx.lineTo(15, trackHeight * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.font = '9px JetBrains Mono';
+    ctx.save();
+    ctx.translate(10, trackHeight * 1.5 + 10);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Guard', 0, 0);
+    ctx.restore();
+  }
+};
+
+/* ============================================================
+   12. SMR TRACK VISUALIZATION
+   ============================================================ */
+var SMRTrackViz = {
+  canvas: null,
+  ctx: null,
+
+  init: function() {
+    this.canvas = document.getElementById('smrCanvas');
+    if (!this.canvas) return;
+    this.canvas.width = this.canvas.parentElement.offsetWidth;
+    this.canvas.height = this.canvas.parentElement.offsetHeight;
+    this.ctx = this.canvas.getContext('2d');
+    this.draw();
+  },
+
+  draw: function() {
+    var ctx = this.ctx;
+    var w = this.canvas.width;
+    var h = this.canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    var trackCount = 12;
+    var trackHeight = h / (trackCount * 0.55 + 2);
+    var overlap = trackHeight * 0.45;
+
+    for (var i = 0; i < trackCount; i++) {
+      var y = 30 + i * (trackHeight - overlap);
+      var alpha = 0.2 + (i % 3) * 0.1;
+
+      ctx.fillStyle = 'rgba(0, 102, 255, ' + alpha + ')';
+      ctx.fillRect(30, y, w - 60, trackHeight);
+
+      // Border
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(30, y, w - 60, trackHeight);
+
+      // Label
+      if (i % 2 === 0) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText('T' + i, w - 50, y + trackHeight / 2 + 3);
+      }
+    }
+
+    // Overlap indicator
+    ctx.fillStyle = 'rgba(0, 212, 255, 0.6)';
+    ctx.font = 'bold 11px Inter';
+    ctx.fillText('SMR: Overlapping (Shingled) Tracks', 30, 18);
+
+    // Overlap arrow
+    var arrowY = 30 + trackHeight;
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(18, 30);
+    ctx.lineTo(18, 30 + trackHeight);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(18, 30 + trackHeight - overlap);
+    ctx.lineTo(18, 30 + 2 * (trackHeight - overlap) + trackHeight);
+    ctx.stroke();
+  }
+};
+
+/* ============================================================
+   13. CACHE ALLOCATION ANIMATION
+   ============================================================ */
+var CacheAllocAnim = {
+  init: function() {
+    var readEl = document.getElementById('cacheRead');
+    var writeEl = document.getElementById('cacheWrite');
+    var metaEl = document.getElementById('cacheMeta');
+    if (!readEl) return;
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          // 116/256 ≈ 45%, 100/256 ≈ 39%, 16/256 ≈ 6.25% (remaining 24/256 = buffers)
+          setTimeout(function() { readEl.style.width = '45%'; }, 200);
+          setTimeout(function() { writeEl.style.width = '39%'; }, 400);
+          setTimeout(function() { metaEl.style.width = '6.25%'; }, 600);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    var wrap = readEl.closest('.cache-bar-wrap');
+    if (wrap) observer.observe(wrap);
+  }
+};
+
+/* ============================================================
+   14. PERFORMANCE BAR ANIMATION
+   ============================================================ */
+var PerfBarAnim = {
+  init: function() {
+    var bars = document.querySelectorAll('.perf-bar-fill[data-height]');
+    if (!bars.length) return;
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var h = entry.target.getAttribute('data-height');
+          entry.target.style.height = h + '%';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    bars.forEach(function(bar) { observer.observe(bar); });
+  }
+};
+
+/* ============================================================
+   15. SEQUENTIAL CHART
+   ============================================================ */
+var SeqChart = {
+  canvas: null,
+  ctx: null,
+
+  init: function() {
+    this.canvas = document.getElementById('seqChart');
+    if (!this.canvas) return;
+    this.canvas.width = this.canvas.parentElement.offsetWidth - 48;
+    this.canvas.height = 250;
+    this.ctx = this.canvas.getContext('2d');
+    this.draw();
+  },
+
+  draw: function() {
+    var ctx = this.ctx;
+    var w = this.canvas.width;
+    var h = this.canvas.height;
+    var pad = { top: 30, right: 20, bottom: 40, left: 50 };
+    var cw = w - pad.left - pad.right;
+    var ch = h - pad.top - pad.bottom;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 0.5;
+    for (var i = 0; i <= 5; i++) {
+      var gy = pad.top + (ch / 5) * i;
+      ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(w - pad.right, gy); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '10px JetBrains Mono';
+      ctx.textAlign = 'right';
+      ctx.fillText((200 - i * 40) + '', pad.left - 8, gy + 4);
+    }
+
+    // Labels
+    var labels = ['Outer', 'Mid-Outer', 'Mid', 'Mid-Inner', 'Inner'];
+    labels.forEach(function(l, idx) {
+      var lx = pad.left + (cw / (labels.length - 1)) * idx;
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '9px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText(l, lx, h - 10);
+    });
+
+    // Read line
+    var readData = [150, 142, 130, 115, 95];
+    var writeData = [145, 138, 125, 110, 90];
+
+    function drawLine(data, color) {
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      data.forEach(function(val, idx) {
+        var x = pad.left + (cw / (data.length - 1)) * idx;
+        var y = pad.top + ch - (val / 200) * ch;
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Dots
+      data.forEach(function(val, idx) {
+        var x = pad.left + (cw / (data.length - 1)) * idx;
+        var y = pad.top + ch - (val / 200) * ch;
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.font = '10px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText(val + '', x, y - 10);
+      });
+    }
+
+    drawLine(readData, '#0066ff');
+    drawLine(writeData, '#00d4ff');
+
+    // Legend
+    ctx.fillStyle = '#0066ff';
+    ctx.fillRect(pad.left, 6, 12, 3);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = '10px Inter';
+    ctx.textAlign = 'left';
+    ctx.fillText('Seq Read (MB/s)', pad.left + 18, 12);
+
+    ctx.fillStyle = '#00d4ff';
+    ctx.fillRect(pad.left + 140, 6, 12, 3);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fillText('Seq Write (MB/s)', pad.left + 158, 12);
+
+    // Axis labels
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '10px Inter';
+    ctx.textAlign = 'center';
+    ctx.fillText('Disk Zone (Outer → Inner)', w / 2, h - 0);
+
+    ctx.save();
+    ctx.translate(12, h / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('MB/s', 0, 0);
+    ctx.restore();
+  }
+};
+
+/* ============================================================
+   16. RANDOM IOPS CHART
+   ============================================================ */
+var RandChart = {
+  canvas: null,
+  ctx: null,
+
+  init: function() {
+    this.canvas = document.getElementById('randChart');
+    if (!this.canvas) return;
+    this.canvas.width = this.canvas.parentElement.offsetWidth - 48;
+    this.canvas.height = 250;
+    this.ctx = this.canvas.getContext('2d');
+    this.draw();
+  },
+
+  draw: function() {
+    var ctx = this.ctx;
+    var w = this.canvas.width;
+    var h = this.canvas.height;
+    var pad = { top: 30, right: 20, bottom: 50, left: 50 };
+    var cw = w - pad.left - pad.right;
+    var ch = h - pad.top - pad.bottom;
+
+    ctx.clearRect(0, 0, w, h);
+
+    var categories = ['4K Read', '4K Write', '64K Read', '64K Write'];
+    var values = [75, 65, 120, 105];
+    var maxVal = 150;
+    var barW = cw / categories.length * 0.55;
+    var gap = cw / categories.length;
+
+    // Grid
+    for (var i = 0; i <= 5; i++) {
+      var gy = pad.top + (ch / 5) * i;
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(w - pad.right, gy); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '10px JetBrains Mono';
+      ctx.textAlign = 'right';
+      ctx.fillText((maxVal - i * 30) + '', pad.left - 8, gy + 4);
+    }
+
+    // Bars
+    categories.forEach(function(cat, idx) {
+      var x = pad.left + gap * idx + (gap - barW) / 2;
+      var barH = (values[idx] / maxVal) * ch;
+      var y = pad.top + ch - barH;
+
+      // Gradient bar
+      var grad = ctx.createLinearGradient(x, y, x, pad.top + ch);
+      grad.addColorStop(0, idx < 2 ? '#0066ff' : '#00d4ff');
+      grad.addColorStop(1, idx < 2 ? 'rgba(0,102,255,0.3)' : 'rgba(0,212,255,0.3)');
+      ctx.fillStyle = grad;
+
+      // Rounded top
+      var radius = 4;
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + barW - radius, y);
+      ctx.quadraticCurveTo(x + barW, y, x + barW, y + radius);
+      ctx.lineTo(x + barW, pad.top + ch);
+      ctx.lineTo(x, pad.top + ch);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.fill();
+
+      // Value
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.font = 'bold 11px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText(values[idx] + '', x + barW / 2, y - 8);
+
+      // Category
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '9px Inter';
+      ctx.fillText(cat, x + barW / 2, h - 15);
+    });
+
+    // Y axis label
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '10px Inter';
+    ctx.save();
+    ctx.translate(12, h / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.fillText('IOPS', 0, 0);
+    ctx.restore();
+  }
+};
+
+/* ============================================================
+   17. RADAR CHART (COMPARISON)
+   ============================================================ */
+var RadarChart = {
+  canvas: null,
+  ctx: null,
+
+  init: function() {
+    this.canvas = document.getElementById('radarChart');
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext('2d');
+    this.draw();
+  },
+
+  draw: function() {
+    var ctx = this.ctx;
+    var w = this.canvas.width;
+    var h = this.canvas.height;
+    var cx = w / 2;
+    var cy = h / 2;
+    var maxR = Math.min(cx, cy) - 60;
+
+    var axes = ['Seq Speed', 'Random IOPS', 'Capacity', 'Power Eff', 'Noise Level', 'Price/GB'];
+    var count = axes.length;
+    var angleStep = (Math.PI * 2) / count;
+
+    // Products: WD Blue, BarraCuda, Toshiba N300
+    var products = [
+      { name: 'WD Blue 8TB', data: [0.60, 0.55, 0.80, 0.85, 0.90, 0.90], color: '#0066ff', alpha: 0.2 },
+      { name: 'BarraCuda 8TB', data: [0.76, 0.40, 0.80, 0.85, 0.85, 0.88], color: '#10b981', alpha: 0.15 },
+      { name: 'N300 8TB', data: [0.95, 0.75, 0.80, 0.50, 0.55, 0.60], color: '#f59e0b', alpha: 0.15 }
+    ];
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Grid rings
+    for (var ring = 1; ring <= 5; ring++) {
+      var r = maxR * (ring / 5);
+      ctx.beginPath();
+      for (var i = 0; i <= count; i++) {
+        var angle = i * angleStep - Math.PI / 2;
+        var x = cx + r * Math.cos(angle);
+        var y = cy + r * Math.sin(angle);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+
+    // Axis lines + labels
+    for (var i = 0; i < count; i++) {
+      var angle = i * angleStep - Math.PI / 2;
+      var x = cx + maxR * Math.cos(angle);
+      var y = cy + maxR * Math.sin(angle);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      // Label
+      var lx = cx + (maxR + 25) * Math.cos(angle);
+      var ly = cy + (maxR + 25) * Math.sin(angle);
+      ctx.fillStyle = '#6b7280';
+      ctx.font = '11px Inter';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(axes[i], lx, ly);
+    }
+
+    // Product polygons
+    products.forEach(function(product) {
+      ctx.beginPath();
+      for (var i = 0; i <= count; i++) {
+        var idx = i % count;
+        var angle = idx * angleStep - Math.PI / 2;
+        var r = maxR * product.data[idx];
+        var x = cx + r * Math.cos(angle);
+        var y = cy + r * Math.sin(angle);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = product.color + '33';
+      ctx.fill();
+      ctx.strokeStyle = product.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Dots
+      for (var i = 0; i < count; i++) {
+        var angle = i * angleStep - Math.PI / 2;
+        var r = maxR * product.data[i];
+        var x = cx + r * Math.cos(angle);
+        var y = cy + r * Math.sin(angle);
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = product.color;
+        ctx.fill();
+      }
+    });
+
+    // Legend
+    var legendY = h - 20;
+    products.forEach(function(p, idx) {
+      var lx = cx - 150 + idx * 120;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(lx, legendY - 4, 10, 10);
+      ctx.fillStyle = '#6b7280';
+      ctx.font = '10px Inter';
+      ctx.textAlign = 'left';
+      ctx.fillText(p.name, lx + 14, legendY + 4);
+    });
+  }
+};
+
+/* ============================================================
+   18. PLATTER CROSS-SECTION
+   ============================================================ */
+var PlatterViz = {
+  canvas: null,
+  ctx: null,
+
+  init: function() {
+    this.canvas = document.getElementById('platterCanvas');
+    if (!this.canvas) return;
+    this.canvas.width = this.canvas.parentElement.offsetWidth - 48;
+    this.canvas.height = 350;
+    this.ctx = this.canvas.getContext('2d');
+    this.draw();
+  },
+
+  draw: function() {
+    var ctx = this.ctx;
+    var w = this.canvas.width;
+    var h = this.canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    var cx = w / 2;
+    var layers = [
+      { name: 'DLC Overcoat', height: 15, color: 'rgba(107, 114, 128, 0.4)' },
+      { name: 'Lubricant Layer', height: 8, color: 'rgba(16, 185, 129, 0.3)' },
+      { name: 'Magnetic Layer (CoCrPt)', height: 30, color: 'rgba(0, 102, 255, 0.5)' },
+      { name: 'Ru Spacer', height: 8, color: 'rgba(245, 158, 11, 0.3)' },
+      { name: 'SUL (Soft Underlayer)', height: 25, color: 'rgba(139, 92, 246, 0.4)' },
+      { name: 'Seed Layer', height: 12, color: 'rgba(236, 72, 153, 0.3)' },
+      { name: 'Al/Glass Substrate', height: 60, color: 'rgba(75, 85, 99, 0.5)' }
+    ];
+
+    var totalH = 0;
+    layers.forEach(function(l) { totalH += l.height; });
+    var startY = (h - totalH * 1.8) / 2;
+    var scale = 1.8;
+    var layerW = w * 0.6;
+    var lx = (w - layerW) / 2;
+    var currentY = startY;
+
+    // Title
+    ctx.fillStyle = '#374151';
+    ctx.font = 'bold 13px Inter';
+    ctx.textAlign = 'center';
+    ctx.fillText('Platter Cross-Section (7 Layers)', cx, 20);
+
+    layers.forEach(function(layer, idx) {
+      var lh = layer.height * scale;
+      var radius = 6;
+
+      // Layer rect with rounded corners
+      ctx.beginPath();
+      ctx.moveTo(lx + radius, currentY);
+      ctx.lineTo(lx + layerW - radius, currentY);
+      ctx.quadraticCurveTo(lx + layerW, currentY, lx + layerW, currentY + radius);
+      ctx.lineTo(lx + layerW, currentY + lh - radius);
+      ctx.quadraticCurveTo(lx + layerW, currentY + lh, lx + layerW - radius, currentY + lh);
+      ctx.lineTo(lx + radius, currentY + lh);
+      ctx.quadraticCurveTo(lx, currentY + lh, lx, currentY + lh - radius);
+      ctx.lineTo(lx, currentY + radius);
+      ctx.quadraticCurveTo(lx, currentY, lx + radius, currentY);
+      ctx.closePath();
+      ctx.fillStyle = layer.color;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      // Label
+      ctx.fillStyle = '#374151';
+      ctx.font = '11px Inter';
+      ctx.textAlign = 'left';
+      ctx.fillText(layer.name, lx + layerW + 12, currentY + lh / 2 + 4);
+
+      // Line to label
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(lx + layerW + 2, currentY + lh / 2);
+      ctx.lineTo(lx + layerW + 10, currentY + lh / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      currentY += lh;
+    });
+  }
+};
+
+/* ============================================================
+   19. FIRMWARE SCHEDULER VISUALIZATION
+   ============================================================ */
+var FWSchedulerViz = {
+  canvas: null,
+  ctx: null,
+  tasks: [],
+  raf: null,
+
+  init: function() {
+    this.canvas = document.getElementById('fwSchedCanvas');
+    if (!this.canvas) return;
+    this.canvas.width = this.canvas.parentElement.offsetWidth;
+    this.canvas.height = 300;
+    this.ctx = this.canvas.getContext('2d');
+    this.createTasks();
+    this.animate();
+  },
+
+  createTasks: function() {
+    var priorities = [
+      { name: 'CRITICAL', color: '#ef4444', y: 0 },
+      { name: 'HIGH', color: '#f59e0b', y: 1 },
+      { name: 'NORMAL', color: '#0066ff', y: 2 },
+      { name: 'LOW', color: '#10b981', y: 3 },
+      { name: 'IDLE', color: '#6b7280', y: 4 }
+    ];
+    var w = this.canvas.width;
+    this.tasks = [];
+    for (var i = 0; i < 25; i++) {
+      var p = priorities[Math.floor(Math.random() * priorities.length)];
+      this.tasks.push({
+        x: Math.random() * w,
+        speed: 0.3 + Math.random() * 1.5,
+        priority: p,
+        width: 30 + Math.random() * 60,
+        opacity: 0.4 + Math.random() * 0.5
+      });
+    }
+  },
+
+  animate: function() {
+    var self = this;
+    var ctx = this.ctx;
+    var w = this.canvas.width;
+    var h = this.canvas.height;
+    var laneH = h / 5;
+
+    (function loop() {
+      ctx.clearRect(0, 0, w, h);
+
+      // Lane backgrounds
+      var priorities = ['CRITICAL', 'HIGH', 'NORMAL', 'LOW', 'IDLE'];
+      var colors = ['#ef4444', '#f59e0b', '#0066ff', '#10b981', '#6b7280'];
+      for (var i = 0; i < 5; i++) {
+        ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.1)';
+        ctx.fillRect(0, i * laneH, w, laneH);
+
+        ctx.fillStyle = colors[i];
+        ctx.globalAlpha = 0.4;
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.textAlign = 'left';
+        ctx.fillText(priorities[i], 10, i * laneH + 18);
+        ctx.globalAlpha = 1;
+      }
+
+      // Tasks
+      self.tasks.forEach(function(task) {
+        task.x += task.speed;
+        if (task.x > w + task.width) task.x = -task.width;
+
+        var y = task.priority.y * laneH + laneH * 0.3;
+        var barH = laneH * 0.4;
+
+        ctx.globalAlpha = task.opacity;
+        ctx.fillStyle = task.priority.color;
+
+        // Rounded rect
+        var r = 3;
+        ctx.beginPath();
+        ctx.moveTo(task.x + r, y);
+        ctx.lineTo(task.x + task.width - r, y);
+        ctx.quadraticCurveTo(task.x + task.width, y, task.x + task.width, y + r);
+        ctx.lineTo(task.x + task.width, y + barH - r);
+        ctx.quadraticCurveTo(task.x + task.width, y + barH, task.x + task.width - r, y + barH);
+        ctx.lineTo(task.x + r, y + barH);
+        ctx.quadraticCurveTo(task.x, y + barH, task.x, y + barH - r);
+        ctx.lineTo(task.x, y + r);
+        ctx.quadraticCurveTo(task.x, y, task.x + r, y);
+        ctx.fill();
+
+        ctx.globalAlpha = 1;
+      });
+
+      self.raf = requestAnimationFrame(loop);
+    })();
+  }
+};
+
+/* ============================================================
+   20. INTERSECTION-BASED CANVAS VISIBILITY
+   ============================================================ */
+var CanvasVisibility = {
+  observers: [],
+
+  init: function() {
+    if (!('IntersectionObserver' in window)) return;
+    // Pause canvases when not visible (performance)
+    var canvasEls = document.querySelectorAll('canvas');
+    canvasEls.forEach(function(canvas) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          canvas.dataset.visible = entry.isIntersecting ? '1' : '0';
+        });
+      }, { threshold: 0 });
+      observer.observe(canvas);
+    });
+  }
+};
+
+/* ============================================================
+   21. TILT CARD EFFECT
+   ============================================================ */
+var TiltCards = {
+  init: function() {
+    if ('ontouchstart' in window) return;
+    var cards = document.querySelectorAll('.overview-card, .ecc-layer-card, .compare-card, .af-benefit');
+    cards.forEach(function(card) {
+      card.addEventListener('mousemove', function(e) {
+        var rect = card.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var centerX = rect.width / 2;
+        var centerY = rect.height / 2;
+        var rotateX = (y - centerY) / centerY * -5;
+        var rotateY = (x - centerX) / centerX * 5;
+        card.style.transform = 'perspective(600px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateY(-8px)';
+      });
+      card.addEventListener('mouseleave', function() {
+        card.style.transform = '';
+      });
+    });
+  }
+};
+
+/* ============================================================
+   22. SMOOTH SCROLL ENHANCEMENT
+   ============================================================ */
+var SmoothScroll = {
+  init: function() {
+    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        var target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          var offset = 80;
+          var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+          window.scrollTo({ top: top, behavior: 'smooth' });
+        }
+      });
+    });
+  }
+};
+
+/* ============================================================
+   23. KEYBOARD NAVIGATION
+   ============================================================ */
+var KeyboardNav = {
+  sections: [],
+  currentIndex: 0,
+
+  init: function() {
+    var self = this;
+    this.sections = Array.from(document.querySelectorAll('.section, .hero'));
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowDown' || e.key === 'j') {
+        e.preventDefault();
+        self.currentIndex = Math.min(self.currentIndex + 1, self.sections.length - 1);
+        self.scrollToCurrent();
+      } else if (e.key === 'ArrowUp' || e.key === 'k') {
+        e.preventDefault();
+        self.currentIndex = Math.max(self.currentIndex - 1, 0);
+        self.scrollToCurrent();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        self.currentIndex = 0;
+        self.scrollToCurrent();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        self.currentIndex = self.sections.length - 1;
+        self.scrollToCurrent();
+      }
+    });
+  },
+
+  scrollToCurrent: function() {
+    var section = this.sections[this.currentIndex];
+    if (section) {
+      var top = section.getBoundingClientRect().top + window.pageYOffset - 80;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+    }
+  }
+};
+
+/* ============================================================
+   24. MOBILE NAV STYLES (injected)
+   ============================================================ */
+(function injectMobileStyles() {
+  var style = document.createElement('style');
+  style.textContent = '' +
+    '.nav-links.mobile-open {' +
+    '  display: flex !important;' +
+    '  flex-direction: column;' +
+    '  position: absolute;' +
+    '  top: 100%;' +
+    '  left: 0;' +
+    '  right: 0;' +
+    '  background: rgba(255,255,255,0.98);' +
+    '  backdrop-filter: blur(20px);' +
+    '  padding: 1rem;' +
+    '  box-shadow: 0 10px 40px rgba(0,0,0,0.1);' +
+    '  border-radius: 0 0 12px 12px;' +
+    '}' +
+    '.nav-links.mobile-open .nav-link {' +
+    '  color: #1a1a2e !important;' +
+    '  padding: 0.75rem 1rem;' +
+    '  border-radius: 8px;' +
+    '}' +
+    '.nav-links.mobile-open .nav-link:hover {' +
+    '  background: rgba(0,102,255,0.05);' +
+    '  color: #0066ff !important;' +
+    '}';
+  document.head.appendChild(style);
+})();
+
+/* ============================================================
+   25. WINDOW RESIZE HANDLER (Redraw canvases)
+   ============================================================ */
+var ResizeHandler = {
+  timeout: null,
+  init: function() {
+    var self = this;
+    window.addEventListener('resize', function() {
+      clearTimeout(self.timeout);
+      self.timeout = setTimeout(function() {
+        self.redrawAll();
+      }, 300);
+    });
+  },
+  redrawAll: function() {
+    CMRTrackViz.init();
+    SMRTrackViz.init();
+    SeqChart.init();
+    RandChart.init();
+    RadarChart.init();
+    PlatterViz.init();
+  }
+};
+
+/* ============================================================
+   26. SECTION DIVIDERS (decorative)
+   ============================================================ */
+var SectionDividers = {
+  init: function() {
+    var sections = document.querySelectorAll('.section');
+    sections.forEach(function(section, idx) {
+      if (idx === 0) return;
+      var divider = document.createElement('div');
+      divider.style.cssText = 'height:1px;background:linear-gradient(90deg,transparent,rgba(0,102,255,0.2),transparent);margin:0;';
+      if (!section.classList.contains('section-dark') && !section.classList.contains('section-alt')) {
+        section.prepend(divider);
+      }
+    });
+  }
+};
+
+/* ============================================================
+   27. TYPEWRITER EFFECT (Hero badge)
+   ============================================================ */
+var TypeWriter = {
+  init: function() {
+    var el = document.querySelector('.hero-badge-text');
+    if (!el) return;
+    var text = el.textContent;
+    el.textContent = '';
+    var i = 0;
+    setTimeout(function type() {
+      if (i < text.length) {
+        el.textContent += text.charAt(i);
+        i++;
+        setTimeout(type, 80);
+      }
+    }, 1500);
+  }
+};
+
+/* ============================================================
+   28. PARALLAX SUBTLE EFFECT
+   ============================================================ */
+var Parallax = {
+  init: function() {
+    if ('ontouchstart' in window) return;
+    var hero = document.querySelector('.hero-visual');
+    if (!hero) return;
+    window.addEventListener('scroll', function() {
+      var scrollY = window.pageYOffset;
+      if (scrollY < window.innerHeight) {
+        hero.style.transform = 'translateY(' + scrollY * 0.15 + 'px)';
+      }
+    });
+  }
+};
+
+/* ============================================================
+   29. CONSOLE WELCOME
+   ============================================================ */
+function consoleWelcome() {
+  console.log(
+    '%c WD BLUE 8TB %c Technical Deep Dive ',
+    'background:#0066ff;color:#fff;padding:6px 12px;border-radius:4px 0 0 4px;font-weight:bold;',
+    'background:#0a0e17;color:#00d4ff;padding:6px 12px;border-radius:0 4px 4px 0;'
+  );
+  console.log('%cAll systems initialized. Explore the specs!', 'color:#6b7280;font-size:11px;');
+}
+
+/* ============================================================
+   APP INITIALIZATION
+   ============================================================ */
+var App = {
+  init: function() {
+    document.body.style.overflow = 'hidden';
+    LoadingController.init();
+
+    var self = this;
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        self.onReady();
+      }, 800);
+    });
+
+    // Fallback: if load doesn't fire within 5s
+    setTimeout(function() {
+      self.onReady();
+    }, 5000);
+  },
+
+  _ready: false,
+  onReady: function() {
+    if (this._ready) return;
+    this._ready = true;
+
+    // Core systems
+    CustomCursor.init();
+    HeroCanvas.init();
+    ScrollReveal.init();
+    NavController.init();
+    CounterAnimation.init();
+    ScrollProgress.init();
+    SideNavigation.init();
+    BackToTop.init();
+
+    // Visualizations
+    NCQVisualizer.init();
+    CMRTrackViz.init();
+    SMRTrackViz.init();
+    CacheAllocAnim.init();
+    PerfBarAnim.init();
+    SeqChart.init();
+    RandChart.init();
+    RadarChart.init();
+    PlatterViz.init();
+    FWSchedulerViz.init();
+
+    // Enhancements
+    TiltCards.init();
+    SmoothScroll.init();
+    KeyboardNav.init();
+    ResizeHandler.init();
+    SectionDividers.init();
+    TypeWriter.init();
+    Parallax.init();
+    CanvasVisibility.init();
+
+    // Console
+    consoleWelcome();
+  }
+};
+
+// Start
+App.init();
+</script>
+</body>
+</html>

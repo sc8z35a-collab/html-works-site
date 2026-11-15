@@ -1,0 +1,1191 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>数II 三角関数 公式図鑑（モーション版）</title>
+  <meta name="description" content="数IIの三角関数の公式（弧度法〜加法定理〜倍角・半角〜積和〜方程式〜合成）をモーション多めで学べるフロント完結サイト" />
+
+  <!-- KaTeX (math rendering) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+  <!-- GSAP (motion) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B1220;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --muted2: rgba(255,255,255,.55);
+      --brand:#7C5CFF;
+      --brand2:#22D3EE;
+      --ok:#34D399;
+      --warn:#F59E0B;
+      --bad:#FB7185;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+      --radius2: 26px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", Arial, sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: var(--sans);
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(124,92,255,.25), transparent 55%),
+                  radial-gradient(1000px 600px at 80% 20%, rgba(34,211,238,.20), transparent 55%),
+                  radial-gradient(1200px 800px at 60% 90%, rgba(52,211,153,.12), transparent 60%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    .wrap{ max-width:1100px; margin:0 auto; padding: 0 18px; }
+
+    /* Top nav */
+    .nav{
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(7,10,18,.80), rgba(7,10,18,.25));
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .navInner{
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 14px;
+      padding: 12px 0;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .dot{
+      width:12px; height:12px; border-radius: 99px;
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      box-shadow: 0 0 0 6px rgba(124,92,255,.12), 0 0 24px rgba(34,211,238,.22);
+    }
+    .navLinks{
+      display:flex; flex-wrap:wrap; gap: 8px;
+      justify-content:flex-end;
+    }
+    .pill{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      font-size: 12.5px;
+      transition: transform .2s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .pill:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.07);
+      border-color: rgba(255,255,255,.16);
+      color: rgba(255,255,255,.85);
+    }
+
+    /* Hero */
+    .hero{
+      position: relative;
+      padding: 48px 0 18px;
+    }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    @media (max-width: 920px){
+      .heroGrid{ grid-template-columns: 1fr; }
+    }
+    .heroCard{
+      border-radius: var(--radius2);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .heroCard::before{
+      content:"";
+      position:absolute; inset:-80px -60px auto -60px;
+      height: 240px;
+      background: radial-gradient(closest-side, rgba(124,92,255,.28), transparent 70%);
+      filter: blur(2px);
+      pointer-events:none;
+    }
+    .heroMain{ padding: 22px 20px 20px; }
+    h1{
+      margin: 0 0 10px;
+      font-size: clamp(24px, 4vw, 40px);
+      line-height: 1.12;
+      letter-spacing: -0.3px;
+    }
+    .lead{
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 14.5px;
+    }
+    .ctaRow{ display:flex; flex-wrap:wrap; gap: 10px; }
+    .btn{
+      display:inline-flex; align-items:center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: rgba(255,255,255,.88);
+      font-weight: 650;
+      cursor:pointer;
+      transition: transform .2s ease, background .2s ease, border-color .2s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18);}
+    .btnPrimary{
+      background: linear-gradient(135deg, rgba(124,92,255,.32), rgba(34,211,238,.18));
+      border-color: rgba(124,92,255,.35);
+    }
+    .kbd{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 3px 7px;
+      border-radius: 9px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.78);
+    }
+
+    .heroSide{ padding: 14px; }
+    .searchBox{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      margin-bottom: 12px;
+    }
+    .searchBox input{
+      width:100%;
+      background: transparent;
+      border: none;
+      outline:none;
+      color: rgba(255,255,255,.92);
+      font-size: 14px;
+    }
+    .searchHint{
+      color: var(--muted2);
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 10px 2px 0;
+    }
+    .stats{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .stat{
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+      padding: 12px;
+    }
+    .stat .k{ color: var(--muted2); font-size:12px; }
+    .stat .v{ font-weight: 800; margin-top: 4px; font-size: 16px; }
+
+    /* Section */
+    section{ padding: 24px 0; }
+    .sectionHead{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      gap: 12px;
+      margin: 8px 0 10px;
+    }
+    .sectionHead h2{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+    .sectionHead .sub{
+      color: var(--muted2);
+      font-size: 12.5px;
+    }
+    .divider{
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
+      margin: 10px 0 14px;
+    }
+
+    /* Cards grid */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+    .card{
+      grid-column: span 6;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 34px rgba(0,0,0,.35);
+      overflow:hidden;
+      position:relative;
+      min-height: 140px;
+      transform: translateZ(0);
+    }
+    @media (max-width: 920px){
+      .card{ grid-column: span 12; }
+    }
+    .cardTop{
+      display:flex; justify-content:space-between; align-items:flex-start;
+      gap: 10px;
+      padding: 14px 14px 8px;
+    }
+    .tagRow{ display:flex; flex-wrap:wrap; gap: 6px; }
+    .tag{
+      font-size: 11px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--muted);
+      user-select:none;
+    }
+    .cardTitle{
+      font-weight: 800;
+      font-size: 13.5px;
+      color: rgba(255,255,255,.88);
+      margin: 0 0 4px;
+    }
+    .cardBody{
+      padding: 0 14px 14px;
+    }
+    .formula{
+      font-size: 16px;
+      line-height: 1.6;
+      margin-top: 4px;
+      overflow-x:auto;
+      padding-bottom: 2px;
+    }
+    .note{
+      margin-top: 10px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .cardActions{
+      display:flex; gap: 8px; align-items:center;
+      padding: 0 14px 14px;
+      margin-top: -4px;
+    }
+    .miniBtn{
+      font-size: 12px;
+      padding: 7px 9px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.80);
+      cursor:pointer;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+    .miniBtn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.07);
+      border-color: rgba(255,255,255,.16);
+    }
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.65);
+      border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.88);
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 12.5px;
+      opacity: 0;
+      pointer-events:none;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      box-shadow: 0 12px 30px rgba(0,0,0,.4);
+    }
+
+    /* Lab */
+    .lab{
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .labTop{
+      display:flex; justify-content:space-between; align-items:center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+    }
+    .labTop .ttl{ font-weight:800; }
+    .labTop .small{ color: var(--muted2); font-size: 12px; }
+    .labGrid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 0;
+    }
+    @media (max-width: 920px){
+      .labGrid{ grid-template-columns: 1fr; }
+    }
+    .canvasWrap{
+      padding: 12px;
+      border-right: 1px solid rgba(255,255,255,.08);
+    }
+    @media (max-width: 920px){
+      .canvasWrap{ border-right:none; border-bottom: 1px solid rgba(255,255,255,.08); }
+    }
+    canvas{
+      width:100%;
+      height: 340px;
+      display:block;
+      border-radius: 14px;
+      background: radial-gradient(800px 400px at 30% 10%, rgba(124,92,255,.18), transparent 55%),
+                  rgba(0,0,0,.20);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .controls{
+      padding: 12px 14px 14px;
+    }
+    .control{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .control label{
+      width: 52px;
+      color: var(--muted2);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+    .control input[type="range"]{ width: 100%; }
+    .control .val{
+      width: 64px;
+      text-align:right;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: rgba(255,255,255,.85);
+    }
+    .toggleRow{
+      display:flex; flex-wrap:wrap; gap: 8px;
+      margin-top: 6px;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      cursor:pointer;
+      user-select:none;
+      font-size: 12px;
+      color: rgba(255,255,255,.82);
+    }
+    .chip input{ accent-color: var(--brand2); }
+
+    /* Footer */
+    footer{
+      padding: 24px 0 50px;
+      color: var(--muted2);
+      font-size: 12.5px;
+      line-height: 1.7;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *{ scroll-behavior: auto !important; }
+      .pill,.btn,.miniBtn{ transition: none !important; }
+    }
+  </style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+  <div class="nav">
+    <div class="wrap navInner">
+      <div class="brand">
+        <span class="dot"></span>
+        <span>数II 三角関数 公式図鑑</span>
+      </div>
+      <div class="navLinks">
+        <a class="pill" href="#catalog">公式</a>
+        <a class="pill" href="#lab">グラフ実験</a>
+        <a class="pill" href="#angles">特別角</a>
+        <a class="pill" href="#equations">方程式</a>
+        <a class="pill" href="#compose">合成</a>
+      </div>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="wrap heroGrid">
+      <div class="heroCard">
+        <div class="heroMain">
+          <h1>三角関数の公式を<br/>“動きで覚える”</h1>
+          <p class="lead">
+            数IIの三角関数（弧度法・単位円・加法定理・倍角半角・積和・方程式・合成など）を
+            公式カード＋スクロールアニメ＋グラフ実験で一気に確認できます。
+          </p>
+          <div class="ctaRow">
+            <button class="btn btnPrimary" id="jumpCatalog">公式カタログへ</button>
+            <button class="btn" id="jumpLab">グラフ実験へ</button>
+            <span class="kbd">/ で検索</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="heroCard">
+        <div class="heroSide">
+          <div class="searchBox">
+            <span style="opacity:.85">🔎</span>
+            <input id="q" type="text" placeholder="検索：加法定理 / 倍角 / 積和 / tan …" autocomplete="off" />
+          </div>
+          <div class="searchHint">
+            例：<span class="kbd">cos2θ</span> / <span class="kbd">半角</span> / <span class="kbd">和積</span><br/>
+            公式カードは一致したものだけ表示されます。
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="k">表示中</div>
+              <div class="v"><span id="shown">0</span> 件</div>
+            </div>
+            <div class="stat">
+              <div class="k">総公式数</div>
+              <div class="v"><span id="total">0</span> 件</div>
+            </div>
+          </div>
+          <div class="stats" style="margin-top:10px">
+            <div class="stat">
+              <div class="k">モード</div>
+              <div class="v" id="motionMode">Motion</div>
+            </div>
+            <div class="stat">
+              <div class="k">数式</div>
+              <div class="v">KaTeX</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="catalog">
+      <div class="sectionHead">
+        <div>
+          <h2>公式カタログ</h2>
+          <div class="sub">カードをクリックせずにOK：コピーや注釈も入れてあります。</div>
+        </div>
+        <div class="sub">Tip：コピー→ノートに貼る</div>
+      </div>
+      <div class="divider"></div>
+      <div class="grid" id="cards"></div>
+    </section>
+
+    <section id="lab">
+      <div class="sectionHead">
+        <div>
+          <h2>グラフ実験： \(y=a\sin(bx+c)+d\)</h2>
+          <div class="sub">スライダーで振幅・周期・位相・上下移動を“動き”で確認。</div>
+        </div>
+        <div class="sub">sin / cos / tan 切替</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="lab">
+        <div class="labTop">
+          <div>
+            <div class="ttl">Trig Lab</div>
+            <div class="small">横軸はラジアン（ \(-\pi\)〜\(\pi\) ）</div>
+          </div>
+          <div class="small" id="labEq">\(y=\sin x\)</div>
+        </div>
+
+        <div class="labGrid">
+          <div class="canvasWrap">
+            <canvas id="plot" width="900" height="420"></canvas>
+          </div>
+
+          <div class="controls">
+            <div class="toggleRow">
+              <label class="chip"><input type="radio" name="fn" value="sin" checked> sin</label>
+              <label class="chip"><input type="radio" name="fn" value="cos"> cos</label>
+              <label class="chip"><input type="radio" name="fn" value="tan"> tan</label>
+              <label class="chip"><input type="checkbox" id="gridOn" checked> グリッド</label>
+              <label class="chip"><input type="checkbox" id="animateOn" checked> アニメ</label>
+            </div>
+
+            <div class="control">
+              <label>a</label>
+              <input id="a" type="range" min="-3" max="3" value="1" step="0.05" />
+              <div class="val" id="aV">1.00</div>
+            </div>
+            <div class="control">
+              <label>b</label>
+              <input id="b" type="range" min="0.2" max="5" value="1" step="0.05" />
+              <div class="val" id="bV">1.00</div>
+            </div>
+            <div class="control">
+              <label>c</label>
+              <input id="c" type="range" min="-3.1416" max="3.1416" value="0" step="0.01" />
+              <div class="val" id="cV">0.00</div>
+            </div>
+            <div class="control">
+              <label>d</label>
+              <input id="d" type="range" min="-2" max="2" value="0" step="0.05" />
+              <div class="val" id="dV">0.00</div>
+            </div>
+
+            <div style="margin-top:10px; color: var(--muted); font-size:12.5px; line-height:1.6">
+              \(\tan\) は \(\cos(bx+c)=0\) 付近で発散するので自動でクリップ表示します。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="angles">
+      <div class="sectionHead">
+        <div>
+          <h2>特別角（代表セット）</h2>
+          <div class="sub">0, \(\frac{\pi}{6}\), \(\frac{\pi}{4}\), \(\frac{\pi}{3}\), \(\frac{\pi}{2}\) の基本値。</div>
+        </div>
+        <div class="sub">象限で符号を判断</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="grid">
+        <div class="card" style="grid-column: span 12;">
+          <div class="cardTop">
+            <div>
+              <div class="cardTitle">暗記の核（sin / cos / tan）</div>
+              <div class="tagRow">
+                <span class="tag">特別角</span>
+                <span class="tag">単位円</span>
+              </div>
+            </div>
+          </div>
+          <div class="cardBody">
+            <div class="formula">
+
+              \[
+              \begin{array}{c|ccccc}
+              \theta & 0 & \frac{\pi}{6} & \frac{\pi}{4} & \frac{\pi}{3} & \frac{\pi}{2}\\ \hline
+              \sin\theta & 0 & \frac12 & \frac{\sqrt2}{2} & \frac{\sqrt3}{2} & 1\\
+              \cos\theta & 1 & \frac{\sqrt3}{2} & \frac{\sqrt2}{2} & \frac12 & 0\\
+              \tan\theta & 0 & \frac{1}{\sqrt3} & 1 & \sqrt3 & \text{—}
+              \end{array}
+              \]
+            </div>
+            <div class="note">
+              \(\tan\theta=\dfrac{\sin\theta}{\cos\theta}\) なので \(\cos\theta=0\) では定義されません。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="equations">
+      <div class="sectionHead">
+        <div>
+          <h2>三角方程式・不等式（解の形）</h2>
+          <div class="sub">基本は「周期」と「対称性」＋グラフ。</div>
+        </div>
+        <div class="sub">一般解の書き方</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="grid" id="eqCards"></div>
+    </section>
+
+    <section id="compose">
+      <div class="sectionHead">
+        <div>
+          <h2>合成（最大・最小にも直結）</h2>
+          <div class="sub">\(a\sin x+b\cos x\) を 1本の \(\sin\) / \(\cos\) にまとめる。</div>
+        </div>
+        <div class="sub">入試でも頻出</div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="grid" id="composeCards"></div>
+    </section>
+
+    <footer>
+      <div class="divider"></div>
+      <div>
+        ・このページはフロント完結（CDN：KaTeX, GSAP）です。<br/>
+        ・モーションを減らしたい場合：OSの「視差効果を減らす / アニメーションを減らす」で自動的に控えめになります。<br/>
+        ・追加したい公式や章立て（正弦定理/余弦定理を強化、tan半角置換を追加など）があれば言ってください。データ配列に追記するだけで拡張できます。
+      </div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast">コピーしました</div>
+
+  <script>
+    // ----------------------------
+    // Data: formula cards
+    // ----------------------------
+    const formulaCards = [
+      // 弧度法
+      { group:"弧度法", title:"度 ↔ ラジアン", tags:["弧度法"], tex:String.raw`
+        180^\circ=\pi\ \text{rad},\quad
+        \theta[\text{rad}]=\frac{\pi}{180^\circ}\theta[^\circ],\quad
+        \theta[^\circ]=\frac{180^\circ}{\pi}\theta[\text{rad}]
+      `, note:"三角関数は基本ラジアンで扱う（グラフ・微積・周期が自然）。" },
+      { group:"弧度法", title:"円弧・扇形", tags:["弧度法","円"], tex:String.raw`
+        s=r\theta,\qquad S=\frac12 r^2\theta\quad(\theta:\text{rad})
+      `, note:"弧長・面積はラジアンを使うと式が簡潔。" },
+
+      // 定義と基本関係
+      { group:"定義と基本", title:"基本関係（tanとピタゴラス）", tags:["基本","恒等式"], tex:String.raw`
+        \tan\theta=\frac{\sin\theta}{\cos\theta}\ (\cos\theta\ne0),\qquad
+        \sin^2\theta+\cos^2\theta=1
+      `, note:"まずこの2つが核。" },
+      { group:"定義と基本", title:"1+tan^2 の形", tags:["基本","恒等式","tan"], tex:String.raw`
+        1+\tan^2\theta=\frac{1}{\cos^2\theta}
+      `, note:"\(\tan=\sin/\cos\) と \(\sin^2+\cos^2=1\) から導ける。" },
+      { group:"定義と基本", title:"偶奇性（符号整理の最短ルート）", tags:["基本","対称性"], tex:String.raw`
+        \sin(-\theta)=-\sin\theta,\quad
+        \cos(-\theta)=\cos\theta,\quad
+        \tan(-\theta)=-\tan\theta
+      `, note:"マイナス角の処理で頻出。" },
+      { group:"定義と基本", title:"周期", tags:["基本","周期"], tex:String.raw`
+        \sin(\theta+2\pi)=\sin\theta,\quad
+        \cos(\theta+2\pi)=\cos\theta,\quad
+        \tan(\theta+\pi)=\tan\theta
+      `, note:"一般解を書くときの骨格。" },
+
+      // 加法定理
+      { group:"加法定理", title:"sinの加法定理", tags:["加法定理"], tex:String.raw`
+        \sin(\alpha\pm\beta)=\sin\alpha\cos\beta\pm\cos\alpha\sin\beta
+      `, note:"展開・変形の中心。" },
+      { group:"加法定理", title:"cosの加法定理", tags:["加法定理"], tex:String.raw`
+        \cos(\alpha\pm\beta)=\cos\alpha\cos\beta\mp\sin\alpha\sin\beta
+      `, note:"符号（∓）に注意：cosは逆符号になる。" },
+      { group:"加法定理", title:"tanの加法定理", tags:["加法定理","tan"], tex:String.raw`
+        \tan(\alpha\pm\beta)=\frac{\tan\alpha\pm\tan\beta}{1\mp\tan\alpha\tan\beta}
+      `, note:"分母が0になる角は除く（定義域注意）。" },
+
+      // 倍角
+      { group:"倍角", title:"sin 2θ", tags:["倍角"], tex:String.raw`
+        \sin 2\theta = 2\sin\theta\cos\theta
+      `, note:"面積・因数分解・最大最小でよく出る。" },
+      { group:"倍角", title:"cos 2θ（3形）", tags:["倍角","恒等式"], tex:String.raw`
+        \cos 2\theta = \cos^2\theta-\sin^2\theta
+        =2\cos^2\theta-1
+        =1-2\sin^2\theta
+      `, note:"\(\sin^2,\cos^2\) を落とす標準手。" },
+      { group:"倍角", title:"tan 2θ", tags:["倍角","tan"], tex:String.raw`
+        \tan 2\theta = \frac{2\tan\theta}{1-\tan^2\theta}
+      `, note:"\(\tan\) で統一したいときに使う。" },
+
+      // 半角
+      { group:"半角", title:"半角（sin^2, cos^2）", tags:["半角","恒等式"], tex:String.raw`
+        \sin^2\frac{\theta}{2}=\frac{1-\cos\theta}{2},\qquad
+        \cos^2\frac{\theta}{2}=\frac{1+\cos\theta}{2}
+      `, note:"平方なので、\(\sin(\theta/2),\cos(\theta/2)\) にするときは符号判定が必要。" },
+      { group:"半角", title:"tan(θ/2) の2形", tags:["半角","tan"], tex:String.raw`
+        \tan\frac{\theta}{2}=\frac{\sin\theta}{1+\cos\theta}
+        =\frac{1-\cos\theta}{\sin\theta}
+      `, note:"分母が0にならない範囲で使う。" },
+
+      // 三倍角（扱い差あるが入れておく）
+      { group:"多倍角", title:"三倍角（sin, cos）", tags:["多倍角"], tex:String.raw`
+        \sin 3\theta = 3\sin\theta-4\sin^3\theta,\qquad
+        \cos 3\theta = 4\cos^3\theta-3\cos\theta
+      `, note:"教科書差あり。入試や発展で頻出。" },
+
+      // 積和
+      { group:"積和・和積", title:"積→和（sin cos）", tags:["積和"], tex:String.raw`
+        \sin\alpha\cos\beta=\frac12\{\sin(\alpha+\beta)+\sin(\alpha-\beta)\}
+      `, note:"積分・和積変換・因数分解に強い。" },
+      { group:"積和・和積", title:"積→和（cos cos）", tags:["積和"], tex:String.raw`
+        \cos\alpha\cos\beta=\frac12\{\cos(\alpha+\beta)+\cos(\alpha-\beta)\}
+      `, note:"cos同士の積はcosの和へ。" },
+      { group:"積和・和積", title:"積→和（sin sin）", tags:["積和"], tex:String.raw`
+        \sin\alpha\sin\beta=\frac12\{\cos(\alpha-\beta)-\cos(\alpha+\beta)\}
+      `, note:"符号（−）の位置に注意。" },
+
+      { group:"積和・和積", title:"和→積（sin+sin）", tags:["和積"], tex:String.raw`
+        \sin\alpha+\sin\beta=2\sin\frac{\alpha+\beta}{2}\cos\frac{\alpha-\beta}{2}
+      `, note:"2本のsinを因数分解したいとき。" },
+      { group:"積和・和積", title:"和→積（sin−sin）", tags:["和積"], tex:String.raw`
+        \sin\alpha-\sin\beta=2\cos\frac{\alpha+\beta}{2}\sin\frac{\alpha-\beta}{2}
+      `, note:"符号で sin/cos の並びが変わる。" },
+      { group:"積和・和積", title:"和→積（cos+cos）", tags:["和積"], tex:String.raw`
+        \cos\alpha+\cos\beta=2\cos\frac{\alpha+\beta}{2}\cos\frac{\alpha-\beta}{2}
+      `, note:"和→積の中でも特に頻出。" },
+      { group:"積和・和積", title:"和→積（cos−cos）", tags:["和積"], tex:String.raw`
+        \cos\alpha-\cos\beta=-2\sin\frac{\alpha+\beta}{2}\sin\frac{\alpha-\beta}{2}
+      `, note:"マイナスが先頭につくのを落としやすい。" },
+
+      // グラフ変形（パラメータ）
+      { group:"グラフ", title:"一般形とパラメータ", tags:["グラフ","変形"], tex:String.raw`
+        y=a\sin(bx+c)+d,\quad
+        \text{振幅}=|a|,\quad
+        \text{周期}=\frac{2\pi}{|b|},\quad
+        \text{位相}=-\frac{c}{b},\quad
+        \text{上下移動}=d
+      `, note:"cos, tan でも同様の見方ができる（周期はtanは\(\pi/|b|\)）。" },
+    ];
+
+    const equationCards = [
+      { group:"方程式", title:"sin x = a の一般解（代表形）", tags:["方程式","一般解","sin"], tex:String.raw`
+        \sin x = a\ (|a|\le1)\Rightarrow
+        x=\arcsin(a)+2k\pi,\quad x=\pi-\arcsin(a)+2k\pi\ (k\in\mathbb{Z})
+      `, note:"教科書によっては \(\arcsin\) を使わず、基準角を図で処理する。" },
+      { group:"方程式", title:"cos x = a の一般解（代表形）", tags:["方程式","一般解","cos"], tex:String.raw`
+        \cos x = a\ (|a|\le1)\Rightarrow
+        x=\pm\arccos(a)+2k\pi\ (k\in\mathbb{Z})
+      `, note:"\(\cos\) は左右対称（±）が出る。" },
+      { group:"方程式", title:"tan x = a の一般解", tags:["方程式","一般解","tan"], tex:String.raw`
+        \tan x = a \Rightarrow x=\arctan(a)+k\pi\ (k\in\mathbb{Z})
+      `, note:"周期が\(\pi\)。" },
+      { group:"不等式", title:"不等式はグラフで区間を読む", tags:["不等式","グラフ"], tex:String.raw`
+        \sin x \ge a,\ \cos x < a,\ \tan x \le a\ \text{などは、}
+        \text{周期と単調区間を意識して解く。}
+      `, note:"方程式で境界を出して、グラフで区間判定するのが定石。" },
+    ];
+
+    const composeCards = [
+      { group:"合成", title:"a sin x + b cos x の合成", tags:["合成","最大最小"], tex:String.raw`
+        a\sin x + b\cos x = R\sin(x+\varphi),\quad
+        R=\sqrt{a^2+b^2}
+      `, note:"\(\cos\varphi=\frac{a}{R},\ \sin\varphi=\frac{b}{R}\) などで決める（象限注意）。" },
+      { group:"合成", title:"最大・最小（即答形）", tags:["合成","最大最小"], tex:String.raw`
+        -R \le a\sin x+b\cos x \le R,\qquad (R=\sqrt{a^2+b^2})
+      `, note:"合成できれば最大最小が一発。" },
+    ];
+
+    // ----------------------------
+    // Render cards
+    // ----------------------------
+    const $cards = document.getElementById("cards");
+    const $eqCards = document.getElementById("eqCards");
+    const $composeCards = document.getElementById("composeCards");
+    const $shown = document.getElementById("shown");
+    const $total = document.getElementById("total");
+    const $q = document.getElementById("q");
+    const toast = document.getElementById("toast");
+
+    function cardHTML(card, idx, namespace){
+      const raw = card.tex;
+      const keywords = [card.group, card.title, ...(card.tags||[])].join(" ");
+      return `
+        <article class="card formulaCard" data-ns="${namespace}" data-idx="${idx}" data-key="${escapeHtml(keywords)}" data-raw="${escapeHtml(raw)}">
+          <div class="cardTop">
+            <div>
+              <div class="cardTitle">${escapeHtml(card.group)}：${escapeHtml(card.title)}</div>
+              <div class="tagRow">
+                ${(card.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("")}
+              </div>
+            </div>
+          </div>
+          <div class="cardBody">
+            <div class="formula">\\(${raw}\\)</div>
+            ${card.note ? `<div class="note">${escapeHtml(card.note)}</div>` : ``}
+          </div>
+          <div class="cardActions">
+            <button class="miniBtn copyBtn" data-copy="${escapeHtml(raw)}">公式をコピー（LaTeX）</button>
+            <button class="miniBtn scrollBtn" data-scrolltop="1">上へ</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function renderAll(){
+      $cards.innerHTML = formulaCards.map((c,i)=>cardHTML(c,i,"main")).join("");
+      $eqCards.innerHTML = equationCards.map((c,i)=>cardHTML(c,i,"eq")).join("");
+      $composeCards.innerHTML = composeCards.map((c,i)=>cardHTML(c,i,"compose")).join("");
+
+      const totalCount = document.querySelectorAll(".formulaCard").length;
+      $total.textContent = totalCount;
+      updateShown();
+    }
+
+    function updateShown(){
+      const shownCount = [...document.querySelectorAll(".formulaCard")].filter(el => el.style.display !== "none").length;
+      $shown.textContent = shownCount;
+    }
+
+    // KaTeX render
+    function renderMath(){
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true },
+        ],
+        throwOnError: false,
+      });
+    }
+
+    // ----------------------------
+    // Search/filter
+    // ----------------------------
+    function normalize(s){ return (s||"").toLowerCase(); }
+
+    function applyFilter(){
+      const query = normalize($q.value).trim();
+      const cards = document.querySelectorAll(".formulaCard");
+      cards.forEach(el=>{
+        const key = normalize(el.getAttribute("data-key") + " " + el.getAttribute("data-raw"));
+        const ok = query === "" ? true : key.includes(query);
+        el.style.display = ok ? "" : "none";
+      });
+      updateShown();
+      refreshScrollAnimations();
+    }
+
+    // Slash to focus
+    window.addEventListener("keydown", (e)=>{
+      if (e.key === "/" && document.activeElement !== $q){
+        e.preventDefault();
+        $q.focus();
+      }
+    });
+
+    // ----------------------------
+    // Copy + toast
+    // ----------------------------
+    let toastTimer = null;
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.style.opacity = "1";
+      toast.style.transform = "translateX(-50%) translateY(0)";
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>{
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(-50%) translateY(8px)";
+      }, 1100);
+    }
+
+    document.addEventListener("click", async (e)=>{
+      const copyBtn = e.target.closest(".copyBtn");
+      if (copyBtn){
+        const text = copyBtn.getAttribute("data-copy");
+        try{
+          await navigator.clipboard.writeText(text);
+          showToast("コピーしました（LaTeX）");
+        }catch{
+          // fallback
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+          showToast("コピーしました（fallback）");
+        }
+      }
+      const sbtn = e.target.closest(".scrollBtn");
+      if (sbtn){
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+
+    // ----------------------------
+    // Smooth jump buttons
+    // ----------------------------
+    document.getElementById("jumpCatalog").addEventListener("click", ()=>{
+      document.getElementById("catalog").scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+    document.getElementById("jumpLab").addEventListener("click", ()=>{
+      document.getElementById("lab").scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+
+    // ----------------------------
+    // Motion (GSAP)
+    // ----------------------------
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("motionMode").textContent = reduceMotion ? "Reduced" : "Motion";
+
+    function initMotion(){
+      if (reduceMotion || !window.gsap || !window.ScrollTrigger) return;
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      // hero subtle float
+      gsap.to(".dot", { y: -3, duration: 1.6, yoyo:true, repeat:-1, ease:"sine.inOut" });
+
+      // cards reveal
+      const cards = gsap.utils.toArray(".formulaCard");
+      cards.forEach((card)=>{
+        gsap.fromTo(card,
+          { y: 18, opacity: 0 },
+          {
+            y: 0, opacity: 1, duration: .55, ease: "power2.out",
+            scrollTrigger: { trigger: card, start: "top 86%", toggleActions:"play none none reverse" }
+          }
+        );
+      });
+
+      // hero parallax-ish
+      gsap.fromTo(".heroCard", { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: .7, stagger: .10, ease:"power2.out" });
+    }
+
+    function refreshScrollAnimations(){
+      if (reduceMotion || !window.ScrollTrigger) return;
+      ScrollTrigger.getAll().forEach(st => st.kill());
+      initMotion();
+      ScrollTrigger.refresh(true);
+    }
+
+    // ----------------------------
+    // Trig Lab (canvas)
+    // ----------------------------
+    const canvas = document.getElementById("plot");
+    const ctx = canvas.getContext("2d");
+    const $labEq = document.getElementById("labEq");
+
+    const sliders = {
+      a: document.getElementById("a"),
+      b: document.getElementById("b"),
+      c: document.getElementById("c"),
+      d: document.getElementById("d"),
+    };
+    const vals = {
+      aV: document.getElementById("aV"),
+      bV: document.getElementById("bV"),
+      cV: document.getElementById("cV"),
+      dV: document.getElementById("dV"),
+    };
+    const gridOn = document.getElementById("gridOn");
+    const animateOn = document.getElementById("animateOn");
+
+    let fn = "sin";
+    document.querySelectorAll('input[name="fn"]').forEach(r=>{
+      r.addEventListener("change", ()=>{
+        fn = document.querySelector('input[name="fn"]:checked').value;
+        updateLabEq();
+      });
+    });
+
+    function getParams(){
+      return {
+        a: parseFloat(sliders.a.value),
+        b: parseFloat(sliders.b.value),
+        c: parseFloat(sliders.c.value),
+        d: parseFloat(sliders.d.value),
+      };
+    }
+    function updateParamLabels(){
+      const p = getParams();
+      vals.aV.textContent = p.a.toFixed(2);
+      vals.bV.textContent = p.b.toFixed(2);
+      vals.cV.textContent = p.c.toFixed(2);
+      vals.dV.textContent = p.d.toFixed(2);
+    }
+    function updateLabEq(){
+      const p = getParams();
+      const core = fn === "tan" ? "\\tan" : (fn === "cos" ? "\\cos" : "\\sin");
+      $labEq.innerHTML = `\\(y=${p.a.toFixed(2)}${core}(${p.b.toFixed(2)}x${p.c>=0?"+":""}${p.c.toFixed(2)})${p.d>=0?"+":""}${p.d.toFixed(2)}\\)`;
+      // rerender only this node using KaTeX auto-render on body later (cheap: rerender whole is ok)
+      renderMathInElement($labEq, {
+        delimiters: [{ left:"\\(", right:"\\)", display:false }],
+        throwOnError:false
+      });
+    }
+
+    function resizeCanvasToCSS(){
+      // keep internal resolution sharp on HiDPI
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+
+    function f(x, p){
+      const t = p.b*x + p.c;
+      if (fn === "sin") return p.a*Math.sin(t) + p.d;
+      if (fn === "cos") return p.a*Math.cos(t) + p.d;
+      // tan: clip later
+      return p.a*Math.tan(t) + p.d;
+    }
+
+    function draw(tNow){
+      const p = getParams();
+      const w = canvas.getBoundingClientRect().width;
+      const h = canvas.getBoundingClientRect().height;
+      ctx.clearRect(0,0,w,h);
+
+      const pad = 34;
+      const xMin = -Math.PI, xMax = Math.PI;
+      const yMin = -4, yMax = 4;
+
+      const xToPx = (x)=> pad + (x - xMin) * (w-2*pad) / (xMax-xMin);
+      const yToPx = (y)=> h - pad - (y - yMin) * (h-2*pad) / (yMax-yMin);
+
+      // grid
+      if (gridOn.checked){
+        ctx.save();
+        ctx.globalAlpha = 0.55;
+        ctx.strokeStyle = "rgba(255,255,255,.10)";
+        ctx.lineWidth = 1;
+
+        // vertical: -pi..pi step pi/2
+        const xs = [-Math.PI, -Math.PI/2, 0, Math.PI/2, Math.PI];
+        xs.forEach(xx=>{
+          const X = xToPx(xx);
+          ctx.beginPath(); ctx.moveTo(X, pad); ctx.lineTo(X, h-pad); ctx.stroke();
+        });
+
+        // horizontal: -3..3
+        for(let yy=-3; yy<=3; yy++){
+          const Y = yToPx(yy);
+          ctx.beginPath(); ctx.moveTo(pad, Y); ctx.lineTo(w-pad, Y); ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // axes
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,255,255,.22)";
+      ctx.lineWidth = 1.2;
+      // y=0
+      ctx.beginPath(); ctx.moveTo(pad, yToPx(0)); ctx.lineTo(w-pad, yToPx(0)); ctx.stroke();
+      // x=0
+      ctx.beginPath(); ctx.moveTo(xToPx(0), pad); ctx.lineTo(xToPx(0), h-pad); ctx.stroke();
+      ctx.restore();
+
+      // labels
+      ctx.save();
+      ctx.fillStyle = "rgba(255,255,255,.70)";
+      ctx.font = "12px " + getComputedStyle(document.body).fontFamily;
+      const label = (txt, x, y)=>{ ctx.fillText(txt, x, y); };
+      label("-π", xToPx(-Math.PI)-10, h-12);
+      label("-π/2", xToPx(-Math.PI/2)-16, h-12);
+      label("0", xToPx(0)-3, h-12);
+      label("π/2", xToPx(Math.PI/2)-12, h-12);
+      label("π", xToPx(Math.PI)-4, h-12);
+      ctx.restore();
+
+      // wave
+      const time = (tNow||0) / 1000;
+      const phase = animateOn.checked ? (time * 0.8) : 0;
+
+      ctx.save();
+      ctx.lineWidth = 2.2;
+      ctx.strokeStyle = "rgba(34,211,238,.85)";
+      ctx.shadowColor = "rgba(34,211,238,.25)";
+      ctx.shadowBlur = 16;
+
+      ctx.beginPath();
+      let started = false;
+
+      const N = Math.floor((w-2*pad) * 1.6);
+      for(let i=0;i<=N;i++){
+        const x = xMin + (xMax-xMin) * (i/N);
+        let y = f(x + phase, p);
+
+        // tan clip
+        if (fn === "tan"){
+          if (!isFinite(y) || Math.abs(y) > 5.5){
+            started = false;
+            continue;
+          }
+        }
+
+        const X = xToPx(x);
+        const Y = yToPx(y);
+
+        if (!started){
+          ctx.moveTo(X, Y);
+          started = true;
+        }else{
+          ctx.lineTo(X, Y);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // marker at x=0
+      ctx.save();
+      const y0 = f(0 + phase, p);
+      if (isFinite(y0) && Math.abs(y0) <= 6){
+        ctx.fillStyle = "rgba(124,92,255,.92)";
+        ctx.beginPath();
+        ctx.arc(xToPx(0), yToPx(y0), 4.5, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      requestAnimationFrame(draw);
+    }
+
+    // ----------------------------
+    // Boot
+    // ----------------------------
+    renderAll();
+
+    window.addEventListener("load", ()=>{
+      renderMath();
+      initMotion();
+
+      // filter
+      $q.addEventListener("input", applyFilter);
+
+      // init lab
+      updateParamLabels();
+      updateLabEq();
+      Object.values(sliders).forEach(s=>{
+        s.addEventListener("input", ()=>{
+          updateParamLabels();
+          updateLabEq();
+        });
+      });
+
+      // canvas
+      resizeCanvasToCSS();
+      window.addEventListener("resize", resizeCanvasToCSS);
+      requestAnimationFrame(draw);
+    });
+  </script>
+</body>
+</html>

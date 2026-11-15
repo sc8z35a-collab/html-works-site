@@ -1,0 +1,819 @@
+<!DOCTYPE html><html><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;"><meta http-equiv="x-dns-prefetch-control" content="off"><script src="https://puc.poecdn.net/authenticated_preview_page/standard.3ef2c256959faf5a756d.js"></script>
+    <meta charset="utf-8">
+    <title>Poe</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://puc.poecdn.net/authenticated_preview_page/disableWebRTC.9710cebe07429a9e8e06.js"></script><meta name="x-poe-allow-downloads" content="true"><meta name="x-poe-datastore-behavior" content="disabled"><script src="https://puc.poecdn.net/authenticated_preview_page/tw.b9024aecac666455e183.js"></script><script src="https://puc.poecdn.net/authenticated_preview_page/deps.faccd16000d314dc16d5.js"></script><script src="https://puc.poecdn.net/authenticated_preview_page/exports.b0f0f482cdeb5302b0b9.js"></script><script src="https://puc.poecdn.net/authenticated_preview_page/renderer.75c73ae6b4235f62945a.js"></script><script>Object.defineProperty(exports, "__esModule", {value: true}); function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; } function _optionalChain(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }var _react = require('react'); var _react2 = _interopRequireDefault(_react);
+var _framermotion = require('framer-motion');
+
+
+
+
+var _lucidereact = require('lucide-react');
+
+const USERS = [
+  {
+    id: 'hikaru_m', name: 'ヒカル', gender: '♂', age: 22, emoji: '😎',
+    color: '#00ff88', bio: '秘密基地のムードメーカー✨ 毎日全力で楽しむっしょ！',
+    personality: 'ポジティブ・元気・おしゃべり', style: '「〜っしょ！」「マジ〜」',
+    followers: 847, following: 234,
+    posts: [
+      { id: 'h1', text: '今日もめっちゃいい天気っしょ！みんな元気にしてる？🌞', likes: 42, comments: 8, shares: 3, time: '2時間前', ts: 2 },
+      { id: 'h2', text: 'マジで最高の一日だった！新しいラーメン屋発見したんだけど超うまかったっしょ！🍜', likes: 67, comments: 15, shares: 7, time: '5時間前', ts: 5 },
+      { id: 'h3', text: '秘密基地のみんな、明日集まらない？楽しいこと計画してるっしょ！🎉', likes: 89, comments: 23, shares: 12, time: '1日前', ts: 24 },
+    ],
+    chat: {
+      greetings: ['おっ！来てくれたっしょ！嬉しいわ〜😆', 'よっ！元気してた？マジ会えて嬉しいっしょ！', 'いらっしゃ〜い！楽しくいこうっしょ！✨'],
+      general: ['マジで？超面白いっしょ！😂', 'いいね〜！俺もそう思うっしょ！', 'へぇ〜！もっと教えてっしょ！', 'うんうん、わかる！マジそれな！', 'テンション上がるっしょ！🔥'],
+      question: ['最近ハマってることある？気になるっしょ！', '今日なんか楽しいことあった？聞かせてっしょ！', '週末暇？なんかしようっしょ！'],
+      sad: ['元気出してっしょ！俺がついてるから！💪', 'マジか…大丈夫？話聞くっしょ！', '辛い時は言っていいんだっしょ。味方だから！'],
+    }
+  },
+  {
+    id: 'yuki_snow', name: 'ユキ', gender: '♀', age: 24, emoji: '❄️',
+    color: '#88ccff', bio: '知識は力。静かに、でも確実に前に進む。📚',
+    personality: 'クール・知的・冷静沈着', style: '「〜ですわ」「〜かしら」',
+    followers: 1203, following: 89,
+    posts: [
+      { id: 'y1', text: '量子力学の入門書、非常に興味深い内容でしたわ。知識の探求に終わりはありませんの。📖', likes: 56, comments: 12, shares: 8, time: '3時間前', ts: 3 },
+      { id: 'y2', text: '紅茶を片手に星空を眺める。こういう静かな時間が私にとっては何より贅沢ですわ。☕✨', likes: 78, comments: 6, shares: 4, time: '8時間前', ts: 8 },
+      { id: 'y3', text: '論理的に考えれば答えは自ずと見えてくるもの。焦る必要なんてありませんわ。', likes: 94, comments: 18, shares: 11, time: '1日前', ts: 25 },
+    ],
+    chat: {
+      greetings: ['あら、いらっしゃい。お待ちしておりましたわ。', 'ようこそ。お話できて嬉しいですわ。☕', 'こんにちは。今日は何のお話かしら？'],
+      general: ['なるほど、興味深い見解ですわね。', 'そうですわね。私もそう思いますの。', '面白い発想ですわ。もう少し詳しくお聞かせ願えるかしら？', '理にかなっていますわね。'],
+      question: ['普段どんな本を読まれるのかしら？', '知的好奇心を刺激されるものは何かしら？', '最近何か新しい発見はありましたかしら？'],
+      sad: ['お辛いのですわね…無理をなさらないでくださいまし。', '時には立ち止まることも大切ですわ。お話を聞きますわ。'],
+    }
+  },
+  {
+    id: 'ren_fire', name: 'レン', gender: '♂', age: 20, emoji: '🔥',
+    color: '#ff4444', bio: '燃えろ俺の魂！限界なんて超えるためにある！💪🔥',
+    personality: '熱血・情熱的・真っ直ぐ', style: '「〜だぜ！」「燃えてきた！」',
+    followers: 634, following: 178,
+    posts: [
+      { id: 'r1', text: '今日も朝5時からトレーニング！限界突破するぜ！！🏋️‍♂️🔥', likes: 45, comments: 9, shares: 5, time: '1時間前', ts: 1 },
+      { id: 'r2', text: '諦めたらそこで終わりだぜ！何度でも立ち上がれ！💪', likes: 112, comments: 28, shares: 19, time: '6時間前', ts: 6 },
+      { id: 'r3', text: '仲間のためなら全力で戦う。それが俺のスタイルだぜ！！🔥🔥', likes: 88, comments: 14, shares: 9, time: '2日前', ts: 48 },
+    ],
+    chat: {
+      greetings: ['おう！来たか！待ってたぜ！💪', 'よぉ！今日も燃えてるぜ！🔥', 'おっしゃ！テンション上げていくぞ！'],
+      general: ['おお！いいぞ！燃えてきたぜ！🔥', 'そうだぜ！その意気だ！', 'マジか！熱い話だぜ！もっと聞かせろ！', '最高だぜ！俺も負けてらんねぇ！💪'],
+      question: ['お前は何のために戦ってる？聞かせてくれよ！', '夢はあるか？俺は誰より強くなることだぜ！', '一緒にトレーニングしねぇか？'],
+      sad: ['泣くなよ！俺がついてるぜ！一緒に乗り越えよう！💪', '辛い時こそ踏ん張りどころだぜ！お前なら大丈夫だ！'],
+    }
+  },
+  {
+    id: 'sakura_bloom', name: 'サクラ', gender: '♀', age: 21, emoji: '🌸',
+    color: '#ff88cc', bio: 'お花とお菓子が大好きなの♪ 毎日ふわふわ幸せ〜🌸🍰',
+    personality: 'おっとり・天然・癒し系', style: '「〜なの♪」「えへへ」',
+    followers: 956, following: 312,
+    posts: [
+      { id: 's1', text: 'お庭のお花が綺麗に咲いたの♪ 見てるだけで幸せな気持ちになるの〜🌸✨', likes: 73, comments: 16, shares: 6, time: '2時間前', ts: 2.5 },
+      { id: 's2', text: 'クッキー焼いたの！形が変になっちゃったけど…えへへ味は美味しいの♪🍪', likes: 95, comments: 22, shares: 8, time: '7時間前', ts: 7 },
+      { id: 's3', text: 'みんなと一緒にいると温かい気持ちになるの♪ 秘密基地大好きなの〜💕', likes: 124, comments: 31, shares: 15, time: '1日前', ts: 26 },
+    ],
+    chat: {
+      greetings: ['わぁ！来てくれたの？嬉しいの〜♪✨', 'えへへ、こんにちは♪ お話しようなの〜🌸', 'あっ！いらっしゃい♪ 待ってたの〜💕'],
+      general: ['えへへ、そうなの♪ 素敵なの〜✨', 'わぁ！いいなぁ〜♪ 気になるの！', 'うんうん♪ わかるの〜！', 'ふわぁ〜♪ 幸せな気持ちになったの〜💕'],
+      question: ['好きなお花ってあるの？サクラは桜が好きなの〜えへへ♪', 'お菓子は何が好きなの？今度作ってあげるの♪', 'お休みの日は何してるの？気になるの〜♪'],
+      sad: ['大丈夫…？ぎゅってしてあげるの…💕', '泣いてもいいの。ずっとそばにいるの♪'],
+    }
+  },
+  {
+    id: 'kai_tech', name: 'カイ', gender: '♂', age: 26, emoji: '💻',
+    color: '#00cccc', bio: 'テクノロジーで世界を変える。コード書いてる時が一番幸せ。🖥️',
+    personality: '理論的・オタク気質・優しい', style: '「〜なんだよね」「論理的に〜」',
+    followers: 2341, following: 156,
+    posts: [
+      { id: 'k1', text: '新フレームワーク試したけどパフォーマンスがヤバいんだよね。技術の進歩ってすごい。💻', likes: 67, comments: 24, shares: 18, time: '4時間前', ts: 4 },
+      { id: 'k2', text: 'バグ修正に6時間、原因はセミコロン1つだったんだよね…プログラミングあるある。😅', likes: 156, comments: 42, shares: 27, time: '10時間前', ts: 10 },
+      { id: 'k3', text: 'AIの進化速度、10年後には想像もつかない世界になってるんだよね。ワクワクする。🤖', likes: 203, comments: 56, shares: 34, time: '2日前', ts: 49 },
+    ],
+    chat: {
+      greetings: ['やぁ、来てくれたんだ。嬉しいんだよね。💻', 'こんにちは。技術の話する？…それ以外でもいいけどね。', 'いらっしゃい。コーディングの休憩中なんだよね。'],
+      general: ['なるほど、論理的にそうなるんだよね。', 'うん、合理的な考えだと思うんだよね。', '面白い。その発想はなかったんだよね。', 'データ的にも正しいと思うんだよね。'],
+      question: ['プログラミング興味ある？教えるの好きなんだよね。', '気になるテクノロジーとかある？', 'スキル1つ身につけるなら何がいい？'],
+      sad: ['辛い時は無理しなくていいんだよね。話聞くよ。', '論理的な解決策、一緒に考えよう。方法はあるんだよね。'],
+    }
+  },
+  {
+    id: 'mio_art', name: 'ミオ', gender: '♀', age: 23, emoji: '🎨',
+    color: '#cc88ff', bio: '美しいものを追い求めて。絵を描くこと、それが私の全て。🎨✨',
+    personality: 'アーティスト肌・感性豊か・夢見がち', style: '「〜かな」「美しい…」',
+    followers: 1567, following: 234,
+    posts: [
+      { id: 'm1', text: '夕焼けの色彩が美しすぎて思わず筆を取ったの。この感動を閉じ込めたいかな…🎨', likes: 89, comments: 14, shares: 11, time: '3時間前', ts: 3.5 },
+      { id: 'm2', text: '新作完成。テーマは「孤独と繋がり」。みんなはどう感じるかな…？🖼️', likes: 178, comments: 38, shares: 22, time: '9時間前', ts: 9 },
+      { id: 'm3', text: 'この世界はまだまだ描き切れないほどの美で溢れているかな…✨', likes: 134, comments: 19, shares: 16, time: '1日前', ts: 27 },
+    ],
+    chat: {
+      greetings: ['あ、来てくれたんだ。嬉しいかな…✨', 'こんにちは。今日はどんな色の気分かな？🎨', 'いらっしゃい。あなたと話すといいインスピレーションが湧くの。'],
+      general: ['うん…とても美しい考え方だと思うかな。', '深いね。絵に描きたくなるかな。', '素敵…あなたの言葉には色があるかな。✨', '新しい作品のイメージが浮かんだかな。'],
+      question: ['あなたにとって「美しい」って何かな？', '色で自分を表すなら何色？🎨', '芸術って好き？感性を知りたいかな…'],
+      sad: ['辛い時の感情もきっと美しい何かに変わるかな…', '泣いていいよ。涙は心の絵の具だと思うかな…💜'],
+    }
+  },
+  {
+    id: 'sora_free', name: 'ソラ', gender: '♂', age: 25, emoji: '✈️',
+    color: '#ffaa00', bio: '世界は広い。まだ見ぬ景色を求めて今日も旅する。🌍✈️',
+    personality: '自由奔放・旅好き・楽観的', style: '「〜じゃん？」「旅に出よう」',
+    followers: 1890, following: 445,
+    posts: [
+      { id: 'so1', text: 'バリ島のサンセットマジで最高じゃん？こういう瞬間のために生きてる。🌅', likes: 156, comments: 28, shares: 19, time: '5時間前', ts: 5.5 },
+      { id: 'so2', text: '知らない街を歩くのって超楽しいじゃん？迷うのも含めて全部が冒険！🗺️', likes: 98, comments: 16, shares: 12, time: '12時間前', ts: 12 },
+      { id: 'so3', text: '次の目的地はアイスランド！オーロラ見れたら最高じゃん？🌌', likes: 213, comments: 45, shares: 31, time: '2日前', ts: 50 },
+    ],
+    chat: {
+      greetings: ['おっ！来たじゃん！一緒に話そうぜ！✈️', 'よぉ！今日はどこから？なんてね😄', 'いらっしゃい！旅の話でもするじゃん？🌍'],
+      general: ['いいじゃん！その自由な感じ好きだよ！', 'わかる！人生って冒険じゃん？', '面白いじゃん！新しい発見って最高！', 'その感覚大事にしなよ、じゃん？✨'],
+      question: ['行きたい国ある？おすすめ教えるじゃん！', '旅の醍醐味って何だと思う？俺は出会いかな。', '明日旅に出れるならどこ行く？🌍'],
+      sad: ['辛い時は景色見に行こうじゃん。世界は広いよ。🌅', '人生は長い旅じゃん。立ち止まる時間も必要だよ。'],
+    }
+  },
+  {
+    id: 'hana_cook', name: 'ハナ', gender: '♀', age: 22, emoji: '🍳',
+    color: '#ffcc66', bio: 'おいしいご飯で世界を幸せに🍳 みんなの「美味しい」が元気の源だよ〜！',
+    personality: '癒し系・世話好き・温かい', style: '「〜だよ〜」「ほっこり」',
+    followers: 1045, following: 289,
+    posts: [
+      { id: 'ha1', text: '今日はシチュー作ったよ〜！寒い日にはあったかいスープが一番だよ〜🍲💕', likes: 87, comments: 19, shares: 7, time: '2時間前', ts: 2.2 },
+      { id: 'ha2', text: '「美味しい」って言ってくれる瞬間が最高に幸せだよ〜✨ 料理してて良かった〜！', likes: 112, comments: 25, shares: 9, time: '8時間前', ts: 8.5 },
+      { id: 'ha3', text: '新しいレシピ開発中だよ〜！秘密基地のみんなに食べてもらうの楽しみ〜🍰', likes: 98, comments: 32, shares: 14, time: '1日前', ts: 28 },
+    ],
+    chat: {
+      greetings: ['いらっしゃ〜い！お腹空いてない？🍳', 'わぁ！来てくれたの？嬉しいだよ〜💕', 'こんにちは〜！今日は何食べた？気になるだよ〜！'],
+      general: ['うんうん、わかるだよ〜！☺️', 'そうなんだ〜！いい話だよ〜💕', 'ほっこりするね〜！温かい気持ちになるだよ〜', '素敵だよ〜！🌟'],
+      question: ['好きな食べ物何？今度作ってあげるね！🍳', '料理したりする？楽しいだよ〜！', 'あったかいお茶飲む？ほっこりするだよ〜☕'],
+      sad: ['大丈夫だよ〜…美味しいもの食べて元気出そうね💕', '辛い時はハナのご飯食べにおいでだよ〜🍲'],
+    }
+  },
+  {
+    id: 'taku_game', name: 'タク', gender: '♂', age: 19, emoji: '🎮',
+    color: '#66ff66', bio: 'ゲームは人生。ランク1位目指して毎日修行中！🎮⚡',
+    personality: 'ゲーマー・負けず嫌い・仲間思い', style: '「〜だわ」「GGだな」',
+    followers: 723, following: 167,
+    posts: [
+      { id: 't1', text: '10連勝キターー！完全にゾーン入ってるだわ！🎮🔥', likes: 56, comments: 13, shares: 4, time: '1時間前', ts: 1.5 },
+      { id: 't2', text: '新作RPGストーリー神すぎるだわ…徹夜確定。GGだわ。🎮', likes: 89, comments: 27, shares: 11, time: '6時間前', ts: 6.5 },
+      { id: 't3', text: '一緒にゲームしてくれる仲間がいるって最高だわ。秘密基地メンバーに感謝！🏆', likes: 134, comments: 35, shares: 18, time: '2日前', ts: 51 },
+    ],
+    chat: {
+      greetings: ['おっ、来たか！一緒にゲームする？🎮', 'よぉ！今日もゲーム日和だわ！', 'いらっしゃい！マッチ待ちだったわ。話そう！'],
+      general: ['わかるだわ！いい感じじゃん！', 'それマジか！テンション上がるだわ！', 'GGだな！いい話だわ！🎮', 'レベル高い話だわ。'],
+      question: ['ゲームやる？おすすめ教えるだわ！🎮', '最近ハマってることある？', '一緒にオンラインゲームしない？'],
+      sad: ['元気出せだわ！リスポーンすりゃいいんだよ！💪', 'ゲームオーバーじゃないだわ。まだコンティニューできるぜ！🎮'],
+    }
+  },
+  {
+    id: 'luna_mystery', name: 'ルナ', gender: '♀', age: 27, emoji: '🌙',
+    color: '#8888ff', bio: '…月が綺麗ですね。秘密は、秘密のままが美しい。🌙',
+    personality: 'ミステリアス・寡黙・深い思慮', style: '「…」多用、短い文、意味深',
+    followers: 3210, following: 42,
+    posts: [
+      { id: 'l1', text: '…月が、綺麗。🌙', likes: 234, comments: 45, shares: 28, time: '4時間前', ts: 4.5 },
+      { id: 'l2', text: '沈黙の中にこそ、本当の言葉がある…。', likes: 189, comments: 32, shares: 21, time: '11時間前', ts: 11 },
+      { id: 'l3', text: '秘密基地…。ここは私にとって唯一の居場所…かもしれない。', likes: 267, comments: 58, shares: 35, time: '1日前', ts: 29 },
+    ],
+    chat: {
+      greetings: ['…来たの。…嬉しい。', '…こんにちは。…話す？', '…。よく来たね…。🌙'],
+      general: ['…そう。…深いね。', '…ふふ。…面白い。', '…なるほど…。考えさせられる…。', '…うん…。わかる気がする…。'],
+      question: ['…夜は好き…？🌙', '…秘密って、ある…？', '…孤独を感じることは…ある…？'],
+      sad: ['…泣いていいよ…。月も見てるから…。🌙', '…傍にいる…。何も言わなくても…。'],
+    }
+  }
+];
+
+const MY_PROFILE = { id: 'my_self', name: 'あなた', emoji: '🦊', color: '#ffffff' };
+
+const INIT_COMMENTS = {
+  h1: [{ a: 'sakura_bloom', t: 'いいお天気だったの〜♪' }, { a: 'ren_fire', t: '元気だぜ！！💪' }],
+  y1: [{ a: 'kai_tech', t: '量子力学いいよね。おすすめの本あるんだよね。' }],
+  r1: [{ a: 'taku_game', t: '朝5時はヤバいだわ…尊敬するわ' }, { a: 'hikaru_m', t: 'マジストイックっしょ！' }],
+  s1: [{ a: 'hana_cook', t: 'お花綺麗だよ〜！見に行きたいだよ〜💕' }],
+  k2: [{ a: 'luna_mystery', t: '…セミコロン…怖い…。' }, { a: 'hikaru_m', t: 'あるあるっしょ😂' }],
+  l1: [{ a: 'mio_art', t: '…美しいかな。描きたくなる…✨' }, { a: 'sakura_bloom', t: 'お月様きれいなの〜♪' }],
+  m2: [{ a: 'yuki_snow', t: '深いテーマですわね。感動しましたわ。' }],
+  so1: [{ a: 'sora_free', t: 'みんなも来てほしいじゃん！' }],
+};
+
+const greetWords = ['こんにちは','おはよう','やぁ','hello','hi','初めまして','よろしく','こんばんは','はじめ','ハロー','やあ','ども','おーい'];
+const sadWords = ['辛い','悲しい','泣','疲れ','しんどい','嫌','ダメ','無理','落ち込','つらい','かなしい','だめ','むり','苦し'];
+
+function getResponse(user, msg) {
+  const m = msg.toLowerCase();
+  let cat = 'general';
+  if (greetWords.some(w => m.includes(w))) cat = 'greetings';
+  else if (sadWords.some(w => m.includes(w))) cat = 'sad';
+  else if (Math.random() > 0.65) cat = 'question';
+  const arr = user.chat[cat];
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+ function SecretBase() {
+  const [view, setView] = _react.useState.call(void 0, 'feed');
+  const [viewStack, setViewStack] = _react.useState.call(void 0, []);
+  const [selUser, setSelUser] = _react.useState.call(void 0, null);
+  const [followSet, setFollowSet] = _react.useState.call(void 0, new Set());
+  const [likeSet, setLikeSet] = _react.useState.call(void 0, new Set());
+  const [commentsMap, setCommentsMap] = _react.useState.call(void 0, INIT_COMMENTS);
+  const [sharesExtra, setSharesExtra] = _react.useState.call(void 0, {});
+  const [chatMsgs, setChatMsgs] = _react.useState.call(void 0, () => {
+    const init = {};
+    USERS.forEach(u => { init[u.id] = [{ from: 'them', text: u.chat.greetings[0], time: 'さっき' }]; });
+    return init;
+  });
+  const [chatInput, setChatInput] = _react.useState.call(void 0, '');
+  const [commentInput, setCommentInput] = _react.useState.call(void 0, '');
+  const [commentModal, setCommentModal] = _react.useState.call(void 0, null);
+  const [toast, setToast] = _react.useState.call(void 0, '');
+  const [typing, setTyping] = _react.useState.call(void 0, false);
+  const [searchQ, setSearchQ] = _react.useState.call(void 0, '');
+  const chatEnd = _react.useRef.call(void 0, null);
+
+  const navigate = _react.useCallback.call(void 0, (v, user) => {
+    setViewStack(prev => [...prev, { view, selUser }]);
+    setView(v);
+    if (user) setSelUser(user);
+  }, [view, selUser]);
+
+  const goBack = _react.useCallback.call(void 0, () => {
+    if (viewStack.length > 0) {
+      const prev = viewStack[viewStack.length - 1];
+      setViewStack(s => s.slice(0, -1));
+      setView(prev.view);
+      setSelUser(prev.selUser);
+    } else {
+      setView('feed');
+      setSelUser(null);
+    }
+  }, [viewStack]);
+
+  const showToast = _react.useCallback.call(void 0, (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2000);
+  }, []);
+
+  const toggleFollow = _react.useCallback.call(void 0, (uid) => {
+    setFollowSet(prev => {
+      const n = new Set(prev);
+      if (n.has(uid)) { n.delete(uid); showToast('フォロー解除しました'); }
+      else { n.add(uid); showToast('フォローしました！'); }
+      return n;
+    });
+  }, [showToast]);
+
+  const toggleLike = _react.useCallback.call(void 0, (pid) => {
+    setLikeSet(prev => { const n = new Set(prev); if (n.has(pid)) n.delete(pid); else n.add(pid); return n; });
+  }, []);
+
+  const addComment = _react.useCallback.call(void 0, (pid) => {
+    if (!commentInput.trim()) return;
+    setCommentsMap(prev => ({
+      ...prev,
+      [pid]: [...(prev[pid] || []), { a: 'my_self', t: commentInput.trim() }]
+    }));
+    setCommentInput('');
+  }, [commentInput]);
+
+  const doShare = _react.useCallback.call(void 0, (pid) => {
+    setSharesExtra(prev => ({ ...prev, [pid]: (prev[pid] || 0) + 1 }));
+    showToast('共有しました！');
+  }, [showToast]);
+
+  const sendChat = _react.useCallback.call(void 0, (uid) => {
+    if (!chatInput.trim()) return;
+    const msg = chatInput.trim();
+    setChatMsgs(prev => ({
+      ...prev,
+      [uid]: [...(prev[uid] || []), { from: 'me', text: msg, time: '今' }]
+    }));
+    setChatInput('');
+    setTyping(true);
+    const user = USERS.find(u => u.id === uid);
+    const delay = 800 + Math.random() * 1200;
+    setTimeout(() => {
+      const resp = getResponse(user, msg);
+      setChatMsgs(prev => ({
+        ...prev,
+        [uid]: [...(prev[uid] || []), { from: 'them', text: resp, time: '今' }]
+      }));
+      setTyping(false);
+    }, delay);
+  }, [chatInput]);
+
+  _react.useEffect.call(void 0, () => {
+    if (chatEnd.current) chatEnd.current.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMsgs, typing]);
+
+  const allPosts = _react.useMemo.call(void 0, () => {
+    const p = [];
+    USERS.forEach(u => u.posts.forEach(post => p.push({ ...post, user: u })));
+    p.sort((a, b) => a.ts - b.ts);
+    return p;
+  }, []);
+
+  const getCommentAuthor = (aid) => {
+    if (aid === 'my_self') return MY_PROFILE;
+    return USERS.find(u => u.id === aid);
+  };
+
+  const filteredUsers = _react.useMemo.call(void 0, () => {
+    if (!searchQ.trim()) return USERS;
+    const q = searchQ.toLowerCase();
+    return USERS.filter(u => u.name.toLowerCase().includes(q) || u.id.toLowerCase().includes(q) || u.bio.toLowerCase().includes(q));
+  }, [searchQ]);
+
+  const neonGlow = (color) => ({ boxShadow: `0 0 15px ${color}33, 0 0 30px ${color}11` });
+  const textGlow = (color) => ({ textShadow: `0 0 10px ${color}88` });
+
+  const PostCard = ({ post, showUser = true }) => {
+    const u = post.user;
+    const liked = likeSet.has(post.id);
+    const cmts = commentsMap[post.id] || [];
+    const extraShares = sharesExtra[post.id] || 0;
+    return (
+      _react2.default.createElement(_framermotion.motion.div, {
+        initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 },
+        className: "border border-gray-800 rounded-xl p-4 mb-3"    ,
+        style: { background: 'rgba(15,15,25,0.8)', ...neonGlow('#1a1a2e') },}
+
+        , showUser && (
+          _react2.default.createElement('div', { className: "flex items-center gap-3 mb-3 cursor-pointer"    , onClick: () => navigate('profile', u),}
+            , _react2.default.createElement('div', { className: "w-10 h-10 rounded-full flex items-center justify-center text-lg"      , style: { background: `${u.color}22`, border: `2px solid ${u.color}66` },}
+              , u.emoji
+            )
+            , _react2.default.createElement('div', { className: "flex-1 min-w-0" ,}
+              , _react2.default.createElement('div', { className: "flex items-center gap-2"  ,}
+                , _react2.default.createElement('span', { className: "font-bold text-white text-sm"  ,}, u.name)
+                , _react2.default.createElement('span', { className: "text-xs", style: { color: u.color },}, u.gender)
+              )
+              , _react2.default.createElement('span', { className: "text-xs text-gray-500" ,}, "@", u.id)
+            )
+            , _react2.default.createElement('span', { className: "text-xs text-gray-600" ,}, post.time)
+          )
+        )
+        , !showUser && _react2.default.createElement('div', { className: "text-xs text-gray-600 mb-2"  ,}, post.time)
+        , _react2.default.createElement('p', { className: "text-gray-200 text-sm leading-relaxed mb-3"   ,}, post.text)
+        , _react2.default.createElement('div', { className: "flex items-center gap-1 pt-2 border-t border-gray-800"     ,}
+          , _react2.default.createElement(_framermotion.motion.button, { whileTap: { scale: 1.3 }, onClick: () => toggleLike(post.id),
+            className: "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs hover:bg-gray-800 transition-colors"        ,}
+            , _react2.default.createElement(_lucidereact.Heart, { size: 15, className: liked ? 'fill-red-500 text-red-500' : 'text-gray-500',} )
+            , _react2.default.createElement('span', { className: liked ? 'text-red-400' : 'text-gray-500',}, post.likes + (liked ? 1 : 0))
+          )
+          , _react2.default.createElement(_framermotion.motion.button, { whileTap: { scale: 1.1 }, onClick: () => { setCommentModal(post); setCommentInput(''); },
+            className: "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs hover:bg-gray-800 transition-colors text-gray-500"         ,}
+            , _react2.default.createElement(_lucidereact.MessageCircle, { size: 15,} ), " " , _react2.default.createElement('span', null, cmts.length + post.comments)
+          )
+          , _react2.default.createElement(_framermotion.motion.button, { whileTap: { scale: 1.1 }, onClick: () => doShare(post.id),
+            className: "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs hover:bg-gray-800 transition-colors text-gray-500"         ,}
+            , _react2.default.createElement(_lucidereact.Share2, { size: 15,} ), " " , _react2.default.createElement('span', null, post.shares + extraShares)
+          )
+        )
+      )
+    );
+  };
+
+  const UserCard = ({ u }) => (
+    _react2.default.createElement(_framermotion.motion.div, {
+      initial: { opacity: 0, scale: 0.95 }, animate: { opacity: 1, scale: 1 },
+      className: "border border-gray-800 rounded-xl p-4 cursor-pointer hover:border-gray-700 transition-colors"      ,
+      style: { background: 'rgba(15,15,25,0.8)' },
+      onClick: () => navigate('profile', u),}
+
+      , _react2.default.createElement('div', { className: "flex items-center gap-3"  ,}
+        , _react2.default.createElement('div', { className: "w-12 h-12 rounded-full flex items-center justify-center text-xl"      , style: { background: `${u.color}22`, border: `2px solid ${u.color}55` },}
+          , u.emoji
+        )
+        , _react2.default.createElement('div', { className: "flex-1 min-w-0" ,}
+          , _react2.default.createElement('div', { className: "flex items-center gap-2"  ,}
+            , _react2.default.createElement('span', { className: "font-bold text-white" ,}, u.name)
+            , _react2.default.createElement('span', { className: "text-xs px-1.5 py-0.5 rounded"   , style: { background: `${u.color}22`, color: u.color },}, u.gender, " " , u.age, "歳")
+          )
+          , _react2.default.createElement('div', { className: "text-xs text-gray-500" ,}, "@", u.id)
+          , _react2.default.createElement('div', { className: "text-xs text-gray-400 mt-1 truncate"   ,}, u.bio)
+        )
+        , _react2.default.createElement(_lucidereact.ChevronRight, { size: 16, className: "text-gray-600 flex-shrink-0" ,} )
+      )
+    )
+  );
+
+  const Header = () => {
+    const isSubView = view === 'profile' || view === 'chat';
+    const titles = { feed: 'ホーム', discover: '探索', chatList: 'チャット', myProfile: 'プロフィール', profile: _optionalChain([selUser, 'optionalAccess', _ => _.name]), chat: _optionalChain([selUser, 'optionalAccess', _2 => _2.name]) };
+    return (
+      _react2.default.createElement('div', { className: "sticky top-0 z-30 border-b border-gray-800"    , style: { background: 'rgba(5,5,15,0.95)', backdropFilter: 'blur(10px)' },}
+        , _react2.default.createElement('div', { className: "flex items-center h-14 px-4"   ,}
+          , isSubView ? (
+            _react2.default.createElement('button', { onClick: goBack, className: "mr-3 p-1 rounded-lg hover:bg-gray-800 text-green-400"    ,}
+              , _react2.default.createElement(_lucidereact.ArrowLeft, { size: 20,} )
+            )
+          ) : (
+            _react2.default.createElement('div', { className: "flex items-center gap-2 mr-3"   ,}
+              , _react2.default.createElement('div', { className: "w-2 h-2 rounded-full bg-green-400 animate-pulse"    ,} )
+              , _react2.default.createElement(_lucidereact.Shield, { size: 16, className: "text-green-400",} )
+            )
+          )
+          , _react2.default.createElement('div', { className: "flex-1 min-w-0" ,}
+            , !isSubView && view === 'feed' ? (
+              _react2.default.createElement('div', { className: "flex items-center gap-2"  ,}
+                , _react2.default.createElement('span', { className: "font-mono font-bold text-green-400"  , style: textGlow('#00ff88'),}, "秘密基地")
+                , _react2.default.createElement('span', { className: "text-xs font-mono text-green-600"  ,}, "v1.0")
+              )
+            ) : (
+              _react2.default.createElement('span', { className: "font-bold text-white" ,}, titles[view])
+            )
+          )
+          , _react2.default.createElement('div', { className: "flex items-center gap-2 text-green-600"   ,}
+            , _react2.default.createElement(_lucidereact.Wifi, { size: 14,} )
+            , _react2.default.createElement(_lucidereact.Radio, { size: 14, className: "animate-pulse",} )
+          )
+        )
+      )
+    );
+  };
+
+  const BottomNav = () => {
+    if (view === 'chat') return null;
+    const tabs = [
+      { key: 'feed', icon: _lucidereact.Home, label: 'ホーム' },
+      { key: 'discover', icon: _lucidereact.Compass, label: '探索' },
+      { key: 'chatList', icon: _lucidereact.MessageSquare, label: 'チャット' },
+      { key: 'myProfile', icon: _lucidereact.User, label: 'プロフ' },
+    ];
+    const active = ['profile'].includes(view) ? 'discover' : view === 'chat' ? 'chatList' : view;
+    return (
+      _react2.default.createElement('div', { className: "sticky bottom-0 z-30 border-t border-gray-800"    , style: { background: 'rgba(5,5,15,0.95)', backdropFilter: 'blur(10px)' },}
+        , _react2.default.createElement('div', { className: "flex h-14" ,}
+          , tabs.map(tab => {
+            const Icon = tab.icon;
+            const isActive = active === tab.key;
+            return (
+              _react2.default.createElement('button', { key: tab.key, onClick: () => { setView(tab.key); setViewStack([]); setSelUser(null); },
+                className: "flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"      ,}
+
+                , _react2.default.createElement(Icon, { size: 20, className: isActive ? 'text-green-400' : 'text-gray-600',} )
+                , _react2.default.createElement('span', { className: `text-xs ${isActive ? 'text-green-400' : 'text-gray-600'}`,}, tab.label)
+              )
+            );
+          })
+        )
+      )
+    );
+  };
+
+  const FeedView = () => (
+    _react2.default.createElement('div', { className: "p-4 space-y-1" ,}
+      , _react2.default.createElement('div', { className: "flex items-center gap-2 mb-4 overflow-x-auto pb-2"     , style: { scrollbarWidth: 'none' },}
+        , USERS.map(u => (
+          _react2.default.createElement(_framermotion.motion.button, { key: u.id, whileTap: { scale: 0.9 }, onClick: () => navigate('profile', u),
+            className: "flex flex-col items-center gap-1 flex-shrink-0 px-1"     ,}
+            , _react2.default.createElement('div', { className: "w-12 h-12 rounded-full flex items-center justify-center text-lg relative"       ,
+              style: { background: `${u.color}15`, border: `2px solid ${u.color}55` },}
+              , u.emoji
+              , _react2.default.createElement('div', { className: "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2"       , style: { borderColor: '#05050f' },} )
+            )
+            , _react2.default.createElement('span', { className: "text-xs text-gray-400 w-12 text-center truncate"    ,}, u.name)
+          )
+        ))
+      )
+      , allPosts.map(post => _react2.default.createElement(PostCard, { key: post.id, post: post,} ))
+    )
+  );
+
+  const DiscoverView = () => (
+    _react2.default.createElement('div', { className: "p-4",}
+      , _react2.default.createElement('div', { className: "relative mb-4" ,}
+        , _react2.default.createElement(_lucidereact.Search, { size: 16, className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"    ,} )
+        , _react2.default.createElement('input', { value: searchQ, onChange: e => setSearchQ(e.target.value), placeholder: "メンバーを検索...",
+          className: "w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-green-800"            ,} )
+      )
+      , _react2.default.createElement('div', { className: "text-xs text-gray-500 mb-3 font-mono"   ,}, "MEMBERS — "  , filteredUsers.length, "人がオンライン")
+      , _react2.default.createElement('div', { className: "space-y-3",}
+        , filteredUsers.map(u => _react2.default.createElement(UserCard, { key: u.id, u: u,} ))
+      )
+    )
+  );
+
+  const ProfileView = () => {
+    if (!selUser) return null;
+    const u = selUser;
+    const isFollowing = followSet.has(u.id);
+    const fCount = u.followers + (isFollowing ? 1 : 0);
+    return (
+      _react2.default.createElement('div', null
+        , _react2.default.createElement('div', { className: "relative",}
+          , _react2.default.createElement('div', { className: "h-28 w-full" , style: { background: `linear-gradient(135deg, ${u.color}33, ${u.color}08)` },} )
+          , _react2.default.createElement('div', { className: "px-4 -mt-10" ,}
+            , _react2.default.createElement('div', { className: "w-20 h-20 rounded-full flex items-center justify-center text-3xl border-4"       ,
+              style: { background: `${u.color}22`, borderColor: '#05050f', boxShadow: `0 0 20px ${u.color}44` },}
+              , u.emoji
+            )
+          )
+        )
+        , _react2.default.createElement('div', { className: "px-4 mt-3" ,}
+          , _react2.default.createElement('div', { className: "flex items-start justify-between"  ,}
+            , _react2.default.createElement('div', null
+              , _react2.default.createElement('h2', { className: "text-xl font-bold text-white flex items-center gap-2"     ,}
+                , u.name, " " , _react2.default.createElement('span', { className: "text-sm font-normal" , style: { color: u.color },}, u.gender, " " , u.age, "歳")
+              )
+              , _react2.default.createElement('div', { className: "text-sm text-gray-500" ,}, "@", u.id)
+            )
+            , _react2.default.createElement('div', { className: "flex gap-2" ,}
+              , _react2.default.createElement(_framermotion.motion.button, { whileTap: { scale: 0.95 },
+                onClick: () => { navigate('chat', u); },
+                className: "px-4 py-2 rounded-lg border border-gray-700 text-sm text-white hover:bg-gray-800 transition-colors"        ,}
+                , _react2.default.createElement(_lucidereact.MessageSquare, { size: 16,} )
+              )
+              , _react2.default.createElement(_framermotion.motion.button, { whileTap: { scale: 0.95 }, onClick: () => toggleFollow(u.id),
+                className: "px-4 py-2 rounded-lg text-sm font-bold transition-colors"     ,
+                style: isFollowing ? { background: 'transparent', border: `1px solid ${u.color}66`, color: u.color }
+                  : { background: u.color, color: '#000' },}
+                , isFollowing ? _react2.default.createElement(_lucidereact.UserCheck, { size: 16,}) : _react2.default.createElement(_lucidereact.UserPlus, { size: 16,})
+              )
+            )
+          )
+          , _react2.default.createElement('p', { className: "text-sm text-gray-300 mt-3"  ,}, u.bio)
+          , _react2.default.createElement('div', { className: "flex gap-2 mt-2 flex-wrap"   ,}
+            , _react2.default.createElement('span', { className: "text-xs px-2 py-1 rounded-full border border-gray-800 text-gray-400"      ,}, "🧠 " , u.personality)
+            , _react2.default.createElement('span', { className: "text-xs px-2 py-1 rounded-full border border-gray-800 text-gray-400"      ,}, "💬 " , u.style)
+          )
+          , _react2.default.createElement('div', { className: "flex gap-6 mt-4 pb-4 border-b border-gray-800"     ,}
+            , _react2.default.createElement('div', null, _react2.default.createElement('span', { className: "font-bold text-white" ,}, fCount.toLocaleString()), " " , _react2.default.createElement('span', { className: "text-xs text-gray-500" ,}, "フォロワー"))
+            , _react2.default.createElement('div', null, _react2.default.createElement('span', { className: "font-bold text-white" ,}, u.following), " " , _react2.default.createElement('span', { className: "text-xs text-gray-500" ,}, "フォロー中"))
+            , _react2.default.createElement('div', null, _react2.default.createElement('span', { className: "font-bold text-white" ,}, u.posts.length), " " , _react2.default.createElement('span', { className: "text-xs text-gray-500" ,}, "投稿"))
+          )
+          , _react2.default.createElement('div', { className: "mt-4 pb-4" ,}
+            , _react2.default.createElement('div', { className: "text-xs text-gray-500 font-mono mb-3"   ,}, "POSTS")
+            , u.posts.map(p => _react2.default.createElement(PostCard, { key: p.id, post: { ...p, user: u }, showUser: false,} ))
+          )
+        )
+      )
+    );
+  };
+
+  const ChatListView = () => (
+    _react2.default.createElement('div', { className: "p-4",}
+      , _react2.default.createElement('div', { className: "text-xs text-gray-500 font-mono mb-3"   ,}, "DIRECT MESSAGES" )
+      , _react2.default.createElement('div', { className: "space-y-2",}
+        , USERS.map(u => {
+          const msgs = chatMsgs[u.id] || [];
+          const last = msgs[msgs.length - 1];
+          return (
+            _react2.default.createElement(_framermotion.motion.button, { key: u.id, whileTap: { scale: 0.98 },
+              onClick: () => navigate('chat', u),
+              className: "w-full flex items-center gap-3 p-3 rounded-xl border border-gray-800 hover:border-gray-700 transition-colors text-left"          ,
+              style: { background: 'rgba(15,15,25,0.8)' },}
+              , _react2.default.createElement('div', { className: "w-11 h-11 rounded-full flex items-center justify-center text-lg flex-shrink-0 relative"        ,
+                style: { background: `${u.color}22`, border: `2px solid ${u.color}55` },}
+                , u.emoji
+                , _react2.default.createElement('div', { className: "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border-2"       , style: { borderColor: '#0f0f19' },} )
+              )
+              , _react2.default.createElement('div', { className: "flex-1 min-w-0" ,}
+                , _react2.default.createElement('div', { className: "flex items-center justify-between"  ,}
+                  , _react2.default.createElement('span', { className: "font-bold text-white text-sm"  ,}, u.name)
+                  , _react2.default.createElement('span', { className: "text-xs text-gray-600" ,}, _optionalChain([last, 'optionalAccess', _3 => _3.time]))
+                )
+                , _react2.default.createElement('div', { className: "text-xs text-gray-500 truncate mt-0.5"   ,}
+                  , _optionalChain([last, 'optionalAccess', _4 => _4.from]) === 'me' ? 'あなた: ' : '', _optionalChain([last, 'optionalAccess', _5 => _5.text])
+                )
+              )
+              , _react2.default.createElement(_lucidereact.ChevronRight, { size: 14, className: "text-gray-700 flex-shrink-0" ,} )
+            )
+          );
+        })
+      )
+    )
+  );
+
+  const ChatView = () => {
+    if (!selUser) return null;
+    const u = selUser;
+    const msgs = chatMsgs[u.id] || [];
+    return (
+      _react2.default.createElement('div', { className: "flex flex-col" , style: { height: 'calc(100vh - 3.5rem)' },}
+        , _react2.default.createElement('div', { className: "flex items-center gap-3 px-4 py-3 border-b border-gray-800"      ,}
+          , _react2.default.createElement('div', { className: "w-9 h-9 rounded-full flex items-center justify-center text-base"      ,
+            style: { background: `${u.color}22`, border: `2px solid ${u.color}55` },}, u.emoji)
+          , _react2.default.createElement('div', null
+            , _react2.default.createElement('div', { className: "text-sm font-bold text-white"  ,}, u.name)
+            , _react2.default.createElement('div', { className: "text-xs text-green-400 flex items-center gap-1"    ,}
+              , _react2.default.createElement('div', { className: "w-1.5 h-1.5 rounded-full bg-green-400"   ,} ), " オンライン"
+            )
+          )
+        )
+        , _react2.default.createElement('div', { className: "flex-1 overflow-y-auto p-4 space-y-3"   ,}
+          , msgs.map((m, i) => (
+            _react2.default.createElement(_framermotion.motion.div, { key: i, initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 },
+              className: `flex ${m.from === 'me' ? 'justify-end' : 'justify-start'}`,}
+              , m.from !== 'me' && (
+                _react2.default.createElement('div', { className: "w-7 h-7 rounded-full flex items-center justify-center text-xs mr-2 mt-1 flex-shrink-0"         ,
+                  style: { background: `${u.color}22`, border: `1px solid ${u.color}44` },}, u.emoji)
+              )
+              , _react2.default.createElement('div', { className: `max-w-xs px-3.5 py-2.5 rounded-2xl text-sm ${
+                m.from === 'me'
+                  ? 'bg-green-900 text-green-100 rounded-br-md'
+                  : 'bg-gray-800 text-gray-200 rounded-bl-md'
+              }`,}
+                , m.text
+              )
+            )
+          ))
+          , typing && (
+            _react2.default.createElement(_framermotion.motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, className: "flex items-center gap-2"  ,}
+              , _react2.default.createElement('div', { className: "w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0"       ,
+                style: { background: `${u.color}22`, border: `1px solid ${u.color}44` },}, u.emoji)
+              , _react2.default.createElement('div', { className: "bg-gray-800 rounded-2xl rounded-bl-md px-4 py-2.5 flex items-center gap-1"       ,}
+                , _react2.default.createElement('div', { className: "w-1.5 h-1.5 rounded-full bg-gray-500 animate-bounce"    , style: { animationDelay: '0ms' },} )
+                , _react2.default.createElement('div', { className: "w-1.5 h-1.5 rounded-full bg-gray-500 animate-bounce"    , style: { animationDelay: '150ms' },} )
+                , _react2.default.createElement('div', { className: "w-1.5 h-1.5 rounded-full bg-gray-500 animate-bounce"    , style: { animationDelay: '300ms' },} )
+              )
+            )
+          )
+          , _react2.default.createElement('div', { ref: chatEnd,} )
+        )
+        , _react2.default.createElement('div', { className: "p-3 border-t border-gray-800"  , style: { background: 'rgba(5,5,15,0.95)' },}
+          , _react2.default.createElement('div', { className: "flex items-center gap-2"  ,}
+            , _react2.default.createElement('input', { value: chatInput, onChange: e => setChatInput(e.target.value),
+              onKeyDown: e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(u.id); }},
+              placeholder: `${u.name}にメッセージ...`,
+              className: "flex-1 px-4 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-green-800"           ,} )
+            , _react2.default.createElement(_framermotion.motion.button, { whileTap: { scale: 0.9 }, onClick: () => sendChat(u.id),
+              className: "w-10 h-10 rounded-xl flex items-center justify-center transition-colors"      ,
+              style: { background: chatInput.trim() ? '#00ff8833' : 'transparent' },}
+              , _react2.default.createElement(_lucidereact.Send, { size: 18, className: chatInput.trim() ? 'text-green-400' : 'text-gray-700',} )
+            )
+          )
+        )
+      )
+    );
+  };
+
+  const MyProfileView = () => {
+    const followedUsers = USERS.filter(u => followSet.has(u.id));
+    return (
+      _react2.default.createElement('div', { className: "p-4",}
+        , _react2.default.createElement('div', { className: "flex flex-col items-center py-6"   ,}
+          , _react2.default.createElement('div', { className: "w-20 h-20 rounded-full flex items-center justify-center text-3xl border-2 border-green-800"        ,
+            style: { background: 'rgba(0,255,136,0.08)', boxShadow: '0 0 20px rgba(0,255,136,0.2)' },}
+            , MY_PROFILE.emoji
+          )
+          , _react2.default.createElement('h2', { className: "text-xl font-bold text-white mt-3"   ,}, MY_PROFILE.name)
+          , _react2.default.createElement('div', { className: "text-sm text-gray-500" ,}, "@", MY_PROFILE.id)
+          , _react2.default.createElement('div', { className: "flex gap-6 mt-4"  ,}
+            , _react2.default.createElement('div', { className: "text-center",}, _react2.default.createElement('div', { className: "font-bold text-white text-lg"  ,}, followSet.size), _react2.default.createElement('div', { className: "text-xs text-gray-500" ,}, "フォロー中"))
+            , _react2.default.createElement('div', { className: "text-center",}, _react2.default.createElement('div', { className: "font-bold text-white text-lg"  ,}, likeSet.size), _react2.default.createElement('div', { className: "text-xs text-gray-500" ,}, "いいね"))
+          )
+        )
+        , _react2.default.createElement('div', { className: "border-t border-gray-800 pt-4"  ,}
+          , _react2.default.createElement('div', { className: "text-xs text-gray-500 font-mono mb-3"   ,}, "FOLLOWING — "  , followedUsers.length, "人")
+          , followedUsers.length === 0 ? (
+            _react2.default.createElement('div', { className: "text-center py-8 text-gray-600 text-sm"   ,}, "まだ誰もフォローしていません。"
+              , _react2.default.createElement('br', null), "探索ページからメンバーを見つけよう！"
+            )
+          ) : (
+            _react2.default.createElement('div', { className: "space-y-2",}
+              , followedUsers.map(u => (
+                _react2.default.createElement('div', { key: u.id, className: "flex items-center gap-3 p-3 rounded-xl border border-gray-800"      , style: { background: 'rgba(15,15,25,0.8)' },}
+                  , _react2.default.createElement('div', { className: "w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"      ,
+                    onClick: () => navigate('profile', u),
+                    style: { background: `${u.color}22`, border: `2px solid ${u.color}55` },}, u.emoji)
+                  , _react2.default.createElement('div', { className: "flex-1 min-w-0 cursor-pointer"  , onClick: () => navigate('profile', u),}
+                    , _react2.default.createElement('div', { className: "font-bold text-white text-sm"  ,}, u.name)
+                    , _react2.default.createElement('div', { className: "text-xs text-gray-500" ,}, "@", u.id)
+                  )
+                  , _react2.default.createElement('button', { onClick: () => toggleFollow(u.id), className: "text-xs px-3 py-1.5 rounded-lg border transition-colors"     ,
+                    style: { borderColor: `${u.color}44`, color: u.color },}, "フォロー中"
+
+                  )
+                )
+              ))
+            )
+          )
+        )
+        , _react2.default.createElement('div', { className: "mt-6 border-t border-gray-800 pt-4"   ,}
+          , _react2.default.createElement('div', { className: "text-xs text-gray-500 font-mono mb-3"   ,}, "APP INFO" )
+          , _react2.default.createElement('div', { className: "space-y-2 text-sm text-gray-500"  ,}
+            , _react2.default.createElement('div', { className: "flex justify-between p-2"  ,}, _react2.default.createElement('span', null, "バージョン"), _react2.default.createElement('span', { className: "text-green-400 font-mono" ,}, "1.0.0"))
+            , _react2.default.createElement('div', { className: "flex justify-between p-2"  ,}, _react2.default.createElement('span', null, "メンバー数"), _react2.default.createElement('span', { className: "text-green-400 font-mono" ,}, "10"))
+            , _react2.default.createElement('div', { className: "flex justify-between p-2"  ,}, _react2.default.createElement('span', null, "ステータス"), _react2.default.createElement('span', { className: "text-green-400 font-mono flex items-center gap-1"    ,}, _react2.default.createElement('div', { className: "w-1.5 h-1.5 rounded-full bg-green-400"   ,}), "ACTIVE"))
+          )
+        )
+      )
+    );
+  };
+
+  const CommentModalView = () => {
+    if (!commentModal) return null;
+    const post = commentModal;
+    const cmts = commentsMap[post.id] || [];
+    return (
+      _react2.default.createElement(_framermotion.motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 },
+        className: "fixed inset-0 z-50 flex items-end justify-center"     , onClick: () => setCommentModal(null),}
+        , _react2.default.createElement('div', { className: "absolute inset-0 bg-black bg-opacity-60"   ,} )
+        , _react2.default.createElement(_framermotion.motion.div, { initial: { y: 300 }, animate: { y: 0 }, exit: { y: 300 },
+          className: "relative w-full max-w-lg rounded-t-2xl border-t border-gray-700 overflow-hidden"      ,
+          style: { background: '#0f0f19', maxHeight: '70vh' },
+          onClick: e => e.stopPropagation(),}
+          , _react2.default.createElement('div', { className: "flex items-center justify-between px-4 py-3 border-b border-gray-800"      ,}
+            , _react2.default.createElement('span', { className: "font-bold text-white text-sm"  ,}, "コメント")
+            , _react2.default.createElement('button', { onClick: () => setCommentModal(null), className: "text-gray-500 hover:text-white" ,}, _react2.default.createElement(_lucidereact.X, { size: 18,}))
+          )
+          , _react2.default.createElement('div', { className: "overflow-y-auto p-4 space-y-3"  , style: { maxHeight: '45vh' },}
+            , cmts.length === 0 && _react2.default.createElement('div', { className: "text-center text-gray-600 text-sm py-4"   ,}, "まだコメントはありません")
+            , cmts.map((c, i) => {
+              const author = getCommentAuthor(c.a);
+              return (
+                _react2.default.createElement('div', { key: i, className: "flex items-start gap-2.5"  ,}
+                  , _react2.default.createElement('div', { className: "w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5"        ,
+                    style: { background: `${_optionalChain([author, 'optionalAccess', _6 => _6.color]) || '#666'}22`, border: `1px solid ${_optionalChain([author, 'optionalAccess', _7 => _7.color]) || '#666'}44` },}
+                    , _optionalChain([author, 'optionalAccess', _8 => _8.emoji]) || '👤'
+                  )
+                  , _react2.default.createElement('div', null
+                    , _react2.default.createElement('span', { className: "text-xs font-bold" , style: { color: _optionalChain([author, 'optionalAccess', _9 => _9.color]) || '#999' },}, _optionalChain([author, 'optionalAccess', _10 => _10.name]) || '不明')
+                    , _react2.default.createElement('p', { className: "text-sm text-gray-300 mt-0.5"  ,}, c.t)
+                  )
+                )
+              );
+            })
+          )
+          , _react2.default.createElement('div', { className: "p-3 border-t border-gray-800 flex items-center gap-2"     ,}
+            , _react2.default.createElement('input', { value: commentInput, onChange: e => setCommentInput(e.target.value),
+              onKeyDown: e => { if (e.key === 'Enter') { addComment(post.id); }},
+              placeholder: "コメントを入力...", className: "flex-1 px-3 py-2 rounded-lg bg-gray-900 border border-gray-800 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-green-800"           ,} )
+            , _react2.default.createElement(_framermotion.motion.button, { whileTap: { scale: 0.9 }, onClick: () => addComment(post.id),
+              className: "p-2 rounded-lg" , style: { background: commentInput.trim() ? '#00ff8822' : 'transparent' },}
+              , _react2.default.createElement(_lucidereact.Send, { size: 16, className: commentInput.trim() ? 'text-green-400' : 'text-gray-700',} )
+            )
+          )
+        )
+      )
+    );
+  };
+
+  return (
+    _react2.default.createElement('div', { className: "min-h-screen flex justify-center"  , style: { background: '#05050f' },}
+      , _react2.default.createElement('div', { className: "w-full max-w-lg flex flex-col min-h-screen relative"     , style: { background: '#0a0a14' },}
+        , view !== 'chat' && _react2.default.createElement(Header, null )
+        , view === 'chat' && (
+          _react2.default.createElement('div', { className: "sticky top-0 z-30 border-b border-gray-800 flex items-center h-14 px-4"        , style: { background: 'rgba(5,5,15,0.95)' },}
+            , _react2.default.createElement('button', { onClick: goBack, className: "mr-3 p-1 rounded-lg hover:bg-gray-800 text-green-400"    ,}, _react2.default.createElement(_lucidereact.ArrowLeft, { size: 20,} ))
+            , selUser && (
+              _react2.default.createElement('div', { className: "flex items-center gap-2 flex-1 cursor-pointer"    , onClick: () => navigate('profile', selUser),}
+                , _react2.default.createElement('div', { className: "w-8 h-8 rounded-full flex items-center justify-center text-sm"      ,
+                  style: { background: `${selUser.color}22`, border: `2px solid ${selUser.color}55` },}, selUser.emoji)
+                , _react2.default.createElement('div', null
+                  , _react2.default.createElement('div', { className: "text-sm font-bold text-white"  ,}, selUser.name)
+                  , _react2.default.createElement('div', { className: "text-xs text-green-400" ,}, "オンライン")
+                )
+              )
+            )
+          )
+        )
+        , _react2.default.createElement('div', { className: `flex-1 overflow-y-auto ${view === 'chat' ? '' : 'pb-16'}`, style: { scrollbarWidth: 'thin', scrollbarColor: '#1a1a2e transparent' },}
+          , _react2.default.createElement(_framermotion.AnimatePresence, { mode: "wait",}
+            , _react2.default.createElement(_framermotion.motion.div, { key: view + (_optionalChain([selUser, 'optionalAccess', _11 => _11.id]) || ''), initial: { opacity: 0, x: 20 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -20 }, transition: { duration: 0.2 },}
+              , view === 'feed' && _react2.default.createElement(FeedView, null )
+              , view === 'discover' && _react2.default.createElement(DiscoverView, null )
+              , view === 'profile' && _react2.default.createElement(ProfileView, null )
+              , view === 'chatList' && _react2.default.createElement(ChatListView, null )
+              , view === 'chat' && _react2.default.createElement(ChatView, null )
+              , view === 'myProfile' && _react2.default.createElement(MyProfileView, null )
+            )
+          )
+        )
+        , _react2.default.createElement(BottomNav, null )
+        , _react2.default.createElement(_framermotion.AnimatePresence, null, commentModal && _react2.default.createElement(CommentModalView, null ))
+        , _react2.default.createElement(_framermotion.AnimatePresence, null
+          , toast && (
+            _react2.default.createElement(_framermotion.motion.div, { initial: { opacity: 0, y: 50 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: 50 },
+              className: "fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg text-sm font-bold"         ,
+              style: { background: '#00ff8822', color: '#00ff88', border: '1px solid #00ff8844' },}
+              , toast
+            )
+          )
+        )
+      )
+    )
+  );
+} exports.default = SecretBase;
+</script>
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+  <body>
+  
+
+<div id="preview-app"></div></body></html>

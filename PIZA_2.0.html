@@ -1,0 +1,4915 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PIZA経営シミュレーション</title>
+<style>
+/* ===== RESET & BASE ===== */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',sans-serif;background:#1a1a2e;color:#fff;overflow:hidden;user-select:none;}
+/* ===== MAIN LAYOUT ===== */
+#game-container{width:100vw;height:100vh;position:relative;overflow:hidden;}
+#top-bar{position:absolute;top:0;left:0;right:0;height:54px;background:linear-gradient(90deg,#16213e,#0f3460);display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:100;border-bottom:2px solid #e94560;}
+#top-bar .stat{display:flex;align-items:center;gap:6px;font-size:13px;background:rgba(0,0,0,.3);padding:4px 12px;border-radius:12px;}
+#top-bar .stat .label{color:#aaa;font-size:11px;}
+#top-bar .stat .val{color:#fff;font-weight:700;}
+.money-val{color:#4ecca3!important;}
+#day-timer{color:#e94560;font-weight:700;font-size:15px;}
+#main-view{position:absolute;top:54px;bottom:0;left:0;right:0;display:flex;}
+/* Shop View */
+#shop-view{flex:1;position:relative;background:linear-gradient(180deg,#2a1a0a 0%,#3d2b1f 40%,#4a3728 100%);overflow:hidden;}
+#shop-canvas{width:100%;height:100%;}
+/* Right Panel */
+#right-panel{width:340px;background:#16213e;border-left:2px solid #0f3460;display:flex;flex-direction:column;overflow:hidden;}
+#panel-tabs{display:flex;background:#0f3460;flex-shrink:0;}
+#panel-tabs .tab{flex:1;padding:10px 4px;text-align:center;font-size:11px;cursor:pointer;border-bottom:3px solid transparent;transition:.2s;}
+#panel-tabs .tab:hover{background:rgba(255,255,255,.05);}
+#panel-tabs .tab.active{border-bottom-color:#e94560;color:#e94560;}
+#panel-content{flex:1;overflow-y:auto;padding:10px;}
+#panel-content::-webkit-scrollbar{width:6px;}
+#panel-content::-webkit-scrollbar-thumb{background:#e94560;border-radius:3px;}
+/* Cards */
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;margin-bottom:10px;transition:.2s;}
+.card:hover{border-color:#e94560;}
+.card h3{font-size:13px;color:#e94560;margin-bottom:6px;}
+.card p{font-size:11px;color:#bbb;line-height:1.5;}
+/* Buttons */
+.btn{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:.2s;display:inline-flex;align-items:center;gap:4px;}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.2);}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:linear-gradient(135deg,#e94560,#c23152);color:#fff;}
+.btn-success{background:linear-gradient(135deg,#4ecca3,#38b28a);color:#fff;}
+.btn-warning{background:linear-gradient(135deg,#f0a500,#d4940a);color:#fff;}
+.btn-info{background:linear-gradient(135deg,#00b4d8,#0096c7);color:#fff;}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-block{width:100%;justify-content:center;padding:8px;}
+/* Progress bars */
+.prog-bar{height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin:4px 0;}
+.prog-fill{height:100%;border-radius:4px;transition:width .3s;}
+.prog-fill.green{background:linear-gradient(90deg,#4ecca3,#38b28a);}
+.prog-fill.red{background:linear-gradient(90deg,#e94560,#c23152);}
+.prog-fill.blue{background:linear-gradient(90deg,#00b4d8,#0096c7);}
+.prog-fill.yellow{background:linear-gradient(90deg,#f0a500,#d4940a);}
+/* Staff list */
+.staff-item{display:flex;align-items:center;gap:8px;padding:8px;background:rgba(0,0,0,.2);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:.2s;}
+.staff-item:hover{background:rgba(233,69,96,.15);}
+.staff-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.staff-info{flex:1;}
+.staff-info .name{font-size:12px;font-weight:600;}
+.staff-info .role{font-size:10px;color:#aaa;}
+.staff-info .boost{font-size:10px;color:#4ecca3;}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s;}
+.modal{background:#1a1a2e;border:2px solid #e94560;border-radius:16px;padding:24px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;animation:slideUp .3s;}
+.modal h2{color:#e94560;margin-bottom:12px;font-size:18px;}
+.modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+/* Phone */
+#phone-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;display:none;align-items:center;justify-content:center;}
+#phone{width:320px;height:600px;background:#111;border-radius:36px;border:3px solid #333;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+#phone-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#111;border-radius:0 0 18px 18px;z-index:5;}
+#phone-screen{position:absolute;top:12px;bottom:12px;left:12px;right:12px;background:#1a1a2e;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;}
+#phone-statusbar{height:32px;background:#0f3460;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:10px;flex-shrink:0;}
+#phone-body{flex:1;overflow-y:auto;padding:12px;}
+#phone-body::-webkit-scrollbar{width:4px;}
+#phone-body::-webkit-scrollbar-thumb{background:#e94560;border-radius:2px;}
+#phone-navbar{height:48px;background:#0f3460;display:flex;align-items:center;justify-content:space-around;flex-shrink:0;}
+.phone-app-icon{width:52px;height:52px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.2s;margin:6px;font-size:9px;gap:2px;}
+.phone-app-icon:hover{transform:scale(1.1);}
+.phone-app-icon .icon{font-size:24px;}
+.phone-nav-btn{background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;padding:8px;}
+.phone-nav-btn:hover{color:#fff;}
+/* message bubbles */
+.msg-bubble{max-width:80%;padding:8px 12px;border-radius:12px;margin-bottom:8px;font-size:12px;line-height:1.4;animation:slideUp .2s;}
+.msg-bubble.sent{background:#e94560;color:#fff;margin-left:auto;border-bottom-right-radius:4px;}
+.msg-bubble.recv{background:#2a2a4a;color:#ddd;margin-right:auto;border-bottom-left-radius:4px;}
+/* Settings */
+#settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:700;display:none;align-items:center;justify-content:center;}
+#settings-panel{background:#1a1a2e;border:2px solid #e94560;border-radius:16px;padding:24px;width:500px;max-height:80vh;overflow-y:auto;}
+/* Notifications */
+#notif-container{position:fixed;top:60px;right:10px;z-index:400;display:flex;flex-direction:column;gap:6px;}
+.notif{padding:10px 16px;border-radius:10px;font-size:12px;animation:slideIn .3s;pointer-events:none;}
+.notif.success{background:#4ecca3;color:#fff;}
+.notif.error{background:#e94560;color:#fff;}
+.notif.info{background:#00b4d8;color:#fff;}
+@keyframes slideIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
+/* Ingredient grid */
+.ingr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.ingr-item{background:rgba(0,0,0,.2);border-radius:8px;padding:8px;font-size:11px;}
+.ingr-item .iname{font-weight:600;margin-bottom:2px;}
+.ingr-item .istock{color:#4ecca3;}
+/* Upgrade items */
+.upgrade-item{display:flex;align-items:center;justify-content:space-between;padding:8px;background:rgba(0,0,0,.2);border-radius:8px;margin-bottom:6px;}
+.upgrade-item .uinfo{flex:1;}
+.upgrade-item .uname{font-size:12px;font-weight:600;}
+.upgrade-item .ulevel{font-size:10px;color:#f0a500;}
+/* Ad plans */
+.ad-plan{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(0,0,0,.2);border-radius:8px;margin-bottom:4px;cursor:pointer;transition:.2s;}
+.ad-plan:hover{background:rgba(233,69,96,.15);}
+.ad-plan.selected{border:1px solid #e94560;}
+/* Furniture */
+.furn-item{display:flex;align-items:center;gap:8px;padding:8px;background:rgba(0,0,0,.2);border-radius:8px;margin-bottom:6px;}
+.furn-preview{width:40px;height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+/* Review */
+.review-item{padding:8px;background:rgba(0,0,0,.2);border-radius:8px;margin-bottom:6px;}
+.review-stars{color:#f0a500;font-size:12px;}
+.review-text{font-size:11px;color:#bbb;margin-top:4px;}
+.review-author{font-size:10px;color:#888;margin-top:2px;}
+/* Loan info */
+.loan-box{background:rgba(233,69,96,.1);border:1px solid #e94560;border-radius:8px;padding:10px;margin-bottom:8px;}
+/* Tooltip */
+.tooltip{position:absolute;background:#0f3460;border:1px solid #e94560;padding:6px 10px;border-radius:6px;font-size:11px;z-index:300;pointer-events:none;}
+/* Bottom action bar */
+#bottom-bar{position:absolute;bottom:0;left:0;right:340px;height:48px;background:rgba(15,52,96,.95);display:flex;align-items:center;justify-content:center;gap:8px;z-index:50;border-top:1px solid rgba(233,69,96,.3);}
+.bb-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;padding:6px 14px;border-radius:8px;font-size:11px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:4px;}
+.bb-btn:hover{background:rgba(233,69,96,.3);border-color:#e94560;}
+/* Animations for people */
+@keyframes walkRight{0%{transform:translateX(-30px)}100%{transform:translateX(0)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes cookAnim{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+@keyframes smokeAnim{0%{opacity:.8;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-20px) scale(1.5)}}
+@keyframes flame{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.2)}}
+/* Delivery animation */
+@keyframes deliveryGo{0%{left:50%}100%{left:110%}}
+/* Customer walk */
+@keyframes custWalkIn{0%{transform:translateX(-100%);opacity:0}100%{transform:translateX(0);opacity:1}}
+@keyframes custWalkOut{0%{transform:translateX(0);opacity:1}100%{transform:translateX(100%);opacity:0}}
+/* Star rating display */
+.stars-display{display:inline-flex;gap:1px;}
+.star{color:#555;font-size:14px;}
+.star.filled{color:#f0a500;}
+.star.half{background:linear-gradient(90deg,#f0a500 50%,#555 50%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+/* Hire modal */
+.hire-candidate{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(0,0,0,.3);border-radius:10px;margin-bottom:8px;border:1px solid rgba(255,255,255,.1);}
+.hire-candidate:hover{border-color:#4ecca3;}
+/* Tab sub-sections */
+.section-title{font-size:12px;color:#e94560;font-weight:700;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(233,69,96,.3);}
+/* input */
+.game-input{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;width:100%;}
+.game-input:focus{outline:none;border-color:#e94560;}
+select.game-input{appearance:none;cursor:pointer;}
+/* Delivery panel */
+.delivery-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,.05);}
+/* Compact layout helpers */
+.flex{display:flex;}.gap4{gap:4px;}.gap8{gap:8px;}.gap12{gap:12px;}
+.aic{align-items:center;}.jcsb{justify-content:space-between;}
+.mt4{margin-top:4px;}.mt8{margin-top:8px;}.mb4{margin-bottom:4px;}.mb8{margin-bottom:8px;}
+.fs10{font-size:10px;}.fs11{font-size:11px;}.fs12{font-size:12px;}.fs13{font-size:13px;}
+.c-gray{color:#999;}.c-green{color:#4ecca3;}.c-red{color:#e94560;}.c-yellow{color:#f0a500;}
+.fw700{font-weight:700;}
+/* day end overlay */
+#day-end-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:800;display:none;align-items:center;justify-content:center;}
+#day-end-panel{background:#1a1a2e;border:2px solid #f0a500;border-radius:16px;padding:30px;width:480px;text-align:center;}
+#day-end-panel h2{color:#f0a500;font-size:22px;margin-bottom:16px;}
+.day-stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+<div id="game-container">
+  <!-- TOP BAR -->
+  <div id="top-bar">
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span style="font-size:18px;font-weight:800;color:#e94560;">🍕 PIZA経営</span>
+      <div class="stat"><span class="label">資金</span><span class="val money-val" id="money-display">¥45,000</span></div>
+      <div class="stat"><span class="label">日</span><span class="val" id="day-display">1日目</span></div>
+      <div class="stat" id="day-timer"><span class="label">残り</span><span class="val" id="timer-display">40:00</span></div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="stat"><span class="label">客数</span><span class="val" id="cust-count">0</span></div>
+      <div class="stat"><span class="label">売上</span><span class="val c-green" id="sales-display">¥0</span></div>
+      <div class="stat"><span class="label">配達</span><span class="val" id="deliv-count">0</span></div>
+      <div class="stat"><span class="label">評判</span><span class="val c-yellow" id="rep-display">★5.0</span></div>
+      <button class="bb-btn" onclick="togglePhone()" title="携帯電話">📱</button>
+      <button class="bb-btn" onclick="toggleSettings()" title="設定">⚙️</button>
+    </div>
+  </div>
+
+  <!-- MAIN VIEW -->
+  <div id="main-view">
+    <div id="shop-view">
+      <canvas id="shop-canvas"></canvas>
+    </div>
+    <div id="right-panel">
+      <div id="panel-tabs">
+        <div class="tab active" data-tab="staff" onclick="switchTab('staff')">👨‍🍳スタッフ</div>
+        <div class="tab" data-tab="kitchen" onclick="switchTab('kitchen')">🔧調理器具</div>
+        <div class="tab" data-tab="ingredients" onclick="switchTab('ingredients')">🧀具材</div>
+        <div class="tab" data-tab="furniture" onclick="switchTab('furniture')">🪑家具</div>
+        <div class="tab" data-tab="ads" onclick="switchTab('ads')">📢広告</div>
+        <div class="tab" data-tab="delivery" onclick="switchTab('delivery')">🛵配達</div>
+        <div class="tab" data-tab="finance" onclick="switchTab('finance')">💰財務</div>
+      </div>
+      <div id="panel-content"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div id="bottom-bar">
+    <button class="bb-btn" onclick="openHireModal()">👤 スタッフ雇用</button>
+    <button class="bb-btn" onclick="expandShop()">🏗️ 店舗拡張</button>
+    <button class="bb-btn" onclick="togglePhone()">📱 携帯電話</button>
+    <button class="bb-btn" onclick="showDaySummary()">📊 日次レポート</button>
+    <button class="bb-btn" id="pause-btn" onclick="togglePause()">⏸️ 一時停止</button>
+  </div>
+
+  <!-- NOTIF -->
+  <div id="notif-container"></div>
+
+  <!-- PHONE -->
+  <div id="phone-overlay" onclick="if(event.target===this)togglePhone()">
+    <div id="phone">
+      <div id="phone-notch"></div>
+      <div id="phone-screen">
+        <div id="phone-statusbar">
+          <span>🔋 87%</span><span id="phone-time">12:00</span><span>📶 PIZA-NET</span>
+        </div>
+        <div id="phone-body"></div>
+        <div id="phone-navbar">
+          <button class="phone-nav-btn" onclick="phoneHome()">🏠</button>
+          <button class="phone-nav-btn" onclick="phoneBack()">◀</button>
+          <button class="phone-nav-btn" onclick="togglePhone()">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="settings-overlay" onclick="if(event.target===this)toggleSettings()">
+    <div id="settings-panel">
+      <h2 style="color:#e94560;margin-bottom:16px;">⚙️ 設定</h2>
+      <div id="settings-content"></div>
+      <button class="btn btn-primary btn-block mt8" onclick="toggleSettings()">閉じる</button>
+    </div>
+  </div>
+
+  <!-- DAY END -->
+  <div id="day-end-overlay" onclick="if(event.target===this)closeDayEnd()">
+    <div id="day-end-panel"></div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// PART 1: CORE GAME STATE & DATA
+// ============================================
+
+const GAME_DAY_MS = 40 * 60 * 1000; // 40 minutes
+const MAX_CUSTOMERS_DAY = 5000;
+const MAX_DELIVERIES_DAY = 20000;
+const MAX_STAFF = 31; // 1 initial + 30
+const MAX_INGREDIENT_STOCK = 300;
+const MAX_EQUIP_LEVEL = 50;
+const MAX_STAFF_LEVEL = 20;
+const MAX_LOAN = 2000000;
+const LOAN_INTEREST_RATE = 0.05;
+
+// INGREDIENTS
+const INGREDIENTS = [
+  {id:'cheese',name:'チーズ',icon:'🧀',costPer:80,basePrice:120},
+  {id:'tomato',name:'トマトソース',icon:'🍅',costPer:40,basePrice:60},
+  {id:'pepperoni',name:'ペパロニ',icon:'🥓',costPer:100,basePrice:150},
+  {id:'mushroom',name:'マッシュルーム',icon:'🍄',costPer:60,basePrice:90},
+  {id:'olive',name:'オリーブ',icon:'🫒',costPer:70,basePrice:100},
+  {id:'basil',name:'バジル',icon:'🌿',costPer:30,basePrice:50},
+  {id:'onion',name:'オニオン',icon:'🧅',costPer:35,basePrice:55},
+  {id:'pepper',name:'ピーマン',icon:'🫑',costPer:45,basePrice:70},
+  {id:'ham',name:'ハム',icon:'🍖',costPer:110,basePrice:160},
+  {id:'shrimp',name:'エビ',icon:'🦐',costPer:150,basePrice:220},
+  {id:'corn',name:'コーン',icon:'🌽',costPer:30,basePrice:50},
+  {id:'anchovy',name:'アンチョビ',icon:'🐟',costPer:120,basePrice:170},
+  {id:'sausage',name:'ソーセージ',icon:'🌭',costPer:90,basePrice:130}
+];
+
+// EQUIPMENT
+const EQUIPMENT = [
+  {id:'oven',name:'かまど',icon:'🔥',baseCost:5000,desc:'ピザを焼く。レベルUPで焼き時間短縮&品質UP'},
+  {id:'stove',name:'コンロ',icon:'♨️',baseCost:3000,desc:'ソース調理。レベルUPで効率UP'},
+  {id:'prep_table',name:'調理台',icon:'🪵',baseCost:2000,desc:'具材準備。レベルUPで速度UP'},
+  {id:'mixer',name:'ミキサー',icon:'🌀',baseCost:4000,desc:'生地作り。レベルUPで品質UP'},
+  {id:'fridge',name:'冷蔵庫',icon:'❄️',baseCost:6000,desc:'具材保存。レベルUPで鮮度保持UP'},
+  {id:'cutter',name:'ピザカッター',icon:'🔪',baseCost:1500,desc:'カット速度UP'},
+  {id:'dishwasher',name:'食洗機',icon:'💧',baseCost:3500,desc:'回転率UP'}
+];
+
+// FURNITURE TYPES (4 types, 8 variants each, 5 grades)
+const FURNITURE_TYPES = ['table','chair','decor','light'];
+const FURNITURE_DATA = {
+  table:{name:'テーブル',icon:'🪑',variants:[
+    {name:'木製テーブル',style:2},{name:'大理石テーブル',style:5},{name:'ガラステーブル',style:4},{name:'和風テーブル',style:3},
+    {name:'モダンテーブル',style:5},{name:'レトロテーブル',style:3},{name:'カフェテーブル',style:4},{name:'VIPテーブル',style:6}
+  ]},
+  chair:{name:'椅子',icon:'💺',variants:[
+    {name:'木製椅子',style:2},{name:'革張り椅子',style:4},{name:'ソファ席',style:5},{name:'スツール',style:2},
+    {name:'ベンチ',style:3},{name:'デザイナーチェア',style:5},{name:'リクライニング',style:4},{name:'VIPソファ',style:6}
+  ]},
+  decor:{name:'装飾',icon:'🖼️',variants:[
+    {name:'観葉植物',style:3},{name:'壁画',style:4},{name:'花瓶',style:3},{name:'イタリア国旗',style:2},
+    {name:'ネオンサイン',style:5},{name:'アンティーク時計',style:4},{name:'水槽',style:5},{name:'彫刻',style:6}
+  ]},
+  light:{name:'照明',icon:'💡',variants:[
+    {name:'ペンダントライト',style:3},{name:'シャンデリア',style:6},{name:'間接照明',style:4},{name:'キャンドル',style:3},
+    {name:'スポットライト',style:4},{name:'ランタン',style:3},{name:'LEDストリップ',style:5},{name:'クリスタルライト',style:6}
+  ]}
+};
+
+const GRADE_NAMES = ['なし','ブロンズ','シルバー','ゴールド','プラチナ','ダイヤモンド'];
+const GRADE_COSTS = [0, 1000, 3000, 8000, 20000, 50000];
+const GRADE_MULTIPLIER = [0, 1, 1.5, 2.5, 4, 7];
+
+// AD PLANS
+const AD_PLANS = [
+  {cost:1000,reach:5},{cost:2000,reach:12},{cost:4000,reach:22},{cost:5000,reach:30},
+  {cost:8500,reach:50},{cost:12000,reach:75},{cost:23000,reach:120},{cost:34000,reach:170},
+  {cost:43000,reach:230},{cost:60000,reach:320},{cost:75000,reach:450}
+];
+// ===== 配達システムデータ =====
+const VEHICLE_TYPES = [
+  {id:'bicycle',name:'自転車',icon:'🚲',speed:1.0,capacity:2,cost:3000,maintenance:100,fuelCost:0},
+  {id:'scooter',name:'原付スクーター',icon:'🛵',speed:1.8,capacity:3,cost:15000,maintenance:500,fuelCost:200},
+  {id:'motorcycle',name:'バイク',icon:'🏍️',speed:2.2,capacity:3,cost:35000,maintenance:800,fuelCost:350},
+  {id:'car',name:'軽自動車',icon:'🚗',speed:2.0,capacity:8,cost:80000,maintenance:1500,fuelCost:600},
+  {id:'van',name:'配達バン',icon:'🚐',speed:1.7,capacity:15,cost:150000,maintenance:2500,fuelCost:900},
+  {id:'ebike',name:'電動自転車',icon:'🔋',speed:1.5,capacity:3,cost:12000,maintenance:200,fuelCost:50},
+  {id:'drone',name:'ドローン',icon:'🤖',speed:3.0,capacity:1,cost:200000,maintenance:3000,fuelCost:100}
+];
+
+const DRIVER_FIRST_NAMES = ['大地','遥','翼','海','空','光','拓也','真由','達也','沙織','慎','彩','亮','舞','諒','麻衣','勇気','春香','健','美月',
+  '和也','裕子','哲也','恵','雄太','千尋','浩二','由美','正人','愛'];
+const DRIVER_TRAITS = [
+  {id:'speed_demon',name:'スピード狂',icon:'⚡',effect:'配達速度+25%、事故率+10%'},
+  {id:'careful',name:'慎重派',icon:'🛡️',effect:'事故率-20%、配達速度-10%'},
+  {id:'friendly',name:'フレンドリー',icon:'😊',effect:'チップ+30%、評価+0.5'},
+  {id:'efficient',name:'効率重視',icon:'📊',effect:'燃料消費-15%、複数配達+10%'},
+  {id:'local_expert',name:'地元の達人',icon:'🗺️',effect:'配達速度+15%、道迷いなし'},
+  {id:'newbie',name:'新人',icon:'🌱',effect:'配達速度-15%、成長速度+30%'},
+  {id:'veteran',name:'ベテラン',icon:'🏅',effect:'全パラメータ+10%'},
+  {id:'night_owl',name:'夜型',icon:'🦉',effect:'夜間効率+30%、昼間-10%'}
+];
+
+const DELIVERY_PROMOS = [
+  {id:'free_delivery',name:'送料無料キャンペーン',cost:5000,duration:1,effect:'注文数+50%、送料収入なし',icon:'🆓'},
+  {id:'speed_bonus',name:'30分以内保証',cost:8000,duration:1,effect:'遅延で返金、高評価+',icon:'⏱️'},
+  {id:'bundle_deal',name:'2枚目半額配達',cost:6000,duration:1,effect:'複数注文+80%',icon:'🎯'},
+  {id:'new_area',name:'新エリア記念割引',cost:3000,duration:1,effect:'新エリアの注文+100%',icon:'🗺️'},
+  {id:'rain_special',name:'雨の日スペシャル',cost:4000,duration:1,effect:'全注文+30%、配達料+200円',icon:'☔'},
+  {id:'weekend_rush',name:'週末ラッシュ',cost:10000,duration:2,effect:'週末注文+60%',icon:'🎉'},
+  {id:'loyalty_program',name:'リピーター割引',cost:7000,duration:3,effect:'リピート注文+40%',icon:'💎'},
+  {id:'late_night',name:'深夜配達サービス',cost:12000,duration:1,effect:'営業時間延長、夜間注文+',icon:'🌙'}
+];
+
+const PACKAGING_LEVELS = [
+  {level:1,name:'標準梱包',desc:'普通の段ボール箱',quality:1.0,cost:30,icon:'📦'},
+  {level:2,name:'保温梱包',desc:'アルミ保温材付き',quality:1.3,cost:60,keepWarm:true,icon:'♨️'},
+  {level:3,name:'プレミアム梱包',desc:'専用保温バッグ+緩衝材',quality:1.6,cost:100,keepWarm:true,icon:'🎁'},
+  {level:4,name:'エコ＆プレミアム',desc:'環境に優しい高品質素材',quality:1.8,cost:130,keepWarm:true,eco:true,icon:'🌿'},
+  {level:5,name:'ラグジュアリー梱包',desc:'高級ボックス+ブランドロゴ+メッセージカード',quality:2.0,cost:200,keepWarm:true,eco:true,icon:'👑'}
+];
+
+const DELIVERY_UPGRADES = [
+  {id:'tracking',name:'リアルタイム追跡',desc:'お客さんが配達状況を確認可能。満足度UP',cost:25000,icon:'📍',unlocked:false},
+  {id:'express',name:'特急配達',desc:'通常の半分の時間で配達。追加料金あり',cost:40000,icon:'🚀',unlocked:false},
+  {id:'batch',name:'バッチ配達',desc:'同エリアの注文をまとめて効率的に配達',cost:30000,icon:'📋',unlocked:false},
+  {id:'auto_dispatch',name:'自動配車システム',desc:'AIが最適な配達員と経路を自動選択',cost:60000,icon:'🤖',unlocked:false},
+  {id:'weather_proof',name:'全天候対応装備',desc:'雨天でも配達品質が低下しない',cost:20000,icon:'☂️',unlocked:false},
+  {id:'insulated_bag',name:'高性能保温バッグ',desc:'配達中の温度低下を大幅軽減',cost:15000,icon:'🌡️',unlocked:false},
+  {id:'customer_app',name:'顧客アプリ連携',desc:'専用アプリで注文・追跡・評価。注文数UP',cost:50000,icon:'📱',unlocked:false},
+  {id:'priority_lane',name:'優先配達契約',desc:'法人顧客への優先配達。高単価注文増加',cost:75000,icon:'⭐',unlocked:false}
+];
+// STAFF NAMES & PERSONALITIES
+const STAFF_FIRST_NAMES = ['太郎','花子','健太','美咲','翔太','結衣','大輝','さくら','蓮','陽菜','悠真','凛','朝陽','芽依','湊','紬','悠人','莉子','樹','葵','颯太','杏','律','詩','奏太','栞','瑛太','楓','壮真','彩乃'];
+const STAFF_LAST_NAMES = ['田中','鈴木','佐藤','高橋','渡辺','伊藤','山本','中村','小林','加藤','松本','井上','木村','林','清水','山崎','池田','阿部','橋本','山口','石川','前田','藤田','岡田','後藤'];
+const STAFF_SPECIALTIES = ['oven','stove','prep_table','mixer','delivery','service','management'];
+const SPEC_NAMES = {oven:'かまど操作',stove:'コンロ調理',prep_table:'具材準備',mixer:'生地作り',delivery:'配達',service:'接客',management:'管理'};
+const PERSONALITY_TRAITS = ['working_hard','lazy','normal','perfectionist','cheerful','quiet'];
+const TRAIT_NAMES = {working_hard:'働き者',lazy:'さぼり癖あり',normal:'普通',perfectionist:'完璧主義',cheerful:'陽気',quiet:'物静か'};
+
+// NAME POOL for phone contacts
+const CONTACTS = [
+  {name:'お母さん',relation:'家族',lendMax:30000,icon:'👩'},
+  {name:'お父さん',relation:'家族',lendMax:50000,icon:'👨'},
+  {name:'兄 太一',relation:'家族',lendMax:20000,icon:'👦'},
+  {name:'友人 マサル',relation:'友達',lendMax:15000,icon:'🧑'},
+  {name:'友人 アヤ',relation:'友達',lendMax:10000,icon:'👧'},
+  {name:'叔父 正夫',relation:'親戚',lendMax:80000,icon:'👴'},
+  {name:'先輩 リカ',relation:'知人',lendMax:25000,icon:'👩‍💼'}
+];
+
+// REVIEW COMMENTS
+// ===== 超拡張レビューコメントシステム =====
+const REVIEW_COMMENTS = {
+  taste: {
+    great: [
+      'チーズのとろけ具合が絶妙！本場イタリアを思い出す','生地がモチモチで最高においしい！','トマトソースの酸味と甘みのバランスが神がかっている',
+      'ペパロニの塩気とチーズの相性が抜群すぎる','一口食べた瞬間に笑顔になった、本当に美味しい','具材の火の通り方が完璧。プロの仕事を感じる',
+      '焼き加減がちょうどよくて、耳までカリッとしていて美味しい','ここのマルゲリータは都内トップクラスだと思う',
+      'バジルの香りが食欲をそそる。具材の鮮度が違う','チーズが糸を引く瞬間が幸せすぎる…','生地の発酵具合が素晴らしい。ふわふわでもちもち',
+      'トッピングのバランスが計算されている。さすがプロ','エビがプリプリで新鮮！贅沢なピザだった',
+      'マッシュルームの香りが豊かで深い味わい','何回食べても飽きない味。リピート確定','ソーセージがジューシーで噛むたびに旨味が溢れる',
+      'アンチョビの塩味がアクセントになっていて大人の味','オリーブとチーズの組み合わせが最高','コーンの甘みがピザに合う！子供も大喜び',
+      '生地の焦げ目が香ばしくて食欲をそそられる','ハムの薄切りが繊細で上品な味わい',
+      'ピーマンのシャキシャキ感が残っていて食感が楽しい','窯焼きの香ばしさが鼻に抜ける、本格的な味',
+      'オニオンが甘く煮えていてとても美味しかった','この価格でこのクオリティは驚き。コスパ最強',
+      'チーズの種類にこだわりを感じる。モッツァレラが絶品','生地の厚さがちょうどよくて食べやすい','四種のチーズピザが濃厚で幸福感がすごい',
+      'トマトの果肉がしっかり感じられるソースが好み','季節の具材を使っているのが嬉しい'
+    ],
+    good: [
+      'なかなか美味しかった。また食べたい','味はしっかりしていて満足できた','普通に美味しいピザ。期待通りの味',
+      'チーズの量がちょうどよかった','生地はまあまあ。もう少しモチモチだと嬉しい','トッピングの種類が豊富で良い',
+      '値段相応の美味しさ。悪くない','子供が喜んで食べていたので良し','焼き加減は良かった。ソースはもう少し濃くても良いかも',
+      'ランチにちょうど良い。軽く食べられた','チーズはよく伸びて楽しかった','具材は新鮮だったと思う',
+      '友達と食べたけど、みんな美味しいと言っていた','デリバリーでも味が落ちていなくて良かった','全体的にバランスの取れた味',
+      'ペパロニピザは安定の美味しさ','生地がちょっと厚めだったけど味は良い','ソースの味が家庭的で落ち着く',
+      'まあまあ満足。特に不満はない','具材の量はちょうどよかった'
+    ],
+    mid: [
+      '可もなく不可もなく、普通のピザ','まあ食べられるけど特別ではない','味は悪くないが印象に残らない',
+      'チーズが少し少なかった気がする','もう少し具材が欲しかったかな','生地が少し硬めだった',
+      '期待していたほどではなかったけど不味くはない','ソースの味が薄い気がした','焼きムラがあった',
+      '普通のピザチェーンと同じくらいの味','トッピングが偏っていた','もう少し塩気があっても良いかも',
+      '生地はイマイチだったけど具材は良かった','温度がぬるかった','全体的に味のメリハリがない',
+      'チーズの質は普通','オリーブが缶詰っぽかった','まあこんなものかな、という感じ'
+    ],
+    bad: [
+      '正直あまり美味しくなかった…','生地がベチャベチャで残念','チーズの量が明らかに少ない。ケチっている？',
+      'ソースの味がほとんどしなかった','具材が新鮮じゃない気がする','焦げていて苦い部分があった',
+      '冷めていて美味しくなかった','この値段でこの味は割高に感じる','生地が生焼けだった',
+      'トッピングがスカスカ。写真と全然違う','塩辛すぎて食べられなかった','油っぽくて胃もたれした',
+      '具材の切り方が雑すぎる','これなら冷凍ピザの方がマシ','味に統一感がなくバラバラ'
+    ],
+    terrible: [
+      '二度と来ません。まずすぎる','食べた瞬間に後悔した。お金を返してほしい','生焼けの生地で体調が悪くなった',
+      'ありえないほど不味い。この店大丈夫？','虫が入っていた…衛生面が最悪','カビた具材を使っていないか？味がおかしい',
+      '石のように硬い生地。歯が折れるかと思った','ゴミ箱行き。食べられるレベルではない'
+    ]
+  },
+  service: {
+    great: [
+      'スタッフの笑顔が素敵で気持ちよかった','注文から提供まですごく早い！','店員さんが丁寧に具材のおすすめを教えてくれた',
+      'スタッフ全員が活気があって良い雰囲気','子供にも優しく対応してくれて嬉しかった','細やかな気配りが行き届いている',
+      'お水のおかわりを言う前に持ってきてくれた','帰り際に笑顔で「ありがとうございました！」が嬉しい',
+      '混雑していたのにテキパキ対応してくれた','質問に親切に答えてくれた。知識も豊富',
+      'アレルギー対応をしっかりしてくれて安心できた','予約の電話対応も丁寧だった'
+    ],
+    good: [
+      '接客は普通に良かった','特に不満のない対応','スタッフは感じが良い',
+      '注文もスムーズにできた','笑顔で対応してくれた','丁寧な接客だった',
+      'まあ普通のファストフードレベルの接客','テーブルまで運んでくれた','お会計もスムーズ'
+    ],
+    bad: [
+      'スタッフの態度が悪い。無愛想すぎる','注文してから30分以上待たされた','店員同士でおしゃべりしていて呼んでも来ない',
+      '注文を間違えられた','挨拶もなく無言で置いていった','忙しいのか明らかにイライラしていた',
+      '質問したら面倒くさそうに答えられた','会計間違いがあった','スタッフが少なすぎて回っていない',
+      '呼び鈴を押しても全然来ない','態度は最悪。教育が必要','注文を忘れられていた'
+    ]
+  },
+  atmosphere: {
+    great: [
+      '店内がとてもおしゃれで居心地が良い','照明の雰囲気がリラックスできる','インテリアがイタリアンらしくて素敵',
+      'BGMのセンスが良い。デートにもぴったり','清潔感があって安心できる','テーブルの間隔がちょうどよくて落ち着く',
+      '家具がハイセンスで高級感がある','窓からの景色もいい。穴場のお店','お花やグリーンがあって癒される',
+      'トイレも清潔に保たれていた','子連れにも優しい空間','広々としていてゆったり過ごせた'
+    ],
+    good: [
+      '店内は綺麗だった','雰囲気はまあまあ良い','普通に居心地の良い空間',
+      '清潔感はある','テーブルが少し狭いけど問題ない程度','照明は良い感じ',
+      '内装は普通だけど清潔','普通のピザ屋さんの雰囲気'
+    ],
+    bad: [
+      '店内が狭くて窮屈','テーブルがベタベタで不潔','照明が暗すぎて料理が見えない',
+      'うるさくて会話ができない','古い家具がボロボロ','エアコンが効いていなくて暑い',
+      '床がベタついている','壁紙が剥がれていて見苦しい','隣のテーブルとの距離が近すぎる',
+      'トイレが汚い。衛生面に不安','虫が飛んでいた…','ゴミ箱が溢れていた'
+    ]
+  },
+  delivery: {
+    great: [
+      '配達がすごく早くて驚いた！','熱々の状態で届いた。完璧','配達員さんがとても丁寧で好印象',
+      '梱包がしっかりしていてピザが崩れていなかった','追跡できるのが便利','時間通りに届いた',
+      'チップ以上の素晴らしいサービス','雨の中でも笑顔で届けてくれた',
+      '梱包を開けたら完璧な状態のピザ。感動','配達の質がチェーン店より断然上'
+    ],
+    good: [
+      '配達は普通に良かった','時間通りに届いた','特に問題なく届いた',
+      'まあまあの配達サービス','梱包は普通','配達員は普通に親切だった'
+    ],
+    bad: [
+      '配達が1時間以上遅れた','届いた時にはピザが冷めていた','箱がぐちゃぐちゃでピザが偏っていた',
+      '配達員の態度が最悪','注文と違うものが届いた','配達手数料が高すぎる',
+      '配達中にピザがひっくり返ったようだ','到着予定時間をかなり過ぎた','インターホン連打された'
+    ]
+  },
+  price: {
+    great: ['このクオリティでこの価格は破格！','コスパ最高のピザ屋さん','安くて美味しくて最高','お財布に優しい価格設定','学生でも気軽に来れる値段がいい'],
+    good: ['値段は妥当だと思う','価格相応の味','まあ普通の値段かな','特別安くはないけど高くもない'],
+    bad: ['この味でこの値段は高い','もう少し安くてもいいのでは','コスパが悪い','値段と品質が見合っていない','割高感がある']
+  },
+  repeat: {
+    yes: ['絶対また来ます！','週一で通いたい','友達にも紹介したい','リピート確定！','すでに3回目。大好き','家族全員ファンです','毎月来ています','もはや常連です笑'],
+    maybe: ['機会があればまた来るかも','気が向いたら','近くに来たらまた寄るかもしれない'],
+    no: ['もう来ないと思います','二度目はないかな','他の店に行きます','リピートする理由がない']
+  },
+  overall: {
+    amazing: ['人生で食べたピザの中でトップ3に入る！','この店は地域の宝。なくならないでほしい','全ピザ好きに自信を持っておすすめする',
+      '何を食べてもハズレがない名店','週末のご褒美に最高のお店','ミシュランに推薦したいレベル'],
+    good: ['全体的に良いお店だと思います','家族で楽しめるいいピザ屋さん','安心して食べに行ける','総合的に満足','いいお店を見つけた'],
+    average: ['普通のピザ屋さん','特筆すべき点はないが悪くもない','まあこんなものかな'],
+    poor: ['改善が必要だと思う。全体的にレベルが低い','もう少し頑張ってほしい','おすすめはしない','残念なお店だった','お金と時間の無駄だった']
+  }
+};
+
+// ユーザー名生成用データ
+const REVIEW_NAMES_FIRST = ['太郎','花子','翔','美咲','蓮','陽葵','悠真','凛','朝陽','芽依','湊','紬','碧','莉子','樹','葵','颯太','杏','律','詩',
+  'ゆうき','あかり','はると','ひなた','そうた','ゆい','みなと','つむぎ','りく','えま','ピザ好き太郎','グルメ女子','食通おじさん','OLランチ民','B級グルメ王'];
+const REVIEW_NAME_SUFFIX = ['','@グルメ好き','🍕','(初来店)','(常連)','_食べ歩き','|美食家','🇮🇹','_ピザマニア','(配達利用)'];
+const REVIEWER_ICONS = ['👨','👩','👦','👧','🧑','👴','👵','🧔','👨‍🦰','👩‍🦱','🧑‍🍳','👨‍💼','👩‍💻','🧑‍🎓','👷','🧑‍🔬'];
+// ============================================
+// GAME STATE
+// ============================================
+let G = {
+  money: 45000,
+  day: 1,
+  dayTimeLeft: GAME_DAY_MS,
+  paused: false,
+  totalSalesToday: 0,
+  totalCustomersToday: 0,
+  totalDeliveriesToday: 0,
+  totalExpensesToday: 0,
+  totalSalesAllTime: 0,
+  shopLevel: 1, // 1-5, affects size/capacity
+  shopExpandCosts: [0, 50000, 150000, 400000, 1000000],
+  
+  // Ingredients stock
+  ingredients: {},
+  
+  // Equipment levels
+  equipment: {},
+  
+  // Staff
+  staff: [],
+  
+  // Furniture placed
+  furniture: [],
+  
+  // Advertising
+  activeAd: null,
+  
+   // Delivery (大型配達システム)
+  deliveryEnabled: false,
+  deliveryFee: 300,
+  deliveryTip: 100,
+  deliveryHandling: 150,
+  deliveriesQueue: [],
+  deliverySystem: {
+    level: 0,           // 配達システムレベル 0=未開始 1-10
+    fleetSize: 0,       // 配達員数
+    maxFleet: 30,
+    drivers: [],        // 配達員リスト
+    vehicles: [],       // 車両リスト
+    zones: [
+      {id:'zone_a',name:'近隣エリア',dist:1,unlocked:true,fee:200,demand:1.0,icon:'🏘️'},
+      {id:'zone_b',name:'市街地エリア',dist:2,unlocked:false,fee:350,demand:1.5,unlockCost:15000,icon:'🏙️'},
+      {id:'zone_c',name:'郊外エリア',dist:3,unlocked:false,fee:500,demand:1.2,unlockCost:40000,icon:'🌳'},
+      {id:'zone_d',name:'ビジネス街',dist:2.5,unlocked:false,fee:450,demand:2.0,unlockCost:60000,icon:'🏢'},
+      {id:'zone_e',name:'大学周辺',dist:2,unlocked:false,fee:300,demand:2.5,unlockCost:35000,icon:'🎓'},
+      {id:'zone_f',name:'駅前エリア',dist:1.5,unlocked:false,fee:380,demand:2.2,unlockCost:50000,icon:'🚉'},
+      {id:'zone_g',name:'住宅街',dist:3,unlocked:false,fee:420,demand:1.8,unlockCost:45000,icon:'🏡'},
+      {id:'zone_h',name:'工業地帯',dist:4,unlocked:false,fee:600,demand:0.8,unlockCost:30000,icon:'🏭'}
+    ],
+    activeOrders: [],   // 処理中注文
+    completedToday: 0,
+    failedToday: 0,
+    totalRevToday: 0,
+    totalTipsToday: 0,
+    totalFeesToday: 0,
+    peakHourBonus: false,
+    trackingEnabled: false,
+    packagingLevel: 1,    // 梱包品質 1-5
+    estimatedTimeBase: 20, // 基本配達時間(分) ゲーム内
+    customerRatingAvg: 0,
+    expressEnabled: false,
+    batchEnabled: false,
+    autoDispatch: false,
+    promotions: [],       // 配達プロモーション
+    stats: {
+      totalDelivered: 0,
+      totalFailed: 0,
+      bestDay: 0,
+      totalTips: 0,
+      avgRating: 0,
+      ratingCount: 0
+    }
+  },  
+  // Loan
+  loanAmount: 0,
+  loanInterestAccum: 0,
+  personalLoans: {}, // from contacts
+  
+  // Reputation
+  baseGRating: 5.0,
+  baseGReviews: [],
+  kx2Subscribed: false,
+  kx2Rating: 0,
+  kx2Visits: 0,
+  kx2LastVisitDay: 0,
+  expertEvals: [],
+  
+  // Customer satisfaction metrics
+  avgFoodQuality: 5.0,
+  avgServiceQuality: 5.0,
+  avgAtmosphere: 3.0,
+  
+  // One-time fund used
+  oneTimeFundUsed: false,
+  staffLimitBreak: false,
+  graphicsQuality: 'high', // low, medium, high
+  
+  // Customers in shop
+  customersInShop: [],
+  customerIdCounter: 0,
+  
+  // Phone
+  phoneScreen: 'home',
+  phoneHistory: [],
+  messageThreads: {},
+  
+  // Day history
+  dayHistory: [],
+  
+  // Tick
+  lastTick: Date.now(),
+  tickAccum: 0,
+  customerSpawnAccum: 0,
+  deliverySpawnAccum: 0,
+  
+  // Animation state
+  animFrame: 0,
+  smokeParticles: [],
+  staffAnimStates: {}
+};
+
+// Initialize ingredients
+INGREDIENTS.forEach(ing => { G.ingredients[ing.id] = 150; }); // Start with 150 each
+// Initialize equipment
+EQUIPMENT.forEach(eq => { G.equipment[eq.id] = 1; }); // All start at level 1
+
+// Create initial staff member
+function createStaff(forceName, forceSpec) {
+  const firstName = forceName || STAFF_FIRST_NAMES[Math.floor(Math.random()*STAFF_FIRST_NAMES.length)];
+  const lastName = STAFF_LAST_NAMES[Math.floor(Math.random()*STAFF_LAST_NAMES.length)];
+  const specialty = forceSpec || STAFF_SPECIALTIES[Math.floor(Math.random()*STAFF_SPECIALTIES.length)];
+  const trait = PERSONALITY_TRAITS[Math.floor(Math.random()*PERSONALITY_TRAITS.length)];
+  const boostPct = 10 + Math.floor(Math.random()*25);
+  const baseStamina = trait === 'working_hard' ? 90 + Math.random()*10 : trait === 'lazy' ? 50 + Math.random()*20 : 65 + Math.random()*25;
+  return {
+    id: Date.now() + Math.random(),
+    name: lastName + ' ' + firstName,
+    specialty, trait, boostPct, level: 1,
+    stamina: baseStamina, maxStamina: baseStamina,
+    salary: 3000 + Math.floor(Math.random()*2000),
+    hired: true, working: true,
+    exp: 0, expToNext: 100,
+    color: `hsl(${Math.floor(Math.random()*360)},60%,50%)`
+  };
+}
+G.staff.push(createStaff('健太','prep_table'));
+G.staff[0].name = '山本 健太';
+
+// Initialize contact message threads
+CONTACTS.forEach(c => {
+  G.messageThreads[c.name] = {
+    messages: [{from:'them',text:`やあ！お店オープンおめでとう！頑張ってね！`,time:'09:00'}],
+    lent: 0, lastMsgTime: 0
+  };
+});
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+function fmt(n) { return '¥' + Math.floor(n).toLocaleString(); }
+function fmtN(n) { return Math.floor(n).toLocaleString(); }
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+function rand(min, max) { return min + Math.random() * (max - min); }
+function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function notify(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = 'notif ' + type;
+  el.textContent = msg;
+  document.getElementById('notif-container').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function starsHTML(rating, maxStars=10) {
+  let html = '<span class="stars-display">';
+  for (let i = 1; i <= maxStars; i++) {
+    html += `<span class="star ${i <= Math.floor(rating) ? 'filled' : (i - 0.5 <= rating ? 'half' : '')}">${i <= Math.floor(rating) ? '★' : (i - 0.5 <= rating ? '★' : '☆')}</span>`;
+  }
+  html += '</span>';
+  return html;
+}
+
+// ============================================
+// GAME LOGIC
+// ============================================
+function getEquipBonus(eqId) {
+  const lv = G.equipment[eqId] || 1;
+  return 1 + (lv - 1) * 0.04; // 4% per level
+}
+
+function getTotalEquipQuality() {
+  let total = 0;
+  EQUIPMENT.forEach(eq => { total += getEquipBonus(eq.id); });
+  return total / EQUIPMENT.length;
+}
+
+function getStaffEfficiency() {
+  if (G.staff.length === 0) return 0.5;
+  let total = 0;
+  let active = 0;
+  G.staff.forEach(s => {
+    if (!s.working) return;
+    let eff = 0.5 + (s.level / MAX_STAFF_LEVEL) * 0.5;
+    eff *= (s.stamina / s.maxStamina);
+    if (s.trait === 'working_hard') eff *= 1.15;
+    if (s.trait === 'lazy' && s.stamina < s.maxStamina * 0.4) eff *= 0.6;
+    if (s.trait === 'perfectionist') eff *= 1.08;
+    total += eff;
+    active++;
+  });
+  return active > 0 ? total / active : 0.3;
+}
+
+function getFurnitureScore() {
+  let totalGrade = 0, totalStyle = 0;
+  G.furniture.forEach(f => {
+    totalGrade += f.grade;
+    totalStyle += f.style * GRADE_MULTIPLIER[f.grade];
+  });
+  return { grade: totalGrade, style: totalStyle, combined: totalGrade * 2 + totalStyle };
+}
+
+function getCustomerAttraction() {
+  let base = 1;
+  // Furniture bonus
+  const fScore = getFurnitureScore();
+  base += fScore.combined * 0.01;
+  // Ad bonus
+  if (G.activeAd) base += G.activeAd.reach * 0.01;
+  // Reputation
+  base *= (G.baseGRating / 5.0);
+  if (G.kx2Subscribed && G.kx2Rating > 0) {
+    base *= (G.kx2Rating / 10.0);
+  }
+  // Shop level
+  base *= (1 + (G.shopLevel - 1) * 0.3);
+  return base;
+}
+
+function calcPizzaPrice(toppingCount, toppingQuality) {
+  let base = 600;
+  base += toppingCount * 120;
+  base *= (0.8 + toppingQuality * 0.4);
+  base *= getTotalEquipQuality();
+  base *= (0.9 + getStaffEfficiency() * 0.3);
+  return Math.floor(base);
+}
+
+function calcPizzaCost(toppings) {
+  let cost = 0;
+  toppings.forEach(t => {
+    const ing = INGREDIENTS.find(i => i.id === t);
+    if (ing) cost += ing.costPer;
+  });
+  return cost;
+}
+
+function servePizza(customer) {
+  const tCount = customer.toppings.length;
+  const quality = getTotalEquipQuality();
+  const price = calcPizzaPrice(tCount, quality);
+  const cost = calcPizzaCost(customer.toppings);
+  
+  // Deduct ingredients
+  let canServe = true;
+  customer.toppings.forEach(t => {
+    if (G.ingredients[t] <= 0) canServe = false;
+  });
+  if (!canServe) return false;
+  
+  customer.toppings.forEach(t => { G.ingredients[t]--; });
+  
+  const profit = price - cost;
+  G.money += price;
+  G.totalSalesToday += price;
+  G.totalExpensesToday += cost;
+  
+  // Customer satisfaction
+  let sat = 5;
+  sat += (quality - 1) * 3;
+  sat += (getStaffEfficiency() - 0.5) * 2;
+  sat += getFurnitureScore().combined * 0.02;
+  sat = clamp(sat, 1, 10);
+  customer.satisfaction = sat;
+  
+  // レビュー投稿確率 (評判・来客数に応じて動的に変化)
+  let reviewChance = 0.45;
+  if (G.totalCustomersToday < 20) reviewChance = 0.7; // 初期は投稿率高め
+  if (G.baseGReviews.length > 200) reviewChance = 0.35;
+  // 極端に良い・悪い体験はレビューされやすい
+  if (sat >= 8.5 || sat <= 2.5) reviewChance += 0.2;
+  if (Math.random() < reviewChance) {
+    addReview(sat, customer);
+  }  
+  return true;
+}
+
+function addReview(sat, customer) {
+  const review = generateDetailedReview(sat, customer);
+  G.baseGReviews.unshift(review);
+  if (G.baseGReviews.length > 500) G.baseGReviews.pop();
+
+  // レビュー数に応じた重み付き平均で評価更新
+  if (G.baseGReviews.length > 0) {
+    let weightedSum = 0, weightTotal = 0;
+    G.baseGReviews.forEach((r, idx) => {
+      const weight = 1 / (1 + idx * 0.05); // 新しいレビューほど影響大
+      weightedSum += r.stars * weight;
+      weightTotal += weight;
+    });
+    G.baseGRating = clamp(weightedSum / weightTotal, 1, 10);
+  }
+}
+
+function generateDetailedReview(sat, customer) {
+  // ===== 詳細な満足度スコア計算 =====
+  const equipQ = getTotalEquipQuality();
+  const staffEff = getStaffEfficiency();
+  const furnScore = getFurnitureScore();
+  const workingStaff = G.staff.filter(s => s.working);
+  const avgStaffStamina = workingStaff.length > 0
+    ? workingStaff.reduce((a, s) => a + s.stamina / s.maxStamina, 0) / workingStaff.length : 0.3;
+
+  // 味スコア (設備と具材の質に依存)
+  const tasteScore = clamp(
+    2 + equipQ * 2.5 + staffEff * 1.5 + (customer.toppings.length >= 3 ? 1 : 0) + Math.random() * 1.5 - 0.5
+  , 1, 10);
+
+  // サービススコア (スタッフの質と体力に依存)
+  const serviceScore = clamp(
+    2 + staffEff * 3 + avgStaffStamina * 2
+    + (workingStaff.length >= 5 ? 1 : workingStaff.length <= 1 ? -2 : 0)
+    + Math.random() * 1.5 - 0.5
+  , 1, 10);
+
+  // 雰囲気スコア (家具に依存)
+  const atmosScore = clamp(
+    2 + furnScore.combined * 0.04 + G.shopLevel * 0.8 + Math.random() * 1.5 - 0.5
+  , 1, 10);
+
+  // 配達スコア
+  const isDelivery = Math.random() < (G.deliveryEnabled ? 0.3 : 0);
+  const delivScore = isDelivery ? clamp(
+    4 + staffEff * 2 + equipQ + Math.random() * 2 - 0.5
+  , 1, 10) : null;
+
+  // 価格スコア (具材コストと販売価格の比率)
+  const price = calcPizzaPrice(customer.toppings.length, equipQ);
+  const cost = calcPizzaCost(customer.toppings);
+  const priceRatio = price / Math.max(cost * 2.5, 1);
+  const priceScore = clamp(
+    priceRatio < 1.5 ? 8 : priceRatio < 2 ? 6.5 : priceRatio < 3 ? 5 : priceRatio < 4 ? 3.5 : 2
+    + Math.random() * 1.5 - 0.5
+  , 1, 10);
+
+  // 総合スコア（重み付き）
+  let overall = tasteScore * 0.35 + serviceScore * 0.2 + atmosScore * 0.15 + priceScore * 0.15;
+  if (delivScore !== null) overall = overall * 0.85 + delivScore * 0.15;
+  else overall += (tasteScore * 0.15);
+  overall = clamp(Math.round(overall * 10) / 10, 1, 10);
+
+  // 星 (整数化するが0.5刻みの表現も)
+  const stars = clamp(Math.round(overall * 2) / 2, 1, 10);
+
+  // ===== コメント生成 =====
+  const comments = [];
+
+  // 味コメント (必ず付く)
+  if (tasteScore >= 8) comments.push(pick(REVIEW_COMMENTS.taste.great));
+  else if (tasteScore >= 6) comments.push(pick(REVIEW_COMMENTS.taste.good));
+  else if (tasteScore >= 4) comments.push(pick(REVIEW_COMMENTS.taste.mid));
+  else if (tasteScore >= 2.5) comments.push(pick(REVIEW_COMMENTS.taste.bad));
+  else comments.push(pick(REVIEW_COMMENTS.taste.terrible));
+
+  // サービスコメント (70%の確率)
+  if (Math.random() < 0.7) {
+    if (serviceScore >= 7) comments.push(pick(REVIEW_COMMENTS.service.great));
+    else if (serviceScore >= 4.5) comments.push(pick(REVIEW_COMMENTS.service.good));
+    else comments.push(pick(REVIEW_COMMENTS.service.bad));
+  }
+
+  // 雰囲気コメント (50%の確率)
+  if (Math.random() < 0.5) {
+    if (atmosScore >= 7) comments.push(pick(REVIEW_COMMENTS.atmosphere.great));
+    else if (atmosScore >= 4.5) comments.push(pick(REVIEW_COMMENTS.atmosphere.good));
+    else comments.push(pick(REVIEW_COMMENTS.atmosphere.bad));
+  }
+
+  // 配達コメント
+  if (isDelivery) {
+    if (delivScore >= 7) comments.push(pick(REVIEW_COMMENTS.delivery.great));
+    else if (delivScore >= 4.5) comments.push(pick(REVIEW_COMMENTS.delivery.good));
+    else comments.push(pick(REVIEW_COMMENTS.delivery.bad));
+  }
+
+  // 価格コメント (40%の確率)
+  if (Math.random() < 0.4) {
+    if (priceScore >= 7) comments.push(pick(REVIEW_COMMENTS.price.great));
+    else if (priceScore >= 4.5) comments.push(pick(REVIEW_COMMENTS.price.good));
+    else comments.push(pick(REVIEW_COMMENTS.price.bad));
+  }
+
+  // リピート意向 (60%の確率)
+  if (Math.random() < 0.6) {
+    if (overall >= 7.5) comments.push(pick(REVIEW_COMMENTS.repeat.yes));
+    else if (overall >= 4.5) comments.push(pick(REVIEW_COMMENTS.repeat.maybe));
+    else comments.push(pick(REVIEW_COMMENTS.repeat.no));
+  }
+
+  // 総評 (30%の確率)
+  if (Math.random() < 0.3) {
+    if (overall >= 8) comments.push(pick(REVIEW_COMMENTS.overall.amazing));
+    else if (overall >= 6) comments.push(pick(REVIEW_COMMENTS.overall.good));
+    else if (overall >= 4) comments.push(pick(REVIEW_COMMENTS.overall.average));
+    else comments.push(pick(REVIEW_COMMENTS.overall.poor));
+  }
+
+  // 注文内容の言及 (20%の確率)
+  if (Math.random() < 0.2 && customer.toppings.length > 0) {
+    const mentionedIng = INGREDIENTS.find(i => i.id === pick(customer.toppings));
+    if (mentionedIng) {
+      const ingComments = [
+        `${mentionedIng.name}が特に${tasteScore >= 6 ? '美味しかった' : 'イマイチだった'}`,
+        `${mentionedIng.name}トッピングを${tasteScore >= 6 ? '追加して正解！' : '選んだのは失敗だったかも'}`,
+        `${mentionedIng.name}の${tasteScore >= 7 ? '品質が高い' : '鮮度が気になった'}`
+      ];
+      comments.push(pick(ingComments));
+    }
+  }
+
+  const fullComment = comments.join(' ');
+
+  // ===== レビュアー名生成 =====
+  const reviewerName = pick(REVIEW_NAMES_FIRST) + pick(REVIEW_NAME_SUFFIX);
+  const reviewerIcon = pick(REVIEWER_ICONS);
+
+  // ===== 具材名リスト =====
+  const orderedItems = customer.toppings
+    .map(t => INGREDIENTS.find(i => i.id === t))
+    .filter(Boolean)
+    .map(i => i.icon + i.name);
+
+  return {
+    stars,
+    comment: fullComment,
+    author: reviewerName,
+    authorIcon: reviewerIcon,
+    time: getGameTimeStr(),
+    day: G.day,
+    tasteScore: Math.round(tasteScore * 10) / 10,
+    serviceScore: Math.round(serviceScore * 10) / 10,
+    atmosScore: Math.round(atmosScore * 10) / 10,
+    priceScore: Math.round(priceScore * 10) / 10,
+    delivScore: delivScore ? Math.round(delivScore * 10) / 10 : null,
+    overallScore: overall,
+    orderedItems,
+    isDelivery,
+    helpful: Math.floor(Math.random() * 20),
+    verified: Math.random() < 0.7
+  };
+}
+function renderBaseG(el) {
+  const totalReviews = G.baseGReviews.length;
+
+  // 評価分布を計算
+  const dist = [0,0,0,0,0,0,0,0,0,0]; // 1-10
+  G.baseGReviews.forEach(r => {
+    const idx = clamp(Math.floor(r.stars) - 1, 0, 9);
+    dist[idx]++;
+  });
+  const maxDist = Math.max(...dist, 1);
+
+  // カテゴリ別平均
+  let avgTaste = 0, avgService = 0, avgAtmos = 0, avgPrice = 0, avgDeliv = 0, delivCount = 0;
+  G.baseGReviews.forEach(r => {
+    avgTaste += r.tasteScore || 0;
+    avgService += r.serviceScore || 0;
+    avgAtmos += r.atmosScore || 0;
+    avgPrice += r.priceScore || 0;
+    if (r.delivScore) { avgDeliv += r.delivScore; delivCount++; }
+  });
+  if (totalReviews > 0) {
+    avgTaste /= totalReviews; avgService /= totalReviews;
+    avgAtmos /= totalReviews; avgPrice /= totalReviews;
+  }
+  if (delivCount > 0) avgDeliv /= delivCount;
+
+  let html = `
+  <div style="background:linear-gradient(135deg,#e94560,#c23152);padding:14px;margin:-12px -12px 0;border-radius:0 0 14px 14px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:28px;">⭐</span>
+      <div>
+        <div style="font-size:20px;font-weight:800;">BASE G</div>
+        <div style="font-size:10px;opacity:.7;">グルメレビュー・評価プラットフォーム</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 総合評価ヘッダー -->
+  <div style="background:rgba(233,69,96,0.08);padding:16px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05);">
+    <div style="font-size:42px;font-weight:900;color:#f0a500;">${G.baseGRating.toFixed(1)}</div>
+    <div style="margin:4px 0;">${starsHTML(G.baseGRating, 10)}</div>
+    <div style="font-size:11px;color:#aaa;">${totalReviews}件のレビュー</div>
+  </div>`;
+
+  // 評価分布バー
+  if (totalReviews > 0) {
+    html += `<div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.05);">
+      <div style="font-size:11px;font-weight:700;color:#e94560;margin-bottom:6px;">📊 評価の分布</div>`;
+    for (let i = 9; i >= 0; i--) {
+      const pct = (dist[i] / maxDist * 100).toFixed(0);
+      const cnt = dist[i];
+      html += `<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+        <span style="font-size:9px;width:18px;text-align:right;color:#aaa;">${i+1}★</span>
+        <div style="flex:1;height:6px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${i >= 7 ? '#4ecca3' : i >= 4 ? '#f0a500' : '#e94560'};border-radius:3px;transition:width .3s;"></div>
+        </div>
+        <span style="font-size:9px;width:22px;color:#888;">${cnt}</span>
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  // カテゴリ別評価
+  if (totalReviews >= 3) {
+    html += `<div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.05);">
+      <div style="font-size:11px;font-weight:700;color:#e94560;margin-bottom:8px;">📈 カテゴリ別評価</div>`;
+    const cats = [
+      {name:'味',score:avgTaste,icon:'🍕'},
+      {name:'接客',score:avgService,icon:'😊'},
+      {name:'雰囲気',score:avgAtmos,icon:'✨'},
+      {name:'価格',score:avgPrice,icon:'💰'}
+    ];
+    if (delivCount > 0) cats.push({name:'配達',score:avgDeliv,icon:'🛵'});
+
+    cats.forEach(c => {
+      const color = c.score >= 7 ? '#4ecca3' : c.score >= 4.5 ? '#f0a500' : '#e94560';
+      html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+        <span style="font-size:12px;">${c.icon}</span>
+        <span style="font-size:10px;width:30px;color:#ccc;">${c.name}</span>
+        <div style="flex:1;height:7px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${c.score * 10}%;background:${color};border-radius:3px;"></div>
+        </div>
+        <span style="font-size:10px;font-weight:700;color:${color};">${c.score.toFixed(1)}</span>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // フィルターバー（ビジュアルのみだが機能感を出す）
+  html += `<div style="padding:8px 12px;display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.05);">
+    <span style="font-size:10px;color:#aaa;line-height:22px;">並び替え:</span>
+    <button class="btn btn-sm" style="padding:2px 8px;font-size:9px;background:rgba(233,69,96,0.3);color:#fff;border:1px solid #e94560;" onclick="sortReviews('new')">新着順</button>
+    <button class="btn btn-sm" style="padding:2px 8px;font-size:9px;background:rgba(255,255,255,0.05);color:#aaa;border:1px solid rgba(255,255,255,0.1);" onclick="sortReviews('high')">高評価</button>
+    <button class="btn btn-sm" style="padding:2px 8px;font-size:9px;background:rgba(255,255,255,0.05);color:#aaa;border:1px solid rgba(255,255,255,0.1);" onclick="sortReviews('low')">低評価</button>
+  </div>`;
+
+  // レビュー一覧
+  html += '<div style="padding:8px 12px;">';
+  html += `<div style="font-size:11px;font-weight:700;color:#e94560;margin-bottom:8px;">💬 レビュー (${totalReviews}件)</div>`;
+
+  if (totalReviews === 0) {
+    html += '<div style="text-align:center;color:#555;padding:30px 10px;font-size:12px;">まだレビューがありません。<br>お客さんが来店すると評価が投稿されます。</div>';
+  } else {
+    const displayReviews = G.baseGReviews.slice(0, 30);
+    displayReviews.forEach((r, ri) => {
+      const starColor = r.stars >= 7 ? '#4ecca3' : r.stars >= 4.5 ? '#f0a500' : '#e94560';
+      html += `<div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;margin-bottom:8px;border-left:3px solid ${starColor};">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:16px;">${r.authorIcon || '👤'}</span>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#ddd;">${r.author}</div>
+              <div style="font-size:9px;color:#777;">${r.day}日目 ${r.time} ${r.verified ? '✅認証済' : ''} ${r.isDelivery ? '🛵配達' : '🪑店内'}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:14px;font-weight:800;color:${starColor};">${r.stars.toFixed(1)}</div>
+            <div style="font-size:8px;color:#888;">/10</div>
+          </div>
+        </div>
+
+        <div style="color:#f0a500;font-size:11px;margin-bottom:4px;">${'★'.repeat(Math.floor(r.stars))}${'☆'.repeat(10 - Math.floor(r.stars))}</div>
+
+        <div style="font-size:11px;color:#ccc;line-height:1.6;margin-bottom:6px;">${r.comment}</div>`;
+
+      // 注文内容
+      if (r.orderedItems && r.orderedItems.length > 0) {
+        html += `<div style="font-size:9px;color:#888;margin-bottom:4px;">🍕 注文: ${r.orderedItems.join(' ')}</div>`;
+      }
+
+      // ミニスコアバー
+      html += `<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">`;
+      if (r.tasteScore) html += miniScoreBadge('味', r.tasteScore);
+      if (r.serviceScore) html += miniScoreBadge('接客', r.serviceScore);
+      if (r.atmosScore) html += miniScoreBadge('雰囲気', r.atmosScore);
+      if (r.priceScore) html += miniScoreBadge('価格', r.priceScore);
+      if (r.delivScore) html += miniScoreBadge('配達', r.delivScore);
+      html += `</div>`;
+
+      // 「参考になった」ボタン
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.04);">
+        <span style="font-size:9px;color:#666;">👍 ${r.helpful}人が参考になったと回答</span>
+        <button style="background:none;border:1px solid rgba(255,255,255,0.1);color:#aaa;font-size:9px;padding:2px 8px;border-radius:4px;cursor:pointer;"
+          onclick="this.textContent='👍 参考になった！';this.style.borderColor='#4ecca3';this.style.color='#4ecca3';">参考になった</button>
+      </div>`;
+
+      html += '</div>';
+    });
+
+    if (totalReviews > 30) {
+      html += `<div style="text-align:center;padding:8px;font-size:11px;color:#888;">他 ${totalReviews - 30}件のレビュー</div>`;
+    }
+  }
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+function miniScoreBadge(label, score) {
+  const color = score >= 7 ? '#4ecca3' : score >= 4.5 ? '#f0a500' : '#e94560';
+  return `<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:${color}22;color:${color};border:1px solid ${color}44;">${label} ${score.toFixed(1)}</span>`;
+}
+
+function sortReviews(mode) {
+  if (mode === 'new') G.baseGReviews.sort((a, b) => b.day - a.day || 0);
+  else if (mode === 'high') G.baseGReviews.sort((a, b) => b.stars - a.stars);
+  else if (mode === 'low') G.baseGReviews.sort((a, b) => a.stars - b.stars);
+
+  if (G.phoneScreen === 'baseg') {
+    renderBaseG(document.getElementById('phone-body'));
+  }
+}
+
+function getGameTimeStr() {
+  const elapsed = GAME_DAY_MS - G.dayTimeLeft;
+  const gameMinutes = (elapsed / GAME_DAY_MS) * 14 * 60; // 9:00 - 23:00
+  const h = Math.floor(9 + gameMinutes / 60);
+  const m = Math.floor(gameMinutes % 60);
+  return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+}
+
+function spawnCustomer() {
+  if (G.totalCustomersToday >= MAX_CUSTOMERS_DAY) return;
+  
+  const toppingCount = randInt(2, 6);
+  const toppings = [];
+  for (let i = 0; i < toppingCount; i++) {
+    toppings.push(pick(INGREDIENTS).id);
+  }
+  
+  const customer = {
+    id: G.customerIdCounter++,
+    toppings: [...new Set(toppings)],
+    satisfaction: 0,
+    entering: true,
+    timer: 0,
+    served: false,
+    leaving: false,
+    x: -30,
+    targetX: 80 + Math.random() * 300,
+    y: 200 + Math.random() * 150,
+    color: `hsl(${randInt(0,360)},50%,60%)`,
+    walkFrame: 0
+  };
+  G.customersInShop.push(customer);
+  G.totalCustomersToday++;
+}
+
+function spawnDeliveryOrder() {
+  if (G.totalDeliveriesToday >= MAX_DELIVERIES_DAY) return;
+  if (!G.deliveryEnabled) return;
+
+  const ds = G.deliverySystem;
+  // 配達員が全員出払っていたらスポーン不可
+  const availableDrivers = ds.drivers.filter(d => d.status === 'idle');
+  if (availableDrivers.length === 0) return;
+
+  // 利用可能な車両
+  const availableVehicles = ds.vehicles.filter(v => v.status === 'idle');
+  if (availableVehicles.length === 0) return;
+
+  // エリアからランダム選択（アンロック済みのみ）
+  const unlockedZones = ds.zones.filter(z => z.unlocked);
+  if (unlockedZones.length === 0) return;
+
+  // 需要に応じた重み付きランダム
+  let demandTotal = 0;
+  unlockedZones.forEach(z => demandTotal += z.demand);
+  let pick_rand = Math.random() * demandTotal;
+  let selectedZone = unlockedZones[0];
+  for (const z of unlockedZones) {
+    pick_rand -= z.demand;
+    if (pick_rand <= 0) { selectedZone = z; break; }
+  }
+
+  // プロモーション効果
+  let orderBoost = 1;
+  let feeModifier = 1;
+  ds.promotions.forEach(p => {
+    if (p.id === 'free_delivery') { feeModifier = 0; orderBoost *= 1.5; }
+    if (p.id === 'bundle_deal') orderBoost *= 1.8;
+    if (p.id === 'rain_special') { orderBoost *= 1.3; feeModifier *= 1.3; }
+    if (p.id === 'weekend_rush') orderBoost *= 1.6;
+    if (p.id === 'loyalty_program') orderBoost *= 1.4;
+    if (p.id === 'late_night') orderBoost *= 1.2;
+    if (p.id === 'new_area') orderBoost *= 2.0;
+  });
+
+  // ピーク時ボーナス（ゲーム時間で判定）
+  const gameTime = getGameTimeStr();
+  const hour = parseInt(gameTime.split(':')[0]);
+  const isPeak = (hour >= 11 && hour <= 13) || (hour >= 18 && hour <= 21);
+  if (isPeak) {
+    orderBoost *= 1.4;
+    ds.peakHourBonus = true;
+  } else {
+    ds.peakHourBonus = false;
+  }
+
+  if (Math.random() > orderBoost * 0.3) return; // 確率フィルター
+
+  const toppingCount = randInt(2, 6);
+  const toppings = [];
+  for (let i = 0; i < toppingCount; i++) {
+    toppings.push(pick(INGREDIENTS).id);
+  }
+  const uniqueToppings = [...new Set(toppings)];
+
+  // 具材チェック
+  let canMake = true;
+  uniqueToppings.forEach(t => { if (G.ingredients[t] <= 0) canMake = false; });
+  if (!canMake) return;
+
+  // 特急注文判定
+  const isExpress = ds.expressEnabled && Math.random() < 0.25;
+  const expressSurcharge = isExpress ? 300 : 0;
+
+  // バッチ配達判定：同エリア配達中があれば相乗り
+  const isBatch = ds.batchEnabled && ds.activeOrders.some(o => o.zone.id === selectedZone.id && o.progress < 0.3);
+
+  // 複数ピザ注文 (1〜3枚)
+  const pizzaCount = Math.random() < 0.3 ? randInt(2, 3) : 1;
+
+  // 価格計算
+  const pricePerPizza = calcPizzaPrice(uniqueToppings.length, getTotalEquipQuality());
+  const totalPizzaPrice = pricePerPizza * pizzaCount;
+  const costPerPizza = calcPizzaCost(uniqueToppings);
+  const totalCost = costPerPizza * pizzaCount;
+
+  // 配達料計算
+  const baseFee = selectedZone.fee * feeModifier;
+  const distanceFee = selectedZone.dist * 80;
+  const totalDeliveryFee = Math.floor(baseFee + distanceFee + expressSurcharge);
+
+  // 手間賃・チップ
+  const handling = Math.floor(G.deliveryHandling * (1 + ds.level * 0.05));
+  const tipBase = G.deliveryTip * (1 + ds.level * 0.1);
+  // ドライバーの性格によるチップ変動
+  const driver = pick(availableDrivers);
+  let tipMultiplier = 1;
+  if (driver.trait === 'friendly') tipMultiplier = 1.3;
+  const driverTip = Math.floor(tipBase * tipMultiplier * (0.7 + Math.random() * 0.6));
+
+  // 梱包コスト
+  const pkg = PACKAGING_LEVELS[ds.packagingLevel - 1];
+  const packagingCost = pkg.cost * pizzaCount;
+
+  // 燃料コスト
+  const vehicle = pick(availableVehicles);
+  const fuelCost = Math.floor(vehicle.fuelCost * selectedZone.dist * 0.5);
+
+  // 顧客支払い総額
+  const customerPays = totalPizzaPrice + totalDeliveryFee;
+  // 当店コスト
+  const ourCosts = totalCost + handling + packagingCost + fuelCost + Math.floor(driver.salary / 100);
+  // 純利益
+  const netProfit = customerPays + driverTip - ourCosts;
+
+  // 具材消費
+  for (let p = 0; p < pizzaCount; p++) {
+    uniqueToppings.forEach(t => {
+      if (G.ingredients[t] > 0) G.ingredients[t]--;
+    });
+  }
+
+  G.money += customerPays + driverTip;
+  G.totalSalesToday += customerPays;
+  G.totalExpensesToday += ourCosts;
+  G.totalDeliveriesToday++;
+  ds.completedToday++;
+  ds.totalRevToday += customerPays;
+  ds.totalTipsToday += driverTip;
+  ds.totalFeesToday += totalDeliveryFee;
+
+  // 配達時間計算
+  let deliveryTime = ds.estimatedTimeBase * selectedZone.dist * 1000;
+  deliveryTime /= vehicle.speed;
+  if (driver.trait === 'speed_demon') deliveryTime *= 0.75;
+  if (driver.trait === 'careful') deliveryTime *= 1.1;
+  if (driver.trait === 'local_expert') deliveryTime *= 0.85;
+  if (driver.trait === 'veteran') deliveryTime *= 0.9;
+  if (driver.trait === 'newbie') deliveryTime *= 1.15;
+  if (isExpress) deliveryTime *= 0.5;
+  if (isBatch) deliveryTime *= 0.7;
+  deliveryTime = Math.max(3000, deliveryTime);
+
+  // 配達品質予測
+  let qualityScore = pkg.quality;
+  qualityScore *= (0.8 + getTotalEquipQuality() * 0.2);
+  if (ds.trackingEnabled) qualityScore += 0.2;
+  DELIVERY_UPGRADES.forEach(u => {
+    if (u.unlocked) {
+      if (u.id === 'insulated_bag') qualityScore += 0.3;
+      if (u.id === 'weather_proof') qualityScore += 0.15;
+    }
+  });
+
+  // ドライバー・車両を使用中に
+  driver.status = 'delivering';
+  driver.currentDelivery = Date.now();
+  driver.deliveryCount++;
+  driver.totalEarnings += driverTip;
+  vehicle.status = 'delivering';
+  vehicle.totalTrips++;
+  vehicle.mileage += selectedZone.dist * 2;
+
+  const order = {
+    id: Date.now() + Math.random(),
+    zone: selectedZone,
+    driver: driver,
+    vehicle: vehicle,
+    toppings: uniqueToppings,
+    pizzaCount,
+    pricePerPizza,
+    totalPrice: customerPays,
+    deliveryFee: totalDeliveryFee,
+    tip: driverTip,
+    handling,
+    packagingCost,
+    fuelCost,
+    netProfit,
+    isExpress,
+    isBatch,
+    timer: deliveryTime,
+    maxTimer: deliveryTime,
+    progress: 0,
+    qualityScore,
+    status: 'preparing',
+    customerName: pick(STAFF_LAST_NAMES) + pick(['さん','様']),
+    customerAddress: selectedZone.name + ' ' + randInt(1, 30) + '-' + randInt(1, 15),
+    orderTime: getGameTimeStr(),
+    estimatedArrival: '',
+    rating: 0
+  };
+
+  ds.activeOrders.push(order);
+}
+
+function createDeliveryDriver(forceIdx) {
+  const ds = G.deliverySystem;
+  const fname = DRIVER_FIRST_NAMES[forceIdx !== undefined ? forceIdx : Math.floor(Math.random() * DRIVER_FIRST_NAMES.length)];
+  const lname = pick(STAFF_LAST_NAMES);
+  const traitData = pick(DRIVER_TRAITS);
+  return {
+    id: Date.now() + Math.random(),
+    name: lname + ' ' + fname,
+    trait: traitData.id,
+    traitName: traitData.name,
+    traitIcon: traitData.icon,
+    traitEffect: traitData.effect,
+    level: 1,
+    exp: 0,
+    expToNext: 80,
+    maxLevel: 15,
+    salary: 2000 + Math.floor(Math.random() * 1500),
+    status: 'idle',
+    stamina: 80 + Math.random() * 20,
+    maxStamina: 80 + Math.random() * 20,
+    deliveryCount: 0,
+    totalEarnings: 0,
+    rating: 5.0,
+    ratingCount: 0,
+    currentDelivery: null,
+    color: `hsl(${Math.floor(Math.random() * 360)},55%,55%)`
+  };
+}
+
+function purchaseVehicle(typeId) {
+  const vType = VEHICLE_TYPES.find(v => v.id === typeId);
+  if (!vType) return;
+  if (G.money < vType.cost) return notify('資金不足', 'error');
+  G.money -= vType.cost;
+  G.deliverySystem.vehicles.push({
+    id: Date.now() + Math.random(),
+    type: vType.id,
+    name: vType.name,
+    icon: vType.icon,
+    speed: vType.speed,
+    capacity: vType.capacity,
+    maintenance: vType.maintenance,
+    fuelCost: vType.fuelCost,
+    status: 'idle',
+    condition: 100,
+    totalTrips: 0,
+    mileage: 0
+  });
+  notify(`${vType.icon} ${vType.name}を購入！`, 'success');
+  renderPanel();
+}
+
+function hireDriver() {
+  const ds = G.deliverySystem;
+  if (ds.drivers.length >= ds.maxFleet) return notify('配達員上限です', 'error');
+  const hireCost = 3000 + ds.drivers.length * 500;
+  if (G.money < hireCost) return notify('資金不足', 'error');
+  G.money -= hireCost;
+  const d = createDeliveryDriver();
+  ds.drivers.push(d);
+  ds.fleetSize = ds.drivers.length;
+  notify(`${d.traitIcon} ${d.name}を配達員として雇用！`, 'success');
+  renderPanel();
+}
+
+function unlockDeliveryZone(zoneId) {
+  const zone = G.deliverySystem.zones.find(z => z.id === zoneId);
+  if (!zone || zone.unlocked) return;
+  if (G.money < zone.unlockCost) return notify('資金不足', 'error');
+  G.money -= zone.unlockCost;
+  zone.unlocked = true;
+  notify(`${zone.icon} ${zone.name}を配達エリアに追加！`, 'success');
+  renderPanel();
+}
+
+function upgradePackaging() {
+  const ds = G.deliverySystem;
+  if (ds.packagingLevel >= 5) return notify('最大レベル', 'error');
+  const next = PACKAGING_LEVELS[ds.packagingLevel];
+  const cost = next.level * 8000;
+  if (G.money < cost) return notify('資金不足', 'error');
+  G.money -= cost;
+  ds.packagingLevel++;
+  notify(`梱包を${PACKAGING_LEVELS[ds.packagingLevel - 1].name}にアップグレード！`, 'success');
+  renderPanel();
+}
+
+function purchaseDeliveryUpgrade(upgradeId) {
+  const ug = DELIVERY_UPGRADES.find(u => u.id === upgradeId);
+  if (!ug || ug.unlocked) return;
+  if (G.money < ug.cost) return notify('資金不足', 'error');
+  G.money -= ug.cost;
+  ug.unlocked = true;
+  const ds = G.deliverySystem;
+  if (upgradeId === 'tracking') ds.trackingEnabled = true;
+  if (upgradeId === 'express') ds.expressEnabled = true;
+  if (upgradeId === 'batch') ds.batchEnabled = true;
+  if (upgradeId === 'auto_dispatch') ds.autoDispatch = true;
+  notify(`${ug.icon} ${ug.name}を導入！`, 'success');
+  renderPanel();
+}
+
+function activatePromo(promoId) {
+  const promo = DELIVERY_PROMOS.find(p => p.id === promoId);
+  if (!promo) return;
+  if (G.money < promo.cost) return notify('資金不足', 'error');
+  const ds = G.deliverySystem;
+  if (ds.promotions.find(p => p.id === promoId)) return notify('すでに実施中', 'error');
+  G.money -= promo.cost;
+  ds.promotions.push({ ...promo, daysLeft: promo.duration });
+  notify(`${promo.icon} ${promo.name}を開始！`, 'success');
+  renderPanel();
+}
+
+function upgradeDeliverySystem() {
+  const ds = G.deliverySystem;
+  if (ds.level >= 10) return notify('最大レベル', 'error');
+  const cost = (ds.level + 1) * 15000;
+  if (G.money < cost) return notify('資金不足', 'error');
+  G.money -= cost;
+  ds.level++;
+  ds.estimatedTimeBase = Math.max(8, 20 - ds.level * 1.2);
+  notify(`配達システムをLv.${ds.level}にアップグレード！`, 'success');
+  renderPanel();
+}
+
+function fireDriver(idx) {
+  const ds = G.deliverySystem;
+  if (ds.drivers[idx].status === 'delivering') return notify('配達中は解雇できません', 'error');
+  const name = ds.drivers[idx].name;
+  ds.drivers.splice(idx, 1);
+  ds.fleetSize = ds.drivers.length;
+  notify(`${name}を解雇`, 'info');
+  renderPanel();
+}
+
+function repairVehicle(idx) {
+  const v = G.deliverySystem.vehicles[idx];
+  const cost = Math.floor((100 - v.condition) * v.maintenance * 0.05);
+  if (cost <= 0) return notify('修理不要です', 'info');
+  if (G.money < cost) return notify('資金不足', 'error');
+  G.money -= cost;
+  v.condition = 100;
+  notify(`${v.icon} ${v.name}を修理 (${fmt(cost)})`, 'success');
+  renderPanel();
+}
+
+function sellVehicle(idx) {
+  const v = G.deliverySystem.vehicles[idx];
+  if (v.status === 'delivering') return notify('使用中は売却不可', 'error');
+  const vType = VEHICLE_TYPES.find(t => t.id === v.type);
+  const sellPrice = Math.floor(vType.cost * 0.4 * (v.condition / 100));
+  G.money += sellPrice;
+  G.deliverySystem.vehicles.splice(idx, 1);
+  notify(`${v.icon} ${v.name}を売却 (+${fmt(sellPrice)})`, 'info');
+  renderPanel();
+}  
+  const toppingCount = randInt(2, 5);
+  const toppings = [];
+  for (let i = 0; i < toppingCount; i++) {
+    toppings.push(pick(INGREDIENTS).id);
+  }
+  const uniqueToppings = [...new Set(toppings)];
+  
+  const price = calcPizzaPrice(uniqueToppings.length, getTotalEquipQuality());
+  const totalFee = G.deliveryFee + G.deliveryTip + G.deliveryHandling;
+  
+  // Check ingredients
+  let canMake = true;
+  uniqueToppings.forEach(t => { if (G.ingredients[t] <= 0) canMake = false; });
+  if (!canMake) return;
+  
+  uniqueToppings.forEach(t => { G.ingredients[t]--; });
+  
+  const revenue = price - totalFee - calcPizzaCost(uniqueToppings);
+  G.money += price - totalFee;
+  G.totalSalesToday += price;
+  G.totalExpensesToday += totalFee + calcPizzaCost(uniqueToppings);
+  G.totalDeliveriesToday++;
+  
+  G.deliveriesQueue.push({
+    id: Date.now(),
+    toppings: uniqueToppings,
+    price,
+    fee: totalFee,
+    status: 'delivering',
+    timer: 5000 + Math.random() * 10000
+  });
+
+function processKX2Visit() {
+  if (!G.kx2Subscribed) return;
+  if (G.day - G.kx2LastVisitDay < 5) return;
+  if (Math.random() > 0.5) return; // Not every eligible day
+  
+  G.kx2LastVisitDay = G.day;
+  G.kx2Visits++;
+  
+  // Calculate KX2 rating (out of 20)
+  let rating = 0;
+  rating += clamp(G.avgFoodQuality * 1.5, 0, 6); // taste & texture: max 6
+  rating += clamp(getFurnitureScore().combined * 0.03, 0, 5); // interior: max 5
+  rating += clamp(getStaffEfficiency() * 4, 0, 4); // staff attitude: max 4
+  rating += clamp((G.money > 0 ? 3 : 0) + (G.totalSalesAllTime > 100000 ? 2 : G.totalSalesAllTime > 50000 ? 1 : 0), 0, 5); // business: max 5
+  
+  G.kx2Rating = clamp(Math.round(rating * 10) / 10, 0, 20);
+  
+  G.expertEvals.push({
+    day: G.day,
+    rating: G.kx2Rating,
+    comment: G.kx2Rating >= 15 ? '素晴らしい経営です' : G.kx2Rating >= 10 ? 'まだ改善の余地があります' : '要改善点が多いです'
+  });
+  
+  notify(`KX2専門家が来店！評価: ${G.kx2Rating}/20`, G.kx2Rating >= 12 ? 'success' : 'info');
+}
+
+function endDay() {
+  G.paused = true;
+  
+  // Pay staff salaries
+  let salaryTotal = 0;
+  G.staff.forEach(s => { salaryTotal += s.salary; });
+  G.money -= salaryTotal;
+  G.totalExpensesToday += salaryTotal;
+  
+  // Ad cost
+  if (G.activeAd) {
+    G.money -= G.activeAd.cost;
+    G.totalExpensesToday += G.activeAd.cost;
+  }
+  
+  // KX2 subscription (monthly, check every 30 days)
+  if (G.kx2Subscribed && G.day % 30 === 0) {
+    G.money -= 15000;
+    G.totalExpensesToday += 15000;
+  }
+  function spawnDeliveryOrder() {
+  if (G.totalDeliveriesToday >= MAX_DELIVERIES_DAY) return;
+  if (!G.deliveryEnabled) return;
+
+  const ds = G.deliverySystem;
+  // 配達員が全員出払っていたらスポーン不可
+  const availableDrivers = ds.drivers.filter(d => d.status === 'idle');
+  if (availableDrivers.length === 0) return;
+
+  // 利用可能な車両
+  const availableVehicles = ds.vehicles.filter(v => v.status === 'idle');
+  if (availableVehicles.length === 0) return;
+
+  // エリアからランダム選択（アンロック済みのみ）
+  const unlockedZones = ds.zones.filter(z => z.unlocked);
+  if (unlockedZones.length === 0) return;
+
+  // 需要に応じた重み付きランダム
+  let demandTotal = 0;
+  unlockedZones.forEach(z => demandTotal += z.demand);
+  let pick_rand = Math.random() * demandTotal;
+  let selectedZone = unlockedZones[0];
+  for (const z of unlockedZones) {
+    pick_rand -= z.demand;
+    if (pick_rand <= 0) { selectedZone = z; break; }
+  }
+
+  // プロモーション効果
+  let orderBoost = 1;
+  let feeModifier = 1;
+  ds.promotions.forEach(p => {
+    if (p.id === 'free_delivery') { feeModifier = 0; orderBoost *= 1.5; }
+    if (p.id === 'bundle_deal') orderBoost *= 1.8;
+    if (p.id === 'rain_special') { orderBoost *= 1.3; feeModifier *= 1.3; }
+    if (p.id === 'weekend_rush') orderBoost *= 1.6;
+    if (p.id === 'loyalty_program') orderBoost *= 1.4;
+    if (p.id === 'late_night') orderBoost *= 1.2;
+    if (p.id === 'new_area') orderBoost *= 2.0;
+  });
+
+  // ピーク時ボーナス（ゲーム時間で判定）
+  const gameTime = getGameTimeStr();
+  const hour = parseInt(gameTime.split(':')[0]);
+  const isPeak = (hour >= 11 && hour <= 13) || (hour >= 18 && hour <= 21);
+  if (isPeak) {
+    orderBoost *= 1.4;
+    ds.peakHourBonus = true;
+  } else {
+    ds.peakHourBonus = false;
+  }
+
+  if (Math.random() > orderBoost * 0.3) return; // 確率フィルター
+
+  const toppingCount = randInt(2, 6);
+  const toppings = [];
+  for (let i = 0; i < toppingCount; i++) {
+    toppings.push(pick(INGREDIENTS).id);
+  }
+  const uniqueToppings = [...new Set(toppings)];
+
+  // 具材チェック
+  let canMake = true;
+  uniqueToppings.forEach(t => { if (G.ingredients[t] <= 0) canMake = false; });
+  if (!canMake) return;
+
+  // 特急注文判定
+  const isExpress = ds.expressEnabled && Math.random() < 0.25;
+  const expressSurcharge = isExpress ? 300 : 0;
+
+  // バッチ配達判定：同エリア配達中があれば相乗り
+  const isBatch = ds.batchEnabled && ds.activeOrders.some(o => o.zone.id === selectedZone.id && o.progress < 0.3);
+
+  // 複数ピザ注文 (1〜3枚)
+  const pizzaCount = Math.random() < 0.3 ? randInt(2, 3) : 1;
+
+  // 価格計算
+  const pricePerPizza = calcPizzaPrice(uniqueToppings.length, getTotalEquipQuality());
+  const totalPizzaPrice = pricePerPizza * pizzaCount;
+  const costPerPizza = calcPizzaCost(uniqueToppings);
+  const totalCost = costPerPizza * pizzaCount;
+
+  // 配達料計算
+  const baseFee = selectedZone.fee * feeModifier;
+  const distanceFee = selectedZone.dist * 80;
+  const totalDeliveryFee = Math.floor(baseFee + distanceFee + expressSurcharge);
+
+  // 手間賃・チップ
+  const handling = Math.floor(G.deliveryHandling * (1 + ds.level * 0.05));
+  const tipBase = G.deliveryTip * (1 + ds.level * 0.1);
+  // ドライバーの性格によるチップ変動
+  const driver = pick(availableDrivers);
+  let tipMultiplier = 1;
+  if (driver.trait === 'friendly') tipMultiplier = 1.3;
+  const driverTip = Math.floor(tipBase * tipMultiplier * (0.7 + Math.random() * 0.6));
+
+  // 梱包コスト
+  const pkg = PACKAGING_LEVELS[ds.packagingLevel - 1];
+  const packagingCost = pkg.cost * pizzaCount;
+
+  // 燃料コスト
+  const vehicle = pick(availableVehicles);
+  const fuelCost = Math.floor(vehicle.fuelCost * selectedZone.dist * 0.5);
+
+  // 顧客支払い総額
+  const customerPays = totalPizzaPrice + totalDeliveryFee;
+  // 当店コスト
+  const ourCosts = totalCost + handling + packagingCost + fuelCost + Math.floor(driver.salary / 100);
+  // 純利益
+  const netProfit = customerPays + driverTip - ourCosts;
+
+  // 具材消費
+  for (let p = 0; p < pizzaCount; p++) {
+    uniqueToppings.forEach(t => {
+      if (G.ingredients[t] > 0) G.ingredients[t]--;
+    });
+  }
+
+  G.money += customerPays + driverTip;
+  G.totalSalesToday += customerPays;
+  G.totalExpensesToday += ourCosts;
+  G.totalDeliveriesToday++;
+  ds.completedToday++;
+  ds.totalRevToday += customerPays;
+  ds.totalTipsToday += driverTip;
+  ds.totalFeesToday += totalDeliveryFee;
+
+  // 配達時間計算
+  let deliveryTime = ds.estimatedTimeBase * selectedZone.dist * 1000;
+  deliveryTime /= vehicle.speed;
+  if (driver.trait === 'speed_demon') deliveryTime *= 0.75;
+  if (driver.trait === 'careful') deliveryTime *= 1.1;
+  if (driver.trait === 'local_expert') deliveryTime *= 0.85;
+  if (driver.trait === 'veteran') deliveryTime *= 0.9;
+  if (driver.trait === 'newbie') deliveryTime *= 1.15;
+  if (isExpress) deliveryTime *= 0.5;
+  if (isBatch) deliveryTime *= 0.7;
+  deliveryTime = Math.max(3000, deliveryTime);
+
+  // 配達品質予測
+  let qualityScore = pkg.quality;
+  qualityScore *= (0.8 + getTotalEquipQuality() * 0.2);
+  if (ds.trackingEnabled) qualityScore += 0.2;
+  DELIVERY_UPGRADES.forEach(u => {
+    if (u.unlocked) {
+      if (u.id === 'insulated_bag') qualityScore += 0.3;
+      if (u.id === 'weather_proof') qualityScore += 0.15;
+    }
+  });
+
+  // ドライバー・車両を使用中に
+  driver.status = 'delivering';
+  driver.currentDelivery = Date.now();
+  driver.deliveryCount++;
+  driver.totalEarnings += driverTip;
+  vehicle.status = 'delivering';
+  vehicle.totalTrips++;
+  vehicle.mileage += selectedZone.dist * 2;
+
+  const order = {
+    id: Date.now() + Math.random(),
+    zone: selectedZone,
+    driver: driver,
+    vehicle: vehicle,
+    toppings: uniqueToppings,
+    pizzaCount,
+    pricePerPizza,
+    totalPrice: customerPays,
+    deliveryFee: totalDeliveryFee,
+    tip: driverTip,
+    handling,
+    packagingCost,
+    fuelCost,
+    netProfit,
+    isExpress,
+    isBatch,
+    timer: deliveryTime,
+    maxTimer: deliveryTime,
+    progress: 0,
+    qualityScore,
+    status: 'preparing',
+    customerName: pick(STAFF_LAST_NAMES) + pick(['さん','様']),
+    customerAddress: selectedZone.name + ' ' + randInt(1, 30) + '-' + randInt(1, 15),
+    orderTime: getGameTimeStr(),
+    estimatedArrival: '',
+    rating: 0
+  };
+
+  ds.activeOrders.push(order);
+}
+
+function createDeliveryDriver(forceIdx) {
+  const ds = G.deliverySystem;
+  const fname = DRIVER_FIRST_NAMES[forceIdx !== undefined ? forceIdx : Math.floor(Math.random() * DRIVER_FIRST_NAMES.length)];
+  const lname = pick(STAFF_LAST_NAMES);
+  const traitData = pick(DRIVER_TRAITS);
+  return {
+    id: Date.now() + Math.random(),
+    name: lname + ' ' + fname,
+    trait: traitData.id,
+    traitName: traitData.name,
+    traitIcon: traitData.icon,
+    traitEffect: traitData.effect,
+    level: 1,
+    exp: 0,
+    expToNext: 80,
+    maxLevel: 15,
+    salary: 2000 + Math.floor(Math.random() * 1500),
+    status: 'idle',
+    stamina: 80 + Math.random() * 20,
+    maxStamina: 80 + Math.random() * 20,
+    deliveryCount: 0,
+    totalEarnings: 0,
+    rating: 5.0,
+    ratingCount: 0,
+    currentDelivery: null,
+    color: `hsl(${Math.floor(Math.random() * 360)},55%,55%)`
+  };
+}
+
+function purchaseVehicle(typeId) {
+  const vType = VEHICLE_TYPES.find(v => v.id === typeId);
+  if (!vType) return;
+  if (G.money < vType.cost) return notify('資金不足', 'error');
+  G.money -= vType.cost;
+  G.deliverySystem.vehicles.push({
+    id: Date.now() + Math.random(),
+    type: vType.id,
+    name: vType.name,
+    icon: vType.icon,
+    speed: vType.speed,
+    capacity: vType.capacity,
+    maintenance: vType.maintenance,
+    fuelCost: vType.fuelCost,
+    status: 'idle',
+    condition: 100,
+    totalTrips: 0,
+    mileage: 0
+  });
+  notify(`${vType.icon} ${vType.name}を購入！`, 'success');
+  renderPanel();
+}
+
+function hireDriver() {
+  const ds = G.deliverySystem;
+  if (ds.drivers.length >= ds.maxFleet) return notify('配達員上限です', 'error');
+  const hireCost = 3000 + ds.drivers.length * 500;
+  if (G.money < hireCost) return notify('資金不足', 'error');
+  G.money -= hireCost;
+  const d = createDeliveryDriver();
+  ds.drivers.push(d);
+  ds.fleetSize = ds.drivers.length;
+  notify(`${d.traitIcon} ${d.name}を配達員として雇用！`, 'success');
+  renderPanel();
+}
+
+function unlockDeliveryZone(zoneId) {
+  const zone = G.deliverySystem.zones.find(z => z.id === zoneId);
+  if (!zone || zone.unlocked) return;
+  if (G.money < zone.unlockCost) return notify('資金不足', 'error');
+  G.money -= zone.unlockCost;
+  zone.unlocked = true;
+  notify(`${zone.icon} ${zone.name}を配達エリアに追加！`, 'success');
+  renderPanel();
+}
+
+function upgradePackaging() {
+  const ds = G.deliverySystem;
+  if (ds.packagingLevel >= 5) return notify('最大レベル', 'error');
+  const next = PACKAGING_LEVELS[ds.packagingLevel];
+  const cost = next.level * 8000;
+  if (G.money < cost) return notify('資金不足', 'error');
+  G.money -= cost;
+  ds.packagingLevel++;
+  notify(`梱包を${PACKAGING_LEVELS[ds.packagingLevel - 1].name}にアップグレード！`, 'success');
+  renderPanel();
+}
+
+function purchaseDeliveryUpgrade(upgradeId) {
+  const ug = DELIVERY_UPGRADES.find(u => u.id === upgradeId);
+  if (!ug || ug.unlocked) return;
+  if (G.money < ug.cost) return notify('資金不足', 'error');
+  G.money -= ug.cost;
+  ug.unlocked = true;
+  const ds = G.deliverySystem;
+  if (upgradeId === 'tracking') ds.trackingEnabled = true;
+  if (upgradeId === 'express') ds.expressEnabled = true;
+  if (upgradeId === 'batch') ds.batchEnabled = true;
+  if (upgradeId === 'auto_dispatch') ds.autoDispatch = true;
+  notify(`${ug.icon} ${ug.name}を導入！`, 'success');
+  renderPanel();
+}
+
+function activatePromo(promoId) {
+  const promo = DELIVERY_PROMOS.find(p => p.id === promoId);
+  if (!promo) return;
+  if (G.money < promo.cost) return notify('資金不足', 'error');
+  const ds = G.deliverySystem;
+  if (ds.promotions.find(p => p.id === promoId)) return notify('すでに実施中', 'error');
+  G.money -= promo.cost;
+  ds.promotions.push({ ...promo, daysLeft: promo.duration });
+  notify(`${promo.icon} ${promo.name}を開始！`, 'success');
+  renderPanel();
+}
+
+function upgradeDeliverySystem() {
+  const ds = G.deliverySystem;
+  if (ds.level >= 10) return notify('最大レベル', 'error');
+  const cost = (ds.level + 1) * 15000;
+  if (G.money < cost) return notify('資金不足', 'error');
+  G.money -= cost;
+  ds.level++;
+  ds.estimatedTimeBase = Math.max(8, 20 - ds.level * 1.2);
+  notify(`配達システムをLv.${ds.level}にアップグレード！`, 'success');
+  renderPanel();
+}
+
+function fireDriver(idx) {
+  const ds = G.deliverySystem;
+  if (ds.drivers[idx].status === 'delivering') return notify('配達中は解雇できません', 'error');
+  const name = ds.drivers[idx].name;
+  ds.drivers.splice(idx, 1);
+  ds.fleetSize = ds.drivers.length;
+  notify(`${name}を解雇`, 'info');
+  renderPanel();
+}
+
+function repairVehicle(idx) {
+  const v = G.deliverySystem.vehicles[idx];
+  const cost = Math.floor((100 - v.condition) * v.maintenance * 0.05);
+  if (cost <= 0) return notify('修理不要です', 'info');
+  if (G.money < cost) return notify('資金不足', 'error');
+  G.money -= cost;
+  v.condition = 100;
+  notify(`${v.icon} ${v.name}を修理 (${fmt(cost)})`, 'success');
+  renderPanel();
+}
+
+function sellVehicle(idx) {
+  const v = G.deliverySystem.vehicles[idx];
+  if (v.status === 'delivering') return notify('使用中は売却不可', 'error');
+  const vType = VEHICLE_TYPES.find(t => t.id === v.type);
+  const sellPrice = Math.floor(vType.cost * 0.4 * (v.condition / 100));
+  G.money += sellPrice;
+  G.deliverySystem.vehicles.splice(idx, 1);
+  notify(`${v.icon} ${v.name}を売却 (+${fmt(sellPrice)})`, 'info');
+  renderPanel();
+}
+
+ // 配達システム日次処理
+  if (G.deliveryEnabled) {
+    const ds = G.deliverySystem;
+    // 配達員給料
+    let driverSalaryTotal = 0;
+    ds.drivers.forEach(d => { driverSalaryTotal += d.salary; d.stamina = clamp(d.stamina + d.maxStamina * 0.5, 0, d.maxStamina); });
+    G.money -= driverSalaryTotal;
+    G.totalExpensesToday += driverSalaryTotal;
+    // 車両維持費
+    let vehicleMaintTotal = 0;
+    ds.vehicles.forEach(v => { vehicleMaintTotal += v.maintenance; });
+    G.money -= Math.floor(vehicleMaintTotal / 30); // 日割り
+    G.totalExpensesToday += Math.floor(vehicleMaintTotal / 30);
+    // プロモーション日数消化
+    for (let i = ds.promotions.length - 1; i >= 0; i--) {
+      ds.promotions[i].daysLeft--;
+      if (ds.promotions[i].daysLeft <= 0) {
+        notify(`${ds.promotions[i].icon} ${ds.promotions[i].name}が終了`, 'info');
+        ds.promotions.splice(i, 1);
+      }
+    }
+    // 全注文を完了/クリア
+    ds.activeOrders.forEach(o => { if(o.driver)o.driver.status='idle'; if(o.vehicle)o.vehicle.status='idle'; });
+    ds.activeOrders = [];
+    ds.completedToday = 0;
+    ds.failedToday = 0;
+    ds.totalRevToday = 0;
+    ds.totalTipsToday = 0;
+    ds.totalFeesToday = 0;
+  }
+
+  // Loan interest
+  if (G.loanAmount > 0) {
+    const interest = Math.floor(G.loanAmount * LOAN_INTEREST_RATE / 30);
+    G.loanInterestAccum += interest;
+    G.loanAmount += interest;
+  }
+  
+  // Personal loan interest (higher!)
+  Object.keys(G.personalLoans).forEach(name => {
+    if (G.personalLoans[name] > 0) {
+      const interest = Math.floor(G.personalLoans[name] * 0.08 / 30);
+      G.personalLoans[name] += interest;
+    }
+  });
+  
+  // Restore staff stamina
+  G.staff.forEach(s => {
+    s.stamina = clamp(s.stamina + s.maxStamina * 0.4, 0, s.maxStamina);
+  });
+  
+  // Update avg quality metrics
+  G.avgFoodQuality = clamp(getTotalEquipQuality() * 3 + getStaffEfficiency() * 2, 1, 10);
+  G.avgServiceQuality = clamp(getStaffEfficiency() * 6 + G.staff.length * 0.3, 1, 10);
+  G.avgAtmosphere = clamp(getFurnitureScore().combined * 0.05 + G.shopLevel, 1, 10);
+  
+  G.totalSalesAllTime += G.totalSalesToday;
+  
+  // Process KX2
+  processKX2Visit();
+  
+  // Day summary
+  const summary = {
+    day: G.day,
+    sales: G.totalSalesToday,
+    customers: G.totalCustomersToday,
+    deliveries: G.totalDeliveriesToday,
+    expenses: G.totalExpensesToday,
+    profit: G.totalSalesToday - G.totalExpensesToday,
+    rating: G.baseGRating
+  };
+  G.dayHistory.push(summary);
+  
+  showDayEndScreen(summary);
+}
+
+function startNewDay() {
+  G.day++;
+  G.dayTimeLeft = GAME_DAY_MS;
+  G.totalSalesToday = 0;
+  G.totalCustomersToday = 0;
+  G.totalDeliveriesToday = 0;
+  G.totalExpensesToday = 0;
+  G.customersInShop = [];
+  G.deliveriesQueue = [];
+  G.paused = false;
+  closeDayEnd();
+  notify(`${G.day}日目スタート！`, 'success');
+}
+
+function showDayEndScreen(summary) {
+  const panel = document.getElementById('day-end-panel');
+  panel.innerHTML = `
+    <h2>📊 ${G.day}日目 終了</h2>
+    <div class="day-stat-row"><span>売上</span><span class="c-green">${fmt(summary.sales)}</span></div>
+    <div class="day-stat-row"><span>来客数</span><span>${summary.customers}人</span></div>
+    <div class="day-stat-row"><span>配達数</span><span>${summary.deliveries}件</span></div>
+    <div class="day-stat-row"><span>経費</span><span class="c-red">${fmt(summary.expenses)}</span></div>
+    <div class="day-stat-row" style="font-size:16px;font-weight:700;border-top:2px solid #f0a500;padding-top:10px;">
+      <span>純利益</span><span class="${summary.profit >= 0 ? 'c-green' : 'c-red'}">${fmt(summary.profit)}</span>
+    </div>
+    <div class="day-stat-row"><span>現在の資金</span><span class="c-green">${fmt(G.money)}</span></div>
+    <div class="day-stat-row"><span>評判</span><span class="c-yellow">★${G.baseGRating.toFixed(1)}</span></div>
+    <button class="btn btn-success btn-block" style="margin-top:16px;padding:12px;" onclick="startNewDay()">🌅 次の日へ</button>
+  `;
+  document.getElementById('day-end-overlay').style.display = 'flex';
+}
+
+function closeDayEnd() {
+  document.getElementById('day-end-overlay').style.display = 'none';
+}
+
+// ============================================
+// MAIN GAME LOOP
+// ============================================
+function gameLoop() {
+  const now = Date.now();
+  const dt = now - G.lastTick;
+  G.lastTick = now;
+  
+  if (!G.paused) {
+    G.dayTimeLeft -= dt;
+    if (G.dayTimeLeft <= 0) {
+      G.dayTimeLeft = 0;
+      endDay();
+    }
+    
+    G.animFrame++;
+    
+    // Customer spawning
+    const attraction = getCustomerAttraction();
+    const spawnRate = 2000 / attraction; // ms between spawns
+    G.customerSpawnAccum += dt;
+    while (G.customerSpawnAccum >= spawnRate && G.totalCustomersToday < MAX_CUSTOMERS_DAY) {
+      G.customerSpawnAccum -= spawnRate;
+      if (G.customersInShop.length < 20 + G.shopLevel * 5) {
+        spawnCustomer();
+      }
+    }
+    
+    // Delivery spawning
+    if (G.deliveryEnabled) {
+      const delivRate = 5000 / attraction;
+      G.deliverySpawnAccum += dt;
+      while (G.deliverySpawnAccum >= delivRate && G.totalDeliveriesToday < MAX_DELIVERIES_DAY) {
+        G.deliverySpawnAccum -= delivRate;
+        spawnDeliveryOrder();
+      }
+    }
+    
+    // Update customers
+    for (let i = G.customersInShop.length - 1; i >= 0; i--) {
+      const c = G.customersInShop[i];
+      c.timer += dt;
+      c.walkFrame += dt * 0.005;
+      
+      if (c.entering) {
+        c.x += (c.targetX - c.x) * 0.05;
+        if (Math.abs(c.x - c.targetX) < 2) {
+          c.entering = false;
+        }
+      }
+      
+      if (!c.served && !c.entering && c.timer > 2000) {
+        if (servePizza(c)) {
+          c.served = true;
+          c.timer = 0;
+        } else {
+          // Can't serve - out of ingredients
+          c.leaving = true;
+          c.satisfaction = 1;
+          if (Math.random() < 0.5) addReview(1, c);
+        }
+      }
+      
+      if (c.served && c.timer > 3000) {
+        c.leaving = true;
+      }
+      
+      if (c.leaving) {
+        c.x += 4;
+        if (c.x > 600) {
+          G.customersInShop.splice(i, 1);
+        }
+      }
+    }
+    
+    // ---- Update deliveries (大型配達システム) ----
+    if (G.deliveryEnabled) {
+      const ds = G.deliverySystem;
+      for (let i = ds.activeOrders.length - 1; i >= 0; i--) {
+        const order = ds.activeOrders[i];
+        order.timer -= dt;
+        order.progress = clamp(1 - (order.timer / order.maxTimer), 0, 1);
+
+        // ステータス遷移
+        if (order.progress < 0.15) order.status = 'preparing';
+        else if (order.progress < 0.85) order.status = 'delivering';
+        else if (order.progress < 1) order.status = 'arriving';
+
+        // 完了処理
+        if (order.timer <= 0) {
+          order.status = 'completed';
+
+          // 配達品質に基づく評価
+          let rating = 3 + order.qualityScore * 1.5 + Math.random() * 1.5;
+          if (order.isExpress) rating += 0.5;
+          const pkg = PACKAGING_LEVELS[ds.packagingLevel - 1];
+          if (pkg.keepWarm) rating += 0.3;
+          rating = clamp(Math.round(rating * 10) / 10, 1, 10);
+          order.rating = rating;
+
+          // ドライバー経験・評価更新
+          const driver = order.driver;
+          driver.status = 'idle';
+          driver.currentDelivery = null;
+          driver.exp += 15 + order.zone.dist * 5;
+          if (driver.exp >= driver.expToNext && driver.level < driver.maxLevel) {
+            driver.level++;
+            driver.exp = 0;
+            driver.expToNext = driver.level * 100;
+            driver.maxStamina += 3;
+            notify(`🛵 ${driver.name}がLv.${driver.level}に！`, 'success');
+          }
+          driver.ratingCount++;
+          driver.rating = ((driver.rating * (driver.ratingCount - 1)) + rating) / driver.ratingCount;
+          driver.stamina = clamp(driver.stamina - order.zone.dist * 3, 0, driver.maxStamina);
+
+          // 車両更新
+          const vehicle = order.vehicle;
+          vehicle.status = 'idle';
+          vehicle.condition = clamp(vehicle.condition - order.zone.dist * 0.5, 0, 100);
+
+          // 統計更新
+          ds.stats.totalDelivered++;
+          ds.stats.totalTips += order.tip;
+          ds.stats.ratingCount++;
+          ds.stats.avgRating = ((ds.stats.avgRating * (ds.stats.ratingCount - 1)) + rating) / ds.stats.ratingCount;
+          if (ds.completedToday > ds.stats.bestDay) ds.stats.bestDay = ds.completedToday;
+
+          // 配達レビュー（BASE Gへも反映）
+          if (Math.random() < 0.25) {
+            addReview(rating, { toppings: order.toppings, satisfaction: rating });
+          }
+
+          ds.activeOrders.splice(i, 1);
+        }
+      }
+
+      // ドライバーの体力回復（アイドル時）
+      ds.drivers.forEach(d => {
+        if (d.status === 'idle') {
+          d.stamina = clamp(d.stamina + dt * 0.002, 0, d.maxStamina);
+        }
+      });
+    }
+
+    // 旧配達キュー互換（古いsave対応）
+    for (let i = G.deliveriesQueue.length - 1; i >= 0; i--) {
+      G.deliveriesQueue[i].timer -= dt;
+      if (G.deliveriesQueue[i].timer <= 0) G.deliveriesQueue.splice(i, 1);
+    }    
+    // Staff stamina drain
+    G.staff.forEach(s => {
+      if (s.working) {
+        let drain = 0.001 * dt / 1000;
+        if (s.trait === 'working_hard') drain *= 1.2;
+        if (s.trait === 'lazy') drain *= 0.7;
+        s.stamina = clamp(s.stamina - drain * s.maxStamina, 0, s.maxStamina);
+        
+        // Lazy staff might slack off
+        if (s.trait === 'lazy' && s.stamina < s.maxStamina * 0.3 && Math.random() < 0.0001) {
+          s.working = false;
+          notify(`${s.name}がサボり始めた！`, 'error');
+        }
+        
+        // EXP gain
+        s.exp += dt * 0.005;
+        if (s.exp >= s.expToNext && s.level < (G.staffLimitBreak ? 30 : MAX_STAFF_LEVEL)) {
+          s.level++;
+          s.exp = 0;
+          s.expToNext = s.level * 120;
+          s.maxStamina += 2;
+          s.stamina = s.maxStamina;
+          notify(`${s.name}がLv.${s.level}に上がった！`, 'success');
+        }
+      }
+    });
+    
+    // Smoke particles
+    if (G.animFrame % 30 === 0) {
+      G.smokeParticles.push({
+        x: 120 + Math.random() * 20,
+        y: 100,
+        life: 60,
+        size: 3 + Math.random() * 4
+      });
+    }
+    for (let i = G.smokeParticles.length - 1; i >= 0; i--) {
+      G.smokeParticles[i].y -= 0.3;
+      G.smokeParticles[i].life--;
+      G.smokeParticles[i].size += 0.05;
+      if (G.smokeParticles[i].life <= 0) G.smokeParticles.splice(i, 1);
+    }
+  }
+  
+  renderShop();
+  updateTopBar();
+  requestAnimationFrame(gameLoop);
+}
+
+// ============================================
+// PART 2: RENDERING, UI, PHONE, SETTINGS
+// ============================================
+
+// CANVAS RENDERING
+const canvas = document.getElementById('shop-canvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * (window.devicePixelRatio || 1);
+  canvas.height = rect.height * (window.devicePixelRatio || 1);
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+}
+window.addEventListener('resize', resizeCanvas);
+
+function renderShop() {
+  const W = canvas.width / (window.devicePixelRatio || 1);
+  const H = canvas.height / (window.devicePixelRatio || 1);
+  ctx.clearRect(0, 0, W, H);
+  
+  // Background - Floor
+  const floorGrad = ctx.createLinearGradient(0, H * 0.4, 0, H);
+  floorGrad.addColorStop(0, '#5c4033');
+  floorGrad.addColorStop(1, '#3e2723');
+  ctx.fillStyle = floorGrad;
+  ctx.fillRect(0, H * 0.4, W, H * 0.6);
+  
+  // Floor tiles
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 50) {
+    ctx.beginPath(); ctx.moveTo(x, H*0.4); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = H * 0.4; y < H; y += 50) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  
+  // Wall
+  const wallGrad = ctx.createLinearGradient(0, 0, 0, H * 0.4);
+  wallGrad.addColorStop(0, '#8B4513');
+  wallGrad.addColorStop(0.5, '#A0522D');
+  wallGrad.addColorStop(1, '#6B3410');
+  ctx.fillStyle = wallGrad;
+  ctx.fillRect(0, 0, W, H * 0.4);
+  
+  // Wall bricks
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  for (let row = 0; row < 6; row++) {
+    const yy = row * (H * 0.4 / 6);
+    const offset = row % 2 === 0 ? 0 : 35;
+    for (let x = offset; x < W; x += 70) {
+      ctx.strokeRect(x, yy, 70, H * 0.4 / 6);
+    }
+  }
+  
+  // Kitchen area (left side)
+  drawKitchen(W, H);
+  
+  // Counter
+  ctx.fillStyle = '#4a3728';
+  ctx.fillRect(W * 0.3 - 5, H * 0.35, 10, H * 0.3);
+  ctx.fillStyle = '#6B4226';
+  ctx.fillRect(W * 0.05, H * 0.35, W * 0.25, 12);
+  
+  // Dining area (right side)
+  drawDiningArea(W, H);
+  
+  // Furniture
+  drawFurniture(W, H);
+  
+  // Staff in kitchen
+  drawStaff(W, H);
+  
+  // Customers
+  drawCustomers(W, H);
+  
+  // Smoke from oven
+  drawSmoke(W, H);
+  
+  // Delivery bike (if enabled)
+  if (G.deliveryEnabled && G.deliveriesQueue.length > 0) {
+    drawDeliveryBike(W, H);
+  }
+  
+  // Shop sign
+  ctx.fillStyle = '#e94560';
+  ctx.font = 'bold 16px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🍕 PIZA', W * 0.5, 25);
+  ctx.font = '10px sans-serif';
+  ctx.fillStyle = '#ddd';
+  ctx.fillText(`Lv.${G.shopLevel} ・ スタッフ${G.staff.filter(s=>s.working).length}人`, W * 0.5, 42);
+  ctx.textAlign = 'left';
+}
+
+function drawKitchen(W, H) {
+  const kx = 20, ky = H * 0.15, kw = W * 0.25, kh = H * 0.55;
+  
+  // Oven (かまど)
+  const ovenLv = G.equipment.oven || 1;
+  ctx.fillStyle = '#444';
+  ctx.fillRect(kx, ky, 70, 55);
+  ctx.fillStyle = '#333';
+  ctx.fillRect(kx + 5, ky + 5, 60, 35);
+  // Fire inside oven
+  const fireIntensity = 0.5 + Math.sin(G.animFrame * 0.1) * 0.3;
+  ctx.fillStyle = `rgba(255,${100 + ovenLv * 3},0,${fireIntensity})`;
+  ctx.fillRect(kx + 10, ky + 15, 50, 20);
+  ctx.fillStyle = `rgba(255,200,0,${fireIntensity * 0.7})`;
+  ctx.fillRect(kx + 15, ky + 20, 40, 10);
+  ctx.fillStyle = '#aaa';
+  ctx.font = '8px sans-serif';
+  ctx.fillText(`かまど Lv.${ovenLv}`, kx, ky + 65);
+  
+  // Stove (コンロ)
+  const stoveLv = G.equipment.stove || 1;
+  ctx.fillStyle = '#555';
+  ctx.fillRect(kx + 80, ky, 55, 45);
+  // Burner
+  const burnColor = stoveLv > 25 ? '#00aaff' : '#ff6600';
+  ctx.beginPath();
+  ctx.arc(kx + 107, ky + 22, 12, 0, Math.PI * 2);
+  ctx.fillStyle = burnColor;
+  ctx.globalAlpha = 0.4 + Math.sin(G.animFrame * 0.15) * 0.2;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#aaa';
+  ctx.font = '8px sans-serif';
+  ctx.fillText(`コンロ Lv.${stoveLv}`, kx + 80, ky + 55);
+  
+  // Prep table
+  const prepLv = G.equipment.prep_table || 1;
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(kx, ky + 75, 130, 35);
+  ctx.fillStyle = '#A08060';
+  ctx.fillRect(kx + 2, ky + 77, 126, 31);
+  // Items on table
+  ctx.font = '14px sans-serif';
+  ctx.fillText('🍅', kx + 10, ky + 98);
+  ctx.fillText('🧀', kx + 35, ky + 98);
+  ctx.fillText('🔪', kx + 60, ky + 98);
+  if (G.animFrame % 60 < 30) ctx.fillText('🫒', kx + 85, ky + 98);
+  else ctx.fillText('🍄', kx + 85, ky + 98);
+  ctx.fillStyle = '#aaa';
+  ctx.font = '8px sans-serif';
+  ctx.fillText(`調理台 Lv.${prepLv}`, kx, ky + 120);
+  
+  // Mixer
+  const mixLv = G.equipment.mixer || 1;
+  ctx.fillStyle = '#666';
+  ctx.fillRect(kx + 140, ky + 20, 30, 40);
+  const mixAngle = G.animFrame * 0.1;
+  ctx.save();
+  ctx.translate(kx + 155, ky + 40);
+  ctx.rotate(mixAngle);
+  ctx.fillStyle = '#888';
+  ctx.fillRect(-8, -2, 16, 4);
+  ctx.restore();
+  ctx.fillStyle = '#aaa';
+  ctx.font = '8px sans-serif';
+  ctx.fillText(`ミキサー Lv.${mixLv}`, kx + 135, ky + 70);
+  
+  // Fridge
+  ctx.fillStyle = '#ccc';
+  ctx.fillRect(kx + 140, ky + 80, 35, 55);
+  ctx.fillStyle = '#ddd';
+  ctx.fillRect(kx + 142, ky + 82, 31, 25);
+  ctx.fillRect(kx + 142, ky + 110, 31, 23);
+  ctx.fillStyle = '#999';
+  ctx.fillRect(kx + 170, ky + 92, 3, 8);
+  ctx.fillRect(kx + 170, ky + 118, 3, 8);
+  ctx.fillStyle = '#aaa';
+  ctx.font = '8px sans-serif';
+  ctx.fillText(`冷蔵庫 Lv.${G.equipment.fridge||1}`, kx + 137, ky + 145);
+}
+
+function drawDiningArea(W, H) {
+  const dx = W * 0.35, dy = H * 0.45;
+  // Default tables if no furniture
+  if (G.furniture.length === 0) {
+    for (let i = 0; i < 3; i++) {
+      const tx = dx + i * 120;
+      ctx.fillStyle = '#6B4226';
+      ctx.fillRect(tx, dy, 60, 40);
+      ctx.fillStyle = '#5a3520';
+      ctx.fillRect(tx + 5, dy + 5, 50, 30);
+    }
+  }
+  
+  // Window
+  ctx.fillStyle = '#87CEEB';
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(W * 0.6, 10, 100, H * 0.28);
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#5a3520';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(W * 0.6, 10, 100, H * 0.28);
+  ctx.beginPath();
+  ctx.moveTo(W * 0.6 + 50, 10);
+  ctx.lineTo(W * 0.6 + 50, 10 + H * 0.28);
+  ctx.stroke();
+  
+  // Door
+  ctx.fillStyle = '#4a3020';
+  ctx.fillRect(W * 0.85, H * 0.15, 50, H * 0.25);
+  ctx.fillStyle = '#f0a500';
+  ctx.beginPath();
+  ctx.arc(W * 0.85 + 40, H * 0.15 + H * 0.125, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#ddd';
+  ctx.font = '9px sans-serif';
+  ctx.fillText('EXIT', W * 0.85 + 12, H * 0.15 + H * 0.05);
+}
+
+function drawFurniture(W, H) {
+  G.furniture.forEach((f, i) => {
+    const fx = W * 0.35 + (i % 5) * 90 + 10;
+    const fy = H * 0.45 + Math.floor(i / 5) * 70;
+    const gColor = ['#666','#cd7f32','#c0c0c0','#ffd700','#b9f2ff','#ff69b4'][f.grade];
+    
+    ctx.fillStyle = gColor;
+    ctx.globalAlpha = 0.3;
+    ctx.fillRect(fx - 4, fy - 4, 50, 40);
+    ctx.globalAlpha = 1;
+    
+    if (f.type === 'table') {
+      ctx.fillStyle = f.grade >= 3 ? '#A0522D' : '#6B4226';
+      ctx.fillRect(fx, fy, 42, 32);
+      ctx.fillStyle = f.grade >= 4 ? '#FFD700' : '#5a3520';
+      ctx.fillRect(fx + 3, fy + 3, 36, 26);
+    } else if (f.type === 'chair') {
+      ctx.fillStyle = f.grade >= 3 ? '#8B0000' : '#5a3520';
+      ctx.fillRect(fx + 8, fy + 5, 26, 24);
+      ctx.fillRect(fx + 10, fy - 5, 22, 12);
+    } else if (f.type === 'decor') {
+      ctx.font = '22px sans-serif';
+      ctx.fillText(f.grade >= 3 ? '🖼️' : '🌿', fx + 5, fy + 22);
+    } else if (f.type === 'light') {
+      ctx.beginPath();
+      ctx.arc(fx + 21, fy + 10, 10, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,150,${0.5 + Math.sin(G.animFrame * 0.05) * 0.2})`;
+      ctx.fill();
+    }
+    
+    ctx.fillStyle = '#aaa';
+    ctx.font = '7px sans-serif';
+    ctx.fillText(`G${f.grade}`, fx, fy + 38);
+  });
+}
+
+function drawStaff(W, H) {
+  const kx = 20, ky = 0;
+  G.staff.forEach((s, i) => {
+    if (!s.working) return;
+    const sx = kx + 30 + (i % 4) * 38;
+    const sy = (W > 600 ? 280 : 240) + Math.floor(i / 4) * 45;
+    const bobY = Math.sin(G.animFrame * 0.08 + i) * 2;
+    
+    // Body
+    ctx.fillStyle = s.color;
+    ctx.beginPath();
+    ctx.arc(sx, sy - 12 + bobY, 8, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Body
+    ctx.fillRect(sx - 6, sy - 4 + bobY, 12, 16);
+    
+    // Hat (chef)
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(sx - 6, sy - 22 + bobY, 12, 6);
+    ctx.fillRect(sx - 4, sy - 26 + bobY, 8, 6);
+    
+    // Arms animation (cooking)
+    const armAngle = Math.sin(G.animFrame * 0.12 + i * 2) * 0.3;
+    ctx.save();
+    ctx.translate(sx - 6, sy + bobY);
+    ctx.rotate(-0.3 + armAngle);
+    ctx.fillStyle = s.color;
+    ctx.fillRect(0, 0, -12, 3);
+    ctx.restore();
+    
+    ctx.save();
+    ctx.translate(sx + 6, sy + bobY);
+    ctx.rotate(0.3 - armAngle);
+    ctx.fillStyle = s.color;
+    ctx.fillRect(0, 0, 12, 3);
+    ctx.restore();
+    
+    // Stamina bar
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(sx - 10, sy + 14 + bobY, 20, 3);
+    const stPct = s.stamina / s.maxStamina;
+    ctx.fillStyle = stPct > 0.5 ? '#4ecca3' : stPct > 0.2 ? '#f0a500' : '#e94560';
+    ctx.fillRect(sx - 10, sy + 14 + bobY, 20 * stPct, 3);
+    
+    // Name
+    ctx.fillStyle = '#fff';
+    ctx.font = '7px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.name.split(' ')[1] || s.name, sx, sy + 24 + bobY);
+    ctx.textAlign = 'left';
+  });
+}
+
+function drawCustomers(W, H) {
+  G.customersInShop.forEach(c => {
+    const bobY = Math.sin(c.walkFrame) * 2;
+    
+    // Head
+    ctx.fillStyle = c.color;
+    ctx.beginPath();
+    ctx.arc(c.x + W * 0.3, c.y - 10 + bobY, 7, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Body
+    ctx.fillRect(c.x + W * 0.3 - 5, c.y + bobY, 10, 14);
+    
+    // Legs walking animation
+    if (c.entering || c.leaving) {
+      const legAnim = Math.sin(c.walkFrame * 3) * 4;
+      ctx.fillStyle = '#555';
+      ctx.fillRect(c.x + W * 0.3 - 3, c.y + 14 + bobY, 3, 8 + legAnim);
+      ctx.fillRect(c.x + W * 0.3 + 1, c.y + 14 + bobY, 3, 8 - legAnim);
+    } else {
+      ctx.fillStyle = '#555';
+      ctx.fillRect(c.x + W * 0.3 - 3, c.y + 14 + bobY, 3, 8);
+      ctx.fillRect(c.x + W * 0.3 + 1, c.y + 14 + bobY, 3, 8);
+    }
+    
+    // Served indicator
+    if (c.served) {
+      ctx.font = '12px sans-serif';
+      ctx.fillText('😊', c.x + W * 0.3 - 6, c.y - 20 + bobY);
+    } else if (!c.entering) {
+      ctx.font = '12px sans-serif';
+      ctx.fillText('🍕❓', c.x + W * 0.3 - 8, c.y - 20 + bobY);
+    }
+  });
+}
+
+function drawSmoke(W, H) {
+  G.smokeParticles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,200,200,${p.life / 60 * 0.4})`;
+    ctx.fill();
+  });
+}
+
+function drawDeliveryBike(W, H) {
+  const bx = W * 0.8;
+  const by = H * 0.85;
+  const bounce = Math.sin(G.animFrame * 0.15) * 2;
+  
+  // Bike
+  ctx.fillStyle = '#e94560';
+  ctx.fillRect(bx - 15, by - 10 + bounce, 30, 12);
+  // Wheels
+  ctx.beginPath();
+  ctx.arc(bx - 10, by + 6 + bounce, 5, 0, Math.PI * 2);
+  ctx.arc(bx + 10, by + 6 + bounce, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#333';
+  ctx.fill();
+  // Box
+  ctx.fillStyle = '#f0a500';
+  ctx.fillRect(bx - 8, by - 20 + bounce, 16, 12);
+  ctx.fillStyle = '#fff';
+  ctx.font = '6px sans-serif';
+  ctx.fillText('PIZA', bx - 7, by - 12 + bounce);
+  
+  // Active delivery count
+  ctx.fillStyle = '#fff';
+  ctx.font = '10px sans-serif';
+  ctx.fillText(`配達中: ${G.deliveriesQueue.length}件`, bx - 20, by + 20);
+}
+
+// ============================================
+// UI UPDATE FUNCTIONS
+// ============================================
+function updateTopBar() {
+  document.getElementById('money-display').textContent = fmt(G.money);
+  document.getElementById('day-display').textContent = G.day + '日目';
+  const mins = Math.floor(G.dayTimeLeft / 60000);
+  const secs = Math.floor((G.dayTimeLeft % 60000) / 1000);
+  document.getElementById('timer-display').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+  document.getElementById('cust-count').textContent = G.totalCustomersToday;
+  document.getElementById('sales-display').textContent = fmt(G.totalSalesToday);
+  document.getElementById('deliv-count').textContent = G.totalDeliveriesToday;
+  document.getElementById('rep-display').textContent = '★' + G.baseGRating.toFixed(1);
+}
+
+// ============================================
+// TAB PANELS
+// ============================================
+let currentTab = 'staff';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('#panel-tabs .tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  renderPanel();
+}
+
+function renderPanel() {
+  const el = document.getElementById('panel-content');
+  switch (currentTab) {
+    case 'staff': el.innerHTML = renderStaffPanel(); break;
+    case 'kitchen': el.innerHTML = renderKitchenPanel(); break;
+    case 'ingredients': el.innerHTML = renderIngredientsPanel(); break;
+    case 'furniture': el.innerHTML = renderFurniturePanel(); break;
+    case 'ads': el.innerHTML = renderAdsPanel(); break;
+    case 'delivery': el.innerHTML = renderDeliveryPanel(); break;
+    case 'finance': el.innerHTML = renderFinancePanel(); break;
+  }
+}
+
+function renderStaffPanel() {
+  let html = `<div class="section-title">スタッフ一覧 (${G.staff.length}/${MAX_STAFF})</div>`;
+  G.staff.forEach((s, i) => {
+    const stPct = (s.stamina / s.maxStamina * 100).toFixed(0);
+    const stColor = stPct > 50 ? 'green' : stPct > 20 ? 'yellow' : 'red';
+    html += `
+      <div class="staff-item" onclick="showStaffDetail(${i})">
+        <div class="staff-avatar" style="background:${s.color}">${s.name[0]}</div>
+        <div class="staff-info">
+          <div class="name">${s.name} <span class="c-yellow fs10">Lv.${s.level}</span></div>
+          <div class="role">${SPEC_NAMES[s.specialty]} (+${s.boostPct}%効率) ・ ${TRAIT_NAMES[s.trait]}</div>
+          <div class="prog-bar"><div class="prog-fill ${stColor}" style="width:${stPct}%"></div></div>
+          <div class="fs10 c-gray">体力 ${stPct}% ・ 給料 ${fmt(s.salary)}/日 ・ ${s.working?'<span class="c-green">勤務中</span>':'<span class="c-red">休憩中</span>'}</div>
+          <div class="boost fs10">得意: ${SPEC_NAMES[s.specialty]} → +${s.boostPct}% 永続効率ブースト</div>
+        </div>
+      </div>`;
+  });
+  html += `<button class="btn btn-success btn-block mt8" onclick="openHireModal()">+ スタッフを雇用</button>`;
+  return html;
+}
+
+function showStaffDetail(idx) {
+  const s = G.staff[idx];
+  const maxLv = G.staffLimitBreak ? 30 : MAX_STAFF_LEVEL;
+  const upgradeCost = s.level * 500 + 1000;
+  let html = `
+    <div class="card">
+      <h3>${s.name}</h3>
+      <p>レベル: ${s.level}/${maxLv}<br>
+      得意分野: ${SPEC_NAMES[s.specialty]} (+${s.boostPct}%永続効率ブースト)<br>
+      性格: ${TRAIT_NAMES[s.trait]}<br>
+      体力: ${(s.stamina/s.maxStamina*100).toFixed(0)}%<br>
+      給料: ${fmt(s.salary)}/日<br>
+      EXP: ${Math.floor(s.exp)}/${s.expToNext}</p>
+      <div class="flex gap4 mt8">
+        ${s.level < maxLv ? `<button class="btn btn-warning btn-sm" onclick="upgradeStaff(${idx})">レベルUP (${fmt(upgradeCost)})</button>` : '<span class="c-yellow fs11">最大レベル</span>'}
+        <button class="btn btn-info btn-sm" onclick="toggleStaffWork(${idx})">${s.working ? '休憩させる' : '勤務させる'}</button>
+        ${G.staff.length > 1 ? `<button class="btn btn-primary btn-sm" onclick="fireStaff(${idx})">解雇</button>` : ''}
+      </div>
+    </div>`;
+  document.getElementById('panel-content').innerHTML = html + `<button class="btn btn-info btn-block mt4" onclick="renderPanel()">← 戻る</button>`;
+}
+
+function upgradeStaff(idx) {
+  const s = G.staff[idx];
+  const maxLv = G.staffLimitBreak ? 30 : MAX_STAFF_LEVEL;
+  const cost = s.level * 500 + 1000;
+  if (s.level >= maxLv) return notify('最大レベルです', 'error');
+  if (G.money < cost) return notify('資金不足', 'error');
+  G.money -= cost;
+  s.level++;
+  s.maxStamina += 3;
+  s.stamina = s.maxStamina;
+  s.boostPct += 2;
+  notify(`${s.name}をLv.${s.level}にアップグレード！`, 'success');
+  showStaffDetail(idx);
+}
+
+function toggleStaffWork(idx) {
+  G.staff[idx].working = !G.staff[idx].working;
+  showStaffDetail(idx);
+}
+
+function fireStaff(idx) {
+  if (G.staff.length <= 1) return notify('最低1人は必要です', 'error');
+  const name = G.staff[idx].name;
+  G.staff.splice(idx, 1);
+  notify(`${name}を解雇しました`, 'info');
+  renderPanel();
+}
+
+function renderKitchenPanel() {
+  let html = '<div class="section-title">調理器具アップグレード</div>';
+  EQUIPMENT.forEach(eq => {
+    const lv = G.equipment[eq.id];
+    const cost = Math.floor(eq.baseCost * (1 + lv * 0.5));
+    const bonus = getEquipBonus(eq.id);
+    html += `
+      <div class="upgrade-item">
+        <div class="uinfo">
+          <div class="uname">${eq.icon} ${eq.name}</div>
+          <div class="ulevel">Lv.${lv}/${MAX_EQUIP_LEVEL} ・ 効率 x${bonus.toFixed(2)}</div>
+          <div class="fs10 c-gray">${eq.desc}</div>
+          <div class="prog-bar"><div class="prog-fill blue" style="width:${(lv/MAX_EQUIP_LEVEL*100)}%"></div></div>
+        </div>
+        ${lv < MAX_EQUIP_LEVEL ?
+          `<button class="btn btn-warning btn-sm" onclick="upgradeEquip('${eq.id}')">UP ${fmt(cost)}</button>` :
+          '<span class="c-yellow fs10">MAX</span>'}
+      </div>`;
+  });
+  return html;
+}
+
+function upgradeEquip(eqId) {
+  const eq = EQUIPMENT.find(e => e.id === eqId);
+  const lv = G.equipment[eqId];
+  if (lv >= MAX_EQUIP_LEVEL) return notify('最大レベル', 'error');
+  const cost = Math.floor(eq.baseCost * (1 + lv * 0.5));
+  if (G.money < cost) return notify('資金不足', 'error');
+  G.money -= cost;
+  G.equipment[eqId]++;
+  notify(`${eq.name}をLv.${G.equipment[eqId]}にアップグレード！`, 'success');
+  renderPanel();
+}
+
+function renderIngredientsPanel() {
+  let html = '<div class="section-title">具材在庫 (最大各300)</div><div class="ingr-grid">';
+  INGREDIENTS.forEach(ing => {
+    const stock = G.ingredients[ing.id];
+    const pct = (stock / MAX_INGREDIENT_STOCK * 100).toFixed(0);
+    const restockCost = ing.costPer * 50;
+    html += `
+      <div class="ingr-item">
+        <div class="iname">${ing.icon} ${ing.name}</div>
+        <div class="istock">${stock}/${MAX_INGREDIENT_STOCK}</div>
+        <div class="prog-bar"><div class="prog-fill ${stock > 100 ? 'green' : stock > 30 ? 'yellow' : 'red'}" style="width:${pct}%"></div></div>
+        <button class="btn btn-success btn-sm mt4" onclick="restockIngredient('${ing.id}',50)">+50 (${fmt(restockCost)})</button>
+      </div>`;
+  });
+  html += '</div>';
+  html += `<button class="btn btn-warning btn-block mt8" onclick="restockAll()">全具材を補充</button>`;
+  return html;
+}
+
+function restockIngredient(id, amount) {
+  const ing = INGREDIENTS.find(i => i.id === id);
+  const cost = ing.costPer * amount;
+  if (G.money < cost) return notify('資金不足', 'error');
+  const canAdd = Math.min(amount, MAX_INGREDIENT_STOCK - G.ingredients[id]);
+  if (canAdd <= 0) return notify('在庫が満杯です', 'error');
+  const actualCost = ing.costPer * canAdd;
+  G.money -= actualCost;
+  G.ingredients[id] += canAdd;
+  G.totalExpensesToday += actualCost;
+  notify(`${ing.name}を${canAdd}個補充 (${fmt(actualCost)})`, 'success');
+  renderPanel();
+}
+
+function restockAll() {
+  let totalCost = 0;
+  INGREDIENTS.forEach(ing => {
+    const need = MAX_INGREDIENT_STOCK - G.ingredients[ing.id];
+    totalCost += need * ing.costPer;
+  });
+  if (G.money < totalCost) return notify(`全補充に${fmt(totalCost)}必要（資金不足）`, 'error');
+  INGREDIENTS.forEach(ing => {
+    const need = MAX_INGREDIENT_STOCK - G.ingredients[ing.id];
+    G.ingredients[ing.id] = MAX_INGREDIENT_STOCK;
+    G.totalExpensesToday += need * ing.costPer;
+  });
+  G.money -= totalCost;
+  notify(`全具材を補充！(${fmt(totalCost)})`, 'success');
+  renderPanel();
+}
+
+function renderFurniturePanel() {
+  let html = `<div class="section-title">家具管理 (${G.furniture.length}個設置中)</div>
+    <p class="fs11 c-gray mb8">家具のグレードとおしゃれ度が高いほど客が集まります。<br>現在のスコア: ${getFurnitureScore().combined.toFixed(0)}</p>`;
+  
+  Object.keys(FURNITURE_DATA).forEach(type => {
+    const fd = FURNITURE_DATA[type];
+    html += `<div class="section-title">${fd.icon} ${fd.name}（8種類）</div>`;
+    fd.variants.forEach((v, vi) => {
+      const existing = G.furniture.find(f => f.type === type && f.variantIdx === vi);
+      html += `<div class="furn-item">
+        <div class="furn-preview" style="background:rgba(255,255,255,.1)">${fd.icon}</div>
+        <div style="flex:1">
+          <div class="fs12 fw700">${v.name}</div>
+          <div class="fs10 c-gray">おしゃれ度: ${v.style}</div>`;
+      if (existing) {
+        const nextGrade = existing.grade + 1;
+        html += `<div class="fs10 c-yellow">グレード: ${GRADE_NAMES[existing.grade]} (${existing.grade}/5)</div>`;
+        if (nextGrade <= 5) {
+          html += `<button class="btn btn-warning btn-sm mt4" onclick="upgradeFurniture('${type}',${vi})">グレードUP → ${GRADE_NAMES[nextGrade]} (${fmt(GRADE_COSTS[nextGrade])})</button>`;
+        } else {
+          html += `<span class="c-yellow fs10">最大グレード</span>`;
+        }
+      } else {
+        html += `<button class="btn btn-success btn-sm mt4" onclick="buyFurniture('${type}',${vi})">購入 (${fmt(GRADE_COSTS[1])})</button>`;
+      }
+      html += `</div></div>`;
+    });
+  });
+  return html;
+}
+
+function buyFurniture(type, variantIdx) {
+  const cost = GRADE_COSTS[1];
+  if (G.money < cost) return notify('資金不足', 'error');
+  G.money -= cost;
+  const v = FURNITURE_DATA[type].variants[variantIdx];
+  G.furniture.push({ type, variantIdx, grade: 1, style: v.style, name: v.name });
+  notify(`${v.name}を設置！`, 'success');
+  renderPanel();
+}
+
+function upgradeFurniture(type, variantIdx) {
+  const f = G.furniture.find(f => f.type === type && f.variantIdx === variantIdx);
+  if (!f || f.grade >= 5) return;
+  const cost = GRADE_COSTS[f.grade + 1];
+  if (G.money < cost) return notify('資金不足', 'error');
+  G.money -= cost;
+  f.grade++;
+  notify(`${f.name}を${GRADE_NAMES[f.grade]}にアップグレード！`, 'success');
+  renderPanel();
+}
+
+function renderAdsPanel() {
+  let html = `<div class="section-title">📢 広告プラン（1日あたり）</div>
+    <p class="fs11 c-gray mb8">広告を打つとお客さんが増えます。金額が高いほど効果大。</p>`;
+  if (G.activeAd) {
+    html += `<div class="card"><h3>現在のプラン</h3><p>${fmt(G.activeAd.cost)}/日 ・ 集客力 +${G.activeAd.reach}</p>
+      <button class="btn btn-primary btn-sm mt4" onclick="cancelAd()">広告を停止</button></div>`;
+  }
+  AD_PLANS.forEach((plan, i) => {
+    const isActive = G.activeAd && G.activeAd.cost === plan.cost;
+    html += `<div class="ad-plan ${isActive ? 'selected' : ''}" onclick="selectAd(${i})">
+      <div>
+        <div class="fs12 fw700">${fmt(plan.cost)}/日</div>
+        <div class="fs10 c-gray">集客力 +${plan.reach}</div>
+      </div>
+      ${isActive ? '<span class="c-green fs10">選択中</span>' : '<span class="c-gray fs10">選択</span>'}
+    </div>`;
+  });
+  return html;
+}
+
+function selectAd(idx) {
+  G.activeAd = AD_PLANS[idx];
+  notify(`広告プラン ${fmt(G.activeAd.cost)}/日 を開始！`, 'success');
+  renderPanel();
+}
+
+function cancelAd() {
+  G.activeAd = null;
+  notify('広告を停止しました', 'info');
+  renderPanel();
+}
+
+function renderDeliveryPanel() {
+  const ds = G.deliverySystem;
+  let html = '';
+
+  if (!G.deliveryEnabled) {
+    // ===== 配達サービス未開始 =====
+    html += `
+    <div class="card" style="border-color:#f0a500;">
+      <h3>🛵 配達サービスを始めよう</h3>
+      <p class="fs11" style="line-height:1.7;">配達サービスを開始すると、店舗に来店できないお客さんにもピザを届けられます。配達エリアの拡大、配達員の雇用、車両の購入、梱包品質のアップグレードなど、本格的な配達ビジネスを構築できます。</p>
+      <div style="margin-top:10px;padding:8px;background:rgba(0,0,0,0.2);border-radius:8px;">
+        <div class="delivery-stat"><span>初期費用</span><span class="c-red">${fmt(15000)}</span></div>
+        <div class="delivery-stat"><span>含まれるもの</span><span class="fs10">配達員1名 + 自転車1台</span></div>
+        <div class="delivery-stat"><span>初期エリア</span><span class="fs10">🏘️ 近隣エリア</span></div>
+      </div>
+      <button class="btn btn-success btn-block mt8" onclick="startDeliveryService()">配達サービスを開始 (${fmt(15000)})</button>
+    </div>`;
+    return html;
+  }
+
+  // ===== メイン配達ダッシュボード =====
+  const unlockedZones = ds.zones.filter(z => z.unlocked).length;
+  const idleDrivers = ds.drivers.filter(d => d.status === 'idle').length;
+  const deliveringDrivers = ds.drivers.filter(d => d.status === 'delivering').length;
+  const idleVehicles = ds.vehicles.filter(v => v.status === 'idle').length;
+
+  html += `
+  <div style="background:linear-gradient(135deg,rgba(233,69,96,0.15),rgba(240,165,0,0.1));border-radius:10px;padding:10px;margin-bottom:8px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span class="fs13 fw700">🛵 配達ダッシュボード</span>
+      <span class="fs10 c-yellow">Lv.${ds.level}/10</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+      <div style="text-align:center;background:rgba(0,0,0,0.2);border-radius:6px;padding:6px;">
+        <div class="fs10 c-gray">本日配達</div>
+        <div class="fs13 fw700 c-green">${ds.completedToday}</div>
+      </div>
+      <div style="text-align:center;background:rgba(0,0,0,0.2);border-radius:6px;padding:6px;">
+        <div class="fs10 c-gray">売上</div>
+        <div class="fs13 fw700 c-green">${fmt(ds.totalRevToday)}</div>
+      </div>
+      <div style="text-align:center;background:rgba(0,0,0,0.2);border-radius:6px;padding:6px;">
+        <div class="fs10 c-gray">チップ</div>
+        <div class="fs13 fw700 c-yellow">${fmt(ds.totalTipsToday)}</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:#aaa;">
+      <span>👤 ${idleDrivers}/${ds.drivers.length}人待機</span>
+      <span>🚗 ${idleVehicles}/${ds.vehicles.length}台待機</span>
+      <span>🗺️ ${unlockedZones}/${ds.zones.length}エリア</span>
+      <span>${ds.peakHourBonus ? '🔥ピーク中' : ''}</span>
+    </div>
+    <button class="btn btn-warning btn-sm mt4" onclick="upgradeDeliverySystem()">システムUP Lv.${ds.level+1} (${fmt((ds.level+1)*15000)})</button>
+  </div>`;
+
+  // ===== アクティブ注文 =====
+  if (ds.activeOrders.length > 0) {
+    html += `<div class="section-title">📦 処理中の注文 (${ds.activeOrders.length}件)</div>`;
+    ds.activeOrders.slice(0, 12).forEach((o, oi) => {
+      const statusIcons = {preparing:'🍕調理中',delivering:'🛵配達中',arriving:'📍到着間近',completed:'✅完了'};
+      const statusColors = {preparing:'#f0a500',delivering:'#00b4d8',arriving:'#4ecca3',completed:'#4ecca3'};
+      const pct = (o.progress * 100).toFixed(0);
+      html += `
+      <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:8px;margin-bottom:6px;border-left:3px solid ${statusColors[o.status]};">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span class="fs11 fw700">#${(oi+1).toString().padStart(3,'0')}</span>
+            <span class="fs10" style="color:${statusColors[o.status]};">${statusIcons[o.status]}</span>
+            ${o.isExpress ? '<span class="fs10" style="color:#ff69b4;">🚀特急</span>' : ''}
+            ${o.isBatch ? '<span class="fs10" style="color:#9b59b6;">📋バッチ</span>' : ''}
+          </div>
+          <span class="fs10 c-green">${fmt(o.totalPrice)}</span>
+        </div>
+        <div class="prog-bar" style="margin:4px 0;"><div class="prog-fill blue" style="width:${pct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:#888;">
+          <span>${o.zone.icon} ${o.zone.name}</span>
+          <span>${o.driver ? o.driver.traitIcon + o.driver.name : ''}</span>
+          <span>${o.vehicle ? o.vehicle.icon : ''} 🍕×${o.pizzaCount}</span>
+          <span>${pct}%</span>
+        </div>
+        ${ds.trackingEnabled ? `<div style="font-size:9px;color:#666;margin-top:2px;">📍 ${o.customerAddress} → ${o.customerName}</div>` : ''}
+      </div>`;
+    });
+    if (ds.activeOrders.length > 12) {
+      html += `<div class="fs10 c-gray" style="text-align:center;">他${ds.activeOrders.length - 12}件処理中...</div>`;
+    }
+  }
+
+  // ===== 配達エリア =====
+  html += `<div class="section-title">🗺️ 配達エリア</div>`;
+  ds.zones.forEach(z => {
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:rgba(0,0,0,0.15);border-radius:6px;margin-bottom:4px;${z.unlocked ? '' : 'opacity:0.6;'}">
+      <div>
+        <span class="fs12">${z.icon}</span>
+        <span class="fs11 fw700">${z.name}</span>
+        <span class="fs10 c-gray">距離${z.dist} 需要×${z.demand}</span>
+      </div>`;
+    if (z.unlocked) {
+      html += `<span class="fs10 c-green">✅ 開放済</span>`;
+    } else {
+      html += `<button class="btn btn-warning btn-sm" onclick="unlockDeliveryZone('${z.id}')">開放 ${fmt(z.unlockCost)}</button>`;
+    }
+    html += '</div>';
+  });
+
+  // ===== 配達員 =====
+  html += `<div class="section-title">👤 配達員 (${ds.drivers.length}/${ds.maxFleet})</div>`;
+  ds.drivers.forEach((d, di) => {
+    const stPct = (d.stamina / d.maxStamina * 100).toFixed(0);
+    html += `
+    <div style="display:flex;align-items:center;gap:6px;padding:6px;background:rgba(0,0,0,0.15);border-radius:6px;margin-bottom:4px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:${d.color};display:flex;align-items:center;justify-content:center;font-size:12px;">${d.traitIcon}</div>
+      <div style="flex:1;">
+        <div class="fs11 fw700">${d.name} <span class="c-yellow fs10">Lv.${d.level}</span> <span class="fs10" style="color:${d.status==='idle'?'#4ecca3':'#00b4d8'};">${d.status==='idle'?'待機中':'配達中'}</span></div>
+        <div class="fs10 c-gray">${d.traitName}: ${d.traitEffect}</div>
+        <div class="prog-bar"><div class="prog-fill ${stPct>50?'green':stPct>20?'yellow':'red'}" style="width:${stPct}%"></div></div>
+        <div class="fs10 c-gray">配達${d.deliveryCount}回 ・ ★${d.rating.toFixed(1)} ・ 給料${fmt(d.salary)}/日</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="fireDriver(${di})" style="font-size:9px;">解雇</button>
+    </div>`;
+  });
+  html += `<button class="btn btn-success btn-block mt4" onclick="hireDriver()">配達員を雇用 (${fmt(3000 + ds.drivers.length * 500)})</button>`;
+
+  // ===== 車両 =====
+  html += `<div class="section-title">🚗 車両</div>`;
+  if (ds.vehicles.length > 0) {
+    ds.vehicles.forEach((v, vi) => {
+      const condColor = v.condition > 70 ? '#4ecca3' : v.condition > 30 ? '#f0a500' : '#e94560';
+      html += `
+      <div style="display:flex;align-items:center;gap:6px;padding:6px;background:rgba(0,0,0,0.15);border-radius:6px;margin-bottom:4px;">
+        <span style="font-size:20px;">${v.icon}</span>
+        <div style="flex:1;">
+          <div class="fs11 fw700">${v.name} <span class="fs10" style="color:${v.status==='idle'?'#4ecca3':'#00b4d8'};">${v.status==='idle'?'待機':'使用中'}</span></div>
+          <div style="display:flex;gap:8px;font-size:9px;color:#aaa;">
+            <span>速度×${v.speed}</span><span>容量${v.capacity}</span><span>走行${v.mileage.toFixed(0)}km</span><span>出動${v.totalTrips}回</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill" style="width:${v.condition}%;background:${condColor};border-radius:4px;"></div></div>
+          <div class="fs10" style="color:${condColor};">状態 ${v.condition.toFixed(0)}%</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <button class="btn btn-info btn-sm" onclick="repairVehicle(${vi})" style="font-size:9px;">修理</button>
+          <button class="btn btn-primary btn-sm" onclick="sellVehicle(${vi})" style="font-size:9px;">売却</button>
+        </div>
+      </div>`;
+    });
+  }
+  html += `<div class="section-title" style="font-size:11px;">車両購入</div>`;
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">`;
+  VEHICLE_TYPES.forEach(vt => {
+    html += `<div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:6px;text-align:center;cursor:pointer;" onclick="purchaseVehicle('${vt.id}')">
+      <div style="font-size:18px;">${vt.icon}</div>
+      <div class="fs10 fw700">${vt.name}</div>
+      <div class="fs10 c-gray">速度×${vt.speed} 容量${vt.capacity}</div>
+      <div class="fs10 c-yellow">${fmt(vt.cost)}</div>
+    </div>`;
+  });
+  html += '</div>';
+
+  // ===== 梱包 =====
+  const curPkg = PACKAGING_LEVELS[ds.packagingLevel - 1];
+  html += `<div class="section-title">📦 梱包品質</div>
+  <div style="background:rgba(0,0,0,0.15);border-radius:8px;padding:8px;margin-bottom:6px;">
+    <div class="fs11 fw700">${curPkg.icon} ${curPkg.name} (Lv.${ds.packagingLevel}/5)</div>
+    <div class="fs10 c-gray">${curPkg.desc}</div>
+    <div class="fs10">品質倍率: ×${curPkg.quality} ・ コスト: ${fmt(curPkg.cost)}/個</div>
+    <div class="prog-bar"><div class="prog-fill blue" style="width:${ds.packagingLevel * 20}%"></div></div>
+    ${ds.packagingLevel < 5 ? `<button class="btn btn-warning btn-sm mt4" onclick="upgradePackaging()">次のレベルへ (${fmt((ds.packagingLevel+1)*8000)})</button>` : '<span class="fs10 c-yellow">最高品質</span>'}
+  </div>`;
+
+  // ===== システムアップグレード =====
+  html += `<div class="section-title">⚙️ 配達システムアップグレード</div>`;
+  DELIVERY_UPGRADES.forEach(u => {
+    html += `<div style="display:flex;align-items:center;gap:6px;padding:6px;background:rgba(0,0,0,0.15);border-radius:6px;margin-bottom:4px;${u.unlocked ? 'border-left:3px solid #4ecca3;' : ''}">
+      <span style="font-size:16px;">${u.icon}</span>
+      <div style="flex:1;">
+        <div class="fs11 fw700">${u.name}</div>
+        <div class="fs10 c-gray">${u.desc}</div>
+      </div>`;
+    if (u.unlocked) {
+      html += '<span class="fs10 c-green">✅導入済</span>';
+    } else {
+      html += `<button class="btn btn-info btn-sm" onclick="purchaseDeliveryUpgrade('${u.id}')">${fmt(u.cost)}</button>`;
+    }
+    html += '</div>';
+  });
+
+  // ===== プロモーション =====
+  html += `<div class="section-title">📢 配達プロモーション</div>`;
+  if (ds.promotions.length > 0) {
+    html += `<div style="margin-bottom:6px;">`;
+    ds.promotions.forEach(p => {
+      html += `<div style="background:rgba(78,204,163,0.1);border:1px solid #4ecca3;border-radius:6px;padding:6px;margin-bottom:4px;">
+        <span class="fs11 fw700">${p.icon} ${p.name}</span>
+        <span class="fs10 c-green"> 実施中 (残り${p.daysLeft}日)</span>
+        <div class="fs10 c-gray">${p.effect}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">';
+  DELIVERY_PROMOS.forEach(p => {
+    const isActive = ds.promotions.find(ap => ap.id === p.id);
+    html += `<div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:6px;${isActive ? 'opacity:0.4;' : 'cursor:pointer;'}" ${isActive ? '' : `onclick="activatePromo('${p.id}')"`}>
+      <div style="font-size:14px;">${p.icon}</div>
+      <div class="fs10 fw700">${p.name}</div>
+      <div style="font-size:8px;color:#aaa;">${p.effect}</div>
+      <div class="fs10 c-yellow">${fmt(p.cost)}/${p.duration}日</div>
+    </div>`;
+  });
+  html += '</div>';
+
+  // ===== 累計統計 =====
+  html += `<div class="section-title">📊 配達統計</div>
+  <div style="background:rgba(0,0,0,0.15);border-radius:8px;padding:8px;">
+    <div class="delivery-stat"><span>累計配達数</span><span>${ds.stats.totalDelivered}</span></div>
+    <div class="delivery-stat"><span>累計チップ</span><span class="c-yellow">${fmt(ds.stats.totalTips)}</span></div>
+    <div class="delivery-stat"><span>平均評価</span><span class="c-yellow">★${ds.stats.avgRating.toFixed(1)}</span></div>
+    <div class="delivery-stat"><span>最高日配達数</span><span>${ds.stats.bestDay}</span></div>
+    <div class="delivery-stat"><span>配達員数</span><span>${ds.drivers.length}/${ds.maxFleet}</span></div>
+    <div class="delivery-stat"><span>車両台数</span><span>${ds.vehicles.length}</span></div>
+  </div>`;
+
+  return html;
+}
+
+function startDeliveryService() {
+  if (G.money < 15000) return notify('資金不足 (¥15,000必要)', 'error');
+  G.money -= 15000;
+  G.deliveryEnabled = true;
+  const ds = G.deliverySystem;
+  ds.level = 1;
+  // 初期配達員1名
+  const firstDriver = createDeliveryDriver(0);
+  firstDriver.name = '佐藤 大地';
+  firstDriver.trait = 'local_expert';
+  firstDriver.traitName = '地元の達人';
+  firstDriver.traitIcon = '🗺️';
+  firstDriver.traitEffect = '配達速度+15%、道迷いなし';
+  ds.drivers.push(firstDriver);
+  ds.fleetSize = 1;
+  // 初期車両（自転車）1台
+  const bikeType = VEHICLE_TYPES[0];
+  ds.vehicles.push({
+    id: Date.now(),
+    type: bikeType.id,
+    name: bikeType.name,
+    icon: bikeType.icon,
+    speed: bikeType.speed,
+    capacity: bikeType.capacity,
+    maintenance: bikeType.maintenance,
+    fuelCost: bikeType.fuelCost,
+    status: 'idle',
+    condition: 100,
+    totalTrips: 0,
+    mileage: 0
+  });
+  notify('🛵 配達サービス開始！配達員1名と自転車1台で営業開始！', 'success');
+  renderPanel();
+}
+
+function renderFinancePanel() {
+  const totalLoan = G.loanAmount;
+  let personalTotal = 0;
+  Object.values(G.personalLoans).forEach(v => personalTotal += v);
+  
+  let html = `<div class="section-title">💰 財務状況</div>
+    <div class="card">
+      <h3>資産概要</h3>
+      <div class="delivery-stat"><span>現在の資金</span><span class="c-green">${fmt(G.money)}</span></div>
+      <div class="delivery-stat"><span>本日売上</span><span>${fmt(G.totalSalesToday)}</span></div>
+      <div class="delivery-stat"><span>本日経費</span><span class="c-red">${fmt(G.totalExpensesToday)}</span></div>
+      <div class="delivery-stat"><span>累計売上</span><span>${fmt(G.totalSalesAllTime)}</span></div>
+      <div class="delivery-stat"><span>銀行借入</span><span class="c-red">${fmt(totalLoan)}</span></div>
+      <div class="delivery-stat"><span>個人借入</span><span class="c-red">${fmt(personalTotal)}</span></div>
+    </div>`;
+  
+  // Bank loan
+  html += `<div class="section-title">🏦 銀行融資 (利息 ${(LOAN_INTEREST_RATE*100).toFixed(0)}%/月)</div>
+    <div class="loan-box">
+      <p class="fs11">借入残高: ${fmt(G.loanAmount)} / 上限 ${fmt(MAX_LOAN)}</p>
+      <p class="fs10 c-gray mt4">累計利息: ${fmt(G.loanInterestAccum)}</p>
+      <div class="flex gap4 mt8">
+        <button class="btn btn-warning btn-sm" onclick="takeLoan(50000)">5万借りる</button>
+        <button class="btn btn-warning btn-sm" onclick="takeLoan(100000)">10万借りる</button>
+        <button class="btn btn-warning btn-sm" onclick="takeLoan(500000)">50万借りる</button>
+      </div>
+      ${G.loanAmount > 0 ? `<div class="flex gap4 mt4">
+        <button class="btn btn-success btn-sm" onclick="repayLoan(50000)">5万返済</button>
+        <button class="btn btn-success btn-sm" onclick="repayLoan(G.loanAmount)">全額返済</button>
+      </div>` : ''}
+    </div>`;
+  
+  // Day history
+  if (G.dayHistory.length > 0) {
+    html += '<div class="section-title">📈 過去の業績</div>';
+    G.dayHistory.slice(-7).reverse().forEach(d => {
+      html += `<div class="furn-item">
+        <div style="flex:1">
+          <div class="fs11 fw700">${d.day}日目</div>
+          <div class="fs10">売上 ${fmt(d.sales)} ・ 客 ${d.customers}人 ・ 利益 <span class="${d.profit>=0?'c-green':'c-red'}">${fmt(d.profit)}</span></div>
+        </div>
+      </div>`;
+    });
+  }
+  return html;
+}
+
+function takeLoan(amount) {
+  if (G.loanAmount + amount > MAX_LOAN) return notify(`最大${fmt(MAX_LOAN)}まで`, 'error');
+  G.loanAmount += amount;
+  G.money += amount;
+  notify(`${fmt(amount)}を借り入れ`, 'info');
+  renderPanel();
+}
+
+function repayLoan(amount) {
+  const repay = Math.min(amount, G.loanAmount, G.money);
+  if (repay <= 0) return notify('返済不可', 'error');
+  G.money -= repay;
+  G.loanAmount -= repay;
+  notify(`${fmt(repay)}を返済`, 'success');
+  renderPanel();
+}
+
+// ============================================
+// HIRE MODAL
+// ============================================
+function openHireModal() {
+  if (G.staff.length >= MAX_STAFF) return notify('スタッフ上限です', 'error');
+  
+  const candidates = [];
+  for (let i = 0; i < 5; i++) {
+    const c = createStaff();
+    c.hired = false;
+    c.hireCost = 2000 + Math.floor(Math.random() * 8000);
+    candidates.push(c);
+  }
+  
+  let html = `<div class="modal-overlay" id="hire-modal" onclick="if(event.target===this)closeHireModal()">
+    <div class="modal" style="position:relative;">
+      <h2>👤 スタッフ雇用</h2>
+      <p class="fs11 c-gray mb8">候補者を選んで雇用しましょう (枠: ${G.staff.length}/${MAX_STAFF})</p>`;
+  
+  candidates.forEach((c, i) => {
+    html += `<div class="hire-candidate">
+      <div class="staff-avatar" style="background:${c.color}">${c.name[0]}</div>
+      <div style="flex:1">
+        <div class="fs12 fw700">${c.name}</div>
+        <div class="fs10">得意: ${SPEC_NAMES[c.specialty]} (+${c.boostPct}%効率ブースト)</div>
+        <div class="fs10">性格: ${TRAIT_NAMES[c.trait]} ・ 給料 ${fmt(c.salary)}/日</div>
+      </div>
+      <button class="btn btn-success btn-sm" onclick="hireStaff(${i})" id="hire-btn-${i}">雇用 ${fmt(c.hireCost)}</button>
+    </div>`;
+  });
+  
+  html += `<button class="btn btn-primary btn-block mt8" onclick="closeHireModal()">閉じる</button>
+    </div></div>`;
+  
+  const div = document.createElement('div');
+  div.id = 'hire-modal-wrapper';
+  div.innerHTML = html;
+  document.body.appendChild(div);
+  
+  window._hireCandidates = candidates;
+}
+
+function hireStaff(idx) {
+  const c = window._hireCandidates[idx];
+  if (!c || c.hired) return;
+  if (G.staff.length >= MAX_STAFF) return notify('上限です', 'error');
+  if (G.money < c.hireCost) return notify('資金不足', 'error');
+  G.money -= c.hireCost;
+  c.hired = true;
+  c.working = true;
+  G.staff.push(c);
+  document.getElementById(`hire-btn-${idx}`).textContent = '雇用済';
+  document.getElementById(`hire-btn-${idx}`).disabled = true;
+  notify(`${c.name}を雇用！`, 'success');
+  renderPanel();
+}
+
+function closeHireModal() {
+  const w = document.getElementById('hire-modal-wrapper');
+  if (w) w.remove();
+}
+
+// ============================================
+// SHOP EXPANSION
+// ============================================
+function expandShop() {
+  if (G.shopLevel >= 5) return notify('最大規模です', 'error');
+  const cost = G.shopExpandCosts[G.shopLevel];
+  if (G.money < cost) return notify(`拡張に${fmt(cost)}必要`, 'error');
+  G.money -= cost;
+  G.shopLevel++;
+  notify(`店舗をLv.${G.shopLevel}に拡張！`, 'success');
+}
+
+// ============================================
+// PHONE SYSTEM
+// ============================================
+function togglePhone() {
+  const overlay = document.getElementById('phone-overlay');
+  if (overlay.style.display === 'flex') {
+    overlay.style.display = 'none';
+  } else {
+    overlay.style.display = 'flex';
+    phoneHome();
+  }
+}
+
+function phoneHome() {
+  G.phoneScreen = 'home';
+  G.phoneHistory = [];
+  const body = document.getElementById('phone-body');
+  document.getElementById('phone-time').textContent = getGameTimeStr();
+  body.innerHTML = `
+    <div style="text-align:center;padding:20px 0;">
+      <div style="font-size:28px;font-weight:800;color:#e94560;">📱</div>
+      <div style="font-size:12px;color:#aaa;margin-top:4px;">${getGameTimeStr()} ・ ${G.day}日目</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:8px;">
+      <div class="phone-app-icon" style="background:#e94560" onclick="phoneApp('baseg')">
+        <span class="icon">⭐</span>BASE G
+      </div>
+      <div class="phone-app-icon" style="background:#00b4d8" onclick="phoneApp('kx2')">
+        <span class="icon">🏆</span>KX 2
+      </div>
+      <div class="phone-app-icon" style="background:#4ecca3" onclick="phoneApp('money')">
+        <span class="icon">💰</span>money R
+      </div>
+      <div class="phone-app-icon" style="background:#f0a500" onclick="phoneApp('message')">
+        <span class="icon">💬</span>MESSAGE
+      </div>
+      <div class="phone-app-icon" style="background:#9b59b6" onclick="phoneApp('stats')">
+        <span class="icon">📊</span>統計
+      </div>
+      <div class="phone-app-icon" style="background:#555" onclick="phoneApp('settings')">
+        <span class="icon">⚙️</span>設定
+      </div>
+    </div>`;
+}
+
+function phoneBack() {
+  if (G.phoneHistory.length > 0) {
+    const prev = G.phoneHistory.pop();
+    phoneApp(prev, true);
+  } else {
+    phoneHome();
+  }
+}
+
+function phoneApp(app, isBack) {
+  if (!isBack && G.phoneScreen !== 'home') {
+    G.phoneHistory.push(G.phoneScreen);
+  }
+  G.phoneScreen = app;
+  const body = document.getElementById('phone-body');
+  
+  switch (app) {
+    case 'baseg': renderBaseG(body); break;
+    case 'kx2': renderKX2(body); break;
+    case 'money': renderMoneyR(body); break;
+    case 'message': renderMessage(body); break;
+    case 'stats': renderPhoneStats(body); break;
+    default: phoneHome();
+  }
+}
+
+function renderBaseG(el) {
+  let html = `<div style="background:#e94560;padding:12px;margin:-12px -12px 12px;border-radius:0 0 12px 12px;">
+    <div style="font-size:18px;font-weight:800;">⭐ BASE G</div>
+    <div style="font-size:10px;opacity:.7;">お店の評判・レビュー</div>
+  </div>
+  <div style="text-align:center;padding:12px;">
+    <div style="font-size:36px;font-weight:800;color:#f0a500;">${G.baseGRating.toFixed(1)}</div>
+    <div>${starsHTML(G.baseGRating, 10)}</div>
+    <div style="font-size:11px;color:#aaa;margin-top:4px;">${G.baseGReviews.length}件のレビュー</div>
+  </div>
+  <div style="font-size:12px;font-weight:700;color:#e94560;margin-bottom:8px;">最新レビュー</div>`;
+  
+  if (G.baseGReviews.length === 0) {
+    html += '<div style="text-align:center;color:#666;padding:20px;font-size:12px;">まだレビューがありません</div>';
+  } else {
+    G.baseGReviews.slice(0, 15).forEach(r => {
+      html += `<div class="review-item">
+        <div class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(10-r.stars)}</div>
+        <div class="review-text">${r.comment}</div>
+        <div class="review-author">${r.author} ・ ${r.time}</div>
+      </div>`;
+    });
+  }
+  el.innerHTML = html;
+}
+
+function renderKX2(el) {
+  let html = `<div style="background:#00b4d8;padding:12px;margin:-12px -12px 12px;border-radius:0 0 12px 12px;">
+    <div style="font-size:18px;font-weight:800;">🏆 KX 2</div>
+    <div style="font-size:10px;opacity:.7;">専門家による評価サイト</div>
+  </div>`;
+  
+  if (!G.kx2Subscribed) {
+    html += `<div style="text-align:center;padding:20px;">
+      <div style="font-size:14px;font-weight:700;">月額 ¥15,000</div>
+      <div style="font-size:11px;color:#aaa;margin:8px 0;">専門家が5日に1回来店し、味・食感・内装・雰囲気・スタッフ態度・経営状況を星20段階で総合評価します。</div>
+      <button class="btn btn-info" onclick="subscribeKX2()">契約する</button>
+    </div>`;
+  } else {
+    html += `<div style="text-align:center;padding:12px;">
+      <div style="font-size:11px;color:#4ecca3;">契約中 (月額¥15,000)</div>`;
+    if (G.kx2Visits === 0) {
+      html += `<div style="font-size:14px;color:#f0a500;margin:12px 0;">評価不能</div>
+        <div style="font-size:11px;color:#aaa;">専門家がまだ来店していません。5日に1回程度来店します。</div>`;
+    } else {
+      html += `<div style="font-size:36px;font-weight:800;color:#f0a500;margin:8px 0;">${G.kx2Rating.toFixed(1)}/20</div>
+        <div style="font-size:11px;color:#aaa;">専門家来店回数: ${G.kx2Visits}回</div>`;
+    }
+    html += '</div>';
+    
+    if (G.expertEvals.length > 0) {
+      html += '<div style="font-size:12px;font-weight:700;color:#00b4d8;margin:8px 0;">評価履歴</div>';
+      G.expertEvals.slice().reverse().forEach(e => {
+        html += `<div class="review-item">
+          <div class="review-stars" style="color:#00b4d8;">${e.rating.toFixed(1)}/20</div>
+          <div class="review-text">${e.comment}</div>
+          <div class="review-author">${e.day}日目</div>
+        </div>`;
+      });
+    }
+  }
+  el.innerHTML = html;
+}
+
+function subscribeKX2() {
+  if (G.money < 15000) return notify('資金不足', 'error');
+  G.money -= 15000;
+  G.kx2Subscribed = true;
+  notify('KX 2を契約しました！', 'success');
+  phoneApp('kx2');
+}
+
+function renderMoneyR(el) {
+  let totalPersonalDebt = 0;
+  Object.values(G.personalLoans).forEach(v => totalPersonalDebt += v);
+  
+  let html = `<div style="background:#4ecca3;padding:12px;margin:-12px -12px 12px;border-radius:0 0 12px 12px;">
+    <div style="font-size:18px;font-weight:800;">💰 money R</div>
+    <div style="font-size:10px;opacity:.7;">お金の相談</div>
+  </div>
+  <div class="card">
+    <h3>資産状況</h3>
+    <p>資金: ${fmt(G.money)}<br>銀行借入: ${fmt(G.loanAmount)}<br>個人借入: ${fmt(totalPersonalDebt)}</p>
+  </div>
+  <div class="card">
+    <h3>銀行融資 (利息5%/月)</h3>
+    <p>最大${fmt(MAX_LOAN)}まで借入可能</p>
+    <div style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;">
+      <button class="btn btn-warning btn-sm" onclick="phoneLoan(50000)">5万円</button>
+      <button class="btn btn-warning btn-sm" onclick="phoneLoan(100000)">10万円</button>
+      <button class="btn btn-warning btn-sm" onclick="phoneLoan(200000)">20万円</button>
+      <button class="btn btn-warning btn-sm" onclick="phoneLoan(500000)">50万円</button>
+    </div>
+    ${G.loanAmount > 0 ? `<div style="margin-top:8px;">
+      <button class="btn btn-success btn-sm" onclick="phoneRepay()">返済する</button>
+    </div>` : ''}
+  </div>
+  <div class="card">
+    <h3>💡 アドバイス</h3>
+    <p>${G.money < 5000 ? '資金が少なくなっています。融資を検討しましょう。' :
+      G.loanAmount > 500000 ? '借入金が多いです。早めの返済を心がけましょう。' :
+      G.totalSalesAllTime > 200000 ? '順調な経営です！設備投資で更なる成長を。' :
+      '着実に売上を伸ばしていきましょう。広告も効果的です。'}</p>
+  </div>`;
+  el.innerHTML = html;
+}
+
+function phoneLoan(amount) {
+  takeLoan(amount);
+  phoneApp('money');
+}
+
+function phoneRepay() {
+  const repay = Math.min(G.loanAmount, G.money);
+  if (repay > 0) {
+    G.money -= repay;
+    G.loanAmount -= repay;
+    notify(`${fmt(repay)}返済しました`, 'success');
+  }
+  phoneApp('money');
+}
+
+function renderMessage(el) {
+  let html = `<div style="background:#f0a500;padding:12px;margin:-12px -12px 12px;border-radius:0 0 12px 12px;">
+    <div style="font-size:18px;font-weight:800;">💬 MESSAGE</div>
+    <div style="font-size:10px;opacity:.7;">メッセージ</div>
+  </div>`;
+  
+  CONTACTS.forEach(c => {
+    const thread = G.messageThreads[c.name];
+    const lastMsg = thread.messages[thread.messages.length - 1];
+    const debt = G.personalLoans[c.name] || 0;
+    html += `<div class="staff-item" onclick="openThread('${c.name}')">
+      <div class="staff-avatar" style="background:#${Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0')}">${c.icon}</div>
+      <div class="staff-info">
+        <div class="name">${c.name} <span class="fs10 c-gray">${
+c.relation}</span></div>
+        <div class="role">${lastMsg ? lastMsg.text.substring(0, 30) + '...' : ''}</div>
+        ${debt > 0 ? `<div class="fs10 c-red">借入: ${fmt(debt)}</div>` : ''}
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function openThread(contactName) {
+  G.phoneHistory.push('message');
+  G.phoneScreen = 'thread_' + contactName;
+  const body = document.getElementById('phone-body');
+  const contact = CONTACTS.find(c => c.name === contactName);
+  const thread = G.messageThreads[contactName];
+  const debt = G.personalLoans[contactName] || 0;
+
+  let html = `<div style="background:#f0a500;padding:10px;margin:-12px -12px 12px;border-radius:0 0 12px 12px;">
+    <div style="font-size:14px;font-weight:700;">${contact.icon} ${contactName}</div>
+    <div style="font-size:10px;opacity:.7;">${contact.relation} ・ 貸付上限 ${fmt(contact.lendMax)}</div>
+    ${debt > 0 ? `<div style="font-size:10px;color:#e94560;">現在の借入: ${fmt(debt)} (利息8%/月)</div>` : ''}
+  </div>
+  <div id="msg-scroll" style="max-height:300px;overflow-y:auto;margin-bottom:8px;">`;
+
+  thread.messages.forEach(m => {
+    html += `<div class="msg-bubble ${m.from === 'me' ? 'sent' : 'recv'}">
+      ${m.text}
+      <div style="font-size:8px;opacity:.5;margin-top:2px;">${m.time}</div>
+    </div>`;
+  });
+
+  html += `</div>
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <div style="display:flex;gap:4px;">
+      <input type="text" class="game-input" id="msg-input" placeholder="メッセージを入力..." style="flex:1;" onkeydown="if(event.key==='Enter')sendMsg('${contactName}')">
+      <button class="btn btn-warning btn-sm" onclick="sendMsg('${contactName}')">送信</button>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+      <button class="btn btn-info btn-sm" onclick="askBorrow('${contactName}',5000)">5千借りる</button>
+      <button class="btn btn-info btn-sm" onclick="askBorrow('${contactName}',10000)">1万借りる</button>
+      <button class="btn btn-info btn-sm" onclick="askBorrow('${contactName}',${contact.lendMax})">上限借りる</button>
+      ${debt > 0 ? `<button class="btn btn-success btn-sm" onclick="repayPersonal('${contactName}')">返済</button>` : ''}
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="chatGreeting('${contactName}')">挨拶する</button>
+  </div>`;
+
+  body.innerHTML = html;
+  const scroll = document.getElementById('msg-scroll');
+  if (scroll) scroll.scrollTop = scroll.scrollHeight;
+}
+
+function sendMsg(contactName) {
+  const input = document.getElementById('msg-input');
+  if (!input || !input.value.trim()) return;
+  const text = input.value.trim();
+  const thread = G.messageThreads[contactName];
+  thread.messages.push({ from: 'me', text, time: getGameTimeStr() });
+
+  // Auto reply after a short delay
+  setTimeout(() => {
+    const replies = [
+      'うん、わかったよ！','そうなんだ〜','頑張ってね！','いつでも相談してね',
+      'お店の調子はどう？','ピザ食べたいな〜','応援してるよ！','了解！',
+      'また連絡するね','大変だろうけど頑張って','今度遊びに行くね！'
+    ];
+    thread.messages.push({ from: 'them', text: pick(replies), time: getGameTimeStr() });
+    if (G.phoneScreen === 'thread_' + contactName) openThread(contactName);
+  }, 800 + Math.random() * 1500);
+
+  openThread(contactName);
+}
+
+function chatGreeting(contactName) {
+  const greetings = ['こんにちは！元気？','お店頑張ってるよ！','今日もいい天気だね','最近どう？'];
+  const thread = G.messageThreads[contactName];
+  thread.messages.push({ from: 'me', text: pick(greetings), time: getGameTimeStr() });
+
+  setTimeout(() => {
+    const replies = ['元気だよ！','お疲れ様！','いい感じじゃん！','頑張ってるね！','また来るよ！'];
+    thread.messages.push({ from: 'them', text: pick(replies), time: getGameTimeStr() });
+    if (G.phoneScreen === 'thread_' + contactName) openThread(contactName);
+  }, 1000 + Math.random() * 2000);
+
+  openThread(contactName);
+}
+
+function askBorrow(contactName, amount) {
+  const contact = CONTACTS.find(c => c.name === contactName);
+  const currentDebt = G.personalLoans[contactName] || 0;
+  const thread = G.messageThreads[contactName];
+
+  if (currentDebt + amount > contact.lendMax) {
+    thread.messages.push({ from: 'me', text: `${fmt(amount)}貸してもらえないかな…？`, time: getGameTimeStr() });
+    setTimeout(() => {
+      thread.messages.push({ from: 'them', text: `ごめん、もうこれ以上は無理かな…（上限${fmt(contact.lendMax)}）`, time: getGameTimeStr() });
+      if (G.phoneScreen === 'thread_' + contactName) openThread(contactName);
+    }, 1000);
+    openThread(contactName);
+    return;
+  }
+
+  thread.messages.push({ from: 'me', text: `お願いがあるんだけど…${fmt(amount)}貸してもらえない？お店のためなんだ。`, time: getGameTimeStr() });
+
+  setTimeout(() => {
+    // Acceptance chance based on amount and existing debt
+    const ratio = (currentDebt + amount) / contact.lendMax;
+    const chance = ratio < 0.3 ? 0.95 : ratio < 0.6 ? 0.7 : ratio < 0.85 ? 0.45 : 0.2;
+
+    if (Math.random() < chance) {
+      G.personalLoans[contactName] = currentDebt + amount;
+      G.money += amount;
+      thread.messages.push({ from: 'them', text: `いいよ！${fmt(amount)}送るね。頑張って！でも返してね！`, time: getGameTimeStr() });
+      notify(`${contactName}から${fmt(amount)}借りました`, 'success');
+    } else {
+      const rejects = [
+        'ごめん、今ちょっと余裕がなくて…','うーん、ちょっと厳しいかな…',
+        'もう少し経ってからまた相談して','今は無理かも…ごめんね'
+      ];
+      thread.messages.push({ from: 'them', text: pick(rejects), time: getGameTimeStr() });
+      notify(`${contactName}に断られました`, 'error');
+    }
+    if (G.phoneScreen === 'thread_' + contactName) openThread(contactName);
+  }, 1500 + Math.random() * 2000);
+
+  openThread(contactName);
+}
+
+function repayPersonal(contactName) {
+  const debt = G.personalLoans[contactName] || 0;
+  if (debt <= 0) return notify('借入がありません', 'info');
+  const repay = Math.min(debt, G.money);
+  if (repay <= 0) return notify('資金不足', 'error');
+
+  G.money -= repay;
+  G.personalLoans[contactName] -= repay;
+  const thread = G.messageThreads[contactName];
+  thread.messages.push({ from: 'me', text: `${fmt(repay)}返すね！ありがとう！`, time: getGameTimeStr() });
+
+  setTimeout(() => {
+    const remaining = G.personalLoans[contactName];
+    if (remaining <= 0) {
+      thread.messages.push({ from: 'them', text: 'ありがとう！全額返してくれたんだね。よかった！', time: getGameTimeStr() });
+    } else {
+      thread.messages.push({ from: 'them', text: `ありがとう！残り${fmt(remaining)}だね。無理しないでね。`, time: getGameTimeStr() });
+    }
+    if (G.phoneScreen === 'thread_' + contactName) openThread(contactName);
+  }, 800);
+
+  openThread(contactName);
+}
+
+function renderPhoneStats(el) {
+  const equipQuality = getTotalEquipQuality();
+  const staffEff = getStaffEfficiency();
+  const furnScore = getFurnitureScore();
+  const attraction = getCustomerAttraction();
+
+  el.innerHTML = `<div style="background:#9b59b6;padding:12px;margin:-12px -12px 12px;border-radius:0 0 12px 12px;">
+    <div style="font-size:18px;font-weight:800;">📊 経営統計</div>
+  </div>
+  <div class="card">
+    <h3>本日の実績</h3>
+    <div class="delivery-stat"><span>来客数</span><span>${G.totalCustomersToday}人</span></div>
+    <div class="delivery-stat"><span>売上</span><span class="c-green">${fmt(G.totalSalesToday)}</span></div>
+    <div class="delivery-stat"><span>経費</span><span class="c-red">${fmt(G.totalExpensesToday)}</span></div>
+    <div class="delivery-stat"><span>配達</span><span>${G.totalDeliveriesToday}件</span></div>
+  </div>
+  <div class="card">
+    <h3>店舗パラメータ</h3>
+    <div class="delivery-stat"><span>設備品質</span><span>x${equipQuality.toFixed(2)}</span></div>
+    <div class="delivery-stat"><span>スタッフ効率</span><span>${(staffEff * 100).toFixed(0)}%</span></div>
+    <div class="delivery-stat"><span>家具スコア</span><span>${furnScore.combined.toFixed(0)}</span></div>
+    <div class="delivery-stat"><span>集客力</span><span>x${attraction.toFixed(2)}</span></div>
+    <div class="delivery-stat"><span>平均ピザ単価</span><span>${fmt(calcPizzaPrice(3, equipQuality))}</span></div>
+    <div class="delivery-stat"><span>店舗レベル</span><span>Lv.${G.shopLevel}/5</span></div>
+    <div class="delivery-stat"><span>評判(BASE G)</span><span class="c-yellow">★${G.baseGRating.toFixed(1)}/10</span></div>
+    ${G.kx2Subscribed ? `<div class="delivery-stat"><span>評価(KX 2)</span><span class="c-yellow">${G.kx2Rating > 0 ? G.kx2Rating.toFixed(1) + '/20' : '評価不能'}</span></div>` : ''}
+  </div>
+  <div class="card">
+    <h3>ピザ価格目安</h3>
+    <p class="fs11 c-gray">具材2種: 約${fmt(calcPizzaPrice(2, equipQuality))}<br>
+    具材4種: 約${fmt(calcPizzaPrice(4, equipQuality))}<br>
+    具材6種: 約${fmt(calcPizzaPrice(6, equipQuality))}</p>
+  </div>`;
+}
+
+// ============================================
+// SETTINGS
+// ============================================
+function toggleSettings() {
+  const overlay = document.getElementById('settings-overlay');
+  if (overlay.style.display === 'flex') {
+    overlay.style.display = 'none';
+  } else {
+    overlay.style.display = 'flex';
+    renderSettings();
+  }
+}
+
+function renderSettings() {
+  const el = document.getElementById('settings-content');
+  el.innerHTML = `
+    <div class="card">
+      <h3>💸 一回のみの資金5万円融資</h3>
+      <p class="fs11 c-gray">一度だけ無利息で5万円を受け取れます。</p>
+      ${G.oneTimeFundUsed
+        ? '<p class="c-red fs11 mt4">使用済み</p>'
+        : '<button class="btn btn-success mt8" onclick="useOneTimeFund()">5万円を受け取る</button>'}
+    </div>
+    <div class="card">
+      <h3>🚀 スタッフの能力値限界突破モード</h3>
+      <p class="fs11 c-gray">スタッフの最大レベルを20→30に引き上げます。</p>
+      <button class="btn ${G.staffLimitBreak ? 'btn-primary' : 'btn-warning'} mt8" onclick="toggleLimitBreak()">
+        ${G.staffLimitBreak ? '✅ ON（有効中）' : '❌ OFF（無効）'}
+      </button>
+    </div>
+    <div class="card">
+      <h3>🎨 グラフィックス設定</h3>
+      <p class="fs11 c-gray mb8">描画品質を調整します。低スペックPCでは「低」を推奨。</p>
+      <div style="display:flex;gap:6px;">
+        <button class="btn ${G.graphicsQuality==='low'?'btn-primary':'btn-info'} btn-sm" onclick="setGraphics('low')">低</button>
+        <button class="btn ${G.graphicsQuality==='medium'?'btn-primary':'btn-info'} btn-sm" onclick="setGraphics('medium')">中</button>
+        <button class="btn ${G.graphicsQuality==='high'?'btn-primary':'btn-info'} btn-sm" onclick="setGraphics('high')">高</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🔊 サウンド</h3>
+      <p class="fs11 c-gray">（将来のアップデートで追加予定）</p>
+    </div>
+    <div class="card">
+      <h3>⏱️ ゲーム速度</h3>
+      <p class="fs11 c-gray mb8">ゲームの進行速度を変更します。</p>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-sm btn-info" onclick="setGameSpeed(0.5)">0.5x</button>
+        <button class="btn btn-sm btn-info" onclick="setGameSpeed(1)">1x</button>
+        <button class="btn btn-sm btn-info" onclick="setGameSpeed(2)">2x</button>
+        <button class="btn btn-sm btn-info" onclick="setGameSpeed(3)">3x</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>💾 セーブ / ロード</h3>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button class="btn btn-success btn-sm" onclick="saveGame()">セーブ</button>
+        <button class="btn btn-warning btn-sm" onclick="loadGame()">ロード</button>
+        <button class="btn btn-primary btn-sm" onclick="if(confirm('本当にリセットしますか？'))resetGame()">リセット</button>
+      </div>
+    </div>`;
+}
+
+let gameSpeedMultiplier = 1;
+
+function useOneTimeFund() {
+  if (G.oneTimeFundUsed) return notify('すでに使用済みです', 'error');
+  G.oneTimeFundUsed = true;
+  G.money += 50000;
+  notify('5万円を受け取りました！', 'success');
+  renderSettings();
+}
+
+function toggleLimitBreak() {
+  G.staffLimitBreak = !G.staffLimitBreak;
+  notify(`限界突破モード: ${G.staffLimitBreak ? 'ON' : 'OFF'}`, 'info');
+  renderSettings();
+}
+
+function setGraphics(quality) {
+  G.graphicsQuality = quality;
+  notify(`グラフィックス: ${quality}`, 'info');
+  renderSettings();
+}
+
+function setGameSpeed(speed) {
+  gameSpeedMultiplier = speed;
+  notify(`ゲーム速度: ${speed}x`, 'info');
+}
+
+function togglePause() {
+  G.paused = !G.paused;
+  document.getElementById('pause-btn').textContent = G.paused ? '▶️ 再開' : '⏸️ 一時停止';
+  notify(G.paused ? '一時停止' : '再開', 'info');
+}
+
+function showDaySummary() {
+  if (G.dayHistory.length === 0) return notify('まだデータがありません', 'info');
+  const last = G.dayHistory[G.dayHistory.length - 1];
+  showDayEndScreen(last);
+}
+
+// ============================================
+// SAVE / LOAD / RESET
+// ============================================
+function saveGame() {
+  try {
+    const saveData = JSON.stringify(G);
+    localStorage.setItem('piza_save', saveData);
+    notify('セーブしました！', 'success');
+  } catch (e) {
+    notify('セーブ失敗: ' + e.message, 'error');
+  }
+}
+
+function loadGame() {
+  try {
+    const saveData = localStorage.getItem('piza_save');
+    if (!saveData) return notify('セーブデータがありません', 'error');
+    const loaded = JSON.parse(saveData);
+    Object.assign(G, loaded);
+    G.lastTick = Date.now();
+    notify('ロードしました！', 'success');
+    renderPanel();
+  } catch (e) {
+    notify('ロード失敗: ' + e.message, 'error');
+  }
+}
+
+function resetGame() {
+  localStorage.removeItem('piza_save');
+  location.reload();
+}
+
+// ============================================
+// ADVANCED GAME LOOP WITH SPEED MULTIPLIER
+// ============================================
+function advancedGameLoop() {
+  const now = Date.now();
+  let dt = now - G.lastTick;
+  G.lastTick = now;
+  dt *= gameSpeedMultiplier;
+
+  if (!G.paused) {
+    G.dayTimeLeft -= dt;
+    if (G.dayTimeLeft <= 0) {
+      G.dayTimeLeft = 0;
+      endDay();
+      renderShop();
+      updateTopBar();
+      requestAnimationFrame(advancedGameLoop);
+      return;
+    }
+
+    G.animFrame++;
+
+    // ---- Customer spawning ----
+    const attraction = getCustomerAttraction();
+    const baseSpawnInterval = 2200;
+    const spawnRate = Math.max(200, baseSpawnInterval / attraction);
+    G.customerSpawnAccum += dt;
+    while (G.customerSpawnAccum >= spawnRate && G.totalCustomersToday < MAX_CUSTOMERS_DAY) {
+      G.customerSpawnAccum -= spawnRate;
+      const maxInShop = 15 + G.shopLevel * 8;
+      if (G.customersInShop.length < maxInShop) {
+        spawnCustomer();
+      }
+    }
+
+    // ---- Delivery spawning ----
+    if (G.deliveryEnabled) {
+      const delivRate = Math.max(300, 4500 / attraction);
+      G.deliverySpawnAccum += dt;
+      while (G.deliverySpawnAccum >= delivRate && G.totalDeliveriesToday < MAX_DELIVERIES_DAY) {
+        G.deliverySpawnAccum -= delivRate;
+        spawnDeliveryOrder();
+      }
+    }
+
+    // ---- Update customers ----
+    for (let i = G.customersInShop.length - 1; i >= 0; i--) {
+      const c = G.customersInShop[i];
+      c.timer += dt;
+      c.walkFrame += dt * 0.005;
+
+      if (c.entering) {
+        c.x += (c.targetX - c.x) * 0.06;
+        if (Math.abs(c.x - c.targetX) < 2) {
+          c.entering = false;
+          c.timer = 0;
+        }
+      }
+
+      if (!c.served && !c.entering && c.timer > 1800) {
+        if (servePizza(c)) {
+          c.served = true;
+          c.timer = 0;
+        } else {
+          c.leaving = true;
+          c.satisfaction = 1;
+          if (Math.random() < 0.5) addReview(1, c);
+        }
+      }
+
+      if (c.served && c.timer > 2500) {
+        c.leaving = true;
+      }
+
+      if (c.leaving) {
+        c.x += 5;
+        if (c.x > 700) {
+          G.customersInShop.splice(i, 1);
+        }
+      }
+    }
+
+    // ---- Update deliveries ----
+    for (let i = G.deliveriesQueue.length - 1; i >= 0; i--) {
+      G.deliveriesQueue[i].timer -= dt;
+      if (G.deliveriesQueue[i].timer <= 0) {
+        G.deliveriesQueue.splice(i, 1);
+      }
+    }
+
+    // ---- Staff stamina, EXP, lazy behavior ----
+    G.staff.forEach(s => {
+      if (s.working) {
+        let drain = 0.0008 * (dt / 1000) * s.maxStamina;
+        if (s.trait === 'working_hard') drain *= 1.3;
+        if (s.trait === 'lazy') drain *= 0.6;
+        if (s.trait === 'perfectionist') drain *= 1.1;
+        s.stamina = clamp(s.stamina - drain, 0, s.maxStamina);
+
+        // Lazy staff may slack off
+        if (s.trait === 'lazy' && s.stamina < s.maxStamina * 0.25 && Math.random() < 0.00005 * dt) {
+          s.working = false;
+          notify(`${s.name}がサボり始めた！`, 'error');
+        }
+
+        // EXP gain
+        const expGain = dt * 0.003 * (s.trait === 'working_hard' ? 1.3 : s.trait === 'perfectionist' ? 1.2 : 1);
+        s.exp += expGain;
+        const maxLv = G.staffLimitBreak ? 30 : MAX_STAFF_LEVEL;
+        if (s.exp >= s.expToNext && s.level < maxLv) {
+          s.level++;
+          s.exp = 0;
+          s.expToNext = s.level * 130;
+          s.maxStamina += 2.5;
+          s.stamina = s.maxStamina;
+          s.boostPct = Math.min(s.boostPct + 1, 60);
+          notify(`${s.name}がLv.${s.level}に！`, 'success');
+        }
+      }
+    });
+
+    // ---- Smoke particles ----
+    if (G.graphicsQuality !== 'low' && G.animFrame % 20 === 0) {
+      G.smokeParticles.push({
+        x: 55 + Math.random() * 25,
+        y: 0,
+        life: 50 + Math.random() * 20,
+        size: 2 + Math.random() * 4,
+        vx: (Math.random() - 0.5) * 0.3
+      });
+    }
+    for (let i = G.smokeParticles.length - 1; i >= 0; i--) {
+      const p = G.smokeParticles[i];
+      p.y -= 0.4;
+      p.x += p.vx || 0;
+      p.life--;
+      p.size += 0.04;
+      if (p.life <= 0) G.smokeParticles.splice(i, 1);
+    }
+    if (G.smokeParticles.length > 60) G.smokeParticles.splice(0, G.smokeParticles.length - 60);
+  }
+
+  renderShop();
+  updateTopBar();
+  requestAnimationFrame(advancedGameLoop);
+}
+
+// ============================================
+// ENHANCED RENDERING (replaces old renderShop)
+// ============================================
+function renderShop() {
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.width / dpr;
+  const H = canvas.height / dpr;
+  if (W <= 0 || H <= 0) return;
+
+  ctx.save();
+  ctx.clearRect(0, 0, W, H);
+
+  const lowQ = G.graphicsQuality === 'low';
+  const highQ = G.graphicsQuality === 'high';
+
+  // ========== FLOOR ==========
+  const floorY = H * 0.42;
+  if (!lowQ) {
+    const floorGrad = ctx.createLinearGradient(0, floorY, 0, H);
+    floorGrad.addColorStop(0, '#6d4c2e');
+    floorGrad.addColorStop(0.4, '#5c3d24');
+    floorGrad.addColorStop(1, '#3e2518');
+    ctx.fillStyle = floorGrad;
+  } else {
+    ctx.fillStyle = '#5c3d24';
+  }
+  ctx.fillRect(0, floorY, W, H - floorY);
+
+  // Floor tiles
+  if (!lowQ) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 0.5;
+    const tileSize = 45;
+    for (let x = 0; x < W; x += tileSize) {
+      ctx.beginPath(); ctx.moveTo(x, floorY); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = floorY; y < H; y += tileSize) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+  }
+
+  // ========== WALL ==========
+  if (!lowQ) {
+    const wallGrad = ctx.createLinearGradient(0, 0, 0, floorY);
+    wallGrad.addColorStop(0, '#9e6b45');
+    wallGrad.addColorStop(0.5, '#b07850');
+    wallGrad.addColorStop(1, '#7a5230');
+    ctx.fillStyle = wallGrad;
+  } else {
+    ctx.fillStyle = '#9e6b45';
+  }
+  ctx.fillRect(0, 0, W, floorY);
+
+  // Bricks on wall
+  if (highQ) {
+    ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+    ctx.lineWidth = 0.8;
+    const brickH = floorY / 7;
+    for (let row = 0; row < 7; row++) {
+      const yy = row * brickH;
+      const offset = row % 2 === 0 ? 0 : 33;
+      for (let x = offset; x < W; x += 66) {
+        ctx.strokeRect(x, yy, 66, brickH);
+      }
+    }
+  }
+
+  // Baseboard
+  ctx.fillStyle = '#4a2e14';
+  ctx.fillRect(0, floorY - 4, W, 8);
+
+  // ========== KITCHEN AREA (left 30%) ==========
+  const kAreaW = W * 0.3;
+  // Kitchen background
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fillRect(0, 0, kAreaW, H);
+
+  // Kitchen back wall (tiles)
+  if (!lowQ) {
+    ctx.fillStyle = '#d4c4a8';
+    ctx.fillRect(0, 0, kAreaW, floorY);
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x < kAreaW; x += 22) {
+      for (let y = 0; y < floorY; y += 22) {
+        ctx.strokeRect(x, y, 22, 22);
+      }
+    }
+  }
+
+  drawKitchenDetailed(W, H, kAreaW, floorY);
+
+  // ========== DIVIDER / COUNTER ==========
+  ctx.fillStyle = '#5a3a1e';
+  ctx.fillRect(kAreaW - 3, floorY * 0.3, 8, H * 0.45);
+  // Counter top
+  if (!lowQ) {
+    const counterGrad = ctx.createLinearGradient(0, floorY * 0.28, 0, floorY * 0.33);
+    counterGrad.addColorStop(0, '#8B7355');
+    counterGrad.addColorStop(1, '#6B5335');
+    ctx.fillStyle = counterGrad;
+  } else {
+    ctx.fillStyle = '#7B6345';
+  }
+  ctx.fillRect(2, floorY * 0.28, kAreaW - 5, 10);
+
+  // ========== WINDOW ==========
+  const winX = W * 0.55, winY = 12, winW = W * 0.16, winH = floorY * 0.7;
+  // Sky
+  if (!lowQ) {
+    const skyGrad = ctx.createLinearGradient(winX, winY, winX, winY + winH);
+    skyGrad.addColorStop(0, '#87CEEB');
+    skyGrad.addColorStop(1, '#b8e6ff');
+    ctx.fillStyle = skyGrad;
+  } else {
+    ctx.fillStyle = '#87CEEB';
+  }
+  ctx.fillRect(winX, winY, winW, winH);
+
+  // Clouds
+  if (highQ) {
+    const cloudX = winX + 15 + Math.sin(G.animFrame * 0.008) * 8;
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.beginPath();
+    ctx.arc(cloudX, winY + 20, 8, 0, Math.PI * 2);
+    ctx.arc(cloudX + 10, winY + 18, 10, 0, Math.PI * 2);
+    ctx.arc(cloudX + 20, winY + 20, 7, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Window frame
+  ctx.strokeStyle = '#4a2e14';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(winX, winY, winW, winH);
+  ctx.beginPath();
+  ctx.moveTo(winX + winW / 2, winY);
+  ctx.lineTo(winX + winW / 2, winY + winH);
+  ctx.moveTo(winX, winY + winH / 2);
+  ctx.lineTo(winX + winW, winY + winH / 2);
+  ctx.stroke();
+
+  // ========== DOOR ==========
+  const doorX = W * 0.82, doorY = floorY * 0.15, doorW = W * 0.08, doorH = floorY * 0.82;
+  ctx.fillStyle = '#3e2210';
+  ctx.fillRect(doorX, doorY, doorW, doorH);
+  if (!lowQ) {
+    ctx.fillStyle = '#5a3a20';
+    ctx.fillRect(doorX + 3, doorY + 3, doorW - 6, doorH * 0.45);
+    ctx.fillRect(doorX + 3, doorY + doorH * 0.52, doorW - 6, doorH * 0.45);
+  }
+  // Door handle
+  ctx.fillStyle = '#f0a500';
+  ctx.beginPath();
+  ctx.arc(doorX + doorW - 10, doorY + doorH * 0.5, 3, 0, Math.PI * 2);
+  ctx.fill();
+  // EXIT sign
+  ctx.fillStyle = '#e94560';
+  ctx.font = 'bold 8px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('EXIT', doorX + doorW / 2, doorY - 4);
+  ctx.textAlign = 'left';
+
+  // ========== DINING AREA FURNITURE ==========
+  drawFurnitureDetailed(W, H, kAreaW, floorY);
+
+  // ========== STAFF ==========
+  drawStaffDetailed(W, H, kAreaW, floorY);
+
+  // ========== CUSTOMERS ==========
+  drawCustomersDetailed(W, H, kAreaW, floorY);
+
+  // ========== SMOKE ==========
+  if (!lowQ) {
+    G.smokeParticles.forEach(p => {
+      ctx.beginPath();
+      const baseY = floorY * 0.2;
+      ctx.arc(p.x, baseY + p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(220,220,220,${(p.life / 70) * 0.35})`;
+      ctx.fill();
+    });
+  }
+
+  // ========== DELIVERY BIKE ==========
+  if (G.deliveryEnabled && G.deliveriesQueue.length > 0) {
+    drawDeliveryDetailed(W, H);
+  }
+
+  // ========== HUD OVERLAY ==========
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(4, 4, 145, 44);
+  ctx.fillStyle = '#e94560';
+  ctx.font = 'bold 13px sans-serif';
+  ctx.fillText('🍕 PIZA Shop', 10, 20);
+  ctx.fillStyle = '#ccc';
+  ctx.font = '10px sans-serif';
+  ctx.fillText(`Lv.${G.shopLevel} ・ ${G.staff.filter(s=>s.working).length}人稼働 ・ 客${G.customersInShop.length}人`, 10, 36);
+
+  ctx.restore();
+}
+
+function drawKitchenDetailed(W, H, kAreaW, floorY) {
+  const kx = 8;
+  const kyBase = floorY * 0.12;
+
+  // ===== OVEN (かまど) =====
+  const ovenLv = G.equipment.oven || 1;
+  const ovenW = 65, ovenH = 52;
+  // Outer shell
+  ctx.fillStyle = '#3a3a3a';
+  roundRect(ctx, kx, kyBase, ovenW, ovenH, 4);
+  ctx.fill();
+  // Inner opening
+  ctx.fillStyle = '#1a1a1a';
+  roundRect(ctx, kx + 5, kyBase + 5, ovenW - 10, ovenH * 0.6, 3);
+  ctx.fill();
+  // Fire
+  const fTime = G.animFrame * 0.12;
+  for (let fi = 0; fi < 5; fi++) {
+    const fx = kx + 12 + fi * 10;
+    const fh = 8 + Math.sin(fTime + fi * 1.3) * 5;
+    const fw = 5 + Math.sin(fTime + fi * 0.7) * 2;
+    ctx.fillStyle = `rgba(255,${60 + ovenLv * 2},0,${0.6 + Math.sin(fTime + fi) * 0.2})`;
+    ctx.beginPath();
+    ctx.moveTo(fx, kyBase + ovenH * 0.55);
+    ctx.quadraticCurveTo(fx + fw / 2, kyBase + ovenH * 0.55 - fh, fx + fw, kyBase + ovenH * 0.55);
+    ctx.fill();
+    // Yellow core
+    ctx.fillStyle = `rgba(255,220,50,${0.4 + Math.sin(fTime + fi) * 0.15})`;
+    ctx.beginPath();
+    ctx.moveTo(fx + 1, kyBase + ovenH * 0.55);
+    ctx.quadraticCurveTo(fx + fw / 2, kyBase + ovenH * 0.55 - fh * 0.6, fx + fw - 1, kyBase + ovenH * 0.55);
+    ctx.fill();
+  }
+  // Oven door handle
+  ctx.fillStyle = '#888';
+  ctx.fillRect(kx + 15, kyBase + ovenH * 0.68, ovenW - 30, 3);
+  // Level badge
+  drawLevelBadge(ctx, kx + ovenW - 18, kyBase + ovenH - 12, ovenLv);
+  ctx.fillStyle = '#ccc';
+  ctx.font = '8px sans-serif';
+  ctx.fillText('かまど', kx, kyBase + ovenH + 10);
+
+  // ===== STOVE (コンロ) =====
+  const stoveLv = G.equipment.stove || 1;
+  const sx = kx + ovenW + 8, sy = kyBase;
+  ctx.fillStyle = '#484848';
+  roundRect(ctx, sx, sy, 52, 42, 3);
+  ctx.fill();
+  ctx.fillStyle = '#555';
+  ctx.fillRect(sx + 2, sy + 2, 48, 28);
+  // Burner rings
+  for (let bi = 0; bi < 2; bi++) {
+    const bx = sx + 14 + bi * 24;
+    const by = sy + 16;
+    ctx.strokeStyle = stoveLv > 25 ? '#4488ff' : '#ff6633';
+    ctx.lineWidth = 1.5;
+    const pulseR = 7 + Math.sin(G.animFrame * 0.15 + bi) * 1.5;
+    ctx.beginPath();
+    ctx.arc(bx, by, pulseR, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(bx, by, pulseR * 0.6, 0, Math.PI * 2);
+    ctx.stroke();
+    // Glow
+    ctx.fillStyle = `rgba(${stoveLv > 25 ? '68,136,255' : '255,100,50'},0.15)`;
+    ctx.beginPath();
+    ctx.arc(bx, by, pulseR + 3, 0, Math.PI * 2);
+    ctx.fill();
+    // Pot on burner
+    ctx.fillStyle = '#666';
+    ctx.fillRect(bx - 6, by - 8, 12, 5);
+    ctx.fillStyle = '#777';
+    ctx.fillRect(bx - 5, by - 10, 10, 4);
+  }
+  drawLevelBadge(ctx, sx + 34, sy + 32, stoveLv);
+  ctx.fillStyle = '#ccc';
+  ctx.font = '8px sans-serif';
+  ctx.fillText('コンロ', sx, sy + 52);
+
+  // ===== PREP TABLE (調理台) =====
+  const prepLv = G.equipment.prep_table || 1;
+  const px = kx, py = kyBase + ovenH + 22;
+  const ptW = kAreaW - 20, ptH = 32;
+  // Table legs
+  ctx.fillStyle = '#5a4530';
+  ctx.fillRect(px + 4, py + ptH, 5, 15);
+  ctx.fillRect(px + ptW - 9, py + ptH, 5, 15);
+  // Table surface
+  if (G.graphicsQuality === 'high') {
+    const tGrad = ctx.createLinearGradient(px, py, px, py + ptH);
+    tGrad.addColorStop(0, '#a08060');
+    tGrad.addColorStop(1, '#8a6a4a');
+    ctx.fillStyle = tGrad;
+  } else {
+    ctx.fillStyle = '#966e4e';
+  }
+  roundRect(ctx, px, py, ptW, ptH, 3);
+  ctx.fill();
+  // Wood grain
+  if (G.graphicsQuality === 'high') {
+    ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+    ctx.lineWidth = 0.5;
+    for (let gx = px + 5; gx < px + ptW - 5; gx += 12) {
+      ctx.beginPath();
+      ctx.moveTo(gx, py + 3);
+      ctx.lineTo(gx + 5, py + ptH - 3);
+      ctx.stroke();
+    }
+  }
+  // Items on prep table - animated
+  const items = ['🍅','🧀','🔪','🫒','🍄','🧅','🌿'];
+  const visibleItems = items.slice(0, 3 + Math.floor(prepLv / 10));
+  visibleItems.forEach((item, idx) => {
+    const ix = px + 8 + idx * 18;
+    const iy = py + 20;
+    const bounce = Math.sin(G.animFrame * 0.08 + idx * 1.5) * 1.5;
+    ctx.font = '13px sans-serif';
+    ctx.fillText(item, ix, iy + bounce);
+  });
+  // Chopping animation
+  if (G.animFrame % 40 < 20) {
+    ctx.font = '12px sans-serif';
+    ctx.fillText('🔪', px + ptW - 25, py + 18);
+  }
+  drawLevelBadge(ctx, px + ptW - 20, py + ptH - 8, prepLv);
+  ctx.fillStyle = '#ccc';
+  ctx.font = '8px sans-serif';
+  ctx.fillText('調理台', px, py + ptH + 22);
+
+  // ===== MIXER (ミキサー) =====
+  const mixLv = G.equipment.mixer || 1;
+  const mx = kx + ptW - 35, my = py + ptH + 30;
+  ctx.fillStyle = '#606060';
+  roundRect(ctx, mx, my, 28, 35, 3);
+  ctx.fill();
+  ctx.fillStyle = '#707070';
+  ctx.fillRect(mx + 3, my + 3, 22, 18);
+  // Spinning blade
+  ctx.save();
+  ctx.translate(mx + 14, my + 12);
+  ctx.rotate(G.animFrame * 0.2);
+  ctx.strokeStyle = '#aaa';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-7, 0); ctx.lineTo(7, 0);
+  ctx.moveTo(0, -7); ctx.lineTo(0, 7);
+  ctx.stroke();
+  ctx.restore();
+  // Dough ball
+  if (G.animFrame % 100 < 80) {
+    ctx.fillStyle = '#f5deb3';
+    const doughSize = 4 + Math.sin(G.animFrame * 0.06) * 1;
+    ctx.beginPath();
+    ctx.arc(mx + 14, my + 12, doughSize, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  drawLevelBadge(ctx, mx + 10, my + 28, mixLv);
+  ctx.fillStyle = '#ccc';
+  ctx.font = '8px sans-serif';
+  ctx.fillText('ミキサー', mx - 5, my + 45);
+
+  // ===== FRIDGE (冷蔵庫) =====
+  const fridgeLv = G.equipment.fridge || 1;
+  const fx = kx, fy = py + ptH + 28;
+  ctx.fillStyle = '#d0d0d0';
+  roundRect(ctx, fx, fy, 32, 52, 3);
+  ctx.fill();
+  // Door lines
+  ctx.strokeStyle = '#bbb';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(fx, fy + 24);
+  ctx.lineTo(fx + 32, fy + 24);
+  ctx.stroke();
+  // Handles
+  ctx.fillStyle = '#999';
+  ctx.fillRect(fx + 26, fy + 8, 3, 10);
+  ctx.fillRect(fx + 26, fy + 30, 3, 10);
+  // Frost effect
+  if (G.graphicsQuality === 'high') {
+    ctx.fillStyle = 'rgba(200,230,255,0.15)';
+    ctx.fillRect(fx + 2, fy + 2, 28, 20);
+  }
+  // Cold mist
+  if (G.animFrame % 120 < 20 && G.graphicsQuality !== 'low') {
+    ctx.fillStyle = 'rgba(200,230,255,0.3)';
+    ctx.beginPath();
+    ctx.arc(fx + 16, fy + 54, 6 + Math.random() * 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  drawLevelBadge(ctx, fx + 14, fy + 44, fridgeLv);
+  ctx.fillStyle = '#ccc';
+  ctx.font = '8px sans-serif';
+  ctx.fillText('冷蔵庫', fx, fy + 62);
+
+  // ===== CUTTER & DISHWASHER (smaller items) =====
+  const cutLv = G.equipment.cutter || 1;
+  const dwLv = G.equipment.dishwasher || 1;
+  // Cutter on prep table area
+  ctx.font = '10px sans-serif';
+  ctx.fillStyle = '#ccc';
+  const cutY = fy + 16;
+  ctx.fillText(`🔪Lv.${cutLv}`, fx + 40, cutY);
+  ctx.fillText(`💧Lv.${dwLv}`, fx + 40, cutY + 16);
+}
+
+function drawLevelBadge(ctx, x, y, level) {
+  const color = level >= 40 ? '#ff69b4' : level >= 25 ? '#ffd700' : level >= 10 ? '#c0c0c0' : '#cd7f32';
+  ctx.fillStyle = color;
+  ctx.font = 'bold 7px sans-serif';
+  ctx.fillText(`${level}`, x, y);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawFurnitureDetailed(W, H, kAreaW, floorY) {
+  if (G.furniture.length === 0) {
+    // Default empty tables
+    for (let i = 0; i < 2 + G.shopLevel; i++) {
+      const tx = kAreaW + 30 + (i % 4) * (W * 0.14);
+      const ty = floorY + 20 + Math.floor(i / 4) * 70;
+      ctx.fillStyle = '#6B4226';
+      roundRect(ctx, tx, ty, 50, 32, 3);
+      ctx.fill();
+      ctx.fillStyle = '#5a3520';
+      ctx.fillRect(tx + 5, ty + 5, 40, 22);
+    }
+    return;
+  }
+
+  const cols = Math.min(5, 2 + G.shopLevel);
+  G.furniture.forEach((f, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const fx = kAreaW + 20 + col * (W * 0.12);
+    const fy = floorY + 15 + row * 65;
+    const gColors = ['#666','#cd7f32','#c0c0c0','#ffd700','#e0f0ff','#ff69b4'];
+    const gColor = gColors[f.grade] || '#666';
+
+    // Glow effect for high-grade furniture
+    if (f.grade >= 3 && G.graphicsQuality !== 'low') {
+      ctx.fillStyle = `${gColor}22`;
+      ctx.beginPath();
+      ctx.arc(fx + 22, fy + 18, 28, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (f.type === 'table') {
+      const tColors = ['#6B4226','#8B5A2B','#A0522D','#B87333','#DAA520','#FFD700'];
+      ctx.fillStyle = tColors[f.grade] || '#6B4226';
+      roundRect(ctx, fx, fy, 46, 30, 4);
+      ctx.fill();
+      // Table surface detail
+      if (G.graphicsQuality === 'high') {
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(fx + 3, fy + 3, 40, 24);
+      }
+      // Table legs
+      ctx.fillStyle = '#4a2e14';
+      ctx.fillRect(fx + 4, fy + 30, 4, 10);
+      ctx.fillRect(fx + 38, fy + 30, 4, 10);
+      // Plate on table
+      ctx.fillStyle = '#eee';
+      ctx.beginPath();
+      ctx.ellipse(fx + 23, fy + 14, 10, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (f.type === 'chair') {
+      const cColors = ['#5a3520','#6B3A2A','#8B4513','#A0522D','#B8860B','#CD853F'];
+      ctx.fillStyle = cColors[f.grade] || '#5a3520';
+      // Seat
+      roundRect(ctx, fx + 5, fy + 10, 28, 18, 3);
+      ctx.fill();
+      // Back
+      ctx.fillRect(fx + 7, fy - 2, 24, 14);
+      // Cushion for higher grades
+      if (f.grade >= 3) {
+        ctx.fillStyle = f.grade >= 4 ? '#8B0000' : '#A0522D';
+        roundRect(ctx, fx + 8, fy + 12, 22, 12, 2);
+        ctx.fill();
+      }
+      // Legs
+      ctx.fillStyle = '#333';
+      ctx.fillRect(fx + 8, fy + 28, 3, 8);
+      ctx.fillRect(fx + 27, fy + 28, 3, 8);
+    } else if (f.type === 'decor') {
+      const decorEmojis = ['🌿','🌿','🖼️','🖼️','🎨','✨'];
+      ctx.font = '20px sans-serif';
+      ctx.fillText(decorEmojis[f.grade] || '🌿', fx + 5, fy + 24);
+      // Frame for higher grades
+      if (f.grade >= 2) {
+        ctx.strokeStyle = gColor;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(fx + 2, fy, 34, 32);
+      }
+    } else if (f.type === 'light') {
+      // Light fixture
+      ctx.fillStyle = '#444';
+      ctx.fillRect(fx + 16, fy - 5, 4, 10);
+      // Bulb / fixture
+      const glowIntensity = 0.4 + Math.sin(G.animFrame * 0.04 + i) * 0.15;
+      const glowRadius = 10 + f.grade * 3;
+      const gradient = ctx.createRadialGradient(fx + 18, fy + 10, 2, fx + 18, fy + 10, glowRadius);
+      gradient.addColorStop(0, `rgba(255,255,200,${glowIntensity + 0.3})`);
+      gradient.addColorStop(0.5, `rgba(255,240,150,${glowIntensity})`);
+      gradient.addColorStop(1, 'rgba(255,220,100,0)');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(fx + 18, fy + 10, glowRadius, 0, Math.PI * 2);
+      ctx.fill();
+      // Fixture body
+      ctx.fillStyle = f.grade >= 4 ? '#ffd700' : f.grade >= 2 ? '#c0c0c0' : '#888';
+      ctx.beginPath();
+      ctx.moveTo(fx + 10, fy + 5);
+      ctx.lineTo(fx + 26, fy + 5);
+      ctx.lineTo(fx + 22, fy + 15);
+      ctx.lineTo(fx + 14, fy + 15);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Grade label
+    if (f.grade > 0) {
+      ctx.fillStyle = gColor;
+      ctx.font = 'bold 7px sans-serif';
+      ctx.fillText(GRADE_NAMES[f.grade], fx, fy + 44);
+    }
+  });
+}
+
+function drawStaffDetailed(W, H, kAreaW, floorY) {
+  const workingStaff = G.staff.filter(s => s.working);
+  workingStaff.forEach((s, i) => {
+    const col = i % 4;
+    const row = Math.floor(i / 4);
+    const sx = 18 + col * 36;
+    const sy = floorY + 20 + row * 50;
+    const bobY = Math.sin(G.animFrame * 0.07 + i * 1.1) * 2;
+    const stPct = s.stamina / s.maxStamina;
+
+    // Shadow
+    if (G.graphicsQuality !== 'low') {
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.beginPath();
+      ctx.ellipse(sx, sy + 24 + bobY, 8, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Legs
+    const legAnim = Math.sin(G.animFrame * 0.1 + i * 2) * (stPct > 0.3 ? 2 : 0.5);
+    ctx.fillStyle = '#3a3a5a';
+    ctx.fillRect(sx - 4, sy + 12 + bobY, 3, 10 + legAnim);
+    ctx.fillRect(sx + 1, sy + 12 + bobY, 3, 10 - legAnim);
+
+    // Shoes
+    ctx.fillStyle = '#222';
+    ctx.fillRect(sx - 5, sy + 21 + bobY + legAnim, 5, 3);
+    ctx.fillRect(sx, sy + 21 + bobY - legAnim, 5, 3);
+
+    // Body (apron)
+    ctx.fillStyle = '#ffffff';
+    roundRect(ctx, sx - 6, sy - 2 + bobY, 12, 15, 2);
+    ctx.fill();
+    ctx.fillStyle = s.color;
+    ctx.fillRect(sx - 5, sy - 2 + bobY, 10, 6);
+
+    // Arms with cooking animation
+    const armSwing = Math.sin(G.animFrame * 0.12 + i * 2.5) * 15 * Math.PI / 180;
+    // Left arm
+    ctx.save();
+    ctx.translate(sx - 6, sy + 2 + bobY);
+    ctx.rotate(-0.4 + armSwing);
+    ctx.fillStyle = s.color;
+    roundRect(ctx, -2, 0, 4, 11, 1);
+    ctx.fill();
+    ctx.restore();
+    // Right arm
+    ctx.save();
+    ctx.translate(sx + 6, sy + 2 + bobY);
+    ctx.rotate(0.4 - armSwing);
+    ctx.fillStyle = s.color;
+    roundRect(ctx, -2, 0, 4, 11, 1);
+    ctx.fill();
+    ctx.restore();
+
+    // Head
+    ctx.fillStyle = '#f5d0a9';
+    ctx.beginPath();
+    ctx.arc(sx, sy - 8 + bobY, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eyes
+    ctx.fillStyle = '#333';
+    const blinkOpen = G.animFrame % 180 < 170;
+    if (blinkOpen) {
+      ctx.fillRect(sx - 3, sy - 9 + bobY, 2, 2);
+      ctx.fillRect(sx + 1, sy - 9 + bobY, 2, 2);
+    } else {
+      ctx.fillRect(sx - 3, sy - 8 + bobY, 2, 1);
+      ctx.fillRect(sx + 1, sy - 8 + bobY, 2, 1);
+    }
+
+    // Mouth - happy if stamina high, tired if low
+    if (stPct > 0.5) {
+      ctx.beginPath();
+      ctx.arc(sx, sy - 5 + bobY, 2, 0, Math.PI);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.arc(sx, sy - 3 + bobY, 2, Math.PI, 0);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+
+    // Chef hat
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(sx - 6, sy - 17 + bobY, 12, 5);
+    roundRect(ctx, sx - 5, sy - 22 + bobY, 10, 7, 2);
+    ctx.fill();
+
+    // Stamina bar
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    roundRect(ctx, sx - 10, sy + 26 + bobY, 20, 3, 1);
+    ctx.fill();
+    ctx.fillStyle = stPct > 0.5 ? '#4ecca3' : stPct > 0.2 ? '#f0a500' : '#e94560';
+    if (stPct > 0) {
+      roundRect(ctx, sx - 10, sy + 26 + bobY, 20 * stPct, 3, 1);
+      ctx.fill();
+    }
+
+    // Name tag
+    ctx.fillStyle = '#ddd';
+    ctx.font = '6px sans-serif';
+    ctx.textAlign = 'center';
+    const shortName = s.name.split(' ').pop();
+    ctx.fillText(shortName, sx, sy + 35 + bobY);
+    ctx.textAlign = 'left';
+
+    // Specialty icon (small)
+    const specIcons = {oven:'🔥',stove:'♨️',prep_table:'🪵',mixer:'🌀',delivery:'🛵',service:'😊',management:'📋'};
+    ctx.font = '8px sans-serif';
+    ctx.fillText(specIcons[s.specialty] || '', sx - 4, sy - 24 + bobY);
+
+    // Lazy Z's
+    if (s.trait === 'lazy' && stPct < 0.3) {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = '8px sans-serif';
+      const zBob = Math.sin(G.animFrame * 0.05) * 3;
+      ctx.fillText('💤', sx + 8, sy - 18 + bobY + zBob);
+    }
+  });
+}
+
+function drawCustomersDetailed(W, H, kAreaW, floorY) {
+  G.customersInShop.forEach((c, ci) => {
+    const cx = c.x + kAreaW;
+    const cy = c.y;
+    const bobY = Math.sin(c.walkFrame) * 1.5;
+    const isMoving = c.entering || c.leaving;
+
+    // Shadow
+    if (G.graphicsQuality !== 'low') {
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + 22 + bobY, 7, 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Legs
+    const legAnim = isMoving ? Math.sin(c.walkFrame * 3) * 3 : 0;
+    ctx.fillStyle = '#444';
+    ctx.fillRect(cx - 3, cy + 10 + bobY, 3, 10 + legAnim);
+    ctx.fillRect(cx + 1, cy + 10 + bobY, 3, 10 - legAnim);
+
+    // Body
+    ctx.fillStyle = c.color;
+    roundRect(ctx, cx - 5, cy - 4 + bobY, 11, 15, 2);
+    ctx.fill();
+
+    // Head
+    ctx.fillStyle = '#f5d0a9';
+    ctx.beginPath();
+    ctx.arc(cx, cy - 10 + bobY, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Hair (random styles per customer)
+    ctx.fillStyle = `hsl(${(c.id * 77) % 360}, 30%, 25%)`;
+    ctx.beginPath();
+    ctx.arc(cx, cy - 13 + bobY, 6, Math.PI, 0);
+    ctx.fill();
+
+    // Eyes
+    const blinkOpen = (G.animFrame + c.id * 13) % 200 < 185;
+    ctx.fillStyle = '#333';
+    if (blinkOpen) {
+      ctx.fillRect(cx - 3, cy - 11 + bobY, 1.5, 1.5);
+      ctx.fillRect(cx + 1.5, cy - 11 + bobY, 1.5, 1.5);
+    }
+
+    // Expression based on status
+    if (c.served) {
+      // Happy
+      ctx.beginPath();
+      ctx.arc(cx, cy - 7 + bobY, 2, 0, Math.PI);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+      // Satisfaction emoji
+      const emojis = ['😐','😐','😊','😊','😄','😄','🤩','🤩','🤩','🤩'];
+      const emoIdx = clamp(Math.floor(c.satisfaction) - 1, 0, 9);
+      ctx.font = '10px sans-serif';
+      ctx.fillText(emojis[emoIdx], cx - 5, cy - 22 + bobY);
+    } else if (!c.entering && !c.leaving) {
+      // Waiting - thought bubble with pizza
+      if (G.graphicsQuality !== 'low') {
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.beginPath();
+        ctx.arc(cx + 10, cy - 26 + bobY, 10, 0, Math.PI * 2);
+        ctx.fill();
+        // Tail
+        ctx.beginPath();
+        ctx.arc(cx + 4, cy - 18 + bobY, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx + 7, cy - 21 + bobY, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.font = '10px sans-serif';
+        ctx.fillText('🍕', cx + 5, cy - 23 + bobY);
+      }
+    }
+
+    // Leaving with pizza
+    if (c.leaving && c.served) {
+      ctx.font = '9px sans-serif';
+      const pizzaX = cx + (c.leaving ? 8 : 0);
+      ctx.fillText('🍕', pizzaX, cy + bobY);
+    }
+  });
+}
+
+function drawDeliveryDetailed(W, H) {
+  const ds = G.deliverySystem;
+  if (!G.deliveryEnabled || !ds) return;
+
+  const activeCount = ds.activeOrders.length;
+  const baseX = W * 0.73;
+  const baseY = H - 55;
+
+  // 配達ステーション背景
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  roundRect(ctx, baseX - 35, baseY - 40, 120, 70, 6);
+  ctx.fill();
+  ctx.fillStyle = '#e94560';
+  ctx.font = 'bold 8px sans-serif';
+  ctx.fillText('🛵 配達ステーション', baseX - 30, baseY - 30);
+
+  // 待機中の車両を描画
+  const idleVehicles = ds.vehicles.filter(v => v.status === 'idle');
+  idleVehicles.slice(0, 4).forEach((v, vi) => {
+    const vx = baseX - 25 + vi * 25;
+    const vy = baseY + 10;
+    ctx.font = '14px sans-serif';
+    ctx.fillText(v.icon, vx, vy);
+    // コンディションバー
+    const condColor = v.condition > 70 ? '#4ecca3' : v.condition > 30 ? '#f0a500' : '#e94560';
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(vx, vy + 3, 16, 2);
+    ctx.fillStyle = condColor;
+    ctx.fillRect(vx, vy + 3, 16 * v.condition / 100, 2);
+  });
+
+  // 配達中のバイク/車をアニメーション
+  ds.activeOrders.slice(0, 5).forEach((order, oi) => {
+    const progress = order.progress;
+    const laneY = baseY - 55 - oi * 18;
+    const startX = baseX - 30;
+    const endX = baseX + 85;
+    const currentX = startX + (endX - startX) * progress;
+
+    // 経路線
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(startX, laneY);
+    ctx.lineTo(endX, laneY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 進行済み線
+    const statusColor = order.status === 'preparing' ? '#f0a500' : order.status === 'arriving' ? '#4ecca3' : '#00b4d8';
+    ctx.strokeStyle = statusColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(startX, laneY);
+    ctx.lineTo(currentX, laneY);
+    ctx.stroke();
+
+    // 車両アイコン
+    const vIcon = order.vehicle ? order.vehicle.icon : '🛵';
+    const bounce = Math.sin(G.animFrame * 0.15 + oi * 2) * 1.5;
+    ctx.font = '11px sans-serif';
+    ctx.fillText(vIcon, currentX - 6, laneY + 4 + bounce);
+
+    // 特急マーク
+    if (order.isExpress) {
+      ctx.fillStyle = '#ff69b4';
+      ctx.font = 'bold 6px sans-serif';
+      ctx.fillText('⚡', currentX + 5, laneY - 4);
+    }
+
+    // 到着地点マーク
+    ctx.font = '8px sans-serif';
+    ctx.fillText('📍', endX, laneY + 3);
+  });
+
+  // 統計テキスト
+  ctx.fillStyle = '#fff';
+  ctx.font = '9px sans-serif';
+  ctx.fillText(`配達中: ${activeCount}件`, baseX - 25, baseY - 18);
+  ctx.fillStyle = '#4ecca3';
+  ctx.fillText(`完了: ${ds.completedToday}件`, baseX + 30, baseY - 18);
+
+  // ピーク時インジケーター
+  if (ds.peakHourBonus) {
+    ctx.fillStyle = `rgba(255,100,50,${0.5 + Math.sin(G.animFrame * 0.1) * 0.3})`;
+    ctx.font = 'bold 7px sans-serif';
+    ctx.fillText('🔥 PEAK TIME', baseX - 25, baseY - 6);
+  }
+
+  // 待機中ドライバー
+  const idleDrivers = ds.drivers.filter(d => d.status === 'idle');
+  idleDrivers.slice(0, 3).forEach((d, di) => {
+    const dx = baseX + 55 + di * 14;
+    const dy = baseY + 12;
+    const bobY = Math.sin(G.animFrame * 0.06 + di * 1.5) * 1;
+    // 小さいスタッフ風
+    ctx.fillStyle = d.color;
+    ctx.beginPath();
+    ctx.arc(dx, dy - 5 + bobY, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(dx - 3, dy - 1 + bobY, 6, 8);
+    ctx.font = '6px sans-serif';
+    ctx.fillText(d.traitIcon, dx - 3, dy - 10 + bobY);
+  });
+}
+
+// ============================================
+// PERIODIC UI UPDATE
+// ============================================
+setInterval(() => {
+  if (currentTab) renderPanel();
+}, 3000);
+
+// ============================================
+// INITIALIZATION
+// ============================================
+function init() {
+  resizeCanvas();
+  renderPanel();
+  G.lastTick = Date.now();
+  advancedGameLoop();
+  notify('PIZA経営シミュレーションへようこそ！', 'success');
+  notify('右パネルでスタッフや設備を管理しましょう', 'info');
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

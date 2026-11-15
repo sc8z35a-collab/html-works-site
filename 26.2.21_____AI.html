@@ -1,0 +1,4980 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>26.2.21 最新の動画AI - AI Video Generation Models 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS RESET & BASE
+   ============================================ */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --white: #FFFFFF;
+  --off-white: #FAFAFA;
+  --light-gray: #F0F0F0;
+  --mid-gray: #E0E0E0;
+  --text-primary: #1A1A1A;
+  --text-secondary: #4A4A4A;
+  --text-tertiary: #7A7A7A;
+  --accent-gold: #C9A84C;
+  --accent-gold-light: #E8D5A0;
+  --accent-blue: #2D5BFF;
+  --accent-blue-light: #E8EEFF;
+  --google-blue: #4285F4;
+  --meta-blue: #0668E1;
+  --runway-purple: #7B2FBE;
+  --pika-pink: #FF3366;
+  --bytedance-red: #FE2C55;
+  --shenshu-green: #00C853;
+  --alibaba-orange: #FF6A00;
+  --kuaishou-yellow: #FF9500;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-xl: 0 24px 60px rgba(0,0,0,0.10), 0 8px 20px rgba(0,0,0,0.06);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  background: var(--white);
+  color: var(--text-primary);
+  line-height: 1.8;
+  overflow-x: hidden;
+  position: relative;
+}
+
+::selection {
+  background: var(--accent-gold);
+  color: var(--white);
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--off-white);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-gold);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-gold-light);
+}
+
+/* ============================================
+   LOADING SCREEN
+   ============================================ */
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--white);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+#loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: loadFadeIn 0.8s ease 0.2s forwards;
+}
+
+.loading-bar-container {
+  width: 240px;
+  height: 2px;
+  background: var(--light-gray);
+  border-radius: 2px;
+  overflow: hidden;
+  opacity: 0;
+  animation: loadFadeIn 0.8s ease 0.4s forwards;
+}
+
+.loading-bar {
+  width: 0%;
+  height: 100%;
+  background: var(--accent-gold);
+  border-radius: 2px;
+  animation: loadProgress 2s ease 0.6s forwards;
+}
+
+.loading-percentage {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 16px;
+  letter-spacing: 0.1em;
+  opacity: 0;
+  animation: loadFadeIn 0.8s ease 0.4s forwards;
+}
+
+@keyframes loadFadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes loadProgress {
+  0% { width: 0%; }
+  30% { width: 45%; }
+  60% { width: 70%; }
+  90% { width: 92%; }
+  100% { width: 100%; }
+}
+
+/* ============================================
+   CURSOR FOLLOWER
+   ============================================ */
+.cursor-follower {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--accent-gold);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transition: transform 0.15s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+}
+
+.cursor-follower.hover {
+  width: 60px;
+  height: 60px;
+  border-color: var(--accent-blue);
+}
+
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-gold);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.05s ease;
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+.main-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 72px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  transition: all var(--transition-normal);
+}
+
+.main-nav.scrolled {
+  height: 60px;
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-gold);
+  border-radius: 50%;
+  display: inline-block;
+  animation: logoPulse 2s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  position: relative;
+  padding: 4px 0;
+  transition: color var(--transition-fast);
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--accent-gold);
+  transition: width var(--transition-normal);
+}
+
+.nav-links a:hover {
+  color: var(--text-primary);
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.nav-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.08em;
+  background: var(--off-white);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--mid-gray);
+}
+
+.mobile-menu-btn {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.mobile-menu-btn span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 48px 80px;
+  overflow: hidden;
+}
+
+.hero-bg-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image:
+    linear-gradient(var(--text-primary) 1px, transparent 1px),
+    linear-gradient(90deg, var(--text-primary) 1px, transparent 1px);
+  background-size: 80px 80px;
+  animation: gridFloat 20s linear infinite;
+}
+
+@keyframes gridFloat {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(80px, 80px); }
+}
+
+.hero-floating-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.04;
+  animation: shapeFloat 8s ease-in-out infinite;
+}
+
+.hero-shape:nth-child(1) {
+  width: 600px;
+  height: 600px;
+  background: var(--accent-gold);
+  top: -200px;
+  right: -100px;
+  animation-delay: 0s;
+}
+
+.hero-shape:nth-child(2) {
+  width: 400px;
+  height: 400px;
+  background: var(--accent-blue);
+  bottom: -100px;
+  left: -100px;
+  animation-delay: -3s;
+}
+
+.hero-shape:nth-child(3) {
+  width: 250px;
+  height: 250px;
+  background: var(--accent-gold);
+  top: 40%;
+  left: 20%;
+  animation-delay: -5s;
+}
+
+.hero-shape:nth-child(4) {
+  width: 180px;
+  height: 180px;
+  background: var(--meta-blue);
+  top: 20%;
+  right: 25%;
+  animation-delay: -2s;
+  animation-duration: 10s;
+}
+
+.hero-shape:nth-child(5) {
+  width: 320px;
+  height: 320px;
+  background: var(--runway-purple);
+  bottom: 10%;
+  right: 10%;
+  animation-delay: -4s;
+  animation-duration: 12s;
+}
+
+@keyframes shapeFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-30px) scale(1.05); }
+}
+
+.hero-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--accent-gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  animation: heroFadeUp 1s ease 2.8s forwards;
+}
+
+.hero-label-line {
+  width: 40px;
+  height: 1px;
+  background: var(--accent-gold);
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  max-width: 1000px;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.hero-title .title-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(60px);
+  animation: heroWordReveal 0.8s ease forwards;
+}
+
+.hero-title .title-word:nth-child(1) { animation-delay: 2.9s; }
+.hero-title .title-word:nth-child(2) { animation-delay: 3.0s; }
+.hero-title .title-word:nth-child(3) { animation-delay: 3.1s; }
+.hero-title .title-word:nth-child(4) { animation-delay: 3.2s; }
+.hero-title .title-word:nth-child(5) { animation-delay: 3.3s; }
+
+@keyframes heroWordReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-title .highlight {
+  background: linear-gradient(120deg, var(--accent-gold) 0%, var(--accent-gold-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  font-weight: 300;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 640px;
+  line-height: 1.9;
+  margin-bottom: 48px;
+  opacity: 0;
+  animation: heroFadeUp 1s ease 3.5s forwards;
+}
+
+@keyframes heroFadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+}
+
+.hero-cta-group {
+  display: flex;
+  gap: 16px;
+  opacity: 0;
+  animation: heroFadeUp 1s ease 3.8s forwards;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: var(--text-primary);
+  color: var(--white);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border-radius: 50px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border-radius: 50px;
+  text-decoration: none;
+  border: 1.5px solid var(--mid-gray);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  transform: translateY(-2px);
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: heroFadeUp 1s ease 4.2s forwards;
+}
+
+.scroll-line {
+  width: 1px;
+  height: 48px;
+  background: var(--mid-gray);
+  position: relative;
+  overflow: hidden;
+}
+
+.scroll-line::after {
+  content: '';
+  position: absolute;
+  top: -48px;
+  left: 0;
+  width: 1px;
+  height: 48px;
+  background: var(--accent-gold);
+  animation: scrollLineAnim 2s ease-in-out infinite;
+}
+
+@keyframes scrollLineAnim {
+  0% { top: -48px; }
+  100% { top: 48px; }
+}
+
+.scroll-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+}
+
+/* ============================================
+   STATS BAR
+   ============================================ */
+.stats-bar {
+  padding: 60px 48px;
+  background: var(--off-white);
+  border-top: 1px solid var(--light-gray);
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.stats-bar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+}
+
+.stat-item {
+  text-align: center;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.stat-item.visible {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.stat-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-number .stat-suffix {
+  font-size: 1.5rem;
+  color: var(--accent-gold);
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stat-divider {
+  width: 24px;
+  height: 1px;
+  background: var(--accent-gold);
+  margin: 10px auto 0;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   SECTION COMMON
+   ============================================ */
+.section {
+  padding: 120px 48px;
+  position: relative;
+}
+
+.section-header {
+  max-width: 800px;
+  margin: 0 auto 80px;
+  text-align: center;
+}
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--accent-gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.section-label-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--accent-gold);
+  border-radius: 50%;
+  font-size: 0.65rem;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
+}
+
+.section-desc {
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--text-secondary);
+  line-height: 1.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   EXECUTIVE SUMMARY SECTION
+   ============================================ */
+.exec-summary {
+  background: var(--white);
+}
+
+.exec-summary-content {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.exec-summary-text {
+  font-size: 1.05rem;
+  line-height: 2;
+  color: var(--text-secondary);
+  font-weight: 300;
+  position: relative;
+  padding-left: 32px;
+  border-left: 2px solid var(--accent-gold);
+}
+
+.exec-summary-text p {
+  margin-bottom: 24px;
+}
+
+.exec-summary-text strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.exec-key-points {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 60px;
+}
+
+.key-point-card {
+  background: var(--off-white);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-lg);
+  padding: 36px 28px;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.key-point-card.visible {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.key-point-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-normal);
+}
+
+.key-point-card:hover::before {
+  transform: scaleX(1);
+}
+
+.key-point-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
+}
+
+.key-point-icon {
+  width: 52px;
+  height: 52px;
+  background: var(--white);
+  border: 1px solid var(--mid-gray);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+  transition: all var(--transition-normal);
+}
+
+.key-point-card:hover .key-point-icon {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  transform: scale(1.05);
+}
+
+.key-point-card:hover .key-point-icon svg {
+  stroke: white;
+}
+
+.key-point-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  letter-spacing: 0.01em;
+}
+
+.key-point-desc {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+/* ============================================
+   MODEL CARDS SECTION
+   ============================================ */
+.models-section {
+  background: var(--off-white);
+}
+
+.models-grid {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.model-card {
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-xl);
+  padding: 0;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  position: relative;
+  opacity: 0;
+  transform: translateY(50px);
+}
+
+.model-card.visible {
+  animation: cardReveal 0.8s ease forwards;
+}
+
+@keyframes cardReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.model-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+  border-color: transparent;
+}
+
+.model-card-header {
+  padding: 32px 28px 20px;
+  position: relative;
+}
+
+.model-card-rank {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  letter-spacing: 0.1em;
+  background: var(--off-white);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.model-card-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.model-card-logo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  border-radius: inherit;
+}
+
+.model-card-logo.google { background: var(--google-blue); }
+.model-card-logo.meta { background: var(--meta-blue); }
+.model-card-logo.runway { background: var(--runway-purple); }
+.model-card-logo.pika { background: var(--pika-pink); }
+.model-card-logo.bytedance { background: var(--bytedance-red); }
+.model-card-logo.shenshu { background: var(--shenshu-green); }
+.model-card-logo.alibaba { background: var(--alibaba-orange); }
+.model-card-logo.kuaishou { background: var(--kuaishou-yellow); }
+
+.model-card-logo svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+}
+
+.model-card-logo-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 0.02em;
+  position: relative;
+  z-index: 1;
+}
+
+.model-card-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.model-card-org {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.model-card-body {
+  padding: 0 28px 28px;
+}
+
+.model-card-specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.spec-item {
+  background: var(--off-white);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  transition: background var(--transition-fast);
+}
+
+.spec-item:hover {
+  background: var(--light-gray);
+}
+
+.spec-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.spec-value {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.model-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.model-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+  border: 1px solid;
+}
+
+.tag-diffusion { color: #6B21A8; background: #F3E8FF; border-color: #E9D5FF; }
+.tag-transformer { color: #0369A1; background: #E0F2FE; border-color: #BAE6FD; }
+.tag-flow { color: #B45309; background: #FEF3C7; border-color: #FDE68A; }
+.tag-audio { color: #059669; background: #D1FAE5; border-color: #A7F3D0; }
+.tag-commercial { color: #DC2626; background: #FEE2E2; border-color: #FECACA; }
+.tag-research { color: #4338CA; background: #E0E7FF; border-color: #C7D2FE; }
+.tag-multimodal { color: #7C3AED; background: #EDE9FE; border-color: #DDD6FE; }
+
+.model-card-desc {
+  font-size: 0.82rem;
+  color: var(--text-tertiary);
+  line-height: 1.7;
+}
+
+.model-card-footer {
+  padding: 16px 28px;
+  border-top: 1px solid var(--light-gray);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.model-card-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+}
+
+.model-card-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: gap var(--transition-fast);
+}
+
+.model-card-link:hover {
+  gap: 8px;
+}
+
+.model-card-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ============================================
+   TOP 3 COMPARISON SECTION
+   ============================================ */
+.comparison-section {
+  background: var(--white);
+}
+
+.comparison-visual {
+  max-width: 1100px;
+  margin: 0 auto 80px;
+}
+
+.comparison-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.flow-node {
+  background: var(--white);
+  border: 2px solid var(--light-gray);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  text-align: center;
+  min-width: 200px;
+  transition: all var(--transition-normal);
+  position: relative;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.flow-node.visible {
+  animation: nodeReveal 0.6s var(--transition-spring) forwards;
+}
+
+@keyframes nodeReveal {
+  to { opacity: 1; transform: scale(1); }
+}
+
+.flow-node:hover {
+  border-color: var(--accent-gold);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.flow-node-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  background: var(--off-white);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-node-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.flow-node-sub {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.flow-arrow {
+  font-size: 1.5rem;
+  color: var(--accent-gold);
+  animation: arrowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.4; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(6px); }
+}
+
+/* Comparison Table (Premium) */
+.comparison-table-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-x: auto;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--light-gray);
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.comparison-table thead {
+  background: var(--off-white);
+}
+
+.comparison-table th {
+  padding: 20px 24px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 2px solid var(--light-gray);
+  white-space: nowrap;
+}
+
+.comparison-table td {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--light-gray);
+  vertical-align: middle;
+  transition: background var(--transition-fast);
+}
+
+.comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.comparison-table tbody tr:hover td {
+  background: rgba(201, 168, 76, 0.03);
+}
+
+.table-model-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.table-model-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.table-model-name {
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.table-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.badge-gold { background: #FEF3C7; color: #92400E; }
+.badge-silver { background: #F1F5F9; color: #475569; }
+.badge-bronze { background: #FED7AA; color: #9A3412; }
+.badge-top { background: #D1FAE5; color: #065F46; }
+
+.table-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--light-gray);
+  min-width: 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.table-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 0;
+}
+
+.table-bar-fill.animated {
+  /* width set by JS */
+}
+
+.bar-google { background: linear-gradient(90deg, var(--google-blue), #5B9CF6); }
+.bar-meta { background: linear-gradient(90deg, var(--meta-blue), #4D8FFF); }
+.bar-runway { background: linear-gradient(90deg, var(--runway-purple), #A855F7); }
+
+/* ============================================
+   PERFORMANCE RADAR CHART (CSS)
+   ============================================ */
+.performance-section {
+  background: var(--off-white);
+}
+
+.perf-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.perf-chart-container {
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.perf-chart-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.perf-chart-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin-bottom: 32px;
+}
+
+.radar-chart {
+  width: 100%;
+  aspect-ratio: 1;
+  position: relative;
+}
+
+.radar-chart svg {
+  width: 100%;
+  height: 100%;
+}
+
+.perf-details {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.perf-detail-card {
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  transition: all var(--transition-normal);
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.perf-detail-card.visible {
+  animation: slideInRight 0.6s ease forwards;
+}
+
+@keyframes slideInRight {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.perf-detail-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: transparent;
+}
+
+.perf-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.perf-detail-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.perf-detail-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.perf-detail-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.perf-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.perf-bar-label {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+  width: 100px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.perf-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--light-gray);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.perf-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  width: 0;
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.perf-bar-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  width: 36px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+/* ============================================
+   ARCHITECTURE DIAGRAM SECTION
+   ============================================ */
+.arch-section {
+  background: var(--white);
+}
+
+.arch-diagram-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.arch-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 48px;
+}
+
+.arch-tab {
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1.5px solid var(--mid-gray);
+  background: var(--white);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.03em;
+}
+
+.arch-tab.active {
+  background: var(--text-primary);
+  color: var(--white);
+  border-color: var(--text-primary);
+}
+
+.arch-tab:hover:not(.active) {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.arch-panel {
+  display: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all var(--transition-normal);
+}
+
+.arch-panel.active {
+  display: block;
+  animation: panelFadeIn 0.6s ease forwards;
+}
+
+@keyframes panelFadeIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.arch-flow-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 20px;
+  background: var(--off-white);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--light-gray);
+  flex-wrap: wrap;
+}
+
+.arch-block {
+  background: var(--white);
+  border: 2px solid;
+  border-radius: var(--radius-md);
+  padding: 24px 20px;
+  text-align: center;
+  min-width: 160px;
+  transition: all var(--transition-normal);
+  position: relative;
+}
+
+.arch-block:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.arch-block-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.arch-block-sub {
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+}
+
+.arch-block.input { border-color: #93C5FD; background: #EFF6FF; }
+.arch-block.process { border-color: var(--accent-gold-light); background: #FFFBEB; }
+.arch-block.output { border-color: #86EFAC; background: #F0FDF4; }
+
+.arch-arrow-svg {
+  width: 40px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.arch-arrow-svg line,
+.arch-arrow-svg polyline {
+  stroke: var(--accent-gold);
+  stroke-width: 2;
+  fill: none;
+}
+
+.arch-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.arch-detail-item {
+  background: var(--off-white);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  border: 1px solid var(--light-gray);
+  transition: all var(--transition-normal);
+}
+
+.arch-detail-item:hover {
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.arch-detail-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.arch-detail-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.arch-detail-desc {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+}
+
+/* ============================================
+   TIMELINE SECTION
+   ============================================ */
+.timeline-section {
+  background: var(--off-white);
+}
+
+.timeline-container {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--light-gray);
+  transform: translateX(-50%);
+}
+
+.timeline-line-fill {
+  width: 100%;
+  height: 0;
+  background: var(--accent-gold);
+  transition: height 2s ease;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: 48px;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.timeline-item.visible {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.timeline-item:nth-child(odd) {
+  flex-direction: row;
+  padding-right: calc(50% + 40px);
+  text-align: right;
+}
+
+.timeline-item:nth-child(even) {
+  flex-direction: row-reverse;
+  padding-left: calc(50% + 40px);
+  text-align: left;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 3px solid var(--accent-gold);
+  transform: translateX(-50%);
+  z-index: 2;
+  transition: all var(--transition-fast);
+}
+
+.timeline-item:hover .timeline-dot {
+  background: var(--accent-gold);
+  transform: translateX(-50%) scale(1.3);
+}
+
+.timeline-content {
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  transition: all var(--transition-normal);
+  width: 100%;
+}
+
+.timeline-content:hover {
+  box-shadow: var(--shadow-md);
+  border-color: transparent;
+}
+
+.timeline-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--accent-gold);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.timeline-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.timeline-desc {
+  font-size: 0.82rem;
+  color: var(--text-tertiary);
+  line-height: 1.7;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .models-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .perf-grid {
+    grid-template-columns: 1fr;
+  }
+  .arch-detail-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-nav {
+    padding: 0 24px;
+  }
+  .nav-links {
+    display: none;
+  }
+  .mobile-menu-btn {
+    display: flex;
+  }
+  .hero {
+    padding: 100px 24px 60px;
+  }
+  .section {
+    padding: 80px 24px;
+  }
+  .stats-bar {
+    padding: 40px 24px;
+  }
+  .stats-bar-inner {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .models-grid {
+    grid-template-columns: 1fr;
+  }
+  .exec-key-points {
+    grid-template-columns: 1fr;
+  }
+  .hero-cta-group {
+    flex-direction: column;
+    align-items: center;
+  }
+  .comparison-flow {
+    flex-direction: column;
+  }
+  .flow-arrow {
+    transform: rotate(90deg);
+  }
+  .timeline-item:nth-child(odd),
+  .timeline-item:nth-child(even) {
+    flex-direction: column;
+    padding: 0 0 0 48px;
+    text-align: left;
+  }
+  .timeline-line {
+    left: 16px;
+  }
+  .timeline-dot {
+    left: 16px;
+  }
+  .arch-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .arch-flow-diagram {
+    flex-direction: column;
+  }
+  .arch-arrow-svg {
+    transform: rotate(90deg);
+  }
+  .cursor-follower,
+  .cursor-dot {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-number {
+    font-size: 2.2rem;
+  }
+  .model-card-specs {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+
+<!-- ============================================
+     LOADING SCREEN
+     ============================================ -->
+<div id="loading-screen">
+  <div class="loading-logo">AI Video Gen</div>
+  <div class="loading-bar-container">
+    <div class="loading-bar"></div>
+  </div>
+  <div class="loading-percentage" id="loadPercent">0%</div>
+</div>
+
+<!-- ============================================
+     CURSOR FOLLOWER
+     ============================================ -->
+<div class="cursor-follower" id="cursorFollower"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- ============================================
+     NAVIGATION
+     ============================================ -->
+<nav class="main-nav" id="mainNav">
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-dot"></span>
+    AI Video 2026
+  </a>
+  <ul class="nav-links">
+    <li><a href="#summary">概要</a></li>
+    <li><a href="#models">モデル</a></li>
+    <li><a href="#comparison">比較</a></li>
+    <li><a href="#performance">性能</a></li>
+    <li><a href="#architecture">構造</a></li>
+    <li><a href="#timeline">時系列</a></li>
+    <li><a href="#challenges">課題</a></li>
+    <li><a href="#outlook">展望</a></li>
+  </ul>
+  <div class="nav-date">2026.02.21</div>
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ============================================
+     HERO SECTION
+     ============================================ -->
+<section class="hero" id="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-floating-shapes">
+    <div class="hero-shape"></div>
+    <div class="hero-shape"></div>
+    <div class="hero-shape"></div>
+    <div class="hero-shape"></div>
+    <div class="hero-shape"></div>
+  </div>
+
+  <div class="hero-label">
+    <span class="hero-label-line"></span>
+    Executive Summary 2026.02.21
+    <span class="hero-label-line"></span>
+  </div>
+
+  <h1 class="hero-title">
+    <span class="title-word">最新</span>
+    <span class="title-word">AI</span>
+    <span class="title-word title-word-highlight"><span class="highlight">動画生成</span></span>
+    <span class="title-word">モデル</span>
+    <span class="title-word">総覧</span>
+  </h1>
+
+  <p class="hero-subtitle">
+    Google、Meta、Runway、ByteDance、中国系企業などが先導する最先端AI動画生成技術。<br>
+    テキストから数秒で高解像度映像を生み出す、2026年最新モデルを徹底比較。
+  </p>
+
+  <div class="hero-cta-group">
+    <a href="#models" class="btn-primary">
+      モデル比較を見る
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <a href="#summary" class="btn-secondary">
+      エグゼクティブサマリ
+    </a>
+  </div>
+
+  <div class="hero-scroll-indicator">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">Scroll</span>
+  </div>
+</section>
+
+<!-- ============================================
+     STATS BAR
+     ============================================ -->
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stat-item" data-animate>
+      <div class="stat-number"><span class="stat-counter" data-target="10">0</span><span class="stat-suffix">+</span></div>
+      <div class="stat-label">主要モデル</div>
+      <div class="stat-divider"></div>
+    </div>
+    <div class="stat-item" data-animate>
+      <div class="stat-number"><span class="stat-counter" data-target="30">0</span><span class="stat-suffix">B</span></div>
+      <div class="stat-label">最大パラメータ</div>
+      <div class="stat-divider"></div>
+    </div>
+    <div class="stat-item" data-animate>
+      <div class="stat-number"><span class="stat-counter" data-target="1080">0</span><span class="stat-suffix">p</span></div>
+      <div class="stat-label">最大解像度</div>
+      <div class="stat-divider"></div>
+    </div>
+    <div class="stat-item" data-animate>
+      <div class="stat-number"><span class="stat-counter" data-target="16">0</span><span class="stat-suffix">秒</span></div>
+      <div class="stat-label">最大生成長</div>
+      <div class="stat-divider"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     EXECUTIVE SUMMARY SECTION
+     ============================================ -->
+<section class="section exec-summary" id="summary">
+  <div class="section-header">
+    <div class="section-label">
+      <span class="section-label-number">01</span>
+      Executive Summary
+    </div>
+    <h2 class="section-title">エグゼクティブサマリ</h2>
+    <p class="section-desc">最先端AI動画生成の現状と課題を俯瞰する</p>
+  </div>
+
+  <div class="exec-summary-content" data-animate>
+    <div class="exec-summary-text">
+      <p>
+        最新のAI動画生成モデルは、<strong>Google</strong>、<strong>Meta</strong>、<strong>Runway</strong>、<strong>ByteDance（Seedance）</strong>、そして<strong>中国系企業（ShengShu, Alibaba, Kuaishou）</strong>などが先導しており、いずれもテキストや画像を入力として数秒〜十数秒の高解像度映像を生成できる段階に到達している。
+      </p>
+      <p>
+        中でも最先端モデルである<strong>Google「Veo 3.1」</strong>、<strong>Meta「Movie Gen Video」</strong>、<strong>Runway「Gen-4.5」</strong>は、世界観の一貫性、物理的なリアリティ、テキスト忠実度において顕著な性能を示す。これらはそれぞれ、音声込みの同期生成や大規模トランスフォーマアーキテクチャ、高いベンチマークスコア獲得などで優位に立っている。
+      </p>
+      <p>
+        ただし、いずれも数秒〜十数秒程度の短い映像に限られ、計算コストも極めて高い。今後1年以内には、より長尺かつ効率的な生成アルゴリズムや、編集機能の高度化（インタラクティブな編集やマルチモーダル制御）に注目が集まると予想される。同時に、膨大な学習データに由来するバイアス問題や著作権・偽情報生成の懸念など倫理面の課題、そして莫大な算力要求（GPU/TPUリソース）の克服が重大な課題として残っている。
+      </p>
+    </div>
+
+    <div class="exec-key-points">
+      <div class="key-point-card" data-animate data-delay="100">
+        <div class="key-point-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        </div>
+        <div class="key-point-title">高解像度映像生成</div>
+        <div class="key-point-desc">1080p品質の映像を数秒〜16秒まで生成可能。テキスト入力のみで映画的な品質を実現。</div>
+      </div>
+      <div class="key-point-card" data-animate data-delay="200">
+        <div class="key-point-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="key-point-title">大規模アーキテクチャ</div>
+        <div class="key-point-desc">30Bパラメータ級トランスフォーマや潜在拡散モデルの組み合わせによるスケーラブルな生成。</div>
+      </div>
+      <div class="key-point-card" data-animate data-delay="300">
+        <div class="key-point-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div class="key-point-title">課題と展望</div>
+        <div class="key-point-desc">計算コスト・倫理・安全性の課題が残る。今後はマルチモーダル融合と長尺化に期待。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     MODEL CARDS SECTION
+     ============================================ -->
+<section class="section models-section" id="models">
+  <div class="section-header">
+    <div class="section-label">
+      <span class="section-label-number">02</span>
+      Model Catalog
+    </div>
+    <h2 class="section-title">AI動画生成モデル一覧</h2>
+    <p class="section-desc">主要な公開AI動画生成モデルの属性を個別に比較</p>
+  </div>
+
+  <div class="models-grid">
+
+    <!-- Google Veo 3 -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">#01</span>
+        <div class="model-card-logo google">
+          <span class="model-card-logo-text">G</span>
+        </div>
+        <div class="model-card-name">Veo 3</div>
+        <div class="model-card-org">Google DeepMind</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Resolution</div>
+            <div class="spec-value">1080p</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Max Length</div>
+            <div class="spec-value">8秒</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">FPS</div>
+            <div class="spec-value">15fps</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Input</div>
+            <div class="spec-value">テキスト/画像</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-diffusion">潜在拡散</span>
+          <span class="model-tag tag-transformer">Transformer</span>
+          <span class="model-tag tag-audio">音声同期</span>
+        </div>
+        <div class="model-card-desc">潜在拡散＋トランスフォーマで映像＋音声を同時生成。Google API経由で提供。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2025年8月</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Google Veo 3.1 -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">TOP</span>
+        <div class="model-card-logo google">
+          <span class="model-card-logo-text">G</span>
+        </div>
+        <div class="model-card-name">Veo 3.1</div>
+        <div class="model-card-org">Google DeepMind</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Resolution</div>
+            <div class="spec-value">1080p</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Max Length</div>
+            <div class="spec-value">8秒</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">FPS</div>
+            <div class="spec-value">15fps</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Input</div>
+            <div class="spec-value">テキスト/画像</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-diffusion">潜在拡散</span>
+          <span class="model-tag tag-transformer">Transformer</span>
+          <span class="model-tag tag-audio">音声強化</span>
+        </div>
+        <div class="model-card-desc">Veo 3の改良版。プロンプト追従性と音声品質を強化。Gemini/Vertex AI対応。全評価項目で最高評価。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2025年10月</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Meta Movie Gen Video -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">#02</span>
+        <div class="model-card-logo meta">
+          <span class="model-card-logo-text">M</span>
+        </div>
+        <div class="model-card-name">Movie Gen Video</div>
+        <div class="model-card-org">Meta AI</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Resolution</div>
+            <div class="spec-value">1080p</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Max Length</div>
+            <div class="spec-value">16秒</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">FPS</div>
+            <div class="spec-value">16fps</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Parameters</div>
+            <div class="spec-value">30B</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-transformer">Transformer</span>
+          <span class="model-tag tag-flow">Flow Matching</span>
+          <span class="model-tag tag-research">研究発表</span>
+        </div>
+        <div class="model-card-desc">30Bパラメータ級トランスフォーマ。Flow Matching事前学習で最大16秒の高品質映像を生成。個人化・編集機能も搭載。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2024年10月</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Meta Movie Gen Audio -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">AUDIO</span>
+        <div class="model-card-logo meta">
+          <span class="model-card-logo-text">M</span>
+        </div>
+        <div class="model-card-name">Movie Gen Audio</div>
+        <div class="model-card-org">Meta AI</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Output</div>
+            <div class="spec-value">48kHz音声</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Parameters</div>
+            <div class="spec-value">13B</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Input</div>
+            <div class="spec-value">テキスト</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Type</div>
+            <div class="spec-value">音声生成</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-transformer">Transformer</span>
+          <span class="model-tag tag-flow">Flow Matching</span>
+          <span class="model-tag tag-audio">音声特化</span>
+        </div>
+        <div class="model-card-desc">13BパラメータのFlow Matchingトランスフォーマで48kHz高品質音声を生成する音声特化モデル。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2024年10月</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Runway Gen-4.5 -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">#03</span>
+        <div class="model-card-logo runway">
+          <span class="model-card-logo-text">R</span>
+        </div>
+        <div class="model-card-name">Gen-4.5</div>
+        <div class="model-card-org">Runway ML</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Resolution</div>
+            <div class="spec-value">HD (720p~1080p)</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Max Length</div>
+            <div class="spec-value">~10秒</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">FPS</div>
+            <div class="spec-value">~30fps</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Benchmark</div>
+            <div class="spec-value">1247 Elo</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-diffusion">拡散モデル</span>
+          <span class="model-tag tag-commercial">商用API</span>
+        </div>
+        <div class="model-card-desc">世界ベンチマーク首位（1247 Elo）。動きの正確性とシーン複雑性で高評価。API経由で広く利用可能。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2025年12月</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Runway Gen-4 -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">GEN4</span>
+        <div class="model-card-logo runway">
+          <span class="model-card-logo-text">R</span>
+        </div>
+        <div class="model-card-name">Gen-4</div>
+        <div class="model-card-org">Runway ML</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Resolution</div>
+            <div class="spec-value">HD (720p~1080p)</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Max Length</div>
+            <div class="spec-value">10秒</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Input</div>
+            <div class="spec-value">テキスト/画像</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Access</div>
+            <div class="spec-value">商用API</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-diffusion">拡散モデル</span>
+          <span class="model-tag tag-commercial">商用API</span>
+        </div>
+        <div class="model-card-desc">Gen-4.5の前身モデル。拡散モデルベースで参照画像入力にも対応する商用モデル。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2024年4月</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Pika 2.2 -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">PIKA</span>
+        <div class="model-card-logo pika">
+          <span class="model-card-logo-text">P</span>
+        </div>
+        <div class="model-card-name">Pika 2.2</div>
+        <div class="model-card-org">Pika Labs</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Resolution</div>
+            <div class="spec-value">720p/1080p</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Max Length</div>
+            <div class="spec-value">5~10秒</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">FPS</div>
+            <div class="spec-value">24fps</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Input</div>
+            <div class="spec-value">テキスト/画像</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-diffusion">拡散モデル推定</span>
+          <span class="model-tag tag-commercial">商用Web</span>
+        </div>
+        <div class="model-card-desc">開始/終了画像指定やPikaframesによるキーアニメーション制御が特徴。実用的な短尺生成ツール。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2025年2月</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- ByteDance Seedance 2.0 -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">SEED</span>
+        <div class="model-card-logo bytedance">
+          <span class="model-card-logo-text">B</span>
+        </div>
+        <div class="model-card-name">Seedance 2.0</div>
+        <div class="model-card-org">ByteDance</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Resolution</div>
+            <div class="spec-value">1080p (推定)</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Max Length</div>
+            <div class="spec-value">数秒~</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Input</div>
+            <div class="spec-value">テキスト/画像/音声</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Access</div>
+            <div class="spec-value">非公開(内部)</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-multimodal">マルチモーダル</span>
+          <span class="model-tag tag-audio">音声・映像同時</span>
+        </div>
+        <div class="model-card-desc">テキスト・画像・音声の複合入力からマルチモーダルに映像を生成。ByteDance内部利用。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2026年2月頃</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- ShengShu Vidu Q3 -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">VIDU</span>
+        <div class="model-card-logo shenshu">
+          <span class="model-card-logo-text">V</span>
+        </div>
+        <div class="model-card-name">Vidu Q3</div>
+        <div class="model-card-org">ShengShu AI</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Resolution</div>
+            <div class="spec-value">1080p</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Max Length</div>
+            <div class="spec-value">最大16秒</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">FPS</div>
+            <div class="spec-value">~30fps</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Input</div>
+            <div class="spec-value">テキスト</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-diffusion">TurboDiffusion</span>
+          <span class="model-tag tag-audio">音声同期</span>
+          <span class="model-tag tag-commercial">商用サブスク</span>
+        </div>
+        <div class="model-card-desc">世界初の16秒ネイティブ音声・映像同時生成。高精細な唇同期とシームレスなショット切替を実現。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2026年1月30日</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Alibaba Wan2.6 -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">WAN</span>
+        <div class="model-card-logo alibaba">
+          <span class="model-card-logo-text">A</span>
+        </div>
+        <div class="model-card-name">Wan 2.6</div>
+        <div class="model-card-org">Alibaba</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Resolution</div>
+            <div class="spec-value">1080p</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Max Length</div>
+            <div class="spec-value">15秒</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">FPS</div>
+            <div class="spec-value">~30fps</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Input</div>
+            <div class="spec-value">テキスト/画像/音声</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-multimodal">マルチモーダル</span>
+          <span class="model-tag tag-diffusion">Diffusion</span>
+          <span class="model-tag tag-commercial">商用</span>
+        </div>
+        <div class="model-card-desc">巨大言語AI+画像AIを統合したマルチモーダルモデル。リファレンスキャラクターのインポートやマルチショット生成に対応。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2025年12月16日</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Kuaishou Kling O1 -->
+    <div class="model-card" data-animate>
+      <div class="model-card-header">
+        <span class="model-card-rank">KLING</span>
+        <div class="model-card-logo kuaishou">
+          <span class="model-card-logo-text">K</span>
+        </div>
+        <div class="model-card-name">Kling O1</div>
+        <div class="model-card-org">Kuaishou</div>
+      </div>
+      <div class="model-card-body">
+        <div class="model-card-specs">
+          <div class="spec-item">
+            <div class="spec-label">Resolution</div>
+            <div class="spec-value">1080p</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Max Length</div>
+            <div class="spec-value">3~10秒</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">FPS</div>
+            <div class="spec-value">~30fps</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Input</div>
+            <div class="spec-value">テキスト/画像/映像</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          <span class="model-tag tag-multimodal">マルチモーダル</span>
+          <span class="model-tag tag-commercial">商用Web</span>
+        </div>
+        <div class="model-card-desc">テキスト・画像に加え既存映像も入力可能なマルチモーダルモデル。Webアプリとして広く提供。</div>
+      </div>
+      <div class="model-card-footer">
+        <span class="model-card-date">2025年12月頃</span>
+        <a href="#" class="model-card-link">
+          詳細
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================
+     TOP 3 COMPARISON SECTION
+     ============================================ -->
+<section class="section comparison-section" id="comparison">
+  <div class="section-header">
+    <div class="section-label">
+      <span class="section-label-number">03</span>
+      Top 3 Comparison
+    </div>
+    <h2 class="section-title">上位3モデル技術比較</h2>
+    <p class="section-desc">最も高性能と考えられるVeo 3.1、Movie Gen Video、Gen-4.5を技術的に比較</p>
+  </div>
+
+  <!-- Architecture Flow Diagrams -->
+  <div class="comparison-visual">
+    <div class="comparison-flow">
+      <div class="flow-node" data-animate style="border-color: var(--google-blue);">
+        <div class="flow-node-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--google-blue)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6v6H9z"/></svg>
+        </div>
+        <div class="flow-node-title">Veo 3.1</div>
+        <div class="flow-node-sub">潜在拡散 + Transformer<br>8秒 1080p + 音声</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" data-animate style="border-color: var(--meta-blue);">
+        <div class="flow-node-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--meta-blue)" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3c-4 4-4 14 0 18M12 3c4 4 4 14 0 18M3 12h18"/></svg>
+        </div>
+        <div class="flow-node-title">Movie Gen Video</div>
+        <div class="flow-node-sub">Transformer (30B, Flow)<br>16秒 1080p + 音声</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" data-animate style="border-color: var(--runway-purple);">
+        <div class="flow-node-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--runway-purple)" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
+        </div>
+        <div class="flow-node-title">Gen-4.5</div>
+        <div class="flow-node-sub">拡散モデル<br>10秒 HD</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Table -->
+  <div class="comparison-table-wrapper">
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>モデル</th>
+          <th>アーキテクチャ</th>
+          <th>解像度</th>
+          <th>最大長</th>
+          <th>音声</th>
+          <th>テキスト忠実度</th>
+          <th>物理リアリティ</th>
+          <th>映像品質</th>
+          <th>総合順位</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="table-model-cell">
+              <div class="table-model-dot" style="background: var(--google-blue);"></div>
+              <span class="table-model-name">Veo 3.1</span>
+            </div>
+          </td>
+          <td>潜在拡散 + Transformer</td>
+          <td>1080p</td>
+          <td>8秒</td>
+          <td><span class="table-badge badge-top">● 同期生成</span></td>
+          <td>
+            <div class="table-bar"><div class="table-bar-fill bar-google" data-width="98"></div></div>
+          </td>
+          <td>
+            <div class="table-bar"><div class="table-bar-fill bar-google" data-width="96"></div></div>
+          </td>
+          <td>
+            <div class="table-bar"><div class="table-bar-fill bar-google" data-width="97"></div></div>
+          </td>
+          <td><span class="table-badge badge-gold">🥇 1位</span></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="table-model-cell">
+              <div class="table-model-dot" style="background: var(--meta-blue);"></div>
+              <span class="table-model-name">Movie Gen Video</span>
+            </div>
+          </td>
+          <td>Transformer (Flow, 30B)</td>
+          <td>1080p</td>
+          <td>16秒</td>
+          <td><span class="table-badge badge-top">● 別モデル</span></td>
+          <td>
+            <div class="table-bar"><div class="table-bar-fill bar-meta" data-width="94"></div></div>
+          </td>
+          <td>
+            <div class="table-bar"><div class="table-bar-fill bar-meta" data-width="93"></div></div>
+          </td>
+          <td>
+            <div class="table-bar"><div class="table-bar-fill bar-meta" data-width="95"></div></div>
+          </td>
+          <td><span class="table-badge badge-silver">🥈 2位</span></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="table-model-cell">
+              <div class="table-model-dot" style="background: var(--runway-purple);"></div>
+              <span class="table-model-name">Gen-4.5</span>
+            </div>
+          </td>
+          <td>拡散モデル</td>
+          <td>HD</td>
+          <td>~10秒</td>
+          <td><span class="table-badge badge-silver">– 不明</span></td>
+          <td>
+            <div class="table-bar"><div class="table-bar-fill bar-runway" data-width="90"></div></div>
+          </td>
+          <td>
+            <div class="table-bar"><div class="table-bar-fill bar-runway" data-width="91"></div></div>
+          </td>
+          <td>
+            <div class="table-bar"><div class="table-bar-fill bar-runway" data-width="89"></div></div>
+          </td>
+          <td><span class="table-badge badge-bronze">🥉 3位</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================
+     PERFORMANCE SECTION
+     ============================================ -->
+<section class="section performance-section" id="performance">
+  <div class="section-header">
+    <div class="section-label">
+      <span class="section-label-number">04</span>
+      Performance Evaluation
+    </div>
+    <h2 class="section-title">性能評価</h2>
+    <p class="section-desc">主に人間評価とベンチマークスコアに基づく比較分析</p>
+  </div>
+
+  <div class="perf-grid">
+    <!-- Radar Chart -->
+    <div class="perf-chart-container" data-animate>
+      <div class="perf-chart-title">総合性能レーダー</div>
+      <div class="perf-chart-subtitle">5軸評価（テキスト忠実度・映像品質・物理性・音声・速度）</div>
+      <div class="radar-chart">
+        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background pentagons -->
+          <g transform="translate(200,200)">
+            <!-- Grid lines -->
+            <polygon points="0,-160 152.2,-49.4 94,-129.4 0,0" fill="none" stroke="#E0E0E0" stroke-width="0.5" opacity="0"/>
+            <!-- Level 5 -->
+            <polygon id="radarGrid5" points="0,-160 152.2,-49.4 94.1,129.4 -94.1,129.4 -152.2,-49.4" fill="none" stroke="#E0E0E0" stroke-width="1" opacity="0.5"/>
+            <!-- Level 4 -->
+            <polygon id="radarGrid4" points="0,-128 121.8,-39.5 75.3,103.5 -75.3,103.5 -121.8,-39.5" fill="none" stroke="#E0E0E0" stroke-width="0.8" opacity="0.4"/>
+            <!-- Level 3 -->
+            <polygon id="radarGrid3" points="0,-96 91.3,-29.7 56.5,77.6 -56.5,77.6 -91.3,-29.7" fill="none" stroke="#E0E0E0" stroke-width="0.6" opacity="0.3"/>
+            <!-- Level 2 -->
+            <polygon id="radarGrid2" points="0,-64 60.9,-19.8 37.6,51.8 -37.6,51.8 -60.9,-19.8" fill="none" stroke="#E0E0E0" stroke-width="0.5" opacity="0.2"/>
+            <!-- Level 1 -->
+            <polygon id="radarGrid1" points="0,-32 30.4,-9.9 18.8,25.9 -18.8,25.9 -30.4,-9.9" fill="none" stroke="#E0E0E0" stroke-width="0.4" opacity="0.15"/>
+            <!-- Axis lines -->
+            <line x1="0" y1="0" x2="0" y2="-160" stroke="#E0E0E0" stroke-width="0.5"/>
+            <line x1="0" y1="0" x2="152.2" y2="-49.4" stroke="#E0E0E0" stroke-width="0.5"/>
+            <line x1="0" y1="0" x2="94.1" y2="129.4" stroke="#E0E0E0" stroke-width="0.5"/>
+            <line x1="0" y1="0" x2="-94.1" y2="129.4" stroke="#E0E0E0" stroke-width="0.5"/>
+            <line x1="0" y1="0" x2="-152.2" y2="-49.4" stroke="#E0E0E0" stroke-width="0.5"/>
+            <!-- Labels -->
+            <text x="0" y="-172" text-anchor="middle" font-size="11" font-family="Inter, sans-serif" fill="#7A7A7A" font-weight="600">テキスト忠実度</text>
+            <text x="168" y="-45" text-anchor="start" font-size="11" font-family="Inter, sans-serif" fill="#7A7A7A" font-weight="600">映像品質</text>
+            <text x="108" y="148" text-anchor="start" font-size="11" font-family="Inter, sans-serif" fill="#7A7A7A" font-weight="600">物理リアリティ</text>
+            <text x="-108" y="148" text-anchor="end" font-size="11" font-family="Inter, sans-serif" fill="#7A7A7A" font-weight="600">音声品質</text>
+            <text x="-168" y="-45" text-anchor="end" font-size="11" font-family="Inter, sans-serif" fill="#7A7A7A" font-weight="600">生成速度</text>
+
+            <!-- Veo 3.1 (Blue) -->
+            <polygon id="radarVeo" class="radar-data" points="0,-154 145,-47 82,116 -75,103 -106,-34" fill="rgba(66,133,244,0.12)" stroke="#4285F4" stroke-width="2.5" stroke-linejoin="round" opacity="0"/>
+            <circle cx="0" cy="-154" r="4" fill="#4285F4" class="radar-dot" opacity="0"/>
+            <circle cx="145" cy="-47" r="4" fill="#4285F4" class="radar-dot" opacity="0"/>
+            <circle cx="82" cy="116" r="4" fill="#4285F4" class="radar-dot" opacity="0"/>
+            <circle cx="-75" cy="103" r="4" fill="#4285F4" class="radar-dot" opacity="0"/>
+            <circle cx="-106" cy="-34" r="4" fill="#4285F4" class="radar-dot" opacity="0"/>
+
+            <!-- Movie Gen (Dark Blue) -->
+            <polygon id="radarMeta" class="radar-data" points="0,-147 140,-44 76,110 -56,77 -91,-30" fill="rgba(6,104,225,0.10)" stroke="#0668E1" stroke-width="2.5" stroke-linejoin="round" opacity="0"/>
+            <circle cx="0" cy="-147" r="4" fill="#0668E1" class="radar-dot" opacity="0"/>
+            <circle cx="140" cy="-44" r="4" fill="#0668E1" class="radar-dot" opacity="0"/>
+            <circle cx="76" cy="110" r="4" fill="#0668E1" class="radar-dot" opacity="0"/>
+            <circle cx="-56" cy="77" r="4" fill="#0668E1" class="radar-dot" opacity="0"/>
+            <circle cx="-91" cy="-30" r="4" fill="#0668E1" class="radar-dot" opacity="0"/>
+
+            <!-- Gen-4.5 (Purple) -->
+            <polygon id="radarRunway" class="radar-data" points="0,-140 133,-41 70,97 -38,52 -121,-39" fill="rgba(123,47,190,0.08)" stroke="#7B2FBE" stroke-width="2.5" stroke-linejoin="round" opacity="0"/>
+            <circle cx="0" cy="-140" r="4" fill="#7B2FBE" class="radar-dot" opacity="0"/>
+            <circle cx="133" cy="-41" r="4" fill="#7B2FBE" class="radar-dot" opacity="0"/>
+            <circle cx="70" cy="97" r="4" fill="#7B2FBE" class="radar-dot" opacity="0"/>
+            <circle cx="-38" cy="52" r="4" fill="#7B2FBE" class="radar-dot" opacity="0"/>
+            <circle cx="-121" cy="-39" r="4" fill="#7B2FBE" class="radar-dot" opacity="0"/>
+          </g>
+
+          <!-- Legend -->
+          <g transform="translate(20, 370)">
+            <rect x="0" y="0" width="12" height="12" rx="2" fill="#4285F4"/>
+            <text x="18" y="10" font-size="10" font-family="Inter, sans-serif" fill="#4A4A4A">Veo 3.1</text>
+            <rect x="90" y="0" width="12" height="12" rx="2" fill="#0668E1"/>
+            <text x="108" y="10" font-size="10" font-family="Inter, sans-serif" fill="#4A4A4A">Movie Gen</text>
+            <rect x="200" y="0" width="12" height="12" rx="2" fill="#7B2FBE"/>
+            <text x="218" y="10" font-size="10" font-family="Inter, sans-serif" fill="#4A4A4A">Gen-4.5</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Performance Details -->
+    <div class="perf-details">
+      <div class="perf-detail-card" data-animate data-delay="0">
+        <div class="perf-detail-header">
+          <span class="perf-detail-name">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--google-blue);"></span>
+            Google Veo 3.1
+          </span>
+          <span class="perf-detail-score badge-gold">1st</span>
+        </div>
+        <div class="perf-detail-bars">
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">テキスト忠実度</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-google" data-width="98"></div></div>
+            <span class="perf-bar-value">98</span>
+          </div>
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">映像品質</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-google" data-width="97"></div></div>
+            <span class="perf-bar-value">97</span>
+          </div>
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">物理リアリティ</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-google" data-width="96"></div></div>
+            <span class="perf-bar-value">96</span>
+          </div>
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">音声品質</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-google" data-width="95"></div></div>
+            <span class="perf-bar-value">95</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="perf-detail-card" data-animate data-delay="150">
+        <div class="perf-detail-header">
+          <span class="perf-detail-name">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--meta-blue);"></span>
+            Meta Movie Gen Video
+          </span>
+          <span class="perf-detail-score badge-silver">2nd</span>
+        </div>
+        <div class="perf-detail-bars">
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">テキスト忠実度</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-meta" data-width="94"></div></div>
+            <span class="perf-bar-value">94</span>
+          </div>
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">映像品質</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-meta" data-width="95"></div></div>
+            <span class="perf-bar-value">95</span>
+          </div>
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">物理リアリティ</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-meta" data-width="93"></div></div>
+            <span class="perf-bar-value">93</span>
+          </div>
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">音声品質</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-meta" data-width="90"></div></div>
+            <span class="perf-bar-value">90</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="perf-detail-card" data-animate data-delay="300">
+        <div class="perf-detail-header">
+          <span class="perf-detail-name">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--runway-purple);"></span>
+            Runway Gen-4.5
+          </span>
+          <span class="perf-detail-score badge-bronze">3rd</span>
+        </div>
+        <div class="perf-detail-bars">
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">テキスト忠実度</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-runway" data-width="90"></div></div>
+            <span class="perf-bar-value">90</span>
+          </div>
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">映像品質</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-runway" data-width="89"></div></div>
+            <span class="perf-bar-value">89</span>
+          </div>
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">物理リアリティ</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-runway" data-width="91"></div></div>
+            <span class="perf-bar-value">91</span>
+          </div>
+          <div class="perf-bar-row">
+            <span class="perf-bar-label">ベンチマーク</span>
+            <div class="perf-bar"><div class="perf-bar-fill bar-runway" data-width="96"></div></div>
+            <span class="perf-bar-value">1247</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ARCHITECTURE SECTION
+     ============================================ -->
+<section class="section arch-section" id="architecture">
+  <div class="section-header">
+    <div class="section-label">
+      <span class="section-label-number">05</span>
+      Architecture
+    </div>
+    <h2 class="section-title">アーキテクチャ詳細</h2>
+    <p class="section-desc">各モデルの生成フローとアーキテクチャの概略</p>
+  </div>
+
+  <div class="arch-diagram-wrapper">
+    <!-- Tabs -->
+    <div class="arch-tabs">
+      <button class="arch-tab active" data-tab="veo">Veo 3.1</button>
+      <button class="arch-tab" data-tab="moviegen">Movie Gen</button>
+      <button class="arch-tab" data-tab="runway">Gen-4.5</button>
+    </div>
+
+    <!-- Veo Panel -->
+    <div class="arch-panel active" id="panel-veo">
+      <div class="arch-flow-diagram">
+        <div class="arch-block input">
+          <div class="arch-block-title">テキスト入力</div>
+          <div class="arch-block-sub">プロンプト / 画像条件</div>
+        </div>
+        <svg class="arch-arrow-svg" viewBox="0 0 40 24"><line x1="4" y1="12" x2="30" y2="12"/><polyline points="26,6 34,12 26,18"/></svg>
+        <div class="arch-block process" style="border-color: var(--accent-gold-light);">
+          <div class="arch-block-title">潜在拡散モデル</div>
+          <div class="arch-block-sub">+ Transformer</div>
+        </div>
+        <svg class="arch-arrow-svg" viewBox="0 0 40 24"><line x1="4" y1="12" x2="30" y2="12"/><polyline points="26,6 34,12 26,18"/></svg>
+        <div class="arch-block output">
+          <div class="arch-block-title">映像 + 音声出力</div>
+          <div class="arch-block-sub">1080p / 15fps / 8秒</div>
+        </div>
+      </div>
+      <div class="arch-detail-grid">
+        <div class="arch-detail-item">
+          <div class="arch-detail-label">Model Type</div>
+          <div class="arch-detail-value">潜在拡散 + Transformer</div>
+          <div class="arch-detail-desc">映像と音声を同一パイプラインで生成する複合アーキテクチャ</div>
+        </div>
+        <div class="arch-detail-item">
+          <div class="arch-detail-label">Key Feature</div>
+          <div class="arch-detail-value">音声同期生成</div>
+          <div class="arch-detail-desc">映像に同期した高品質音声を同時に生成。物理的動作表現にも優れる</div>
+        </div>
+        <div class="arch-detail-item">
+          <div class="arch-detail-label">API Access</div>
+          <div class="arch-detail-value">Gemini / Vertex AI</div>
+          <div class="arch-detail-desc">拡張・フレーム挿入・物体挿入など多様な編集機能にも対応</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Movie Gen Panel -->
+    <div class="arch-panel" id="panel-moviegen">
+      <div class="arch-flow-diagram">
+        <div class="arch-block input">
+          <div class="arch-block-title">テキスト入力</div>
+          <div class="arch-block-sub">+ 参照画像（個人化）</div>
+        </div>
+        <svg class="arch-arrow-svg" viewBox="0 0 40 24"><line x1="4" y1="12" x2="30" y2="12"/><polyline points="26,6 34,12 26,18"/></svg>
+        <div class="arch-block process" style="border-color: var(--accent-gold-light);">
+          <div class="arch-block-title">Transformer (30B)</div>
+          <div class="arch-block-sub">Flow Matching学習</div>
+        </div>
+        <svg class="arch-arrow-svg" viewBox="0 0 40 24"><line x1="4" y1="12" x2="30" y2="12"/><polyline points="26,6 34,12 26,18"/></svg>
+        <div class="arch-block output">
+          <div class="arch-block-title">映像 + 音声出力</div>
+          <div class="arch-block-sub">1080p / 16fps / 16秒</div>
+        </div>
+      </div>
+      <div class="arch-detail-grid">
+        <div class="arch-detail-item">
+          <div class="arch-detail-label">Parameters</div>
+          <div class="arch-detail-value">30B パラメータ</div>
+          <div class="arch-detail-desc">超大規模トランスフォーマで高品質映像を実現。73Kトークンの長文脈に対応</div>
+        </div>
+        <div class="arch-detail-item">
+          <div class="arch-detail-label">Training</div>
+          <div class="arch-detail-value">Flow Matching</div>
+          <div class="arch-detail-desc">ライセンス済み公開動画等で事前学習。テキスト忠実度で従来最高を達成</div>
+        </div>
+        <div class="arch-detail-item">
+          <div class="arch-detail-label">Editing</div>
+          <div class="arch-detail-value">物体追加・削除・個人化</div>
+          <div class="arch-detail-desc">特定人物の反映、映像編集（物体の追加・削除）にも対応する多機能モデル</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Runway Panel -->
+    <div class="arch-panel" id="panel-runway">
+      <div class="arch-flow-diagram">
+        <div class="arch-block input">
+          <div class="arch-block-title">テキスト入力</div>
+          <div class="arch-block-sub">+ 画像 / キーフレーム / 映像</div>
+        </div>
+        <svg class="arch-arrow-svg" viewBox="0 0 40 24"><line x1="4" y1="12" x2="30" y2="12"/><polyline points="26,6 34,12 26,18"/></svg>
+        <div class="arch-block process" style="border-color: var(--accent
+<!-- ============================================
+     Part 2: 途切れた箇所から続き
+     ============================================ -->
+
+        <div class="arch-block process" style="border-color: var(--accent-gold-light);">
+          <div class="arch-block-title">拡散モデル</div>
+          <div class="arch-block-sub">世界モデル表現</div>
+        </div>
+        <svg class="arch-arrow-svg" viewBox="0 0 40 24"><line x1="4" y1="12" x2="30" y2="12"/><polyline points="26,6 34,12 26,18"/></svg>
+        <div class="arch-block output">
+          <div class="arch-block-title">映像出力</div>
+          <div class="arch-block-sub">HD / ~30fps / ~10秒</div>
+        </div>
+      </div>
+      <div class="arch-detail-grid">
+        <div class="arch-detail-item">
+          <div class="arch-detail-label">Model Type</div>
+          <div class="arch-detail-value">拡散モデルベース</div>
+          <div class="arch-detail-desc">詳細非公開だが、世界モデル表現と一貫した物体描写に特化した拡散モデル</div>
+        </div>
+        <div class="arch-detail-item">
+          <div class="arch-detail-label">Benchmark</div>
+          <div class="arch-detail-value">1247 Elo ポイント</div>
+          <div class="arch-detail-desc">AI Text-to-Video Benchmarkで首位を獲得。動きの正確性とシーンの複雑性で高評価</div>
+        </div>
+        <div class="arch-detail-item">
+          <div class="arch-detail-label">Control</div>
+          <div class="arch-detail-value">参照画像 / キーフレーム</div>
+          <div class="arch-detail-desc">テキスト・参照画像・キーフレーム・既存映像を活用した細かいシーン制御が可能</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================
+     TIMELINE SECTION
+     ============================================ -->
+<section class="section timeline-section" id="timeline">
+  <div class="section-header">
+    <div class="section-label">
+      <span class="section-label-number">06</span>
+      Timeline
+    </div>
+    <h2 class="section-title">モデル公開タイムライン</h2>
+    <p class="section-desc">2024年〜2026年にかけてのAI動画生成モデルの登場を時系列で俯瞰</p>
+  </div>
+
+  <div class="timeline-container">
+    <div class="timeline-line">
+      <div class="timeline-line-fill" id="timelineFill"></div>
+    </div>
+
+    <!-- 2024-04 Runway Gen-4 -->
+    <div class="timeline-item" data-animate>
+      <div class="timeline-dot" style="border-color: var(--runway-purple);"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">2024年4月</div>
+        <div class="timeline-title">Runway Gen-4 発表</div>
+        <div class="timeline-desc">Runway MLが拡散モデルベースの商用動画生成モデルGen-4を発表。参照画像入力にも対応し、HD品質で最大10秒の映像を生成可能に。</div>
+      </div>
+    </div>
+
+    <!-- 2024-10 Meta Movie Gen -->
+    <div class="timeline-item" data-animate>
+      <div class="timeline-dot" style="border-color: var(--meta-blue);"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">2024年10月</div>
+        <div class="timeline-title">Meta Movie Gen Video / Audio 論文公開</div>
+        <div class="timeline-desc">Meta AIが30Bパラメータ級トランスフォーマによるMovie Gen Videoと13BパラメータのMovie Gen Audioを論文発表。1080p・最大16秒のHD映像生成で従来モデルを凌駕。</div>
+      </div>
+    </div>
+
+    <!-- 2025-02 Pika 2.2 -->
+    <div class="timeline-item" data-animate>
+      <div class="timeline-dot" style="border-color: var(--pika-pink);"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">2025年2月</div>
+        <div class="timeline-title">Pika 2.2 リリース</div>
+        <div class="timeline-desc">Pika Labsが商用動画生成ツールPika 2.2を公開。開始/終了画像指定やPikaframesによるキーアニメーション制御を搭載。720p/1080p・24fps・5〜10秒の実用的短尺生成。</div>
+      </div>
+    </div>
+
+    <!-- 2025-08 Veo 3 -->
+    <div class="timeline-item" data-animate>
+      <div class="timeline-dot" style="border-color: var(--google-blue);"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">2025年8月</div>
+        <div class="timeline-title">Google Veo 3 一般提供開始</div>
+        <div class="timeline-desc">Google DeepMindが潜在拡散＋トランスフォーマの複合アーキテクチャによるVeo 3を公開。映像＋音声の同期生成を実現し、1080p・15fps・8秒の高品質映像をAPI経由で提供。</div>
+      </div>
+    </div>
+
+    <!-- 2025-10 Veo 3.1 -->
+    <div class="timeline-item" data-animate>
+      <div class="timeline-dot" style="border-color: var(--google-blue);"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">2025年10月</div>
+        <div class="timeline-title">Google Veo 3.1 発表</div>
+        <div class="timeline-desc">Veo 3の改良版としてVeo 3.1を発表。プロンプト追従性と音声品質を強化し、MovieGenBenchほか全評価項目で最高評価を獲得。Gemini/Vertex AI経由で提供開始。</div>
+      </div>
+    </div>
+
+    <!-- 2025-12 Runway Gen-4.5 -->
+    <div class="timeline-item" data-animate>
+      <div class="timeline-dot" style="border-color: var(--runway-purple);"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">2025年12月1日</div>
+        <div class="timeline-title">Runway Gen-4.5 公開</div>
+        <div class="timeline-desc">Runway MLが最新モデルGen-4.5を公開。AI Text-to-Video Benchmarkで1247 Eloポイントの首位を獲得。世界モデル表現と創造的制御性に優れ、商用APIとして広く利用可能に。</div>
+      </div>
+    </div>
+
+    <!-- 2025-12 Wan2.6 -->
+    <div class="timeline-item" data-animate>
+      <div class="timeline-dot" style="border-color: var(--alibaba-orange);"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">2025年12月16日</div>
+        <div class="timeline-title">Alibaba Wan 2.6 リリース</div>
+        <div class="timeline-desc">Alibabaがマルチモーダル生成AIモデルWan2.6を公開。巨大言語AI+画像AIを統合し、1080p・15秒の映像生成に加え、リファレンスキャラクターのインポートやマルチショット生成に対応。</div>
+      </div>
+    </div>
+
+    <!-- 2025-12 Kling O1 -->
+    <div class="timeline-item" data-animate>
+      <div class="timeline-dot" style="border-color: var(--kuaishou-yellow);"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">2025年12月頃</div>
+        <div class="timeline-title">Kuaishou Kling O1 登場</div>
+        <div class="timeline-desc">Kuaishouがマルチモーダルモデル Kling O1をWebアプリとして公開。テキスト・画像に加え既存映像も入力として使用可能。1080p・3〜10秒の映像を生成。</div>
+      </div>
+    </div>
+
+    <!-- 2026-01 Vidu Q3 -->
+    <div class="timeline-item" data-animate>
+      <div class="timeline-dot" style="border-color: var(--shenshu-green);"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">2026年1月30日</div>
+        <div class="timeline-title">ShengShu Vidu Q3 リリース</div>
+        <div class="timeline-desc">ShengShu AIが世界初の16秒ネイティブ音声・映像同時生成モデルVidu Q3を発表。TurboDiffusion技術により、高精細な唇同期とシームレスなショット切替を実現。1080p・最大16秒。</div>
+      </div>
+    </div>
+
+    <!-- 2026-02 Seedance 2.0 -->
+    <div class="timeline-item" data-animate>
+      <div class="timeline-dot" style="border-color: var(--bytedance-red);"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">2026年2月頃</div>
+        <div class="timeline-title">ByteDance Seedance 2.0 発表</div>
+        <div class="timeline-desc">ByteDanceがマルチモーダル拡散モデルSeedance 2.0を発表。テキスト・画像・音声の複合入力から映像を生成。音声・映像の同時生成に対応するが、現時点では内部利用に限定。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     CHALLENGES SECTION
+     ============================================ -->
+<section class="section challenges-section" id="challenges">
+  <div class="section-header">
+    <div class="section-label">
+      <span class="section-label-number">07</span>
+      Challenges
+    </div>
+    <h2 class="section-title">技術的課題と限界</h2>
+    <p class="section-desc">現状のAI動画生成技術が直面する主要な課題</p>
+  </div>
+
+  <div class="challenges-grid">
+    <!-- Challenge 1: 生成長尺と計算負荷 -->
+    <div class="challenge-card" data-animate>
+      <div class="challenge-card-inner">
+        <div class="challenge-icon-wrapper challenge-icon-compute">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+            <rect x="9" y="9" width="6" height="6"/>
+            <line x1="9" y1="1" x2="9" y2="4"/>
+            <line x1="15" y1="1" x2="15" y2="4"/>
+            <line x1="9" y1="20" x2="9" y2="23"/>
+            <line x1="15" y1="20" x2="15" y2="23"/>
+            <line x1="20" y1="9" x2="23" y2="9"/>
+            <line x1="20" y1="14" x2="23" y2="14"/>
+            <line x1="1" y1="9" x2="4" y2="9"/>
+            <line x1="1" y1="14" x2="4" y2="14"/>
+          </svg>
+        </div>
+        <div class="challenge-number">01</div>
+        <h3 class="challenge-title">生成長尺と計算負荷</h3>
+        <p class="challenge-desc">
+          多くのモデルが映像長を10〜16秒程度に制限しており、数分にわたる長尺動画生成は未達成。生成時に数十〜数百のGPU/TPUが必要となるなど、計算コストが桁違いに大きい。
+        </p>
+        <div class="challenge-metric">
+          <div class="challenge-metric-label">Vidu Q2 生成負荷の例</div>
+          <div class="challenge-metric-bar-container">
+            <div class="challenge-metric-bar">
+              <div class="challenge-metric-fill" data-width="92" style="background: linear-gradient(90deg, #FF6B6B, #FF3333);"></div>
+            </div>
+            <span class="challenge-metric-value">5秒生成に5秒</span>
+          </div>
+        </div>
+        <div class="challenge-impact">
+          <span class="challenge-impact-label">影響度</span>
+          <div class="challenge-impact-dots">
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Challenge 2: データバイアス・倫理 -->
+    <div class="challenge-card" data-animate data-delay="100">
+      <div class="challenge-card-inner">
+        <div class="challenge-icon-wrapper challenge-icon-ethics">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M12 8v4"/>
+            <path d="M12 16h.01"/>
+          </svg>
+        </div>
+        <div class="challenge-number">02</div>
+        <h3 class="challenge-title">データバイアス・倫理</h3>
+        <p class="challenge-desc">
+          学習にはWebから取得した動画や画像が用いられており、性別・人種バイアスや差別的表現が含まれる可能性がある。著作権の所在も不明確で、生成映像が他作品の無断流用になりうる法的問題が指摘されている。
+        </p>
+        <div class="challenge-metric">
+          <div class="challenge-metric-label">米著作権庁の判例</div>
+          <div class="challenge-case-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            AI出力に著作権認めず
+          </div>
+        </div>
+        <div class="challenge-impact">
+          <span class="challenge-impact-label">影響度</span>
+          <div class="challenge-impact-dots">
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Challenge 3: 安全性 -->
+    <div class="challenge-card" data-animate data-delay="200">
+      <div class="challenge-card-inner">
+        <div class="challenge-icon-wrapper challenge-icon-safety">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="challenge-number">03</div>
+        <h3 class="challenge-title">安全性</h3>
+        <p class="challenge-desc">
+          偽ニュース映像や人のなりすましなどディープフェイク技術との結びつきによる悪用リスクが存在。Content FilterやWatermarkの導入が急務だが、未知の問題に対する予測的防御が必要。
+        </p>
+        <div class="challenge-metric">
+          <div class="challenge-metric-label">対策状況</div>
+          <div class="challenge-status-row">
+            <span class="challenge-status-tag status-progress">フィルタリング実装中</span>
+            <span class="challenge-status-tag status-needed">Watermark課題</span>
+          </div>
+        </div>
+        <div class="challenge-impact">
+          <span class="challenge-impact-label">影響度</span>
+          <div class="challenge-impact-dots">
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Challenge 4: 実用化上の制約 -->
+    <div class="challenge-card" data-animate data-delay="300">
+      <div class="challenge-card-inner">
+        <div class="challenge-icon-wrapper challenge-icon-practical">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </div>
+        <div class="challenge-number">04</div>
+        <h3 class="challenge-title">実用化上の制約</h3>
+        <p class="challenge-desc">
+          企業やクリエイターが実用利用するには、生成速度・コスト・UI/UXの改善が不可欠。現行モデルは高品質だが「敷居が高い」状況であり、商用利用のための品質保証やライセンス契約の整備も求められる。
+        </p>
+        <div class="challenge-metric">
+          <div class="challenge-metric-label">課題領域</div>
+          <div class="challenge-status-row">
+            <span class="challenge-status-tag status-needed">速度</span>
+            <span class="challenge-status-tag status-needed">コスト</span>
+            <span class="challenge-status-tag status-progress">UI/UX</span>
+            <span class="challenge-status-tag status-needed">ライセンス</span>
+          </div>
+        </div>
+        <div class="challenge-impact">
+          <span class="challenge-impact-label">影響度</span>
+          <div class="challenge-impact-dots">
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot filled"></span>
+            <span class="impact-dot"></span>
+            <span class="impact-dot"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     OUTLOOK / FUTURE SECTION
+     ============================================ -->
+<section class="section outlook-section" id="outlook">
+  <div class="section-header">
+    <div class="section-label">
+      <span class="section-label-number">08</span>
+      Future Outlook
+    </div>
+    <h2 class="section-title">今後6〜12か月の展望</h2>
+    <p class="section-desc">短期的に期待される技術進展と産業への影響</p>
+  </div>
+
+  <div class="outlook-grid">
+    <!-- Outlook 1 -->
+    <div class="outlook-card" data-animate>
+      <div class="outlook-card-glow"></div>
+      <div class="outlook-card-content">
+        <div class="outlook-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent-gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
+        <div class="outlook-tag">高確度</div>
+        <h3 class="outlook-title">効率化・長尺化の進展</h3>
+        <p class="outlook-desc">
+          TurboDiffusion（ShengShu）やエッジ推論技術の適用で推論速度が飛躍的に向上。より長い映像（数十秒〜数分）を生成可能なモデルが登場する見込み。物語性の高い長尺生成やRIFEのような逐次補間技術との組み合わせが進展。
+        </p>
+        <div class="outlook-progress">
+          <div class="outlook-progress-label">実現可能性</div>
+          <div class="outlook-progress-bar">
+            <div class="outlook-progress-fill" data-width="85"></div>
+          </div>
+          <span class="outlook-progress-value">85%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outlook 2 -->
+    <div class="outlook-card" data-animate data-delay="100">
+      <div class="outlook-card-glow"></div>
+      <div class="outlook-card-content">
+        <div class="outlook-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent-gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+        <div class="outlook-tag">注目</div>
+        <h3 class="outlook-title">マルチモーダル融合・編集機能強化</h3>
+        <p class="outlook-desc">
+          Wan2.6やKling O1のような映像・音声・テキスト・画像を自由に組み合わせるマルチモーダルモデルが主流に。対話型インターフェースや段階的生成ワークフロー（シナリオ→映像→修正→生成）の研究開発が進行。映画制作支援ツールとしての利用が加速。
+        </p>
+        <div class="outlook-progress">
+          <div class="outlook-progress-label">実現可能性</div>
+          <div class="outlook-progress-bar">
+            <div class="outlook-progress-fill" data-width="78"></div>
+          </div>
+          <span class="outlook-progress-value">78%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outlook 3 -->
+    <div class="outlook-card" data-animate data-delay="200">
+      <div class="outlook-card-glow"></div>
+      <div class="outlook-card-content">
+        <div class="outlook-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent-gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="outlook-tag">進行中</div>
+        <h3 class="outlook-title">新ベンチマーク整備</h3>
+        <p class="outlook-desc">
+          MetaのMovieGenBenchやVBenchなど動画生成評価指標の整備が始動。FIDやCLIPScoreに代わる映像向け指標（時間的一貫性や動きの自然さを定量化する新規メトリクス）やオープンベンチマークが整備される見通し。
+        </p>
+        <div class="outlook-progress">
+          <div class="outlook-progress-label">実現可能性</div>
+          <div class="outlook-progress-bar">
+            <div class="outlook-progress-fill" data-width="70"></div>
+          </div>
+          <span class="outlook-progress-value">70%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outlook 4 -->
+    <div class="outlook-card" data-animate data-delay="300">
+      <div class="outlook-card-glow"></div>
+      <div class="outlook-card-content">
+        <div class="outlook-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent-gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="outlook-tag">重要</div>
+        <h3 class="outlook-title">規制と標準化</h3>
+        <p class="outlook-desc">
+          AI生成物の著作権・倫理基準に関する議論が活発化。生成モデルにも透明性や使用制限を課す法規制が検討される。生成過程の記録やウォーターマーク技術を取り入れるなど、法令遵守と社会的信頼性向上への取り組みが重要に。
+        </p>
+        <div class="outlook-progress">
+          <div class="outlook-progress-label">実現可能性</div>
+          <div class="outlook-progress-bar">
+            <div class="outlook-progress-fill" data-width="65"></div>
+          </div>
+          <span class="outlook-progress-value">65%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SUMMARY COMPARISON TABLE SECTION
+     ============================================ -->
+<section class="section summary-table-section" id="summary-table">
+  <div class="section-header">
+    <div class="section-label">
+      <span class="section-label-number">09</span>
+      Summary Table
+    </div>
+    <h2 class="section-title">要約比較表</h2>
+    <p class="section-desc">上位3モデルの主要属性を凝縮した比較</p>
+  </div>
+
+  <div class="summary-cards-row">
+    <div class="summary-model-card" data-animate style="--card-accent: var(--google-blue);">
+      <div class="summary-card-badge">1st</div>
+      <div class="summary-card-header-bar" style="background: var(--google-blue);"></div>
+      <div class="summary-card-body">
+        <h3 class="summary-card-name">Google Veo 3.1</h3>
+        <div class="summary-card-arch">潜在拡散 + Transformer</div>
+        <div class="summary-card-output">
+          <div class="summary-output-item">
+            <span class="summary-output-label">出力</span>
+            <span class="summary-output-value">8秒 1080p + 音声（同期）</span>
+          </div>
+        </div>
+        <div class="summary-card-features">
+          <div class="summary-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--google-blue)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            物理リアリティ最高
+          </div>
+          <div class="summary-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--google-blue)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            テキスト忠実度トップ
+          </div>
+          <div class="summary-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--google-blue)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            全評価項目で最高評価
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-model-card" data-animate data-delay="100" style="--card-accent: var(--meta-blue);">
+      <div class="summary-card-badge">2nd</div>
+      <div class="summary-card-header-bar" style="background: var(--meta-blue);"></div>
+      <div class="summary-card-body">
+        <h3 class="summary-card-name">Meta Movie Gen</h3>
+        <div class="summary-card-arch">Transformer (Flow学習)</div>
+        <div class="summary-card-output">
+          <div class="summary-output-item">
+            <span class="summary-output-label">出力</span>
+            <span class="summary-output-value">16秒 1080p + 音声</span>
+          </div>
+        </div>
+        <div class="summary-card-features">
+          <div class="summary-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--meta-blue)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            超大規模モデルで高品質
+          </div>
+          <div class="summary-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--meta-blue)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            テキスト/人物忠実度トップ級
+          </div>
+          <div class="summary-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--meta-blue)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            最長16秒の映像生成
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-model-card" data-animate data-delay="200" style="--card-accent: var(--runway-purple);">
+      <div class="summary-card-badge">3rd</div>
+      <div class="summary-card-header-bar" style="background: var(--runway-purple);"></div>
+      <div class="summary-card-body">
+        <h3 class="summary-card-name">Runway Gen-4.5</h3>
+        <div class="summary-card-arch">拡散モデル</div>
+        <div class="summary-card-output">
+          <div class="summary-output-item">
+            <span class="summary-output-label">出力</span>
+            <span class="summary-output-value">10秒 HD（音声不明）</span>
+          </div>
+        </div>
+        <div class="summary-card-features">
+          <div class="summary-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--runway-purple)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            動き自然・物体一貫性
+          </div>
+          <div class="summary-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--runway-purple)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            ベンチマーク首位 1247 Elo
+          </div>
+          <div class="summary-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--runway-purple)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            商用API広く提供
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     REFERENCES SECTION
+     ============================================ -->
+<section class="section references-section" id="references">
+  <div class="section-header">
+    <div class="section-label">
+      <span class="section-label-number">10</span>
+      References
+    </div>
+    <h2 class="section-title">参照文献</h2>
+    <p class="section-desc">本レポートの情報源一覧</p>
+  </div>
+
+  <div class="references-grid">
+    <div class="ref-card" data-animate>
+      <div class="ref-category">Google</div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://deepmind.google/models/veo/" target="_blank" rel="noopener">Veo — Google DeepMind</a>
+      </div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://forest.watch.impress.co.jp/docs/news/2035903.html" target="_blank" rel="noopener">Google「Veo 3」一般提供開始 — 窓の杜</a>
+      </div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://forest.watch.impress.co.jp/docs/news/2055359.html" target="_blank" rel="noopener">Google「Veo 3.1」発表 — 窓の杜</a>
+      </div>
+    </div>
+
+    <div class="ref-card" data-animate data-delay="50">
+      <div class="ref-category">Meta</div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://ar5iv.labs.arxiv.org/html/2410.13720v2" target="_blank" rel="noopener">Movie Gen: A Cast of Media Foundation Models — ArXiv</a>
+      </div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://www.wired.com/story/meta-movie-gen-ai-model/" target="_blank" rel="noopener">Meta's Movie Gen Makes Convincing AI Video — WIRED</a>
+      </div>
+    </div>
+
+    <div class="ref-card" data-animate data-delay="100">
+      <div class="ref-category">Runway</div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://runwayml.com/research/introducing-runway-gen-4.5" target="_blank" rel="noopener">Introducing Runway Gen-4.5 — Runway Research</a>
+      </div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://runwayml.com/research/introducing-runway-gen-4" target="_blank" rel="noopener">Introducing Runway Gen-4 — Runway Research</a>
+      </div>
+    </div>
+
+    <div class="ref-card" data-animate data-delay="150">
+      <div class="ref-category">その他</div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://www.imagine.art/features/pika-2-2" target="_blank" rel="noopener">Pika 2.2 AI Video Generator — ImagineArt</a>
+      </div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://seed.bytedance.com/en/seedance2_0" target="_blank" rel="noopener">Seedance 2.0 — ByteDance</a>
+      </div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://prtimes.jp/main/html/rd/p/000000005.000160300.html" target="_blank" rel="noopener">Vidu Q3 プレスリリース — ShengShu AI</a>
+      </div>
+      <div class="ref-item">
+        <span class="ref-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </span>
+        <a href="https://www.congress.gov/crs-product/LSB10922" target="_blank" rel="noopener">Generative AI and Copyright Law — Congress.gov</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     FOOTER
+     ============================================ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="nav-logo-dot"></span>
+          AI Video Gen 2026
+        </div>
+        <p class="footer-tagline">最先端AI動画生成モデルの技術比較レポート</p>
+      </div>
+      <div class="footer-nav">
+        <div class="footer-nav-group">
+          <h4 class="footer-nav-title">コンテンツ</h4>
+          <a href="#summary">エグゼクティブサマリ</a>
+          <a href="#models">モデル一覧</a>
+          <a href="#comparison">上位3モデル比較</a>
+          <a href="#performance">性能評価</a>
+        </div>
+        <div class="footer-nav-group">
+          <h4 class="footer-nav-title">詳細</h4>
+          <a href="#architecture">アーキテクチャ</a>
+          <a href="#timeline">タイムライン</a>
+          <a href="#challenges">課題</a>
+          <a href="#outlook">今後の展望</a>
+        </div>
+        <div class="footer-nav-group">
+          <h4 class="footer-nav-title">参照</h4>
+          <a href="#references">参照文献</a>
+          <a href="#summary-table">要約比較表</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copyright">
+        <span>2026.02.21</span>
+        <span class="footer-sep">|</span>
+        <span>AI Video Generation Executive Summary</span>
+      </div>
+      <div class="footer-back-top">
+        <a href="#hero" class="back-top-btn" id="backToTop">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+          Top
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================
+     ADDITIONAL STYLES (Part 2)
+     ============================================ -->
+<style>
+/* ============================================
+   CHALLENGES SECTION STYLES
+   ============================================ */
+.challenges-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+}
+
+.challenge-card {
+  perspective: 1000px;
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.challenge-card.visible {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.challenge-card-inner {
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.challenge-card-inner:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
+}
+
+.challenge-card-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 0;
+  border-radius: 0 2px 2px 0;
+  transition: height 0.6s ease;
+}
+
+.challenge-card-inner:hover::before {
+  height: 100%;
+}
+
+.challenge-icon-compute .challenge-card-inner::before,
+.challenge-icon-wrapper.challenge-icon-compute + .challenge-number { color: #FF3333; }
+.challenge-card:nth-child(1) .challenge-card-inner::before { background: #FF3333; }
+.challenge-card:nth-child(2) .challenge-card-inner::before { background: #FF9500; }
+.challenge-card:nth-child(3) .challenge-card-inner::before { background: #FF3366; }
+.challenge-card:nth-child(4) .challenge-card-inner::before { background: #7B2FBE; }
+
+.challenge-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  transition: all var(--transition-normal);
+}
+
+.challenge-icon-compute { background: #FEE2E2; color: #DC2626; }
+.challenge-icon-compute svg { stroke: #DC2626; }
+.challenge-icon-ethics { background: #FEF3C7; color: #D97706; }
+.challenge-icon-ethics svg { stroke: #D97706; }
+.challenge-icon-safety { background: #FCE7F3; color: #DB2777; }
+.challenge-icon-safety svg { stroke: #DB2777; }
+.challenge-icon-practical { background: #EDE9FE; color: #7C3AED; }
+.challenge-icon-practical svg { stroke: #7C3AED; }
+
+.challenge-card-inner:hover .challenge-icon-wrapper {
+  transform: scale(1.08) rotate(-3deg);
+}
+
+.challenge-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: var(--light-gray);
+  position: absolute;
+  top: 20px;
+  right: 28px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity var(--transition-normal);
+}
+
+.challenge-card-inner:hover .challenge-number {
+  opacity: 0.8;
+}
+
+.challenge-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.challenge-desc {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.challenge-metric {
+  margin-bottom: 16px;
+}
+
+.challenge-metric-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.challenge-metric-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.challenge-metric-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--light-gray);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.challenge-metric-fill {
+  height: 100%;
+  border-radius: 4px;
+  width: 0;
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.challenge-metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.challenge-case-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FEF3C7;
+  color: #92400E;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+.challenge-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.challenge-status-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.status-progress {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.status-needed {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.challenge-impact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--light-gray);
+}
+
+.challenge-impact-label {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
+.challenge-impact-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.impact-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--light-gray);
+  transition: all var(--transition-fast);
+}
+
+.impact-dot.filled {
+  background: var(--accent-gold);
+}
+
+/* ============================================
+   OUTLOOK SECTION STYLES
+   ============================================ */
+.outlook-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+}
+
+.outlook-card {
+  position: relative;
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.outlook-card.visible {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.outlook-card-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light), var(--accent-blue-light));
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  z-index: 0;
+}
+
+.outlook-card:hover .outlook-card-glow {
+  opacity: 1;
+}
+
+.outlook-card-content {
+  position: relative;
+  z-index: 1;
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  transition: all var(--transition-normal);
+  height: 100%;
+}
+
+.outlook-card:hover .outlook-card-content {
+  border-color: transparent;
+  box-shadow: var(--shadow-lg);
+}
+
+.outlook-icon {
+  margin-bottom: 16px;
+}
+
+.outlook-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: rgba(201, 168, 76, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.outlook-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.outlook-desc {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+.outlook-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.outlook-progress-label {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.outlook-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--light-gray);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.outlook-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light));
+  width: 0;
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.outlook-progress-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  min-width: 36px;
+}
+
+/* ============================================
+   SUMMARY TABLE SECTION STYLES
+   ============================================ */
+.summary-cards-row {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.summary-model-card {
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  position: relative;
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.summary-model-card.visible {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.summary-model-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+  border-color: transparent;
+}
+
+.summary-card-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--white);
+  background: var(--text-primary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  z-index: 2;
+}
+
+.summary-card-header-bar {
+  height: 6px;
+  width: 100%;
+}
+
+.summary-card-body {
+  padding: 32px 28px;
+}
+
+.summary-card-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.summary-card-arch {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.summary-card-output {
+  margin-bottom: 20px;
+}
+
+.summary-output-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-output-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.summary-output-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.summary-card-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ============================================
+   REFERENCES SECTION STYLES
+   ============================================ */
+.references-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.ref-card {
+  background: var(--off-white);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all var(--transition-normal);
+}
+
+.ref-card.visible {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.ref-card:hover {
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.ref-category {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.ref-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ref-item:last-child {
+  margin-bottom: 0;
+}
+
+.ref-icon {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--text-tertiary);
+}
+
+.ref-item a {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  line-height: 1.5;
+  transition: color var(--transition-fast);
+}
+
+.ref-item a:hover {
+  color: var(--accent-gold);
+}
+
+/* ============================================
+   FOOTER STYLES
+   ============================================ */
+.site-footer {
+  background: var(--text-primary);
+  color: var(--white);
+  padding: 60px 48px 32px;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 60px;
+  margin-bottom: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.footer-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.footer-tagline {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+  font-weight: 300;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 60px;
+}
+
+.footer-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-nav-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+
+.footer-nav-group a {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer-nav-group a:hover {
+  color: var(--accent-gold);
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-copyright {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-sep {
+  opacity: 0.3;
+}
+
+.back-top-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  padding: 8px 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 30px;
+  transition: all var(--transition-fast);
+}
+
+.back-top-btn:hover {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+/* ============================================
+   FLOATING PARTICLES
+   ============================================ */
+.particle-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--accent-gold);
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(100vh) scale(0);
+  }
+  10% {
+    opacity: 0.3;
+    transform: translateY(90vh) scale(1);
+  }
+  90% {
+    opacity: 0.1;
+    transform: translateY(10vh) scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0vh) scale(0);
+  }
+}
+
+/* ============================================
+   ADDITIONAL RESPONSIVE (Part 2)
+   ============================================ */
+@media (max-width: 1024px) {
+  .challenges-grid {
+    grid-template-columns: 1fr;
+  }
+  .outlook-grid {
+    grid-template-columns: 1fr;
+  }
+  .summary-cards-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .references-grid {
+    grid-template-columns: 1fr;
+  }
+  .footer-top {
+    flex-direction: column;
+    gap: 32px;
+  }
+  .footer-nav {
+    flex-wrap: wrap;
+    gap: 32px;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  .site-footer {
+    padding: 40px 24px 24px;
+  }
+}
+
+/* ============================================
+   SMOOTH SCROLL REVEAL UTILITY
+   ============================================ */
+[data-animate] {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+[data-animate].visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+
+<!-- ============================================
+     FLOATING PARTICLES
+     ============================================ -->
+<div class="particle-container" id="particleContainer"></div>
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+(function() {
+  'use strict';
+
+  /* ============================================
+     LOADING SCREEN
+     ============================================ */
+  const loadingScreen = document.getElementById('loading-screen');
+  const loadPercent = document.getElementById('loadPercent');
+  let loadVal = 0;
+  const loadInterval = setInterval(() => {
+    loadVal += Math.random() * 8 + 2;
+    if (loadVal > 100) loadVal = 100;
+    if (loadPercent) loadPercent.textContent = Math.round(loadVal) + '%';
+    if (loadVal >= 100) {
+      clearInterval(loadInterval);
+      setTimeout(() => {
+        if (loadingScreen) loadingScreen.classList.add('hidden');
+      }, 400);
+    }
+  }, 80);
+
+  /* ============================================
+     CUSTOM CURSOR
+     ============================================ */
+  const cursorFollower = document.getElementById('cursorFollower');
+  const cursorDot = document.getElementById('cursorDot');
+  let mouseX = 0, mouseY = 0;
+  let followerX = 0, followerY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (cursorDot) {
+      cursorDot.style.left = mouseX + 'px';
+      cursorDot.style.top = mouseY + 'px';
+    }
+  });
+
+  function animateCursor() {
+    followerX += (mouseX - followerX) * 0.12;
+    followerY += (mouseY - followerY) * 0.12;
+    if (cursorFollower) {
+      cursorFollower.style.left = followerX + 'px';
+      cursorFollower.style.top = followerY + 'px';
+    }
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // Hover effect on interactive elements
+  const hoverElements = document.querySelectorAll('a, button, .model-card, .key-point-card, .challenge-card, .outlook-card, .flow-node, .arch-tab, .summary-model-card');
+  hoverElements.forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      if (cursorFollower) cursorFollower.classList.add('hover');
+    });
+    el.addEventListener('mouseleave', () => {
+      if (cursorFollower) cursorFollower.classList.remove('hover');
+    });
+  });
+
+  /* ============================================
+     NAVIGATION SCROLL
+     ============================================ */
+  const mainNav = document.getElementById('mainNav');
+  let lastScroll = 0;
+
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    if (mainNav) {
+      if (scrollY > 80) {
+        mainNav.classList.add('scrolled');
+      } else {
+        mainNav.classList.remove('scrolled');
+      }
+    }
+    lastScroll = scrollY;
+  });
+
+  /* ============================================
+     MOBILE MENU
+     ============================================ */
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const navLinks = document.querySelector('.nav-links');
+  let menuOpen = false;
+
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      if (navLinks) {
+        navLinks.style.display = menuOpen ? 'flex' : '';
+        if (menuOpen) {
+          navLinks.style.position = 'fixed';
+          navLinks.style.top = '60px';
+          navLinks.style.left = '0';
+          navLinks.style.width = '100%';
+          navLinks.style.flexDirection = 'column';
+          navLinks.style.background = 'rgba(255,255,255,0.98)';
+          navLinks.style.backdropFilter = 'blur(20px)';
+          navLinks.style.padding = '24px';
+          navLinks.style.gap = '20px';
+          navLinks.style.boxShadow = '0 12px 40px rgba(0,0,0,0.1)';
+          navLinks.style.zIndex = '999';
+          navLinks.style.borderBottom = '1px solid #e0e0e0';
+        } else {
+          navLinks.removeAttribute('style');
+        }
+      }
+      // Animate hamburger
+      const spans = mobileMenuBtn.querySelectorAll('span');
+      if (menuOpen) {
+        spans[0].style.transform = 'rotate(45deg) translate(4px, 4px)';
+        spans[1].style.opacity = '0';
+        spans[2].style.transform = 'rotate(-45deg) translate(4px, -4px)';
+      } else {
+        spans[0].style.transform = '';
+        spans[1].style.opacity = '';
+        spans[2].style.transform = '';
+      }
+    });
+  }
+
+  // Close mobile menu on link click
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (menuOpen && mobileMenuBtn) {
+        mobileMenuBtn.click();
+      }
+    });
+  });
+
+  /* ============================================
+     INTERSECTION OBSERVER (SCROLL ANIMATIONS)
+     ============================================ */
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px 0px -60px 0px',
+    threshold: 0.1
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const delay = parseInt(el.dataset.delay) || 0;
+        setTimeout(() => {
+          el.classList.add('visible');
+        }, delay);
+        observer.unobserve(el);
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('[data-animate]').forEach(el => {
+    observer.observe(el);
+  });
+
+  /* ============================================
+     STAT COUNTER ANIMATION
+     ============================================ */
+  const statCounters = document.querySelectorAll('.stat-counter');
+  const statObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const counter = entry.target;
+        const target = parseInt(counter.dataset.target);
+        let current = 0;
+        const duration = 2000;
+        const stepTime = 16;
+        const steps = duration / stepTime;
+        const increment = target / steps;
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            current = target;
+            clearInterval(timer);
+          }
+          counter.textContent = Math.round(current);
+        }, stepTime);
+        statObserver.unobserve(counter);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  statCounters.forEach(counter => statObserver.observe(counter));
+
+  /* ============================================
+     BAR CHART ANIMATIONS
+     ============================================ */
+  const barFills = document.querySelectorAll('.table-bar-fill, .perf-bar-fill, .challenge-metric-fill, .outlook-progress-fill');
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const width = el.dataset.width;
+        if (width) {
+          setTimeout(() => {
+            el.style.width = width + '%';
+          }, 300);
+        }
+        barObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  barFills.forEach(bar => barObserver.observe(bar));
+
+  /* ============================================
+     RADAR CHART ANIMATION
+     ============================================ */
+  const radarPolygons = document.querySelectorAll('.radar-data');
+  const radarDots = document.querySelectorAll('.radar-dot');
+  const radarObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        radarPolygons.forEach((poly, i) => {
+          setTimeout(() => {
+            poly.style.transition = 'opacity 1s ease';
+            poly.style.opacity = '1';
+          }, i * 300 + 500);
+        });
+        radarDots.forEach((dot, i) => {
+          setTimeout(() => {
+            dot.style.transition = 'opacity 0.5s ease';
+            dot.style.opacity = '1';
+          }, Math.floor(i / 5) * 300 + 800);
+        });
+        radarObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const radarChart = document.querySelector('.radar-chart');
+  if (radarChart) radarObserver.observe(radarChart);
+
+  /* ============================================
+     TIMELINE FILL ANIMATION
+     ============================================ */
+  const timelineFill = document.getElementById('timelineFill');
+  const timelineContainer = document.querySelector('.timeline-container');
+
+  if (timelineFill && timelineContainer) {
+    const timelineFillObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            timelineFill.style.height = '100%';
+          }, 500);
+          timelineFillObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    timelineFillObserver.observe(timelineContainer);
+  }
+
+  /* ============================================
+     ARCHITECTURE TABS
+     ============================================ */
+  const archTabs = document.querySelectorAll('.arch-tab');
+  const archPanels = document.querySelectorAll('.arch-panel');
+
+  archTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetId = 'panel-' + tab.dataset.tab;
+
+      archTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      archPanels.forEach(panel => {
+        panel.classList.remove('active');
+        panel.style.display = 'none';
+      });
+
+      const targetPanel = document.getElementById(targetId);
+      if (targetPanel) {
+        targetPanel.style.display = 'block';
+        // Force reflow
+        void targetPanel.offsetWidth;
+        targetPanel.classList.add('active');
+      }
+    });
+  });
+
+  /* ============================================
+     FLOATING PARTICLES
+     ============================================ */
+  const particleContainer = document.getElementById('particleContainer');
+
+  function createParticle() {
+    if (!particleContainer) return;
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    const x = Math.random() * 100;
+    const size = Math.random() * 3 + 1;
+    const duration = Math.random() * 15 + 10;
+    const delay = Math.random() * 5;
+    particle.style.left = x + '%';
+    particle.style.width = size + 'px';
+    particle.style.height = size + 'px';
+    particle.style.animationDuration = duration + 's';
+    particle.style.animationDelay = delay + 's';
+
+    // Randomize particle color
+    const colors = ['#C9A84C', '#E8D5A0', '#4285F4', '#0668E1', '#7B2FBE'];
+    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+    particleContainer.appendChild(particle);
+
+    setTimeout(() => {
+      if (particle.parentNode) {
+        particle.parentNode.removeChild(particle);
+      }
+    }, (duration + delay) * 1000);
+  }
+
+  // Create initial particles
+  for (let i = 0; i < 20; i++) {
+    setTimeout(createParticle, i * 500);
+  }
+
+  // Continuously create particles
+  setInterval(createParticle, 2000);
+
+  /* ============================================
+     SMOOTH SCROLL FOR ANCHOR LINKS
+     ============================================ */
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href');
+      const targetElement = document.querySelector(targetId);
+      if (targetElement) {
+        const navHeight = mainNav ? mainNav.offsetHeight : 0;
+        const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - navHeight - 20;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+
+  /* ============================================
+     PARALLAX EFFECT ON HERO SHAPES
+     ============================================ */
+  const heroShapes = document.querySelectorAll('.hero-shape');
+
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    heroShapes.forEach((shape, i) => {
+      const speed = 0.03 + i * 0.015;
+      shape.style.transform = `translateY(${scrollY * speed}px)`;
+    });
+  });
+
+  /* ============================================
+     TILT EFFECT ON MODEL CARDS
+     ============================================ */
+  const modelCards = document.querySelectorAll('.model-card, .summary-model-card');
+
+  modelCards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (y - centerY) / centerY * -3;
+      const rotateY = (x - centerX) / centerX * 3;
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+
+  /* ============================================
+     CHALLENGE CARD 3D TILT
+     ============================================ */
+  const challengeCards = document.querySelectorAll('.challenge-card-inner');
+
+  challengeCards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (y - centerY) / centerY * -2;
+      const rotateY = (x - centerX) / centerX * 2;
+      card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+
+  /* ============================================
+     OUTLOOK CARD GLOW FOLLOW MOUSE
+     ============================================ */
+  const outlookCards = document.querySelectorAll('.outlook-card');
+
+  outlookCards.forEach(card => {
+    const glow = card.querySelector('.outlook-card-glow');
+    card.addEventListener('mousemove', (e) => {
+      if (!glow) return;
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      glow.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(201,168,76,0.25), rgba(201,168,76,0.05) 40%, transparent 70%)`;
+    });
+  });
+
+  /* ============================================
+     ACTIVE NAV LINK HIGHLIGHT ON SCROLL
+     ============================================ */
+  const sections = document.querySelectorAll('section[id]');
+  const navLinksAll = document.querySelectorAll('.nav-links a');
+
+  function highlightNav() {
+    const scrollY = window.scrollY + 120;
+    sections.forEach(section => {
+      const top = section.offsetTop;
+      const height = section.offsetHeight;
+      const id = section.getAttribute('id');
+      if (scrollY >= top && scrollY < top + height) {
+        navLinksAll.forEach(link => {
+          link.style.color = '';
+          if (link.getAttribute('href') === '#' + id) {
+            link.style.color = 'var(--accent-gold)';
+          }
+        });
+      }
+    });
+  }
+
+  window.addEventListener('scroll', highlightNav);
+
+  /* ============================================
+     TYPEWRITER EFFECT ON HERO SUBTITLE
+     ============================================ */
+  // Already handled by CSS animation
+
+  /* ============================================
+     STAGGERED ANIMATION FOR STAT ITEMS
+     ============================================ */
+  const statItems = document.querySelectorAll('.stat-item');
+  const statItemObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const items = entry.target.parentElement.querySelectorAll('.stat-item');
+        items.forEach((item, i) => {
+          setTimeout(() => {
+            item.classList.add('visible');
+          }, i * 150);
+        });
+        statItemObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  if (statItems.length > 0) {
+    statItemObserver.observe(statItems[0]);
+  }
+
+  /* ============================================
+     DYNAMIC YEAR IN FOOTER
+     ============================================ */
+  // Already set to 2026.02.21
+
+  /* ============================================
+     KEYBOARD NAVIGATION SUPPORT
+     ============================================ */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menuOpen && mobileMenuBtn) {
+      mobileMenuBtn.click();
+    }
+  });
+
+  /* ============================================
+     PERFORMANCE: REDUCE ANIMATIONS ON LOW-END
+     ============================================ */
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (prefersReducedMotion.matches) {
+    document.querySelectorAll('.particle').forEach(p => p.remove());
+    document.querySelectorAll('.hero-shape').forEach(s => {
+      s.style.animation = 'none';
+    });
+  }
+
+  /* ============================================
+     COMPARISON TABLE ROW HOVER ANIMATION
+     ============================================ */
+  const tableRows = document.querySelectorAll('.comparison-table tbody tr');
+  tableRows.forEach(row => {
+    row.addEventListener('mouseenter', () => {
+      row.style.transition = 'all 0.3s ease';
+      row.style.transform = 'scale(1.01)';
+      row.style.boxShadow = '0 4px 16px rgba(0,0,0,0.05)';
+      row.style.position = 'relative';
+      row.style.zIndex = '2';
+    });
+    row.addEventListener('mouseleave', () => {
+      row.style.transform = '';
+      row.style.boxShadow = '';
+      row.style.zIndex = '';
+    });
+  });
+
+  /* ============================================
+     KEY POINT CARDS ICON ANIMATION
+     ============================================ */
+  const keyPointIcons = document.querySelectorAll('.key-point-icon');
+  keyPointIcons.forEach(icon => {
+    icon.addEventListener('mouseenter', () => {
+      icon.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      icon.style.transform = 'rotate(10deg) scale(1.15)';
+    });
+    icon.addEventListener('mouseleave', () => {
+      icon.style.transform = '';
+    });
+  });
+
+  /* ============================================
+     FLOW NODE PULSE ANIMATION
+     ============================================ */
+  const flowNodes = document.querySelectorAll('.flow-node');
+  flowNodes.forEach((node, i) => {
+    node.style.animationDelay = (i * 200) + 'ms';
+  });
+
+  /* ============================================
+     REFERENCE CARD STAGGER
+     ============================================ */
+  const refCards = document.querySelectorAll('.ref-card');
+  refCards.forEach((card, i) => {
+    card.style.transitionDelay = (i * 100) + 'ms';
+  });
+
+  /* ============================================
+     SCROLL PROGRESS INDICATOR
+     ============================================ */
+  const progressBar = document.createElement('div');
+  progressBar.id = 'scrollProgress';
+  progressBar.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light), var(--accent-blue));
+    z-index: 10000;
+    transition: width 0.1s linear;
+    width: 0%;
+    border-radius: 0 2px 2px 0;
+  `;
+  document.body.prepend(progressBar);
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = (scrollTop / docHeight) * 100;
+    progressBar.style.width = scrollPercent + '%';
+  });
+
+  /* ============================================
+     IMPACT DOTS ANIMATION
+     ============================================ */
+  const impactDots = document.querySelectorAll('.impact-dot.filled');
+  const dotsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const dots = entry.target.closest('.challenge-impact-dots');
+        if (dots) {
+          const filledDots = dots.querySelectorAll('.impact-dot.filled');
+          filledDots.forEach((dot, i) => {
+            dot.style.transition = `transform 0.3s ease ${i * 100}ms, background 0.3s ease ${i * 100}ms`;
+            dot.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+              dot.style.transform = 'scale(1)';
+            }, 300 + i * 100);
+          });
+        }
+        dotsObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.challenge-impact-dots').forEach(container => {
+    const first = container.querySelector('.impact-dot.filled');
+    if (first) dotsObserver.observe(first);
+  });
+
+  /* ============================================
+     ARCH DETAIL ITEMS HOVER SHIMMER
+     ============================================ */
+  document.querySelectorAll('.arch-detail-item').forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      item.style.background = 'linear-gradient(135deg, var(--white) 0%, rgba(201,168,76,0.03) 100%)';
+    });
+    item.addEventListener('mouseleave', () => {
+      item.style.background = '';
+    });
+  });
+
+  /* ============================================
+     SUMMARY FEATURE CHECK ANIMATION
+     ============================================ */
+  const summaryFeatures = document.querySelectorAll('.summary-feature');
+  const featureObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const card = entry.target;
+        const features = card.querySelectorAll ? card.querySelectorAll('.summary-feature') : [];
+        if (features.length === 0 && card.classList.contains('summary-feature')) {
+          const parentCard = card.closest('.summary-card-body');
+          if (parentCard) {
+            const allFeats = parentCard.querySelectorAll('.summary-feature');
+            allFeats.forEach((feat, i) => {
+              feat.style.transition = `opacity 0.5s ease ${i * 150}ms, transform 0.5s ease ${i * 150}ms`;
+              feat.style.opacity = '0';
+              feat.style.transform = 'translateX(-10px)';
+              setTimeout(() => {
+                feat.style.opacity = '1';
+                feat.style.transform = 'translateX(0)';
+              }, 50);
+            });
+          }
+        }
+        featureObserver.unobserve(card);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  summaryFeatures.forEach(feat => featureObserver.observe(feat));
+
+  /* ============================================
+     CONSOLE SIGNATURE
+     ============================================ */
+  console.log(
+    '%c AI Video Generation Report 2026.02.21 ',
+    'background: #1A1A1A; color: #C9A84C; font-size: 14px; font-weight: bold; padding: 8px 16px; border-radius: 4px;'
+  );
+  console.log(
+    '%c Built with precision and care ',
+    'color: #7A7A7A; font-size: 10px;'
+  );
+
+})();
+</script>
+
+</body>
+</html>

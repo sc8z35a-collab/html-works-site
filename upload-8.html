@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>スマホ画面イラスト（SVG）</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#101016;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:16px}
+  svg{max-width:100%;height:auto;max-height:96dvh}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 700" width="400" height="700">
+  <defs>
+    <!-- スマホの影 -->
+    <filter id="phoneShadow" x="-10%" y="-5%" width="120%" height="115%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+    <!-- 指の影 -->
+    <filter id="fingerShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+    <!-- 画面の光沢 -->
+    <linearGradient id="screenGloss" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.07"/>
+      <stop offset="50%" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0.04"/>
+    </linearGradient>
+    <!-- 背景グラデーション -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8ecf1"/>
+      <stop offset="100%" stop-color="#c9d1db"/>
+    </linearGradient>
+    <!-- 壁紙グラデーション -->
+    <linearGradient id="wallpaper" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#667eea"/>
+      <stop offset="50%" stop-color="#764ba2"/>
+      <stop offset="100%" stop-color="#f093fb"/>
+    </linearGradient>
+    <!-- アプリアイコングラデーション -->
+    <linearGradient id="appGrad1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF6B6B"/><stop offset="100%" stop-color="#ee5a24"/>
+    </linearGradient>
+    <linearGradient id="appGrad2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4facfe"/><stop offset="100%" stop-color="#00f2fe"/>
+    </linearGradient>
+    <linearGradient id="appGrad3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#43e97b"/><stop offset="100%" stop-color="#38f9d7"/>
+    </linearGradient>
+    <linearGradient id="appGrad4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fa709a"/><stop offset="100%" stop-color="#fee140"/>
+    </linearGradient>
+    <linearGradient id="appGrad5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a18cd1"/><stop offset="100%" stop-color="#fbc2eb"/>
+    </linearGradient>
+    <linearGradient id="appGrad6" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fccb90"/><stop offset="100%" stop-color="#d57eeb"/>
+    </linearGradient>
+    <linearGradient id="appGrad7" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff9a9e"/><stop offset="100%" stop-color="#fad0c4"/>
+    </linearGradient>
+    <linearGradient id="appGrad8" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#667eea"/><stop offset="100%" stop-color="#764ba2"/>
+    </linearGradient>
+    <!-- ノッチグラデーション -->
+    <linearGradient id="notchGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <!-- タッチ波紋 -->
+    <radialGradient id="ripple" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <!-- 本体グラデーション -->
+    <linearGradient id="phoneBody" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2d3436"/><stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <!-- 通知パネルグラデーション -->
+    <linearGradient id="notifGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#16213e" stop-opacity="0.9"/>
+    </linearGradient>
+    <clipPath id="screenClip">
+      <rect x="68" y="88" width="264" height="524" rx="5"/>
+    </clipPath>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="400" height="700" fill="url(#bgGrad)"/>
+
+  <!-- ===== スマホ本体 ===== -->
+  <g filter="url(#phoneShadow)">
+    <!-- 外枠 -->
+    <rect x="58" y="72" width="284" height="556" rx="32" ry="32" fill="url(#phoneBody)" stroke="#444" stroke-width="1"/>
+    <!-- 画面 -->
+    <g clip-path="url(#screenClip)">
+      <!-- 壁紙 -->
+      <rect x="68" y="88" width="264" height="524" fill="url(#wallpaper)"/>
+
+      <!-- ===== ステータスバー ===== -->
+      <rect x="68" y="88" width="264" height="32" fill="rgba(0,0,0,0.2)"/>
+      <text x="82" y="108" fill="#fff" font-family="Arial,sans-serif" font-size="12" font-weight="600">9:41</text>
+      <!-- WiFiアイコン -->
+      <g transform="translate(290,96)">
+        <path d="M0,10 Q8,-8 16,10" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M3,8 Q8,-4 13,8" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="8" cy="11" r="1.5" fill="#fff"/>
+      </g>
+      <!-- バッテリー -->
+      <rect x="312" y="97" width="16" height="9" rx="2" fill="none" stroke="#fff" stroke-width="1.2"/>
+      <rect x="328" y="99.5" width="2" height="4" rx="1" fill="#fff"/>
+      <rect x="314" y="99" width="10" height="5" rx="1" fill="#78e08f"/>
+
+      <!-- ===== アプリアイコン群（1ページ目） ===== -->
+      <g>
+        <!-- スワイプアニメーション：1ページ目 -->
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; 0,0; 0,0; -264,0; -264,0; -264,0; 0,0; 0,0"
+          keyTimes="0; 0.3; 0.35; 0.42; 0.55; 0.6; 0.67; 1"
+          dur="12s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0 0 1 1; 0.25 0.1 0.25 1; 0 0 1 1; 0 0 1 1; 0.25 0.1 0.25 1; 0 0 1 1; 0 0 1 1"/>
+
+        <!-- Row 1 -->
+        <g transform="translate(88, 145)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad1)"/>
+          <path d="M14,34 L24,14 L34,34 Z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">写真</text>
+        </g>
+        <g transform="translate(158, 145)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad2)"/>
+          <circle cx="24" cy="24" r="12" fill="none" stroke="#fff" stroke-width="2"/>
+          <path d="M20,18 L32,24 L20,30 Z" fill="#fff"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">動画</text>
+        </g>
+        <g transform="translate(228, 145)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad3)"/>
+          <circle cx="24" cy="20" r="7" fill="none" stroke="#fff" stroke-width="2"/>
+          <path d="M12,38 Q12,28 24,28 Q36,28 36,38" fill="none" stroke="#fff" stroke-width="2"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">連絡先</text>
+        </g>
+        <g transform="translate(298, 145)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad4)"/>
+          <rect x="12" y="12" width="24" height="24" rx="3" fill="none" stroke="#fff" stroke-width="2"/>
+          <line x1="12" y1="20" x2="36" y2="20" stroke="#fff" stroke-width="1.5"/>
+          <line x1="12" y1="28" x2="36" y2="28" stroke="#fff" stroke-width="1.5"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">カレンダー</text>
+        </g>
+
+        <!-- Row 2 -->
+        <g transform="translate(88, 230)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad5)"/>
+          <path d="M16,16 L32,16 L32,36 L16,36 Z M20,16 L20,12 M28,16 L28,12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">メモ</text>
+        </g>
+        <g transform="translate(158, 230)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad6)"/>
+          <circle cx="24" cy="24" r="13" fill="none" stroke="#fff" stroke-width="2"/>
+          <line x1="24" y1="24" x2="24" y2="15" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <line x1="24" y1="24" x2="31" y2="24" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">時計</text>
+        </g>
+        <g transform="translate(228, 230)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad7)"/>
+          <path d="M15,32 L21,20 L27,26 L33,14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">株価</text>
+        </g>
+        <g transform="translate(298, 230)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad8)"/>
+          <path d="M18,14 L18,34 L36,34 M18,28 L24,22 L28,26 L36,18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">分析</text>
+        </g>
+
+        <!-- Row 3 -->
+        <g transform="translate(88, 315)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad2)"/>
+          <path d="M14,32 L24,16 L34,32" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+          <line x1="24" y1="22" x2="24" y2="28" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="24" cy="30" r="1" fill="#fff"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">警告</text>
+        </g>
+        <g transform="translate(158, 315)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad3)"/>
+          <circle cx="24" cy="24" r="10" fill="none" stroke="#fff" stroke-width="2"/>
+          <path d="M20,24 L23,27 L29,21" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">完了</text>
+        </g>
+        <g transform="translate(228, 315)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad1)"/>
+          <rect x="14" y="16" width="20" height="16" rx="2" fill="none" stroke="#fff" stroke-width="2"/>
+          <path d="M14,20 L24,26 L34,20" fill="none" stroke="#fff" stroke-width="2"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">メール</text>
+          <!-- 通知バッジ -->
+          <circle cx="40" cy="10" r="9" fill="#ff3b30"/>
+          <text x="40" y="14" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold" font-family="Arial">3</text>
+        </g>
+        <g transform="translate(298, 315)">
+          <rect width="48" height="48" rx="12" fill="url(#appGrad5)"/>
+          <path d="M16,30 Q24,10 32,30" fill="none" stroke="#fff" stroke-width="2"/>
+          <line x1="24" y1="18" x2="24" y2="36" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <text x="24" y="62" text-anchor="middle" fill="#fff" font-size="9" font-family="Arial">地図</text>
+        </g>
+      </g>
+
+      <!-- ===== ドックバー ===== -->
+      <rect x="68" y="558" width="264" height="54" rx="0" fill="rgba(0,0,0,0.3)"/>
+      <g transform="translate(93, 564)">
+        <rect width="42" height="42" rx="10" fill="#34c759"/>
+        <path d="M12,14 L12,28 Q12,30 14,30 L28,30 Q30,30 30,28 L30,14 M16,14 L16,10 Q16,8 21,8 Q26,8 26,10 L26,14" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(155, 564)">
+        <rect width="42" height="42" rx="10" fill="#5856d6"/>
+        <circle cx="21" cy="18" r="6" fill="none" stroke="#fff" stroke-width="1.8"/>
+        <line x1="21" y1="24" x2="21" y2="34" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="14" y1="28" x2="28" y2="28" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(217, 564)">
+        <rect width="42" height="42" rx="10" fill="#ff9500"/>
+        <circle cx="21" cy="21" r="11" fill="none" stroke="#fff" stroke-width="1.8"/>
+        <circle cx="21" cy="21" r="5" fill="#fff"/>
+      </g>
+      <g transform="translate(279, 564)">
+        <rect width="42" height="42" rx="10" fill="#007aff"/>
+        <path d="M21,10 L21,28 M15,16 L21,10 L27,16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12,22 L12,32 L30,32 L30,22" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+      </g>
+
+      <!-- ===== ページインジケータ ===== -->
+      <circle cx="192" cy="540" r="3" fill="rgba(255,255,255,0.4)"/>
+      <circle cx="208" cy="540" r="3" fill="rgba(255,255,255,0.4)"/>
+      <!-- アクティブインジケータ -->
+      <circle cx="192" cy="540" r="3" fill="#fff">
+        <animate attributeName="fill-opacity" values="1;1;1;0.4;0.4;0.4;1;1" keyTimes="0;0.3;0.35;0.42;0.55;0.6;0.67;1" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="208" cy="540" r="3" fill="#fff">
+        <animate attributeName="fill-opacity" values="0.4;0.4;0.4;1;1;1;0.4;0.4" keyTimes="0;0.3;0.35;0.42;0.55;0.6;0.67;1" dur="12s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- ===== 通知パネル（上からスライドダウン） ===== -->
+      <g>
+        <animateTransform attributeName="transform" type="translate"
+          values="0,-200; 0,-200; 0,0; 0,0; 0,-200; 0,-200"
+          keyTimes="0; 0.7; 0.78; 0.88; 0.95; 1"
+          dur="12s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0 0 1 1; 0.22 0.61 0.36 1; 0 0 1 1; 0.55 0.06 0.68 0.19; 0 0 1 1"/>
+        <rect x="68" y="88" width="264" height="200" fill="url(#notifGrad)" rx="0"/>
+        <!-- 通知カード1 -->
+        <rect x="78" y="128" width="244" height="60" rx="12" fill="rgba(255,255,255,0.12)"/>
+        <circle cx="100" cy="150" r="12" fill="#ff3b30"/>
+        <text x="99" y="154" text-anchor="middle" fill="#fff" font-size="12" font-family="Arial" font-weight="bold">M</text>
+        <text x="120" y="147" fill="#fff" font-family="Arial" font-size="11" font-weight="600">メール - 新着メッセージ</text>
+        <text x="120" y="163" fill="rgba(255,255,255,0.7)" font-family="Arial" font-size="10">田中さんからの新しいメールが届…</text>
+        <text x="310" y="137" fill="rgba(255,255,255,0.5)" font-family="Arial" font-size="9">3分前</text>
+        <!-- 通知カード2 -->
+        <rect x="78" y="198" width="244" height="60" rx="12" fill="rgba(255,255,255,0.12)"/>
+        <circle cx="100" cy="220" r="12" fill="#34c759"/>
+        <text x="99" y="224" text-anchor="middle" fill="#fff" font-size="12" font-family="Arial" font-weight="bold">L</text>
+        <text x="120" y="217" fill="#fff" font-family="Arial" font-size="11" font-weight="600">LINE - 山田太郎</text>
+        <text x="120" y="233" fill="rgba(255,255,255,0.7)" font-family="Arial" font-size="10">今日のミーティングの件ですが…</text>
+        <text x="310" y="207" fill="rgba(255,255,255,0.5)" font-family="Arial" font-size="9">10分前</text>
+      </g>
+
+      <!-- ===== 画面の光沢オーバーレイ ===== -->
+      <rect x="68" y="88" width="264" height="524" fill="url(#screenGloss)"/>
+    </g>
+
+    <!-- ===== ノッチ（ダイナミックアイランド風） ===== -->
+    <rect x="162" y="82" width="76" height="24" rx="12" fill="url(#notchGrad)"/>
+    <circle cx="218" cy="94" r="5" fill="#1a2744"/>
+    <circle cx="218" cy="94" r="3" fill="#0a1628"/>
+    <circle cx="218" cy="94" r="1.5" fill="#1a3050" opacity="0.5"/>
+
+    <!-- ===== ホームインジケータ ===== -->
+    <rect x="158" y="606" width="84" height="4" rx="2" fill="#888"/>
+  </g>
+
+  <!-- ===== 指（タップ＆スワイプ） ===== -->
+  <g filter="url(#fingerShadow)">
+    <!-- 指の動き -->
+    <g>
+      <animateTransform attributeName="transform" type="translate"
+        values="200,350; 200,350; 260,280; 260,280; 260,280; 290,350; 100,350; 100,350; 200,350; 200,350; 200,350; 200,100; 200,100; 200,300; 200,300; 200,350"
+        keyTimes="0; 0.05; 0.1; 0.13; 0.18; 0.3; 0.42; 0.5; 0.55; 0.6; 0.68; 0.73; 0.78; 0.83; 0.92; 1"
+        dur="12s" repeatCount="indefinite" calcMode="spline"
+        keySplines="0 0 1 1; 0.25 0.1 0.25 1; 0 0 1 1; 0 0 1 1; 0.25 0.1 0.25 1; 0.25 0.1 0.25 1; 0 0 1 1; 0.25 0.1 0.25 1; 0 0 1 1; 0 0 1 1; 0.25 0.1 0.25 1; 0 0 1 1; 0.25 0.1 0.25 1; 0 0 1 1; 0.25 0.1 0.25 1"/>
+
+      <!-- 指本体 -->
+      <ellipse cx="0" cy="0" rx="22" ry="26" fill="#f0c8a0" opacity="0.85">
+        <animate attributeName="rx" values="22;22;18;18;22;22;22;22;22;22;18;18;18;18;22;22"
+          keyTimes="0;0.05;0.1;0.18;0.2;0.3;0.42;0.5;0.55;0.68;0.73;0.78;0.83;0.92;0.94;1"
+          dur="12s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="26;26;20;20;26;26;26;26;26;26;20;20;20;20;26;26"
+          keyTimes="0;0.05;0.1;0.18;0.2;0.3;0.42;0.5;0.55;0.68;0.73;0.78;0.83;0.92;0.94;1"
+          dur="12s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.85;0.85;0.95;0.95;0.85;0.85;0.85;0.85;0.85;0.85;0.95;0.95;0.95;0.95;0.85;0.85"
+          keyTimes="0;0.05;0.1;0.18;0.2;0.3;0.42;0.5;0.55;0.68;0.73;0.78;0.83;0.92;0.94;1"
+          dur="12s" repeatCount="indefinite"/>
+      </ellipse>
+      <!-- 指のハイライト -->
+      <ellipse cx="-4" cy="-5" rx="10" ry="12" fill="#fad9b5" opacity="0.5">
+        <animate attributeName="rx" values="10;10;7;7;10;10" keyTimes="0;0.05;0.1;0.18;0.2;1" dur="12s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="12;12;8;8;12;12" keyTimes="0;0.05;0.1;0.18;0.2;1" dur="12s" repeatCount="indefinite"/>
+      </ellipse>
+      <!-- 爪 -->
+      <ellipse cx="0" cy="-14" rx="10" ry="8" fill="#f5ddc4" opacity="0.6">
+        <animate attributeName="cy" values="-14;-14;-10;-10;-14;-14" keyTimes="0;0.05;0.1;0.18;0.2;1" dur="12s" repeatCount="indefinite"/>
+      </ellipse>
+    </g>
+  </g>
+
+  <!-- ===== タッチ波紋エフェクト ===== -->
+  <!-- タップ波紋1（アプリタップ時） -->
+  <circle cx="260" cy="280" r="0" fill="url(#ripple)">
+    <animate attributeName="r" values="0;0;0;30;0;0" keyTimes="0;0.1;0.12;0.18;0.2;1" dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;0.7;0;0;0" keyTimes="0;0.1;0.12;0.18;0.2;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- タップ波紋2（スワイプ開始時） -->
+  <circle cx="290" cy="350" r="0" fill="url(#ripple)">
+    <animate attributeName="r" values="0;0;0;25;0;0" keyTimes="0;0.3;0.32;0.36;0.38;1" dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;0.6;0;0;0" keyTimes="0;0.3;0.32;0.36;0.38;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- タップ波紋3（通知プル時） -->
+  <circle cx="200" cy="100" r="0" fill="url(#ripple)">
+    <animate attributeName="r" values="0;0;0;35;0;0" keyTimes="0;0.72;0.73;0.78;0.8;1" dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;0.5;0;0;0" keyTimes="0;0.72;0.73;0.78;0.8;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- ===== アニメーション説明テキスト ===== -->
+  <text x="200" y="668" text-anchor="middle" fill="#666" font-family="Arial,sans-serif" font-size="11">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+    タップ → スワイプ → 通知パネル
+  </text>
+</svg>
+</body>
+</html>

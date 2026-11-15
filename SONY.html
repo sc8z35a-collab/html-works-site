@@ -1,0 +1,4655 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SONYのセンサー | 世界シェアNo.1の全貌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   ROOT VARIABLES & RESET
+   ============================================ */
+:root {
+  --color-bg: #FFFFFF;
+  --color-bg-warm: #FAFAF8;
+  --color-bg-cool: #F5F7FA;
+  --color-bg-dark: #0A0A0A;
+  --color-bg-card: #FFFFFF;
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #4A4A4A;
+  --color-text-tertiary: #7A7A7A;
+  --color-text-white: #FFFFFF;
+  --color-accent-gold: #C9A84C;
+  --color-accent-gold-light: #E8D48B;
+  --color-accent-blue: #1428A0;
+  --color-accent-blue-light: #3D5AFE;
+  --color-sony-black: #000000;
+  --color-sony-blue: #0070D1;
+  --color-border-light: #E8E8E8;
+  --color-border-medium: #D0D0D0;
+  --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-shadow-deep: rgba(0, 0, 0, 0.15);
+  --color-gradient-start: #0A0A0A;
+  --color-gradient-end: #1A1A2E;
+  --font-sans: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Noto Serif JP', Georgia, serif;
+  --font-display: 'Inter', 'Noto Sans JP', sans-serif;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 0.2s;
+  --duration-normal: 0.4s;
+  --duration-slow: 0.8s;
+  --duration-very-slow: 1.2s;
+  --z-nav: 1000;
+  --z-overlay: 2000;
+  --z-modal: 3000;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  overflow-x: hidden;
+  position: relative;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-medium);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+/* ============================================
+   PAGE LOADER
+   ============================================ */
+.page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s var(--ease-out-expo), visibility 0.6s;
+}
+
+.page-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-logo {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-sony-black);
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: loaderFadeIn 0.8s var(--ease-out-expo) 0.2s forwards;
+}
+
+.loader-bar-container {
+  width: 200px;
+  height: 2px;
+  background: var(--color-border-light);
+  border-radius: 1px;
+  overflow: hidden;
+  opacity: 0;
+  animation: loaderFadeIn 0.8s var(--ease-out-expo) 0.4s forwards;
+}
+
+.loader-bar {
+  width: 0%;
+  height: 100%;
+  background: var(--color-sony-black);
+  border-radius: 1px;
+  animation: loaderProgress 1.8s var(--ease-in-out-cubic) 0.6s forwards;
+}
+
+.loader-percentage {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  color: var(--color-text-tertiary);
+  margin-top: 1rem;
+  opacity: 0;
+  animation: loaderFadeIn 0.8s var(--ease-out-expo) 0.4s forwards;
+}
+
+@keyframes loaderFadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes loaderProgress {
+  0% { width: 0%; }
+  30% { width: 45%; }
+  60% { width: 75%; }
+  100% { width: 100%; }
+}
+
+/* ============================================
+   CURSOR FOLLOWER
+   ============================================ */
+.cursor-follower {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: transform 0.15s var(--ease-out-quart),
+              width 0.3s var(--ease-out-expo),
+              height 0.3s var(--ease-out-expo),
+              border-color 0.3s;
+  transform: translate(-50%, -50%);
+}
+
+.cursor-follower.hovering {
+  width: 60px;
+  height: 60px;
+  border-color: var(--color-accent-gold);
+}
+
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--color-sony-black);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.08s linear;
+}
+
+@media (max-width: 768px) {
+  .cursor-follower, .cursor-dot {
+    display: none;
+  }
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: var(--z-nav);
+  padding: 1.5rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.5s var(--ease-out-expo);
+  background: transparent;
+}
+
+.nav.scrolled {
+  padding: 1rem 3rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--color-border-light);
+  box-shadow: 0 1px 30px var(--color-shadow);
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-sony-black);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-logo-icon {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-sony-black);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 900;
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.nav-logo:hover .nav-logo-icon {
+  background: var(--color-sony-black);
+  color: var(--color-text-white);
+  transform: rotate(360deg);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  list-style: none;
+}
+
+.nav-link {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+  position: relative;
+  padding: 0.25rem 0;
+  transition: color 0.3s;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--color-sony-black);
+  transition: width 0.4s var(--ease-out-expo);
+}
+
+.nav-link:hover {
+  color: var(--color-text-primary);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-menu-btn {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0.5rem;
+}
+
+.nav-menu-btn span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--color-sony-black);
+  transition: all 0.3s var(--ease-out-expo);
+  transform-origin: center;
+}
+
+.nav-menu-btn.active span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+
+.nav-menu-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-menu-btn.active span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  height: 100vh;
+  background: var(--color-bg);
+  z-index: calc(var(--z-nav) - 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  transition: right 0.6s var(--ease-out-expo);
+}
+
+.mobile-menu.active {
+  right: 0;
+}
+
+.mobile-menu-link {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.mobile-menu.active .mobile-menu-link {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mobile-menu.active .mobile-menu-link:nth-child(1) { transition-delay: 0.2s; }
+.mobile-menu.active .mobile-menu-link:nth-child(2) { transition-delay: 0.3s; }
+.mobile-menu.active .mobile-menu-link:nth-child(3) { transition-delay: 0.4s; }
+.mobile-menu.active .mobile-menu-link:nth-child(4) { transition-delay: 0.5s; }
+.mobile-menu.active .mobile-menu-link:nth-child(5) { transition-delay: 0.6s; }
+.mobile-menu.active .mobile-menu-link:nth-child(6) { transition-delay: 0.7s; }
+.mobile-menu.active .mobile-menu-link:nth-child(7) { transition-delay: 0.8s; }
+
+@media (max-width: 1024px) {
+  .nav-links { display: none; }
+  .nav-menu-btn { display: flex; }
+  .nav { padding: 1.2rem 1.5rem; }
+  .nav.scrolled { padding: 1rem 1.5rem; }
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+}
+
+.hero-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#heroCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+  z-index: 2;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  padding: 2rem;
+  max-width: 1000px;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  color: var(--color-accent-gold);
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroReveal 1s var(--ease-out-expo) 2.8s forwards;
+}
+
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--color-text-white);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: heroReveal 1s var(--ease-out-expo) 3s forwards;
+}
+
+.hero-title-accent {
+  color: var(--color-accent-gold);
+  display: inline-block;
+  position: relative;
+}
+
+.hero-title-accent::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--color-accent-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: lineGrow 0.8s var(--ease-out-expo) 3.8s forwards;
+}
+
+.hero-subtitle {
+  font-family: var(--font-sans);
+  font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+  font-weight: 300;
+  line-height: 2;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 700px;
+  margin: 0 auto 3rem;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroReveal 1s var(--ease-out-expo) 3.2s forwards;
+}
+
+.hero-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroReveal 1s var(--ease-out-expo) 3.4s forwards;
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.hero-stat-number {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 900;
+  color: var(--color-text-white);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.hero-stat-number .unit {
+  font-size: 0.5em;
+  font-weight: 300;
+  color: var(--color-accent-gold-light);
+}
+
+.hero-stat-label {
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+}
+
+.hero-stat-divider {
+  width: 1px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  opacity: 0;
+  animation: heroReveal 1s var(--ease-out-expo) 3.8s forwards;
+}
+
+.hero-scroll-text {
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.hero-scroll-line {
+  width: 1px;
+  height: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-scroll-line::before {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-accent-gold);
+  animation: scrollLine 2s var(--ease-in-out-cubic) infinite;
+}
+
+@keyframes heroReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lineGrow {
+  to { transform: scaleX(1); }
+}
+
+@keyframes scrollLine {
+  0% { top: -100%; }
+  50% { top: 100%; }
+  50.01% { top: -100%; }
+  100% { top: 100%; }
+}
+
+@media (max-width: 768px) {
+  .hero-stats {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .hero-stat-divider {
+    width: 40px;
+    height: 1px;
+  }
+}
+
+/* ============================================
+   SECTION COMMON STYLES
+   ============================================ */
+.section {
+  position: relative;
+  padding: 8rem 2rem;
+  overflow: hidden;
+}
+
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-narrow {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.section-eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: var(--color-accent-gold);
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.section-eyebrow::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: var(--color-accent-gold);
+}
+
+.section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.section-description {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 2;
+  color: var(--color-text-secondary);
+  margin-bottom: 3rem;
+}
+
+/* ============================================
+   REVEAL ANIMATIONS
+   ============================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s var(--ease-out-expo),
+              transform 0.8s var(--ease-out-expo);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-80px);
+  transition: opacity 0.8s var(--ease-out-expo),
+              transform 0.8s var(--ease-out-expo);
+}
+
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(80px);
+  transition: opacity 0.8s var(--ease-out-expo),
+              transform 0.8s var(--ease-out-expo);
+}
+
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.8s var(--ease-out-expo),
+              transform 0.8s var(--ease-out-expo);
+}
+
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.stagger-1 { transition-delay: 0.1s; }
+.stagger-2 { transition-delay: 0.2s; }
+.stagger-3 { transition-delay: 0.3s; }
+.stagger-4 { transition-delay: 0.4s; }
+.stagger-5 { transition-delay: 0.5s; }
+.stagger-6 { transition-delay: 0.6s; }
+
+/* ============================================
+   EXECUTIVE SUMMARY SECTION
+   ============================================ */
+.executive-summary {
+  background: var(--color-bg-warm);
+}
+
+.exec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.exec-left {
+  position: sticky;
+  top: 8rem;
+}
+
+.exec-quote-mark {
+  font-family: var(--font-serif);
+  font-size: 8rem;
+  font-weight: 900;
+  color: var(--color-accent-gold);
+  line-height: 0.8;
+  opacity: 0.3;
+  margin-bottom: -2rem;
+}
+
+.exec-highlight {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.8;
+  color: var(--color-text-primary);
+  border-left: 3px solid var(--color-accent-gold);
+  padding-left: 1.5rem;
+}
+
+.exec-right .exec-paragraph {
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 2;
+  color: var(--color-text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.exec-pillars {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.exec-pillar {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.4s var(--ease-out-expo);
+  position: relative;
+  overflow: hidden;
+}
+
+.exec-pillar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-accent-gold), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s var(--ease-out-expo);
+}
+
+.exec-pillar:hover::before {
+  transform: scaleX(1);
+}
+
+.exec-pillar:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px var(--color-shadow);
+  border-color: transparent;
+}
+
+.exec-pillar-number {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--color-accent-gold);
+  opacity: 0.3;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+.exec-pillar-title {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.exec-pillar-desc {
+  font-size: 0.8rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 1024px) {
+  .exec-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .exec-left {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .exec-pillars {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   MARKET SHARE SECTION
+   ============================================ */
+.market-share {
+  background: var(--color-bg);
+}
+
+.market-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.share-chart-container {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 24px;
+  padding: 3rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 4px 40px var(--color-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.share-chart-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(201, 168, 76, 0.05), transparent);
+  pointer-events: none;
+}
+
+.chart-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.chart-title {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.chart-legend {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.chart-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.chart-legend-dot.sony { background: var(--color-sony-black); }
+.chart-legend-dot.samsung { background: var(--color-accent-blue); }
+.chart-legend-dot.omnivision { background: var(--color-accent-gold); }
+
+.chart-area {
+  position: relative;
+  height: 400px;
+  margin-bottom: 1rem;
+}
+
+.chart-y-axis {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.chart-y-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  text-align: right;
+  padding-right: 10px;
+}
+
+.chart-grid {
+  position: absolute;
+  left: 50px;
+  top: 0;
+  right: 0;
+  height: 100%;
+}
+
+.chart-grid-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--color-border-light);
+}
+
+.chart-bars-wrapper {
+  position: absolute;
+  left: 70px;
+  top: 0;
+  right: 20px;
+  height: calc(100% - 30px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+}
+
+.chart-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+}
+
+.chart-bar {
+  width: 28px;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.6s var(--ease-out-expo);
+  position: relative;
+  cursor: pointer;
+  transform-origin: bottom;
+}
+
+.chart-bar.sony-bar {
+  background: linear-gradient(to top, #1a1a1a, #3a3a3a);
+}
+
+.chart-bar.samsung-bar {
+  background: linear-gradient(to top, var(--color-accent-blue), #5c7cff);
+}
+
+.chart-bar.omnivision-bar {
+  background: linear-gradient(to top, var(--color-accent-gold), var(--color-accent-gold-light));
+}
+
+.chart-bar:hover {
+  filter: brightness(1.2);
+  transform: scaleY(1.02);
+}
+
+.chart-bar-tooltip {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: var(--color-sony-black);
+  color: var(--color-text-white);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: transform 0.3s var(--ease-spring);
+  pointer-events: none;
+}
+
+.chart-bar:hover .chart-bar-tooltip {
+  transform: translateX(-50%) scale(1);
+}
+
+.chart-x-labels {
+  position: absolute;
+  left: 70px;
+  right: 20px;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+}
+
+.chart-x-label {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+/* Interactive Donut Chart */
+.donut-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  margin-top: 4rem;
+}
+
+.donut-chart-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-chart-svg {
+  width: 300px;
+  height: 300px;
+  transform: rotate(-90deg);
+}
+
+.donut-segment {
+  fill: none;
+  stroke-width: 40;
+  stroke-linecap: butt;
+  transition: all 0.6s var(--ease-out-expo);
+  cursor: pointer;
+}
+
+.donut-segment:hover {
+  stroke-width: 46;
+  filter: brightness(1.1);
+}
+
+.donut-center-text {
+  position: absolute;
+  text-align: center;
+}
+
+.donut-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.donut-info-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  transition: all 0.3s var(--ease-out-expo);
+}
+
+.donut-info-item:hover {
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 4px 20px var(--color-shadow);
+}
+
+.donut-info-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.donut-info-content {
+  flex: 1;
+}
+
+.donut-info-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.donut-info-value {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--color-text-primary);
+}
+
+.donut-info-value .unit {
+  font-size: 0.7em;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 768px) {
+  .donut-section {
+    grid-template-columns: 1fr;
+  }
+  .chart-area {
+    height: 300px;
+  }
+  .chart-bar {
+    width: 18px;
+  }
+  .share-chart-container {
+    padding: 1.5rem;
+  }
+}
+
+/* ============================================
+   MARKET SIZE TREND LINE CHART
+   ============================================ */
+.line-chart-container {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 24px;
+  padding: 3rem;
+  margin-top: 3rem;
+  box-shadow: 0 4px 40px var(--color-shadow);
+}
+
+.line-chart-svg {
+  width: 100%;
+  height: 300px;
+}
+
+.line-path {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.line-path-sony {
+  stroke: var(--color-sony-black);
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  transition: stroke-dashoffset 2s var(--ease-out-expo);
+}
+
+.line-path-sony.animated {
+  stroke-dashoffset: 0;
+}
+
+.line-dot {
+  fill: var(--color-bg-card);
+  stroke-width: 3;
+  cursor: pointer;
+  transition: r 0.3s var(--ease-spring);
+}
+
+.line-dot:hover {
+  r: 8;
+}
+
+/* ============================================
+   TABLE SECTION
+   ============================================ */
+.data-table-wrapper {
+  overflow-x: auto;
+  margin: 3rem 0;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-light);
+  box-shadow: 0 4px 30px var(--color-shadow);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.data-table thead {
+  background: var(--color-sony-black);
+  color: var(--color-text-white);
+}
+
+.data-table thead th {
+  padding: 1.2rem 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: center;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.data-table thead th:first-child {
+  border-radius: 16px 0 0 0;
+  text-align: left;
+}
+
+.data-table thead th:last-child {
+  border-radius: 0 16px 0 0;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--color-border-light);
+  transition: background 0.3s;
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-bg-cool);
+}
+
+.data-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.data-table tbody td {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.data-table tbody td:first-child {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.data-table .highlight-cell {
+  font-weight: 700;
+  color: var(--color-sony-black);
+  position: relative;
+}
+
+.data-table .highlight-cell::after {
+  content: '%';
+  font-size: 0.7em;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+  margin-left: 2px;
+}
+
+.table-note {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  margin-top: 1rem;
+  padding: 0 0.5rem;
+}
+
+/* ============================================
+   TECHNOLOGY SECTION
+   ============================================ */
+.technology-section {
+  background: var(--color-bg-cool);
+  position: relative;
+}
+
+.technology-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.tech-timeline {
+  position: relative;
+  padding-left: 60px;
+}
+
+.tech-timeline::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--color-accent-gold), var(--color-border-light));
+}
+
+.tech-timeline-item {
+  position: relative;
+  margin-bottom: 4rem;
+  padding: 2.5rem;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 20px;
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.tech-timeline-item:hover {
+  box-shadow: 0 20px 60px var(--color-shadow);
+  border-color: var(--color-accent-gold);
+  transform: translateX(10px);
+}
+
+.tech-timeline-dot {
+  position: absolute;
+  left: -48px;
+  top: 2.5rem;
+  width: 16px;
+  height: 16px;
+  background: var(--color-accent-gold);
+  border: 3px solid var(--color-bg-cool);
+  border-radius: 50%;
+  z-index: 1;
+  transition: all 0.3s var(--ease-spring);
+}
+
+.tech-timeline-item:hover .tech-timeline-dot {
+  transform: scale(1.3);
+  box-shadow: 0 0 0 6px rgba(201, 168, 76, 0.2);
+}
+
+.tech-timeline-year {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--color-accent-gold);
+  margin-bottom: 0.75rem;
+}
+
+.tech-timeline-title {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.tech-timeline-desc {
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--color-text-secondary);
+}
+
+.tech-spec-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  background: var(--color-bg-cool);
+  border: 1px solid var(--color-border-light);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-top: 1rem;
+  margin-right: 0.5rem;
+}
+
+.tech-spec-badge .badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent-gold);
+  border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+  .tech-timeline {
+    padding-left: 30px;
+  }
+  .tech-timeline::before {
+    left: 10px;
+  }
+  .tech-timeline-dot {
+    left: -26px;
+    width: 12px;
+    height: 12px;
+  }
+  .tech-timeline-item {
+    padding: 1.5rem;
+  }
+}
+
+/* ============================================
+   TECHNOLOGY DEEP DIVE CARDS
+   ============================================ */
+.tech-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 4rem;
+}
+
+.tech-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 20px;
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s var(--ease-out-expo);
+}
+
+.tech-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(201, 168, 76, 0.05), transparent);
+  animation: techCardRotate 8s linear infinite;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.tech-card:hover::before {
+  opacity: 1;
+}
+
+.tech-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 80px var(--color-shadow-deep);
+  border-color: var(--color-accent-gold);
+}
+
+@keyframes techCardRotate {
+  to { transform: rotate(360deg); }
+}
+
+.tech-card-icon {
+  width: 56px;
+  height: 56px;
+  background: var(--color-bg-cool);
+  border: 1px solid var(--color-border-light);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.4s var(--ease-out-expo);
+  position: relative;
+  z-index: 1;
+}
+
+.tech-card:hover .tech-card-icon {
+  background: var(--color-sony-black);
+  border-color: var(--color-sony-black);
+  transform: scale(1.05) rotate(-5deg);
+}
+
+.tech-card-title {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.tech-card-text {
+  font-size: 0.85rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+.tech-card-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.tech-card-spec {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  background: var(--color-bg-cool);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-light);
+}
+
+@media (max-width: 1024px) {
+  .tech-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .tech-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   FAB & MANUFACTURING SECTION
+   ============================================ */
+.fab-section {
+  background: var(--color-bg);
+}
+
+.fab-map-container {
+  position: relative;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 24px;
+  padding: 3rem;
+  margin: 3rem 0;
+  box-shadow: 0 4px 40px var(--color-shadow);
+  min-height: 450px;
+  overflow: hidden;
+}
+
+.fab-map-title {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: var(--color-text-primary);
+}
+
+.fab-map-svg {
+  width: 100%;
+  height: 350px;
+}
+
+.fab-location-pin {
+  cursor: pointer;
+  transition: all 0.3s var(--ease-spring);
+}
+
+.fab-location-pin:hover {
+  transform: scale(1.2);
+}
+
+.fab-location-pulse {
+  animation: locationPulse 2s ease-in-out infinite;
+}
+
+@keyframes locationPulse {
+  0%, 100% { r: 6; opacity: 0.6; }
+  50% { r: 12; opacity: 0; }
+}
+
+.fab-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.fab-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.4s var(--ease-out-expo);
+  position: relative;
+}
+
+.fab-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  background: var(--color-accent-gold);
+  border-radius: 0 0 16px 16px;
+  transition: width 0.4s var(--ease-out-expo);
+}
+
+.fab-card:hover::after {
+  width: 100%;
+}
+
+.fab-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px var(--color-shadow);
+}
+
+.fab-card-location {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--color-accent-gold);
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.fab-card-name {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.fab-card-desc {
+  font-size: 0.8rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+.fab-card-badge {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.3rem 0.75rem;
+  background: var(--color-bg-cool);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .fab-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   INVESTMENT & FINANCIALS
+   ============================================ */
+.financials-section {
+  background: var(--color-bg-dark);
+  color: var(--color-text-white);
+}
+
+.financials-section .section-eyebrow {
+  color: var(--color-accent-gold);
+}
+
+.financials-section .section-eyebrow::before {
+  background: var(--color-accent-gold);
+}
+
+.financials-section .section-title {
+  color: var(--color-text-white);
+}
+
+.financials-section .section-description {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.finance-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.finance-kpi {
+  text-align: center;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.finance-kpi:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--color-accent-gold);
+  transform: translateY(-4px);
+}
+
+.finance-kpi-value {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--color-text-white);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.finance-kpi-value .small {
+  font-size: 0.4em;
+  font-weight: 300;
+  color: var(--color-accent-gold-light);
+}
+
+.finance-kpi-label {
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.finance-table-dark {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+}
+
+.finance-table-dark thead th {
+  padding: 1rem 1.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.finance-table-dark thead th:first-child {
+  text-align: left;
+}
+
+.finance-table-dark tbody td {
+  padding: 1.2rem 1.5rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.finance-table-dark tbody td:first-child {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-white);
+}
+
+.finance-table-dark tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.finance-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 250px;
+  padding: 2rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 3rem 0;
+}
+
+.finance-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.finance-bar-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 60px;
+}
+
+.finance-bar-revenue {
+  width: 100%;
+  background: linear-gradient(to top, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+  border-radius: 4px 4px 0 0;
+  transition: all 0.6s var(--ease-out-expo);
+  position: relative;
+}
+
+.finance-bar-profit {
+  width: 60%;
+  background: linear-gradient(to top, var(--color-accent-gold), var(--color-accent-gold-light));
+  border-radius: 4px 4px 0 0;
+  transition: all 0.6s var(--ease-out-expo);
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+}
+
+.finance-bar-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 1024px) {
+  .finance-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .finance-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .finance-kpi-value {
+    font-size: 2rem;
+  }
+}
+
+/* ============================================
+   CUSTOMER & SUPPLY CHAIN
+   ============================================ */
+.customer-section {
+  background: var(--color-bg-warm);
+}
+
+.customer-composition {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  margin: 3rem 0;
+}
+
+.composition-visual {
+  position: relative;
+}
+
+.composition-ring {
+  width: 280px;
+  height: 280px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.composition-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.composition-ring-segment {
+  fill: none;
+  stroke-width: 30;
+  transition: all 0.6s var(--ease-out-expo);
+  cursor: pointer;
+}
+
+.composition-ring-segment:hover {
+  stroke-width: 36;
+}
+
+.composition-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.composition-center-value {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--color-text-primary);
+}
+
+.composition-center-label {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.1em;
+}
+
+.composition-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.composition-item {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.2rem 1.5rem;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  transition: all 0.3s var(--ease-out-expo);
+}
+
+.composition-item:hover {
+  box-shadow: 0 10px 40px var(--color-shadow);
+  transform: translateX(8px);
+}
+
+.composition-item-indicator {
+  width: 4px;
+  height: 40px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.composition-item-info {
+  flex: 1;
+}
+
+.composition-item-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.composition-item-desc {
+  font-size: 0.75rem;
+  font-weight: 300;
+  color: var(--color-text-tertiary);
+}
+
+.composition-item-percentage {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 768px) {
+  .customer-composition {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   RISK & GEOPOLITICS SECTION
+   ============================================ */
+.risk-section {
+  background: var(--color-bg);
+}
+
+.risk-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin: 3rem 0;
+}
+
+.risk-card {
+  padding: 2.5rem;
+  border-radius: 20px;
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-card);
+  transition: all 0.4s var(--ease-out-expo);
+  position: relative;
+  overflow: hidden;
+}
+
+.risk-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 0;
+  transition: height 0.4s var(--ease-out-expo);
+}
+
+.risk-card:hover::before {
+  height: 100%;
+}
+
+.risk-card.risk-high::before { background: #E53935; }
+.risk-card.risk-medium::before { background: #FB8C00; }
+.risk-card.risk-low::before { background: #43A047; }
+
+.risk-card:hover {
+  box-shadow: 0 20px 60px var(--color-shadow);
+  transform: translateY(-4px);
+}
+
+.risk-card-severity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+.risk-high .risk-card-severity {
+  background: rgba(229, 57, 53, 0.1);
+  color: #E53935;
+}
+
+.risk-medium .risk-card-severity {
+  background: rgba(251, 140, 0, 0.1);
+  color: #FB8C00;
+}
+
+.risk-low .risk-card-severity {
+  background: rgba(67, 160, 71, 0.1);
+  color: #43A047;
+}
+
+.risk-card-title {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.risk-card-desc {
+  font-size: 0.85rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+}
+
+.risk-card-example {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-cool);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  border-left: 3px solid var(--color-accent-gold);
+}
+
+@media (max-width: 768px) {
+  .risk-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   FUTURE OUTLOOK SECTION
+   ============================================ */
+.future-section {
+  background: linear-gradient(135deg, #0A0A0A 0%, #1A1A2E 50%, #0A0A0A 100%);
+  color: var(--color-text-white);
+  position: relative;
+  overflow: hidden;
+}
+
+.future-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(201, 168, 76, 0.04), transparent 50%),
+              radial-gradient(ellipse at 70% 50%, rgba(0, 112, 209, 0.03), transparent 50%);
+  animation: futureGlow 15s ease-in-out infinite alternate;
+}
+
+@keyframes futureGlow {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-5%, 5%); }
+}
+
+.future-section .section-title {
+  color: var(--color-text-white);
+}
+
+.future-section .section-description {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.future-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.future-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2.5rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.5s var(--ease-out-expo);
+  position: relative;
+  overflow: hidden;
+}
+
+.future-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(201, 168, 76, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.future-card:hover::before {
+  opacity: 1;
+}
+
+.future-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--color-accent-gold);
+  transform: translateY(-8px);
+}
+
+.future-card-icon {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.future-card-growth {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(67, 160, 71, 0.15);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #66BB6A;
+  margin-bottom: 1rem;
+}
+
+.future-card-title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text-white);
+  margin-bottom: 0.75rem;
+}
+
+.future-card-text {
+  font-size: 0.85rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.future-market-projection {
+  margin-top: 4rem;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.projection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.projection-title {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text-white);
+}
+
+.projection-cagr {
+  padding: 0.4rem 1rem;
+  background: rgba(201, 168, 76, 0.15);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent-gold);
+}
+
+@media (max-width: 1024px) {
+  .future-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .future-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  background: var(--color-sony-black);
+  color: var(--color-text-white);
+  padding: 5rem 2rem 3rem;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 4rem;
+}
+
+.footer-brand {
+  max-width: 300px;
+}
+
+.footer-brand-logo {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-brand-desc {
+  font-size: 0.8rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer-column-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 1.5rem;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-link {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.3s;
+  cursor: pointer;
+}
+
+.footer-link:hover {
+  color: var(--color-accent-gold);
+}
+
+.footer-bottom {
+  padding-top: 3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-copyright {
+  font-size: 0.75rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.footer-source-note {
+  font-size: 0.7rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.2);
+  max-width: 500px;
+  text-align: right;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .footer-top {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+  .footer-source-note {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-top {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   FLOATING PARTICLES
+   ============================================ */
+.particle {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: var(--color-accent-gold);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 0;
+}
+
+/* ============================================
+   COUNTER ANIMATION
+   ============================================ */
+.count-up {
+  display: inline-block;
+}
+
+/* ============================================
+   BACK TO TOP
+   ============================================ */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 48px;
+  height: 48px;
+  background: var(--color-sony-black);
+  color: var(--color-text-white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.4s var(--ease-out-expo);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  background: var(--color-accent-gold);
+  transform: translateY(-4px);
+}
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-accent-gold), var(--color-sony-blue));
+  z-index: calc(var(--z-nav) + 1);
+  transition: width 0.1s linear;
+}
+
+/* ============================================
+   SENSOR ARCHITECTURE DIAGRAM
+   ============================================ */
+.arch-diagram {
+  margin: 3rem 0;
+  padding: 3rem;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 24px;
+  box-shadow: 0 4px 40px var(--color-shadow);
+}
+
+.arch-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.arch-layer {
+  padding: 1.5rem 2rem;
+  text-align: center;
+  position: relative;
+  transition: all 0.4s var(--ease-out-expo);
+  cursor: pointer;
+}
+
+.arch-layer:hover {
+  transform: scale(1.03);
+  z-index: 2;
+}
+
+.arch-layer-name {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-white);
+  margin-bottom: 0.3rem;
+}
+
+.arch-layer-desc {
+  font-size: 0.7rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.arch-layer-1 {
+  background: linear-gradient(135deg, #2C3E50, #3498DB);
+  border-radius: 16px 16px 0 0;
+}
+
+.arch-layer-2 {
+  background: linear-gradient(135deg, #1A1A2E, #16213E);
+}
+
+.arch-layer-3 {
+  background: linear-gradient(135deg, #0F0F1A, #1A1A2E);
+}
+
+.arch-layer-4 {
+  background: linear-gradient(135deg, #C9A84C, #D4A843);
+  border-radius: 0 0 16px 16px;
+}
+
+.arch-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  position: relative;
+}
+
+.arch-connector::before {
+  content: '';
+  width: 2px;
+  height: 100%;
+  background: var(--color-accent-gold);
+}
+
+.arch-connector-label {
+  position: absolute;
+  right: -120px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-accent-gold);
+  white-space: nowrap;
+}
+
+/* ============================================
+   ANIMATED NUMBER COUNTER
+   ============================================ */
+.animated-counter {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   COMPARISON SECTION
+   ============================================ */
+.comparison-section {
+  background: var(--color-bg);
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  margin: 3rem 0;
+}
+
+.comparison-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.comparison-card.primary {
+  border-color: var(--color-sony-black);
+  box-shadow: 0 10px 40px var(--color-shadow);
+  transform: scale(1.05);
+}
+
+.comparison-card:hover:not(.primary) {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px var(--color-shadow);
+}
+
+.comparison-card-rank {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.comparison-card.primary .comparison-card-rank {
+  color: var(--color-accent-gold);
+}
+
+.comparison-card-name {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.comparison-card-share {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--color-text-primary);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.comparison-card-share .pct {
+  font-size: 0.5em;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+}
+
+.comparison-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-cool);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.comparison-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1.5s var(--ease-out-expo);
+  width: 0;
+}
+
+.comparison-bar-fill.sony { background: var(--color-sony-black); }
+.comparison-bar-fill.samsung { background: var(--color-accent-blue); }
+.comparison-bar-fill.omnivision { background: var(--color-accent-gold); }
+.comparison-bar-fill.onsemi { background: #43A047; }
+.comparison-bar-fill.st { background: #AB47BC; }
+
+@media (max-width: 1024px) {
+  .comparison-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .comparison-card.primary {
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .comparison-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ============================================
+   ASP SECTION
+   ============================================ */
+.asp-highlight {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 3rem 0;
+}
+
+.asp-card {
+  padding: 2.5rem;
+  border-radius: 20px;
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-card);
+  text-align: center;
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.asp-card:hover {
+  box-shadow: 0 20px 60px var(--color-shadow);
+  transform: translateY(-4px);
+}
+
+.asp-card-value {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--color-text-primary);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.asp-card-unit {
+  font-size: 0.6em;
+  font-weight: 300;
+  color: var(--color-accent-gold);
+}
+
+.asp-card-label {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.asp-card-desc {
+  font-size: 0.75rem;
+  font-weight: 300;
+  color: var(--color-text-tertiary);
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .asp-highlight {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   SMOOTH PARALLAX CONTAINERS
+   ============================================ */
+.parallax-container {
+  perspective: 1000px;
+}
+
+.parallax-slow {
+  will-change: transform;
+}
+
+.parallax-fast {
+  will-change: transform;
+}
+
+/* ============================================
+   SONY BRANDING ACCENT
+   ============================================ */
+.sony-accent-line {
+  width: 60px;
+  height: 3px;
+  background: var(--color-accent-gold);
+  margin-bottom: 2rem;
+}
+
+.sony-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border-light), transparent);
+  margin: 4rem 0;
+}
+
+/* ============================================
+   RESPONSIVE GLOBAL
+   ============================================ */
+@media (max-width: 768px) {
+  .section {
+    padding: 5rem 1.5rem;
+  }
+}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div class="page-loader" id="pageLoader">
+  <div class="loader-logo">SONY SENSOR</div>
+  <div class="loader-bar-container">
+    <div class="loader-bar"></div>
+  </div>
+  <div class="loader-percentage" id="loaderPercentage">Loading...</div>
+</div>
+
+<!-- Reading Progress Bar -->
+<div class="reading-progress" id="readingProgress"></div>
+
+<!-- Cursor -->
+<div class="cursor-follower" id="cursorFollower"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- Navigation -->
+<nav class="nav" id="mainNav">
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-icon">S</span>
+    SONY SENSOR
+  </a>
+  <ul class="nav-links">
+    <li><a href="#summary" class="nav-link">概要</a></li>
+    <li><a href="#market" class="nav-link">市場シェア</a></li>
+    <li><a href="#technology" class="nav-link">技術</a></li>
+    <li><a href="#manufacturing" class="nav-link">製造</a></li>
+    <li><a href="#financials" class="nav-link">収益</a></li>
+    <li><a href="#customers" class="nav-link">顧客</a></li>
+    <li><a href="#future" class="nav-link">将来展望</a></li>
+  </ul>
+  <button class="nav-menu-btn" id="mobileMenuBtn" aria-label="メニュー">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#summary" class="mobile-menu-link" onclick="closeMobileMenu()">概要</a>
+  <a href="#market" class="mobile-menu-link" onclick="closeMobileMenu()">市場シェア</a>
+  <a href="#technology" class="mobile-menu-link" onclick="closeMobileMenu()">技術</a>
+  <a href="#manufacturing" class="mobile-menu-link" onclick="closeMobileMenu()">製造</a>
+  <a href="#financials" class="mobile-menu-link" onclick="closeMobileMenu()">収益</a>
+  <a href="#customers" class="mobile-menu-link" onclick="closeMobileMenu()">顧客</a>
+  <a href="#future" class="mobile-menu-link" onclick="closeMobileMenu()">将来展望</a>
+</div>
+
+<!-- ============================================
+     HERO SECTION
+     ============================================ -->
+<section class="hero" id="hero">
+  <div class="hero-canvas-container">
+    <canvas id="heroCanvas"></canvas>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">CMOS Image Sensor — World No.1</div>
+    <h1 class="hero-title">
+      ソニーの<br>
+      <span class="hero-title-accent">イメージセンサー</span>が<br>
+      世界を制す理由
+    </h1>
+    <p class="hero-subtitle">
+      高付加価値アーキテクチャ、積層技術、そして巨大投資。<br>
+      20年にわたる戦略的決断が築いた、揺るぎないNo.1の全貌。
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-number"><span class="count-up" data-target="50">0</span><span class="unit">%</span></div>
+        <div class="hero-stat-label">市場シェア（2024年）</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-number"><span class="unit">$</span><span class="count-up" data-target="232">0</span><span class="unit">億</span></div>
+        <div class="hero-stat-label">CIS市場規模（2024年）</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-number"><span class="count-up" data-target="9300">0</span><span class="unit">億円</span></div>
+        <div class="hero-stat-label">3年間設備投資</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll-indicator">
+    <span class="hero-scroll-text">Scroll</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- ============================================
+     EXECUTIVE SUMMARY
+     ============================================ -->
+<section class="section executive-summary" id="summary">
+  <div class="section-inner">
+    <div class="exec-grid">
+      <div class="exec-left reveal">
+        <div class="section-eyebrow">Executive Summary</div>
+        <div class="exec-quote-mark">"</div>
+        <p class="exec-highlight">
+          ソニーセミコンダクタソリューションズが担うCMOSイメージセンサー事業は、
+          売上高ベースで世界シェア約50%を占め、
+          技術・量産・顧客基盤の三位一体で
+          他社を圧倒する。
+        </p>
+      </div>
+      <div class="exec-right">
+        <p class="exec-paragraph reveal stagger-1">
+          ソニーの世界シェア1位の根本要因は、単なる「センサー性能」ではなく、顧客製品の差別化——カメラ体験、暗所撮影、動画、高速処理、3D/AI——へ直結する"高付加価値"を作れる撮像アーキテクチャと量産実装力にある。
+        </p>
+        <p class="exec-paragraph reveal stagger-2">
+          モバイルを中心に拡大した需要波（複眼化・大型化・高画素化・動画性能）に対して、積層化・高速読出し・低ノイズ・高ダイナミックレンジを同時に前進させる技術ロードマップが競争力の源泉となっている。
+        </p>
+        <p class="exec-paragraph reveal stagger-3">
+          2020年に40%へ一時低下したシェアは、2023年に45%、2024年には「50%近く」まで再拡大。高付加価値戦略の正しさを証明する軌跡である。
+        </p>
+        <div class="exec-pillars reveal stagger-4">
+          <div class="exec-pillar">
+            <div class="exec-pillar-number">01</div>
+            <div class="exec-pillar-title">高付加価値アーキテクチャ</div>
+            <div class="exec-pillar-desc">積層・BSI・Cu-Cu接合などの差別化技術で高ASPを実現</div>
+          </div>
+          <div class="exec-pillar">
+            <div class="exec-pillar-number">02</div>
+            <div class="exec-pillar-title">技術ロードマップ</div>
+            <div class="exec-pillar-desc">積層化→3層→2層トランジスタピクセルへの一貫した進化</div>
+          </div>
+          <div class="exec-pillar">
+            <div class="exec-pillar-number">03</div>
+            <div class="exec-pillar-title">巨大投資と供給信頼性</div>
+            <div class="exec-pillar-desc">200mm/300mm、複数拠点分散、3年で9,300億円投資</div>
+          </div>
+          <div class="exec-pillar">
+            <div class="exec-pillar-number">04</div>
+            <div class="exec-pillar-title">広い顧客基盤と用途拡張</div>
+            <div class="exec-pillar-desc">Apple等トップ顧客＋車載・産業・セキュリティへ展開</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     MARKET SHARE SECTION
+     ============================================ -->
+<section class="section market-share" id="market">
+  <div class="section-inner">
+    <div class="market-header reveal">
+      <div class="section-eyebrow" style="justify-content: center;">Market Share</div>
+      <h2 class="section-title" style="text-align: center;">CIS市場シェア推移</h2>
+      <p class="section-description" style="text-align: center; max-width: 700px; margin: 0 auto;">
+        Yole Intelligence等の調査データに基づく、売上高ベースのCMOSイメージセンサー市場における主要企業のシェア推移。ソニーは2015年の35%から2024年の約50%へと着実にシェアを拡大してきた。
+      </p>
+    </div>
+
+    <!-- 2023年シェア比較カード -->
+    <div class="comparison-grid reveal" id="comparisonGrid">
+      <div class="comparison-card primary">
+        <div class="comparison-card-rank">No.1</div>
+        <div class="comparison-card-name">Sony</div>
+        <div class="comparison-card-share">45<span class="pct">%</span></div>
+        <div class="comparison-bar"><div class="comparison-bar-fill sony" data-width="90"></div></div>
+      </div>
+      <div class="comparison-card">
+        <div class="comparison-card-rank">No.2</div>
+        <div class="comparison-card-name">Samsung</div>
+        <div class="comparison-card-share">19<span class="pct">%</span></div>
+        <div class="comparison-bar"><div class="comparison-bar-fill samsung" data-width="38"></div></div>
+      </div>
+      <div class="comparison-card">
+        <div class="comparison-card-rank">No.3</div>
+        <div class="comparison-card-name">OmniVision</div>
+        <div class="comparison-card-share">11<span class="pct">%</span></div>
+        <div class="comparison-bar"><div class="comparison-bar-fill omnivision" data-width="22"></div></div>
+      </div>
+      <div class="comparison-card">
+        <div class="comparison-card-rank">No.4</div>
+        <div class="comparison-card-name">onsemi</div>
+        <div class="comparison-card-share">6<span class="pct">%</span></div>
+        <div class="comparison-bar"><div class="comparison-bar-fill onsemi" data-width="12"></div></div>
+      </div>
+      <div class="comparison-card">
+        <div class="comparison-card-rank">No.5</div>
+        <div class="comparison-card-name">STMicro</div>
+        <div class="comparison-card-share">5<span class="pct">%</span></div>
+        <div class="comparison-bar"><div class="comparison-bar-fill st" data-width="10"></div></div>
+      </div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="share-chart-container reveal">
+      <div class="chart-title-bar">
+        <div class="chart-title">CIS売上高シェア推移（上位3社）</div>
+        <div class="chart-legend">
+          <div class="chart-legend-item"><span class="chart-legend-dot sony"></span>Sony</div>
+ <div class="chart-legend-item"><span class="chart-legend-dot samsung"></span>Samsung</div>
+          <div class="chart-legend-item"><span class="chart-legend-dot omnivision"></span>OmniVision</div>
+        </div>
+      </div>
+      <div class="chart-area" id="barChartArea">
+        <!-- Y軸 -->
+        <div class="chart-y-axis">
+          <span class="chart-y-label">50%</span>
+          <span class="chart-y-label">40%</span>
+          <span class="chart-y-label">30%</span>
+          <span class="chart-y-label">20%</span>
+          <span class="chart-y-label">10%</span>
+          <span class="chart-y-label">0%</span>
+        </div>
+        <!-- Grid Lines -->
+        <div class="chart-grid">
+          <div class="chart-grid-line" style="top: 0%;"></div>
+          <div class="chart-grid-line" style="top: 20%;"></div>
+          <div class="chart-grid-line" style="top: 40%;"></div>
+          <div class="chart-grid-line" style="top: 60%;"></div>
+          <div class="chart-grid-line" style="top: 80%;"></div>
+          <div class="chart-grid-line" style="top: 100%;"></div>
+        </div>
+        <!-- Bars -->
+        <div class="chart-bars-wrapper" id="chartBarsWrapper">
+          <!-- 2016 -->
+          <div class="chart-bar-group">
+            <div class="chart-bars">
+              <div class="chart-bar sony-bar" data-height="84" style="height:0%"><span class="chart-bar-tooltip">42%</span></div>
+              <div class="chart-bar samsung-bar" data-height="36" style="height:0%"><span class="chart-bar-tooltip">18%</span></div>
+              <div class="chart-bar omnivision-bar" data-height="24" style="height:0%"><span class="chart-bar-tooltip">12%</span></div>
+            </div>
+          </div>
+          <!-- 2017 -->
+          <div class="chart-bar-group">
+            <div class="chart-bars">
+              <div class="chart-bar sony-bar" data-height="84" style="height:0%"><span class="chart-bar-tooltip">42%</span></div>
+              <div class="chart-bar samsung-bar" data-height="40" style="height:0%"><span class="chart-bar-tooltip">20%</span></div>
+              <div class="chart-bar omnivision-bar" data-height="22" style="height:0%"><span class="chart-bar-tooltip">11%</span></div>
+            </div>
+          </div>
+          <!-- 2020 -->
+          <div class="chart-bar-group">
+            <div class="chart-bars">
+              <div class="chart-bar sony-bar" data-height="80" style="height:0%"><span class="chart-bar-tooltip">40%</span></div>
+              <div class="chart-bar samsung-bar" data-height="44" style="height:0%"><span class="chart-bar-tooltip">22%</span></div>
+              <div class="chart-bar omnivision-bar" data-height="22" style="height:0%"><span class="chart-bar-tooltip">11%</span></div>
+            </div>
+          </div>
+          <!-- 2022 -->
+          <div class="chart-bar-group">
+            <div class="chart-bars">
+              <div class="chart-bar sony-bar" data-height="84" style="height:0%"><span class="chart-bar-tooltip">42%</span></div>
+              <div class="chart-bar samsung-bar" data-height="38" style="height:0%"><span class="chart-bar-tooltip">19%</span></div>
+              <div class="chart-bar omnivision-bar" data-height="22" style="height:0%"><span class="chart-bar-tooltip">11%</span></div>
+            </div>
+          </div>
+          <!-- 2023 -->
+          <div class="chart-bar-group">
+            <div class="chart-bars">
+              <div class="chart-bar sony-bar" data-height="90" style="height:0%"><span class="chart-bar-tooltip">45%</span></div>
+              <div class="chart-bar samsung-bar" data-height="38" style="height:0%"><span class="chart-bar-tooltip">19%</span></div>
+              <div class="chart-bar omnivision-bar" data-height="22" style="height:0%"><span class="chart-bar-tooltip">11%</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- X Labels -->
+        <div class="chart-x-labels">
+          <span class="chart-x-label">2016</span>
+          <span class="chart-x-label">2017</span>
+          <span class="chart-x-label">2020</span>
+          <span class="chart-x-label">2022</span>
+          <span class="chart-x-label">2023</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donut Chart: 2023 Market -->
+    <div class="donut-section reveal">
+      <div class="donut-chart-wrapper">
+        <div class="composition-ring">
+          <svg viewBox="0 0 200 200">
+            <circle class="donut-segment" cx="100" cy="100" r="70" stroke="#1A1A1A" stroke-dasharray="197.92 241.08" stroke-dashoffset="0"></circle>
+            <circle class="donut-segment" cx="100" cy="100" r="70" stroke="#1428A0" stroke-dasharray="83.5 355.5" stroke-dashoffset="-197.92"></circle>
+            <circle class="donut-segment" cx="100" cy="100" r="70" stroke="#C9A84C" stroke-dasharray="48.38 390.62" stroke-dashoffset="-281.42"></circle>
+            <circle class="donut-segment" cx="100" cy="100" r="70" stroke="#43A047" stroke-dasharray="26.39 412.61" stroke-dashoffset="-329.8"></circle>
+            <circle class="donut-segment" cx="100" cy="100" r="70" stroke="#AB47BC" stroke-dasharray="21.99 417.01" stroke-dashoffset="-356.19"></circle>
+            <circle class="donut-segment" cx="100" cy="100" r="70" stroke="#E0E0E0" stroke-dasharray="61.81 377.19" stroke-dashoffset="-378.18"></circle>
+          </svg>
+          <div class="composition-center">
+            <div class="composition-center-value">$218<span style="font-size:0.5em;font-weight:300;color:var(--color-text-tertiary);">億</span></div>
+            <div class="composition-center-label">2023年 市場規模</div>
+          </div>
+        </div>
+      </div>
+      <div class="donut-info">
+        <div class="donut-info-item">
+          <div class="donut-info-color" style="background:#1A1A1A;"></div>
+          <div class="donut-info-content">
+            <div class="donut-info-name">Sony</div>
+          </div>
+          <div class="donut-info-value">45<span class="unit">%</span></div>
+        </div>
+        <div class="donut-info-item">
+          <div class="donut-info-color" style="background:#1428A0;"></div>
+          <div class="donut-info-content">
+            <div class="donut-info-name">Samsung Electronics</div>
+          </div>
+          <div class="donut-info-value">19<span class="unit">%</span></div>
+        </div>
+        <div class="donut-info-item">
+          <div class="donut-info-color" style="background:#C9A84C;"></div>
+          <div class="donut-info-content">
+            <div class="donut-info-name">OmniVision</div>
+          </div>
+          <div class="donut-info-value">11<span class="unit">%</span></div>
+        </div>
+        <div class="donut-info-item">
+          <div class="donut-info-color" style="background:#43A047;"></div>
+          <div class="donut-info-content">
+            <div class="donut-info-name">onsemi</div>
+          </div>
+          <div class="donut-info-value">6<span class="unit">%</span></div>
+        </div>
+        <div class="donut-info-item">
+          <div class="donut-info-color" style="background:#AB47BC;"></div>
+          <div class="donut-info-content">
+            <div class="donut-info-name">STMicroelectronics</div>
+          </div>
+          <div class="donut-info-value">5<span class="unit">%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="data-table-wrapper reveal">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>年</th>
+            <th>市場規模 (US$B)</th>
+            <th>Sony</th>
+            <th>Samsung</th>
+            <th>OmniVision</th>
+            <th>onsemi</th>
+            <th>ST</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2015</td>
+            <td>10.3</td>
+            <td class="highlight-cell">35</td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>2016</td>
+            <td>11.6</td>
+            <td class="highlight-cell">42</td>
+            <td>18%</td>
+            <td>12%</td>
+            <td>6%</td>
+            <td>3%</td>
+          </tr>
+          <tr>
+            <td>2017</td>
+            <td>13.9</td>
+            <td class="highlight-cell">42</td>
+            <td>20%</td>
+            <td>11%</td>
+            <td>5%</td>
+            <td>5%</td>
+          </tr>
+          <tr>
+            <td>2019</td>
+            <td>19.3</td>
+            <td class="highlight-cell">42</td>
+            <td>21%</td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>2020</td>
+            <td>20.7</td>
+            <td class="highlight-cell">40</td>
+            <td>22%</td>
+            <td>11%</td>
+            <td>4%</td>
+            <td>6%</td>
+          </tr>
+          <tr>
+            <td>2022</td>
+            <td>—</td>
+            <td class="highlight-cell">42</td>
+            <td>19%</td>
+            <td>11%</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>2023</td>
+            <td>21.79</td>
+            <td class="highlight-cell">45</td>
+            <td>19%</td>
+            <td>11%</td>
+            <td>6%</td>
+            <td>5%</td>
+          </tr>
+          <tr>
+            <td>2024</td>
+            <td>23.2</td>
+            <td class="highlight-cell" style="color:var(--color-accent-gold);">~50</td>
+            <td colspan="4" style="font-size:0.8rem;color:var(--color-text-tertiary);">企業別詳細 非公開</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note reveal">※ 出所：Yole Intelligence 調査の引用記事より再構成。シェアは売上高ベース。2024年はソニー「50%近く」のみ明示（ベンダー別の厳密値は非公開）。スマホ向けに限ると55%超の四半期もある（TechInsights分析）。</p>
+
+    <!-- ASP Section -->
+    <div class="sony-divider"></div>
+    <div class="reveal" style="text-align:center;margin-bottom:2rem;">
+      <div class="section-eyebrow" style="justify-content:center;">Average Selling Price</div>
+      <h3 class="section-title" style="font-size:1.6rem;">市場ASPの上昇がソニーの追い風</h3>
+    </div>
+    <div class="asp-highlight reveal">
+      <div class="asp-card">
+        <div class="asp-card-value">$3.20<span class="asp-card-unit">/個</span></div>
+        <div class="asp-card-label">2023年 市場平均ASP</div>
+        <div class="asp-card-desc">2023年市場規模（約217.9億ドル）÷ 出荷台数（68億ユニット）から算出。2022年に初めて3ドルを超え、以降も3ドル以上で推移。</div>
+      </div>
+      <div class="asp-card">
+        <div class="asp-card-value">68→86<span class="asp-card-unit">億個</span></div>
+        <div class="asp-card-label">出荷台数（2023→2029予測）</div>
+        <div class="asp-card-desc">Yole予測による2029年の出荷台数。市場規模は286億ドルへ成長見込み（CAGR 4.7%）。高単価品比率の高いソニーに有利な環境。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     TECHNOLOGY SECTION
+     ============================================ -->
+<section class="section technology-section" id="technology">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">Technology Leadership</div>
+    <h2 class="section-title reveal">技術的優位性の深層</h2>
+    <p class="section-description reveal">
+      ソニーの優位性は「画質」「動画」「省電力」「小型化」「多機能化」を代替関係ではなく同時に前進させる"アーキテクチャの積み上げ"にある。BSI、積層、Cu-Cu接合、2層トランジスタピクセルと、製造難度が高い方向へ踏み込む点が参入障壁となる。
+    </p>
+
+    <!-- Architecture Diagram -->
+    <div class="arch-diagram reveal">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <h3 style="font-family:var(--font-serif);font-size:1.2rem;font-weight:600;color:var(--color-text-primary);">積層型CMOSイメージセンサー構造図</h3>
+        <p style="font-size:0.8rem;color:var(--color-text-tertiary);margin-top:0.5rem;">各層をホバーして詳細を確認</p>
+      </div>
+      <div class="arch-layers" id="archLayers">
+        <div class="arch-layer arch-layer-1" data-info="マイクロレンズ＋カラーフィルターを通して光を集光。裏面照射（BSI）により配線の遮光を回避し、感度約2倍を実現。">
+          <div class="arch-layer-name">▲ 受光層（フォトダイオード）</div>
+          <div class="arch-layer-desc">BSI構造 — 感度約2倍・SNR改善</div>
+        </div>
+        <div class="arch-connector">
+          <span class="arch-connector-label">Cu-Cu 直接接合</span>
+        </div>
+        <div class="arch-layer arch-layer-2" data-info="2層トランジスタピクセル技術により、PD層とトランジスタ層を分離。0.6µm画素でランダムノイズ0.99e⁻、FWC 8000e⁻、DR 78.1dBを実現。">
+          <div class="arch-layer-name">◆ トランジスタ / 画素回路層</div>
+          <div class="arch-layer-desc">2層トランジスタピクセル — 超低ノイズ</div>
+        </div>
+        <div class="arch-connector">
+          <span class="arch-connector-label">TSV / ハイブリッドボンディング</span>
+        </div>
+        <div class="arch-layer arch-layer-3" data-info="ISP・制御回路・AI処理（IMX500）などのロジックを集約。TSMCとの提携によるJASM（22/28nm）でロジック供給も強化。">
+          <div class="arch-layer-name">● ロジック層（ISP / AI処理）</div>
+          <div class="arch-layer-desc">信号処理・制御・エッジAI</div>
+        </div>
+        <div class="arch-connector">
+          <span class="arch-connector-label">高速インターフェース</span>
+        </div>
+        <div class="arch-layer arch-layer-4" data-info="2017年発表の3層積層CMOSでDRAMを内蔵。高速読み出しによりローリング歪み低減、ハイスピード動画、マルチフレームHDRを実現。">
+          <div class="arch-layer-name">★ DRAM層</div>
+          <div class="arch-layer-desc">高速読み出し — 動画体験の革新</div>
+        </div>
+      </div>
+      <div id="archInfoPanel" style="max-width:600px;margin:1.5rem auto 0;padding:1.2rem 1.5rem;background:var(--color-bg-cool);border-radius:12px;font-size:0.85rem;line-height:1.8;color:var(--color-text-secondary);min-height:60px;transition:all 0.4s var(--ease-out-expo);text-align:center;">
+        各層をホバーまたはタップすると詳細が表示されます
+      </div>
+    </div>
+
+    <!-- Tech Cards -->
+    <div class="tech-cards-grid">
+      <div class="tech-card reveal stagger-1">
+        <div class="tech-card-icon">◎</div>
+        <div class="tech-card-title">裏面照射型（BSI）</div>
+        <div class="tech-card-text">
+          2009年に量産展開開始。配線層やトランジスタによる遮光を避け、受光効率を飛躍的に向上。同一画素サイズでのSNR改善、スマホの小型レンズでの実効性能に貢献。列並列A/D変換（column-parallel ADC）によるノイズ低減も早期から組み合わせた。
+        </div>
+        <div class="tech-card-specs">
+          <span class="tech-card-spec">感度約2倍</span>
+          <span class="tech-card-spec">暗所ノイズ低減</span>
+          <span class="tech-card-spec">Column ADC</span>
+        </div>
+      </div>
+      <div class="tech-card reveal stagger-2">
+        <div class="tech-card-icon">◈</div>
+        <div class="tech-card-title">積層型 Exmor RS</div>
+        <div class="tech-card-text">
+          2012年、「世界初」を謳う積層型CMOSイメージセンサーを商品化。画素と信号処理回路を分離し、チップ面積・機能・性能を両立。2017年にはDRAM層を加えた3層積層CMOSを発表し、動画の撮像体験を差別化要素に押し上げた。
+        </div>
+        <div class="tech-card-specs">
+          <span class="tech-card-spec">2012年 世界初</span>
+          <span class="tech-card-spec">3層積層</span>
+          <span class="tech-card-spec">DRAM内蔵</span>
+        </div>
+      </div>
+      <div class="tech-card reveal stagger-3">
+        <div class="tech-card-icon">◇</div>
+        <div class="tech-card-title">2層トランジスタピクセル</div>
+        <div class="tech-card-text">
+          フォトダイオード（PD）と画素トランジスタを異なるSi層に作り分け、PD体積を増やしつつ変換ゲインとランダムノイズを改善。0.6µm画素でランダムノイズ0.99e⁻、FWC 8,000e⁻、DR 78.1dBを達成。
+        </div>
+        <div class="tech-card-specs">
+          <span class="tech-card-spec">0.6µm画素</span>
+          <span class="tech-card-spec">0.99e⁻ノイズ</span>
+          <span class="tech-card-spec">78.1dB DR</span>
+        </div>
+      </div>
+      <div class="tech-card reveal stagger-4">
+        <div class="tech-card-icon">⬡</div>
+        <div class="tech-card-title">Cu-Cu直接接合</div>
+        <div class="tech-card-text">
+          積層を"研究"ではなく"量産"にする鍵。TSV接続に代わるCu-Cu直接接合をウェハレベルで成立させ、接合面の超平坦化、位置合わせ、端子信頼性を確保。高性能化と量産性の両立に直結する世界一の実利に転化しやすい技術。
+        </div>
+        <div class="tech-card-specs">
+          <span class="tech-card-spec">ウェハレベル積層</span>
+          <span class="tech-card-spec">超平坦化</span>
+          <span class="tech-card-spec">量産実装</span>
+        </div>
+      </div>
+      <div class="tech-card reveal stagger-5">
+        <div class="tech-card-icon">⊙</div>
+        <div class="tech-card-title">IMX500 — AI搭載センサー</div>
+        <div class="tech-card-text">
+          「世界初のAI処理機能搭載インテリジェントビジョンセンサー」として、センサーを「撮る」から「理解してメタデータを出す」へ拡張。エッジAI時代のデータ量・電力・プライバシー制約に対して、センサー側で前処理する価値を提示。
+        </div>
+        <div class="tech-card-specs">
+          <span class="tech-card-spec">世界初</span>
+          <span class="tech-card-spec">エッジAI</span>
+          <span class="tech-card-spec">メタデータ出力</span>
+        </div>
+      </div>
+      <div class="tech-card reveal stagger-6">
+        <div class="tech-card-icon">☆</div>
+        <div class="tech-card-title">SPAD / 次世代技術</div>
+        <div class="tech-card-text">
+          SPAD（Single Photon Avalanche Diode）は"単一光子レベル"の検出に向く方式。低照度・距離計測・新しいセンシングへの発展余地が大きい。有機光導電膜（OPF）やメタサーフェス、SWIR等の新領域にも投資が進む。
+        </div>
+        <div class="tech-card-specs">
+          <span class="tech-card-spec">SPAD</span>
+          <span class="tech-card-spec">OPF</span>
+          <span class="tech-card-spec">SWIR</span>
+          <span class="tech-card-spec">メタサーフェス</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technology Timeline -->
+    <div class="sony-divider" style="margin-top:5rem;"></div>
+    <div class="reveal" style="margin-bottom:3rem;">
+      <div class="section-eyebrow">Technology Roadmap</div>
+      <h3 class="section-title" style="font-size:1.6rem;">技術・投資マイルストーン</h3>
+    </div>
+    <div class="tech-timeline">
+      <div class="tech-timeline-item reveal">
+        <div class="tech-timeline-dot"></div>
+        <div class="tech-timeline-year">2004</div>
+        <div class="tech-timeline-title">CCD → CMOS 戦略転換</div>
+        <div class="tech-timeline-desc">CCDの増産投資を停止し、CMOSイメージセンサー開発へ重点化。スマホカメラ爆発を前にした構造的先行。この決断が後年のシェア一位への道を開いた。</div>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>戦略的決断</span>
+      </div>
+      <div class="tech-timeline-item reveal">
+        <div class="tech-timeline-dot"></div>
+        <div class="tech-timeline-year">2009</div>
+        <div class="tech-timeline-title">裏面照射（BSI）本格展開</div>
+        <div class="tech-timeline-desc">感度約2倍を訴求し、暗所ノイズ低減を実現。長崎200mmウェハラインでExmor Rの量産を開始。早期から高性能品の量産体制を確立。</div>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>感度2倍</span>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>200mm量産</span>
+      </div>
+      <div class="tech-timeline-item reveal">
+        <div class="tech-timeline-dot"></div>
+        <div class="tech-timeline-year">2010</div>
+        <div class="tech-timeline-title">熊本300mm先端ライン量産開始</div>
+        <div class="tech-timeline-desc">長崎に加え、熊本の300mmウェハ先端ラインでも量産を開始。「高性能品を複数拠点・複数ウェハで量産する」方向性が早期から明確に。</div>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>300mm</span>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>複数拠点</span>
+      </div>
+      <div class="tech-timeline-item reveal">
+        <div class="tech-timeline-dot"></div>
+        <div class="tech-timeline-year">2012</div>
+        <div class="tech-timeline-title">世界初 積層型 Exmor RS 商品化</div>
+        <div class="tech-timeline-desc">画素と信号処理回路を分離する積層構造を世界で初めてスマホ向けに商品化。チップ面積・機能・性能の両立を実現し、以降の進化の基盤に。</div>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>世界初</span>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>積層型</span>
+      </div>
+      <div class="tech-timeline-item reveal">
+        <div class="tech-timeline-dot"></div>
+        <div class="tech-timeline-year">2017</div>
+        <div class="tech-timeline-title">3層積層CMOS（DRAM内蔵）発表</div>
+        <div class="tech-timeline-desc">従来の2層積層にDRAM層を追加。高速読み出しでローリング歪み低減、ハイスピード動画、マルチフレームHDRを実現。「動画の撮像体験」を差別化要素へ押し上げ。</div>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>DRAM内蔵</span>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>高速読み出し</span>
+      </div>
+      <div class="tech-timeline-item reveal">
+        <div class="tech-timeline-dot"></div>
+        <div class="tech-timeline-year">2021</div>
+        <div class="tech-timeline-title">長崎Fab 5稼働 / JASM設立</div>
+        <div class="tech-timeline-desc">長崎テクノロジーセンターで新棟Fab 5の生産ライン稼働開始。同年、TSMCと共同で熊本にJASMを設立し、22/28nmプロセスのロジック供給を補完。</div>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>Fab 5</span>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>JASM / TSMC</span>
+      </div>
+      <div class="tech-timeline-item reveal">
+        <div class="tech-timeline-dot"></div>
+        <div class="tech-timeline-year">2023–2024</div>
+        <div class="tech-timeline-title">シェア45% → ~50%へ拡大</div>
+        <div class="tech-timeline-desc">高付加価値製品への需要回復と差別化技術の採用拡大により、CIS市場シェアが45%（2023年）から約50%（2024年、市場規模232億ドル）へ拡大。</div>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>~50%シェア</span>
+        <span class="tech-spec-badge"><span class="badge-dot"></span>$232億市場</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     MANUFACTURING SECTION
+     ============================================ -->
+<section class="section fab-section" id="manufacturing">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">Manufacturing & Fab Strategy</div>
+    <h2 class="section-title reveal">製造能力とファブ戦略</h2>
+    <p class="section-description reveal">
+      高性能品を複数拠点・複数ウェハサイズで量産する体制を早期から確立。3年間で9,300億円の設備投資を掲げ、資本集約度の高い事業を支える。
+    </p>
+
+    <!-- Fab Map -->
+    <div class="fab-map-container reveal">
+      <div class="fab-map-title">主要製造拠点（日本国内）</div>
+      <svg class="fab-map-svg" viewBox="0 0 800 500" id="fabMapSvg">
+        <!-- 簡易日本地図のアウトライン -->
+        <path d="M380,60 Q420,40 460,50 Q500,30 540,60 Q560,80 550,110 Q560,130 540,150 Q530,170 510,180 Q500,200 490,220 Q480,240 470,250 Q460,270 450,280 Q440,310 430,330 Q420,360 400,380 Q390,400 370,410 Q350,420 340,410 Q330,390 320,370 Q310,350 300,330 Q290,310 280,290 Q270,270 280,250 Q290,230 300,210 Q310,190 320,170 Q330,150 340,130 Q350,110 360,90 Z"
+          fill="var(--color-bg-cool)" stroke="var(--color-border-medium)" stroke-width="1.5" />
+        <!-- 九州 -->
+        <path d="M300,330 Q310,350 290,370 Q270,390 260,400 Q250,410 240,400 Q230,380 240,360 Q250,340 260,320 Q270,310 280,310 Q290,320 300,330Z"
+          fill="var(--color-bg-cool)" stroke="var(--color-border-medium)" stroke-width="1.5" />
+
+        <!-- 長崎ピン -->
+        <g class="fab-location-pin" transform="translate(235, 370)">
+          <circle class="fab-location-pulse" cx="0" cy="0" r="6" fill="var(--color-accent-gold)" opacity="0.4"/>
+          <circle cx="0" cy="0" r="6" fill="var(--color-accent-gold)" stroke="#fff" stroke-width="2"/>
+          <text x="14" y="5" font-size="11" font-weight="700" fill="var(--color-text-primary)" font-family="var(--font-sans)">長崎 TEC</text>
+        </g>
+
+        <!-- 熊本ピン -->
+        <g class="fab-location-pin" transform="translate(270, 385)">
+          <circle class="fab-location-pulse" cx="0" cy="0" r="6" fill="var(--color-accent-blue-light)" opacity="0.4"/>
+          <circle cx="0" cy="0" r="6" fill="var(--color-accent-blue-light)" stroke="#fff" stroke-width="2"/>
+          <text x="14" y="5" font-size="11" font-weight="700" fill="var(--color-text-primary)" font-family="var(--font-sans)">熊本（JASM）</text>
+        </g>
+
+        <!-- 情報パネル 長崎 -->
+        <g transform="translate(480, 300)">
+          <rect x="0" y="0" width="280" height="80" rx="12" fill="var(--color-bg-card)" stroke="var(--color-border-light)" stroke-width="1"/>
+          <line x1="-10" y1="40" x2="0" y2="40" stroke="var(--color-accent-gold)" stroke-width="1.5" stroke-dasharray="4"/>
+          <text x="16" y="24" font-size="10" font-weight="700" fill="var(--color-accent-gold)" font-family="var(--font-sans)" letter-spacing="0.1em">NAGASAKI TEC</text>
+          <text x="16" y="42" font-size="11" font-weight="400" fill="var(--color-text-secondary)" font-family="var(--font-sans)">200mm BSI量産（2009年～）</text>
+          <text x="16" y="58" font-size="11" font-weight="400" fill="var(--color-text-secondary)" font-family="var(--font-sans)">Fab 5 新棟稼働（2021年～）</text>
+        </g>
+
+        <!-- 情報パネル 熊本 -->
+        <g transform="translate(480, 400)">
+          <rect x="0" y="0" width="280" height="80" rx="12" fill="var(--color-bg-card)" stroke="var(--color-border-light)" stroke-width="1"/>
+          <line x1="-10" y1="40" x2="0" y2="40" stroke="var(--color-accent-blue-light)" stroke-width="1.5" stroke-dasharray="4"/>
+          <text x="16" y="24" font-size="10" font-weight="700" fill="var(--color-accent-blue-light)" font-family="var(--font-sans)" letter-spacing="0.1em">KUMAMOTO — JASM</text>
+          <text x="16" y="42" font-size="11" font-weight="400" fill="var(--color-text-secondary)" font-family="var(--font-sans)">300mm先端ライン（2010年～）</text>
+          <text x="16" y="58" font-size="11" font-weight="400" fill="var(--color-text-secondary)" font-family="var(--font-sans)">TSMC提携 22/28nmロジック</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Fab Cards -->
+    <div class="fab-cards">
+      <div class="fab-card reveal stagger-1">
+        <div class="fab-card-location">Nagasaki</div>
+        <div class="fab-card-name">長崎テクノロジーセンター</div>
+        <div class="fab-card-desc">200mmウェハラインでBSI「Exmor R」を2009年から量産。2021年にFab 5新棟が稼働開始し、量産能力を大幅に強化。</div>
+        <span class="fab-card-badge">200mm + Fab 5</span>
+      </div>
+      <div class="fab-card reveal stagger-2">
+        <div class="fab-card-location">Kumamoto</div>
+        <div class="fab-card-name">熊本 300mm先端ライン</div>
+        <div class="fab-card-desc">300mmウェハの先端ラインで2010年末から量産を開始。高性能品の量産拠点として、長崎と合わせた複数拠点体制を実現。</div>
+        <span class="fab-card-badge">300mm先端</span>
+      </div>
+      <div class="fab-card reveal stagger-3">
+        <div class="fab-card-location">Kumamoto — JASM</div>
+        <div class="fab-card-name">TSMC提携ファウンドリ</div>
+        <div class="fab-card-desc">TSMCと共同で設立したJASMにソニーが少数株主として参画。22/28nmプロセスで積層CISのロジック層供給を補完。</div>
+        <span class="fab-card-badge">22/28nm ロジック</span>
+      </div>
+    </div>
+
+    <!-- Investment KPIs -->
+    <div class="sony-divider"></div>
+    <div class="reveal" style="margin-bottom:2rem;">
+      <div class="section-eyebrow">Capital Expenditure</div>
+      <h3 class="section-title" style="font-size:1.6rem;">設備投資と資本戦略</h3>
+    </div>
+    <div class="finance-kpi-grid reveal" style="--color-text-white:var(--color-text-primary);">
+      <div class="finance-kpi" style="background:var(--color-bg-card);border:1px solid var(--color-border-light);">
+        <div class="finance-kpi-value" style="color:var(--color-text-primary);">9,300<span class="small" style="color:var(--color-accent-gold);">億円</span></div>
+        <div class="finance-kpi-label" style="color:var(--color-text-tertiary);">3年間設備投資（2021年～）</div>
+      </div>
+      <div class="finance-kpi" style="background:var(--color-bg-card);border:1px solid var(--color-border-light);">
+        <div class="finance-kpi-value" style="color:var(--color-text-primary);">1.9<span class="small" style="color:var(--color-accent-gold);">兆円</span></div>
+        <div class="finance-kpi-label" style="color:var(--color-text-tertiary);">全社設備投資実績（2021-23年度）</div>
+      </div>
+      <div class="finance-kpi" style="background:var(--color-bg-card);border:1px solid var(--color-border-light);">
+        <div class="finance-kpi-value" style="color:var(--color-text-primary);">1.7<span class="small" style="color:var(--color-accent-gold);">兆円</span></div>
+        <div class="finance-kpi-label" style="color:var(--color-text-tertiary);">全社設備投資計画（2024-26年度）</div>
+      </div>
+      <div class="finance-kpi" style="background:var(--color-bg-card);border:1px solid var(--color-border-light);">
+        <div class="finance-kpi-value" style="color:var(--color-text-primary);">△3,690<span class="small" style="color:var(--color-accent-gold);">億円</span></div>
+        <div class="finance-kpi-label" style="color:var(--color-text-tertiary);">I&SS投資CF（2023年度）</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     FINANCIALS SECTION
+     ============================================ -->
+<section class="section financials-section" id="financials">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">Financial Performance</div>
+    <h2 class="section-title reveal">I&SSセグメント収益性</h2>
+    <p class="section-description reveal">
+      "台数シェア"より"金額シェア"を取りに行く設計。統合報告書にも「売上規模や販売台数よりも収益性を重視し、高付加価値戦略をとる」と記述。巨額の設備投資と償却、世代交代コスト、需給変動リスクを抱えつつ、差別化により営業利益率12〜15%台を維持している。
+    </p>
+
+    <div class="finance-kpi-grid reveal">
+      <div class="finance-kpi">
+        <div class="finance-kpi-value">1.60<span class="small">兆円</span></div>
+        <div class="finance-kpi-label">2023年度 I&SS売上高</div>
+      </div>
+      <div class="finance-kpi">
+        <div class="finance-kpi-value">1,935<span class="small">億円</span></div>
+        <div class="finance-kpi-label">2023年度 I&SS営業利益</div>
+      </div>
+      <div class="finance-kpi">
+        <div class="finance-kpi-value">12.1<span class="small">%</span></div>
+        <div class="finance-kpi-label">2023年度 営業利益率</div>
+      </div>
+      <div class="finance-kpi">
+        <div class="finance-kpi-value">2,783<span class="small">億円</span></div>
+        <div class="finance-kpi-label">2023年度 I&SS営業CF</div>
+      </div>
+    </div>
+
+    <!-- Revenue & Profit Table -->
+    <div class="reveal" style="overflow-x:auto;">
+      <table class="finance-table-dark">
+        <thead>
+          <tr>
+            <th>年度</th>
+            <th>I&SS売上高</th>
+            <th>I&SS営業利益</th>
+            <th>営業利益率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2021年度</td>
+            <td>1兆0,764億円</td>
+            <td>1,556億円</td>
+            <td>14.5%</td>
+          </tr>
+          <tr>
+            <td>2022年度</td>
+            <td>1兆4,022億円</td>
+            <td>2,122億円</td>
+            <td>15.1%</td>
+          </tr>
+          <tr>
+            <td>2023年度</td>
+            <td>1兆6,027億円</td>
+            <td>1,935億円</td>
+            <td>12.1%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Revenue Bar Visual -->
+    <div class="finance-bar-chart reveal" id="financeBarChart">
+      <div class="finance-bar-group">
+        <div class="finance-bar-stack" style="position:relative;">
+          <div class="finance-bar-revenue" data-height="60" style="height:0%;width:60px;border-radius:4px 4px 0 0;"></div>
+        </div>
+        <div class="finance-bar-label">FY2021</div>
+      </div>
+      <div class="finance-bar-group">
+        <div class="finance-bar-stack" style="position:relative;">
+          <div class="finance-bar-revenue" data-height="80" style="height:0%;width:60px;border-radius:4px 4px 0 0;"></div>
+        </div>
+        <div class="finance-bar-label">FY2022</div>
+      </div>
+      <div class="finance-bar-group">
+        <div class="finance-bar-stack" style="position:relative;">
+          <div class="finance-bar-revenue" data-height="90" style="height:0%;width:60px;border-radius:4px 4px 0 0;"></div>
+        </div>
+        <div class="finance-bar-label">FY2023</div>
+      </div>
+    </div>
+    <div class="chart-legend reveal" style="justify-content:center;margin-top:1rem;">
+      <div class="chart-legend-item"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.2);margin-right:6px;"></span><span style="color:rgba(255,255,255,0.5);font-size:0.75rem;">売上高</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     CUSTOMER & SUPPLY CHAIN
+     ============================================ -->
+<section class="section customer-section" id="customers">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">Customers & Supply Chain</div>
+    <h2 class="section-title reveal">顧客基盤とサプライチェーン</h2>
+    <p class="section-description reveal">
+      I&SSの売上構成はモバイル向けイメージセンサーが75%、その他イメージセンサーが15%。モバイル依存が高い一方、車載・産業機器向け、AI処理機能搭載製品など用途拡大が進む。
+    </p>
+
+    <!-- Composition Visual -->
+    <div class="customer-composition reveal">
+      <div class="composition-visual">
+        <div class="composition-ring">
+          <svg viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="70" fill="none" stroke="var(--color-bg-cool)" stroke-width="30"/>
+            <circle class="composition-ring-segment" cx="100" cy="100" r="70" stroke="#1A1A1A" stroke-width="30"
+              stroke-dasharray="329.87 110" stroke-dashoffset="0" style="transform:rotate(-90deg);transform-origin:center;"/>
+            <circle class="composition-ring-segment" cx="100" cy="100" r="70" stroke="var(--color-accent-gold)" stroke-width="30"
+              stroke-dasharray="65.97 374" stroke-dashoffset="-329.87" style="transform:rotate(-90deg);transform-origin:center;"/>
+            <circle class="composition-ring-segment" cx="100" cy="100" r="70" stroke="var(--color-accent-blue-light)" stroke-width="30"
+              stroke-dasharray="44 396" stroke-dashoffset="-395.84" style="transform:rotate(-90deg);transform-origin:center;"/>
+          </svg>
+          <div class="composition-center">
+            <div class="composition-center-value">I&SS</div>
+            <div class="composition-center-label">売上構成比</div>
+          </div>
+        </div>
+      </div>
+      <div class="composition-details">
+        <div class="composition-item">
+          <div class="composition-item-indicator" style="background:#1A1A1A;"></div>
+          <div class="composition-item-info">
+            <div class="composition-item-name">モバイル向けイメージセンサー</div>
+            <div class="composition-item-desc">スマホ向けハイエンドCIS。Apple iPhoneなどフラッグシップ機に搭載</div>
+          </div>
+          <div class="composition-item-percentage">75%</div>
+        </div>
+        <div class="composition-item">
+          <div class="composition-item-indicator" style="background:var(--color-accent-gold);"></div>
+          <div class="composition-item-info">
+            <div class="composition-item-name">その他イメージセンサー</div>
+            <div class="composition-item-desc">車載・産業機器・セキュリティ・ミラーレスカメラ向け</div>
+          </div>
+          <div class="composition-item-percentage">15%</div>
+        </div>
+        <div class="composition-item">
+          <div class="composition-item-indicator" style="background:var(--color-accent-blue-light);"></div>
+          <div class="composition-item-info">
+            <div class="composition-item-name">その他（センサー以外含む）</div>
+            <div class="composition-item-desc">レーザー等、セグメント内のその他事業</div>
+          </div>
+          <div class="composition-item-percentage">10%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Use Case Cards -->
+    <div class="sony-divider"></div>
+    <div class="reveal" style="margin-bottom:2rem;">
+      <div class="section-eyebrow">Application Areas</div>
+      <h3 class="section-title" style="font-size:1.6rem;">用途別の展開</h3>
+    </div>
+    <div class="tech-cards-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="tech-card reveal stagger-1">
+        <div class="tech-card-icon">📱</div>
+        <div class="tech-card-title">モバイル</div>
+        <div class="tech-card-text">複眼化・大型化・高画素化・動画性能の需要に対応。ハイエンドスマホの「カメラ競争」がソニーの高単価戦略を支える。</div>
+      </div>
+      <div class="tech-card reveal stagger-2">
+        <div class="tech-card-icon">🚗</div>
+        <div class="tech-card-title">車載（ADAS）</div>
+        <div class="tech-card-text">耐環境性・低欠陥性が重要。高画素CMOS商品化を推進。ただし車載市場ではonsemiがトップという分析も。CAGR 5.4%の成長市場。</div>
+      </div>
+      <div class="tech-card reveal stagger-3">
+        <div class="tech-card-icon">🔒</div>
+        <div class="tech-card-title">セキュリティ</div>
+        <div class="tech-card-text">STARVIS技術による低照度下での高認識性能。感度指標2,000mV/1µm²超を訴求。監視カメラ市場での存在感。</div>
+      </div>
+      <div class="tech-card reveal stagger-4">
+        <div class="tech-card-icon">🏭</div>
+        <div class="tech-card-title">産業機器</div>
+        <div class="tech-card-text">CAGR 9.5%と最も高い成長率が予測される分野。認定と品質保証のハードルが高いが、採用後の寿命が長い。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     RISK & GEOPOLITICS SECTION
+     ============================================ -->
+<section class="section risk-section" id="risks">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">Risks & Geopolitics</div>
+    <h2 class="section-title reveal">規制・地政学リスクと課題</h2>
+    <p class="section-description reveal">
+      技術優位があっても、特定顧客の販売・調達が規制で崩れると短期のシェアは動く。CISは「スマホ景気＋地政学＋物流/ロックダウン」の複合影響を受けやすい。
+    </p>
+
+    <div class="risk-cards">
+      <div class="risk-card risk-high reveal stagger-1">
+        <div class="risk-card-severity">● High Risk</div>
+        <div class="risk-card-title">米国輸出規制と顧客集中</div>
+        <div class="risk-card-desc">2020年のシェア低下（42→40%）は、Huawei向け出荷の減少（米国の輸出規制）に直接起因。特定顧客への依存は、地政学リスクに対する脆弱性を意味する。</div>
+        <div class="risk-card-example">実例：2019年42% → 2020年40%（Huawei規制の影響）</div>
+      </div>
+      <div class="risk-card risk-high reveal stagger-2">
+        <div class="risk-card-severity">● High Risk</div>
+        <div class="risk-card-title">Apple調達戦略の変化</div>
+        <div class="risk-card-desc">Appleの調達戦略・関税回避観測などがソニーにとってリスク要因。今後は「技術」だけでなく「供給地（製造拠点の地理）」が競争条件になっていく可能性がある。</div>
+        <div class="risk-card-example">モバイル向け75%という高い顧客集中度</div>
+      </div>
+      <div class="risk-card risk-medium reveal stagger-3">
+        <div class="risk-card-severity">● Medium Risk</div>
+        <div class="risk-card-title">マクロ・需給変動</div>
+        <div class="risk-card-desc">2022年の市況悪化は、ロシアのウクライナ侵攻や上海ロックダウンなどマクロ要因が影響。スマホ向けは世代交代が速く、供給制約・在庫調整の影響を受けやすい。</div>
+        <div class="risk-card-example">四半期ベースでのシェア変動（トップは約4割水準）</div>
+      </div>
+      <div class="risk-card risk-medium reveal stagger-4">
+        <div class="risk-card-severity">● Medium Risk</div>
+        <div class="risk-card-title">競合・中国勢の台頭</div>
+        <div class="risk-card-desc">2024年のYole要約では企業別詳細シェアが非公開化されるなど、競争環境の変化が示唆。中国勢の台頭、調達構造の変化が今後の不確実性要因。車載ではonsemiがトップ。</div>
+        <div class="risk-card-example">車載市場：onsemiがトップ / 中国CIS企業の急成長</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     FUTURE OUTLOOK SECTION
+     ============================================ -->
+<section class="section future-section" id="future">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal" style="color:var(--color-accent-gold);">Future Outlook</div>
+    <h2 class="section-title reveal">将来の課題と機会</h2>
+    <p class="section-description reveal">
+      CIS市場は2023年から2029年にCAGR 4.7%で成長し、2029年に286億ドルに達する見通し。モバイル依存を下げる"用途分散"が、シェア維持と収益安定の両面で合理的な戦略となる。
+    </p>
+
+    <div class="future-grid">
+      <div class="future-card reveal stagger-1">
+        <div class="future-card-icon">🤖</div>
+        <div class="future-card-growth">↑ エッジAI</div>
+        <div class="future-card-title">AI搭載センサーの拡大</div>
+        <div class="future-card-text">IMX500に代表される「撮る→理解する」センサーの進化。データ量・電力・プライバシー制約に対し、センサー側での前処理の価値が高まる。</div>
+      </div>
+      <div class="future-card reveal stagger-2">
+        <div class="future-card-icon">🚘</div>
+        <div class="future-card-growth">↑ CAGR 5.4%</div>
+        <div class="future-card-title">車載市場の成長</div>
+        <div class="future-card-text">ADAS・自動運転の進展に伴い、車載CIS需要が堅調に拡大。耐環境性・高画素・低欠陥性でソニーの技術力が活きる領域。</div>
+      </div>
+      <div class="future-card reveal stagger-3">
+        <div class="future-card-icon">🏭</div>
+        <div class="future-card-growth">↑ CAGR 9.5%</div>
+        <div class="future-card-title">産業用途の急成長</div>
+        <div class="future-card-text">産業用CISがCAGR 9.5%と最も高い成長率。FA（ファクトリーオートメーション）、検査装置、ロボティクスなど高付加価値領域。</div>
+      </div>
+      <div class="future-card reveal stagger-4">
+        <div class="future-card-icon">🔬</div>
+        <div class="future-card-growth">↑ 次世代</div>
+        <div class="future-card-title">SPAD / フォトンカウンティング</div>
+        <div class="future-card-text">単一光子レベルの検出が可能なSPAD技術。低照度・距離計測・医療・科学計測など新しいセンシング市場への展開。</div>
+      </div>
+      <div class="future-card reveal stagger-5">
+        <div class="future-card-icon">🌐</div>
+        <div class="future-card-growth">↑ SWIR</div>
+        <div class="future-card-title">高波長・新材料領域</div>
+        <div class="future-card-text">SWIR（短波長赤外）、有機光導電膜（OPF）、メタサーフェスなど、従来CMOSの枠を超えた新技術領域への投資。</div>
+      </div>
+      <div class="future-card reveal stagger-6">
+        <div class="future-card-icon">🛡️</div>
+        <div class="future-card-growth">→ 安定化</div>
+        <div class="future-card-title">サプライチェーン強化</div>
+        <div class="future-card-text">JASM等を通じたロジック供給の安定化、製造拠点の地理的分散。地政学リスクへの耐性を高め、供給信頼性を維持。</div>
+      </div>
+    </div>
+
+    <!-- Market Projection -->
+    <div class="future-market-projection reveal">
+      <div class="projection-header">
+        <div class="projection-title">CIS市場規模予測（2023→2029）</div>
+        <div class="projection-cagr">CAGR 4.7%</div>
+      </div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;height:200px;padding:0 2rem;border-bottom:1px solid rgba(255,255,255,0.1);" id="projectionBars">
+        <div style="text-align:center;flex:1;">
+          <div style="width:60px;margin:0 auto;background:linear-gradient(to top, var(--color-accent-gold), var(--color-accent-gold-light));border-radius:4px 4px 0 0;transition:height 1s var(--ease-out-expo);" data-proj-height="76" class="proj-bar" id="projBar2023"></div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:0.75rem;">2023</div>
+          <div style="font-size:0.85rem;font-weight:700;color:var(--color-text-white);">$218億</div>
+        </div>
+        <div style="text-align:center;flex:1;">
+          <div style="width:60px;margin:0 auto;background:linear-gradient(to top, var(--color-accent-gold), var(--color-accent-gold-light));border-radius:4px 4px 0 0;transition:height 1s var(--ease-out-expo);transition-delay:0.15s;" data-proj-height="81" class="proj-bar" id="projBar2024"></div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:0.75rem;">2024</div>
+          <div style="font-size:0.85rem;font-weight:700;color:var(--color-text-white);">$232億</div>
+        </div>
+        <div style="text-align:center;flex:1;">
+          <div style="width:60px;margin:0 auto;background:linear-gradient(to top, rgba(255,255,255,0.15), rgba(255,255,255,0.08));border:1px dashed rgba(255,255,255,0.2);border-radius:4px 4px 0 0;transition:height 1s var(--ease-out-expo);transition-delay:0.3s;" data-proj-height="100" class="proj-bar" id="projBar2029"></div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:0.75rem;">2029 (予測)</div>
+          <div style="font-size:0.85rem;font-weight:700;color:var(--color-accent-gold);">$286億</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-around;margin-top:1.5rem;">
+        <div style="text-align:center;">
+          <div style="font-size:0.65rem;letter-spacing:0.1em;color:rgba(255,255,255,0.4);text-transform:uppercase;">出荷台数</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--color-text-white);">68 → 86<span style="font-size:0.7em;font-weight:300;color:rgba(255,255,255,0.5);"> 億個</span></div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:0.65rem;letter-spacing:0.1em;color:rgba(255,255,255,0.4);text-transform:uppercase;">産業CAGR</div>
+          <div style="font-size:1.1rem;font-weight:700;color:#66BB6A;">9.5%</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:0.65rem;letter-spacing:0.1em;color:rgba(255,255,255,0.4);text-transform:uppercase;">車載CAGR</div>
+          <div style="font-size:1.1rem;font-weight:700;color:#66BB6A;">5.4%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concluding Statement -->
+    <div class="reveal" style="text-align:center;margin-top:5rem;position:relative;z-index:1;">
+      <div class="sony-accent-line" style="margin:0 auto 2rem;"></div>
+      <p style="font-family:var(--font-serif);font-size:1.3rem;font-weight:500;line-height:2;color:var(--color-text-white);max-width:800px;margin:0 auto;">
+        "技術 × 量産 × 用途拡張"の三点セットを維持できるかが、<br>
+        次の10年の「世界一」を決める。
+      </p>
+      <p style="font-size:0.8rem;font-weight:300;color:rgba(255,255,255,0.4);margin-top:1.5rem;">— JEITA・JSIA提言資料より</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     FOOTER
+     ============================================ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-brand-logo">
+          <span style="width:28px;height:28px;border:1.5px solid #fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.55rem;">S</span>
+          SONY SENSOR
+        </div>
+        <p class="footer-brand-desc">
+          ソニーのCMOSイメージセンサーが世界シェア1位を維持する理由を、技術・市場・投資・顧客・地政学の多角的視点から深掘り分析したWebサイト。
+        </p>
+      </div>
+      <div>
+        <div class="footer-column-title">セクション</div>
+        <ul class="footer-links">
+          <li><a href="#summary" class="footer-link">エグゼクティブサマリー</a></li>
+          <li><a href="#market" class="footer-link">市場シェア推移</a></li>
+          <li><a href="#technology" class="footer-link">技術的優位性</a></li>
+          <li><a href="#manufacturing" class="footer-link">製造能力</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-column-title">分析項目</div>
+        <ul class="footer-links">
+          <li><a href="#financials" class="footer-link">収益性</a></li>
+          <li><a href="#customers" class="footer-link">顧客基盤</a></li>
+          <li><a href="#risks" class="footer-link">リスク分析</a></li>
+          <li><a href="#future" class="footer-link">将来展望</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-column-title">データソース</div>
+        <ul class="footer-links">
+          <li><span class="footer-link">Yole Intelligence</span></li>
+          <li><span class="footer-link">TechInsights</span></li>
+          <li><span class="footer-link">Sony Corporate Report</span></li>
+          <li><span class="footer-link">JEITA / JSIA</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copyright">
+        Analysis based on public information. All trademarks belong to their respective owners.
+      </div>
+      <div class="footer-source-note">
+        ※ 本サイトのデータはYole Intelligence調査の引用記事、ソニー公式IR資料、業界団体提言資料等の公開情報に基づいて構成されています。
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" aria-label="ページトップへ戻る">↑</button>
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+/* ============================================
+   UTILITIES
+   ============================================ */
+const $ = (sel, ctx = document) => ctx.querySelector(sel);
+const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+const mapRange = (val, inMin, inMax, outMin, outMax) =>
+  ((val - inMin) / (inMax - inMin)) * (outMax - outMin) + outMin;
+
+/* ============================================
+   PAGE LOADER
+   ============================================ */
+(function initLoader() {
+  const loader = $('#pageLoader');
+  const pct = $('#loaderPercentage');
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += Math.random() * 15;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+      pct.textContent = '100%';
+      setTimeout(() => {
+        loader.classList.add('hidden');
+        document.body.style.overflow = '';
+        initAllAnimations();
+      }, 400);
+    } else {
+      pct.textContent = Math.round(progress) + '%';
+    }
+  }, 80);
+  document.body.style.overflow = 'hidden';
+})();
+
+function initAllAnimations() {
+  initRevealObserver();
+  initCounterAnimation();
+  initBarChartAnimation();
+  initComparisonBars();
+  initFinanceBars();
+  initProjectionBars();
+}
+
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+(function initCursor() {
+  const follower = $('#cursorFollower');
+  const dot = $('#cursorDot');
+  if (!follower || !dot) return;
+  let mouseX = 0, mouseY = 0;
+  let followerX = 0, followerY = 0;
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+  });
+
+  function animateCursor() {
+    followerX = lerp(followerX, mouseX, 0.12);
+    followerY = lerp(followerY, mouseY, 0.12);
+    follower.style.left = followerX + 'px';
+    follower.style.top = followerY + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+
+  $$('a, button, .tech-card, .exec-pillar, .fab-card, .risk-card, .future-card, .donut-info-item, .chart-bar, .arch-layer, .comparison-card').forEach(el => {
+    el.addEventListener('mouseenter', () => follower.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => follower.classList.remove('hovering'));
+  });
+})();
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+(function initNav() {
+  const nav = $('#mainNav');
+  const btn = $('#mobileMenuBtn');
+  const menu = $('#mobileMenu');
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 80) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }, { passive: true });
+
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    menu.classList.toggle('active');
+    document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+  });
+})();
+
+function closeMobileMenu() {
+  const btn = $('#mobileMenuBtn');
+  const menu = $('#mobileMenu');
+  btn.classList.remove('active');
+  menu.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+/* ============================================
+   READING PROGRESS
+   ============================================ */
+(function initProgress() {
+  const bar = $('#readingProgress');
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = (scrollTop / docHeight) * 100;
+    bar.style.width = progress + '%';
+  }, { passive: true });
+})();
+
+/* ============================================
+   BACK TO TOP
+   ============================================ */
+(function initBackToTop() {
+  const btn = $('#backToTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 600) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }, { passive: true });
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+
+/* ============================================
+   HERO CANVAS - PARTICLE NETWORK
+   ============================================ */
+(function initHeroCanvas() {
+  const canvas = $('#heroCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let w, h, particles = [], mouse = { x: -1000, y: -1000 };
+  const PARTICLE_COUNT = 80;
+  const MAX_DIST = 150;
+
+  function resize() {
+    w = canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
+    h = canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  }
+
+  class Particle {
+    constructor() {
+      this.x = Math.random() * (w / (window.devicePixelRatio || 1));
+      this.y = Math.random() * (h / (window.devicePixelRatio || 1));
+      this.vx = (Math.random() - 0.5) * 0.5;
+      this.vy = (Math.random() - 0.5) * 0.5;
+      this.r = Math.random() * 2 + 1;
+      this.alpha = Math.random() * 0.5 + 0.2;
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      const rw = w / (window.devicePixelRatio || 1);
+      const rh = h / (window.devicePixelRatio || 1);
+      if (this.x < 0 || this.x > rw) this.vx *= -1;
+      if (this.y < 0 || this.y > rh) this.vy *= -1;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(201, 168, 76, ${this.alpha})`;
+      ctx.fill();
+    }
+  }
+
+  function init() {
+    resize();
+    particles = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push(new Particle());
+    }
+  }
+
+  function drawLines() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < MAX_DIST) {
+          const alpha = (1 - dist / MAX_DIST) * 0.15;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(201, 168, 76, ${alpha})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+      // Mouse interaction
+      const dx = particles[i].x - mouse.x;
+      const dy = particles[i].y - mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 200) {
+        const alpha = (1 - dist / 200) * 0.3;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(mouse.x, mouse.y);
+        ctx.strokeStyle = `rgba(201, 168, 76, ${alpha})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+    }
+  }
+
+  function animate() {
+    const rw = w / (window.devicePixelRatio || 1);
+    const rh = h / (window.devicePixelRatio || 1);
+    ctx.clearRect(0, 0, rw, rh);
+    particles.forEach(p => { p.update(); p.draw(); });
+    drawLines();
+    requestAnimationFrame(animate);
+  }
+
+  canvas.parentElement.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  });
+
+  canvas.parentElement.addEventListener('mouseleave', () => {
+    mouse.x = -1000;
+    mouse.y = -1000;
+  });
+
+  window.addEventListener('resize', () => {
+    resize();
+    particles.forEach(p => {
+      p.x = Math.min(p.x, w / (window.devicePixelRatio || 1));
+      p.y = Math.min(p.y, h / (window.devicePixelRatio || 1));
+    });
+  });
+
+  init();
+  animate();
+})();
+
+/* ============================================
+   INTERSECTION OBSERVER - REVEAL
+   ============================================ */
+function initRevealObserver() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Don't unobserve to allow re-reveal if needed, but for performance:
+        // observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  });
+
+
+  $$('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
+    observer.observe(el);
+  });
+}
+
+/* ============================================
+   COUNT-UP ANIMATION
+   ============================================ */
+function initCounterAnimation() {
+  const counters = $$('.count-up');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.target, 10);
+        animateCounter(el, 0, target, 2000);
+        observer.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(c => observer.observe(c));
+}
+
+function animateCounter(el, start, end, duration) {
+  const startTime = performance.now();
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(start + (end - start) * eased);
+    el.textContent = current.toLocaleString();
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    }
+  }
+  requestAnimationFrame(update);
+}
+
+/* ============================================
+   BAR CHART ANIMATION
+   ============================================ */
+function initBarChartAnimation() {
+  const wrapper = $('#chartBarsWrapper');
+  if (!wrapper) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const bars = $$('.chart-bar', wrapper);
+        bars.forEach((bar, i) => {
+          setTimeout(() => {
+            bar.style.height = bar.dataset.height + '%';
+          }, i * 60);
+        });
+        observer.unobserve(wrapper);
+      }
+    });
+  }, { threshold: 0.2 });
+  observer.observe(wrapper);
+}
+
+/* ============================================
+   COMPARISON BAR ANIMATION
+   ============================================ */
+function initComparisonBars() {
+  const grid = $('#comparisonGrid');
+  if (!grid) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+
+        $$('.comparison-bar-fill', grid).forEach((bar, i) => {
+          setTimeout(() => {
+            bar.style.width = bar.dataset.width + '%';
+          }, i * 150);
+        });
+        observer.unobserve(grid);
+      }
+    });
+  }, { threshold: 0.3 });
+  observer.observe(grid);
+}
+
+/* ============================================
+   FINANCE BAR ANIMATION
+   ============================================ */
+function initFinanceBars() {
+  const chart = $('#financeBarChart');
+  if (!chart) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+
+        $$('.finance-bar-revenue', chart).forEach((bar, i) => {
+          setTimeout(() => {
+            bar.style.height = bar.dataset.height + '%';
+          }, i * 200);
+        });
+        observer.unobserve(chart);
+      }
+    });
+  }, { threshold: 0.3 });
+  observer.observe(chart);
+}
+
+/* ============================================
+   PROJECTION BAR ANIMATION
+   ============================================ */
+function initProjectionBars() {
+  const container = $('#projectionBars');
+  if (!container) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+
+        $$('.proj-bar', container).forEach(bar => {
+          const h = bar.dataset.projHeight;
+          bar.style.height = h + '%';
+        });
+        observer.unobserve(container);
+      }
+    });
+  }, { threshold: 0.3 });
+  observer.observe(container);
+}
+
+/* ============================================
+   ARCHITECTURE DIAGRAM INTERACTION
+   ============================================ */
+(function initArchDiagram() {
+  const layers = $$('.arch-layer');
+  const panel = $('#archInfoPanel');
+  if (!panel) return;
+
+  layers.forEach(layer => {
+    layer.addEventListener('mouseenter', () => {
+      const info = layer.dataset.info;
+      if (info) {
+        panel.textContent = info;
+        panel.style.background = 'var(--color-bg-card)';
+        panel.style.border = '1px solid var(--color-accent-gold)';
+        panel.style.boxShadow = '0 4px 20px var(--color-shadow)';
+      }
+    });
+    layer.addEventListener('mouseleave', () => {
+      panel.textContent = '各層をホバーまたはタップすると詳細が表示されます';
+      panel.style.background = 'var(--color-bg-cool)';
+      panel.style.border = 'none';
+      panel.style.boxShadow = 'none';
+    });
+    // Touch support
+    layer.addEventListener('click', () => {
+      const info = layer.dataset.info;
+      if (info) {
+        panel.textContent = info;
+        panel.style.background = 'var(--color-bg-card)';
+        panel.style.border = '1px solid var(--color-accent-gold)';
+      }
+    });
+  });
+})();
+
+/* ============================================
+   SMOOTH SCROLL FOR NAV LINKS
+   ============================================ */
+(function initSmoothScroll() {
+
+  $$('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+      const href = link.getAttribute('href');
+      if (href === '#') return;
+      e.preventDefault();
+      const target = $(href);
+      if (target) {
+        const offset = 80;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  });
+})();
+
+/* ============================================
+   PARALLAX ON SCROLL
+   ============================================ */
+(function initParallax() {
+  const heroContent = $('.hero-content');
+  const heroOverlay = $('.hero-overlay');
+
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    if (scrollY < window.innerHeight) {
+      if (heroContent) {
+        heroContent.style.transform = `translateY(${scrollY * 0.3}px)`;
+        heroContent.style.opacity = 1 - (scrollY / window.innerHeight) * 0.8;
+      }
+      if (heroOverlay) {
+        heroOverlay.style.opacity = 0.5 + (scrollY / window.innerHeight) * 0.5;
+      }
+    }
+  }, { passive: true });
+})();
+
+/* ============================================
+   ACTIVE NAV LINK HIGHLIGHT
+   ============================================ */
+(function initActiveNav() {
+  const sections = $$('section[id]');
+  const navLinks = $$('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navLinks.forEach(link => {
+          link.style.color = '';
+          link.style.fontWeight = '';
+          if (link.getAttribute('href') === '#' + id) {
+            link.style.color = 'var(--color-text-primary)';
+            link.style.fontWeight = '700';
+          }
+        });
+      }
+    });
+  }, {
+    threshold: 0.2,
+    rootMargin: '-80px 0px -50% 0px'
+  });
+
+  sections.forEach(s => observer.observe(s));
+})();
+
+/* ============================================
+   TABLE ROW HOVER GLOW
+   ============================================ */
+(function initTableEffects() {
+
+  $$('.data-table tbody tr').forEach(row => {
+    row.addEventListener('mouseenter', function() {
+      this.style.transition = 'background 0.3s';
+    });
+  });
+})();
+
+/* ============================================
+   FLOATING DECORATION PARTICLES
+   ============================================ */
+(function initFloatingParticles() {
+  const body = document.body;
+  for (let i = 0; i < 6; i++) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    particle.style.left = Math.random() * 100 + 'vw';
+    particle.style.top = Math.random() * 100 + 'vh';
+    particle.style.width = (Math.random() * 3 + 2) + 'px';
+    particle.style.height = particle.style.width;
+    particle.style.opacity = Math.random() * 0.2 + 0.05;
+    particle.style.animation = `floatParticle ${8 + Math.random() * 12}s ease-in-out infinite alternate`;
+    particle.style.animationDelay = `-${Math.random() * 10}s`;
+    body.appendChild(particle);
+  }
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes floatParticle {
+      0% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(${Math.random()*80-40}px, ${Math.random()*80-40}px) scale(1.2); }
+      50% { transform: translate(${Math.random()*80-40}px, ${Math.random()*80-40}px) scale(0.8); }
+      75% { transform: translate(${Math.random()*80-40}px, ${Math.random()*80-40}px) scale(1.1); }
+      100% { transform: translate(${Math.random()*80-40}px, ${Math.random()*80-40}px) scale(1); }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+/* ============================================
+   DONUT CHART HOVER EFFECTS
+   ============================================ */
+(function initDonutInteraction() {
+  const segments = $$('.donut-segment');
+  const infoItems = $$('.donut-info-item');
+
+  infoItems.forEach((item, idx) => {
+    item.addEventListener('mouseenter', () => {
+      segments.forEach((seg, sIdx) => {
+        if (sIdx === idx) {
+          seg.style.strokeWidth = '46';
+          seg.style.filter = 'brightness(1.2)';
+        } else {
+          seg.style.strokeWidth = '36';
+          seg.style.opacity = '0.5';
+        }
+      });
+    });
+    item.addEventListener('mouseleave', () => {
+      segments.forEach(seg => {
+        seg.style.strokeWidth = '';
+        seg.style.filter = '';
+        seg.style.opacity = '';
+      });
+    });
+  });
+})();
+
+/* ============================================
+   TILT EFFECT ON CARDS
+   ============================================ */
+(function initTiltEffect() {
+  if (window.matchMedia('(max-width: 768px)').matches) return;
+
+
+  $$('.tech-card, .future-card, .exec-pillar').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (y - centerY) / centerY * -3;
+      const rotateY = (x - centerX) / centerX * 3;
+      card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+})();
+
+/* ============================================
+   TEXT SCRAMBLE EFFECT ON HERO EYEBROW
+   ============================================ */
+(function initTextScramble() {
+  const el = $('.hero-eyebrow');
+  if (!el) return;
+  const originalText = el.textContent;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  setTimeout(() => {
+    let iteration = 0;
+    const interval = setInterval(() => {
+      el.textContent = originalText.split('').map((char, index) => {
+        if (index < iteration) return originalText[index];
+        if (char === ' ' || char === '—') return char;
+        return chars[Math.floor(Math.random() * chars.length)];
+      }).join('');
+      if (iteration >= originalText.length) clearInterval(interval);
+      iteration += 1 / 2;
+    }, 30);
+  }, 3200);
+})();
+
+/* ============================================
+   MAGNETIC BUTTON EFFECT
+   ============================================ */
+(function initMagneticButtons() {
+  if (window.matchMedia('(max-width: 768px)').matches) return;
+
+
+  $$('.back-to-top, .nav-logo-icon').forEach(el => {
+    el.addEventListener('mousemove', e => {
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      el.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+    });
+    el.addEventListener('mouseleave', () => {
+      el.style.transform = '';
+    });
+  });
+})();
+
+/* ============================================
+   SCROLL-TRIGGERED NUMBER HIGHLIGHT
+   ============================================ */
+(function initNumberGlow() {
+  const highlightCells = $$('.highlight-cell');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.transition = 'color 0.6s, text-shadow 0.6s';
+        entry.target.style.textShadow = '0 0 20px rgba(201,168,76,0.3)';
+        setTimeout(() => {
+          entry.target.style.textShadow = 'none';
+        }, 1500);
+      }
+    });
+  }, { threshold: 0.5 });
+  highlightCells.forEach(c => observer.observe(c));
+})();
+
+/* ============================================
+   PREFERS REDUCED MOTION
+   ============================================ */
+(function checkReducedMotion() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.style.setProperty('--duration-fast', '0.01s');
+    document.documentElement.style.setProperty('--duration-normal', '0.01s');
+    document.documentElement.style.setProperty('--duration-slow', '0.01s');
+    document.documentElement.style.setProperty('--duration-very-slow', '0.01s');
+
+    $$('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
+      el.style.transition = 'none';
+      el.classList.add('visible');
+    });
+  }
+})();
+
+/* ============================================
+   PERFORMANCE: DEBOUNCE SCROLL
+   ============================================ */
+function debounce(fn, wait) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+/* ============================================
+   SECTION SEPARATOR WAVE SVG INJECTION
+   ============================================ */
+(function injectWaveSeparators() {
+  const waveSVG = `<svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="width:100%;height:60px;display:block;"><path d="M0,30 C360,60 720,0 1080,30 C1260,45 1350,30 1440,30 L1440,60 L0,60 Z" fill="currentColor"/></svg>`;
+
+  const summarySection = $('#summary');
+  if (summarySection) {
+    const wave = document.createElement('div');
+    wave.style.cssText = 'position:absolute;top:-1px;left:0;width:100%;color:var(--color-bg-warm);z-index:1;';
+    wave.innerHTML = waveSVG;
+    summarySection.prepend(wave);
+  }
+})();
+
+/* ============================================
+   TYPING EFFECT UTILITY (unused but available)
+   ============================================ */
+function typeText(el, text, speed = 50) {
+  return new Promise(resolve => {
+    let i = 0;
+    el.textContent = '';
+    const interval = setInterval(() => {
+      el.textContent += text[i];
+      i++;
+      if (i >= text.length) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, speed);
+  });
+}
+
+/* ============================================
+   RESIZE HANDLER
+   ============================================ */
+window.addEventListener('resize', debounce(() => {
+  // Recalculate anything that needs it
+}, 200));
+
+/* ============================================
+   KEYBOARD NAVIGATION
+   ============================================ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeMobileMenu();
+  }
+});
+
+/* ============================================
+   PRINT STYLES (inline for completeness)
+   ============================================ */
+const printStyle = document.createElement('style');
+printStyle.textContent = `
+  @media print {
+    .nav, .hero-canvas-container, .hero-overlay, .cursor-follower, .cursor-dot,
+    .back-to-top, .reading-progress, .page-loader, .particle, .mobile-menu {
+      display: none !important;
+    }
+    .hero {
+      min-height: auto;
+      padding: 2rem;
+      background: #000 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .section {
+      padding: 2rem 1rem;
+      break-inside: avoid;
+    }
+    .reveal, .reveal-left, .reveal-right, .reveal-scale {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    body {
+      font-size: 12pt;
+    }
+  }
+`;
+document.head.appendChild(printStyle);
+
+console.log('%c🔬 SONY Sensor Analysis', 'font-size:20px;font-weight:900;color:#C9A84C;');
+console.log('%cBuilt with passion for technology and design.', 'font-size:12px;color:#7A7A7A;');
+</script>
+</body>
+</html>

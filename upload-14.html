@@ -1,0 +1,3632 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>領域展開「ALL WINNER」- カツカツ vs そうめんロボ</title>
+<style>
+/* ===== RESET & BASE ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', sans-serif; }
+canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+
+/* ===== UI OVERLAY ===== */
+#ui-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 10; pointer-events: none;
+}
+#ui-overlay * { pointer-events: auto; }
+
+/* ===== HP BARS ===== */
+.hp-container {
+  position: absolute; top: 20px; width: 380px; height: 70px;
+  background: rgba(0,0,0,0.85); border: 2px solid #FFD700;
+  border-radius: 12px; padding: 8px 15px;
+  box-shadow: 0 0 25px rgba(255,215,0,0.4), inset 0 0 15px rgba(255,215,0,0.1);
+}
+.hp-container.left { left: 20px; }
+.hp-container.right { right: 20px; }
+.hp-name {
+  font-size: 16px; font-weight: bold; color: #FFD700;
+  text-shadow: 0 0 10px #FFD700, 0 0 20px #FF8C00;
+  margin-bottom: 4px; letter-spacing: 2px;
+}
+.hp-bar-outer {
+  width: 100%; height: 22px; background: #1a1a2e;
+  border-radius: 11px; overflow: hidden; position: relative;
+  border: 1px solid #333;
+}
+.hp-bar-inner {
+  height: 100%; border-radius: 11px; transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative; overflow: hidden;
+}
+.hp-bar-inner.katsu {
+  background: linear-gradient(90deg, #FF6B00, #FFD700, #FF6B00);
+  box-shadow: 0 0 15px rgba(255,107,0,0.8), inset 0 -2px 5px rgba(0,0,0,0.3);
+}
+.hp-bar-inner.somen {
+  background: linear-gradient(90deg, #00BFFF, #00FF88, #00BFFF);
+  box-shadow: 0 0 15px rgba(0,191,255,0.8), inset 0 -2px 5px rgba(0,0,0,0.3);
+}
+.hp-bar-inner::after {
+  content: ''; position: absolute; top: 0; left: -50%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: hpShine 2s infinite;
+}
+@keyframes hpShine {
+  0% { left: -50%; } 100% { left: 150%; }
+}
+.hp-text {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 13px; font-weight: bold; color: #fff;
+  text-shadow: 0 0 5px #000, 1px 1px 2px #000;
+  z-index: 2;
+}
+.hp-label-sub {
+  font-size: 11px; color: #aaa; margin-top: 2px;
+}
+
+/* ===== SCOREBOARD ===== */
+#scoreboard {
+  position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.9); border: 3px solid #FF0040;
+  border-radius: 15px; padding: 15px 40px; text-align: center;
+  box-shadow: 0 0 40px rgba(255,0,64,0.6), 0 0 80px rgba(255,0,64,0.3), inset 0 0 20px rgba(255,0,64,0.1);
+  animation: boardPulse 1.5s infinite alternate;
+  min-width: 350px;
+}
+@keyframes boardPulse {
+  0% { box-shadow: 0 0 40px rgba(255,0,64,0.6), 0 0 80px rgba(255,0,64,0.3); border-color: #FF0040; }
+  100% { box-shadow: 0 0 60px rgba(255,215,0,0.8), 0 0 120px rgba(255,215,0,0.4); border-color: #FFD700; }
+}
+#scoreboard-title {
+  font-size: 14px; color: #FF0040; letter-spacing: 5px;
+  text-transform: uppercase; margin-bottom: 8px;
+  animation: titleFlash 0.5s infinite alternate;
+}
+@keyframes titleFlash {
+  0% { opacity: 1; color: #FF0040; } 100% { opacity: 0.7; color: #FFD700; }
+}
+#scoreboard-rank {
+  font-size: 20px; font-weight: 900; color: #FFD700;
+  text-shadow: 0 0 15px #FFD700, 0 0 30px #FF6B00;
+}
+#scoreboard-sub {
+  font-size: 13px; color: #888; margin-top: 5px;
+}
+
+/* ===== DIALOGUE BOX ===== */
+#dialogue-box {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  width: 85%; max-width: 900px; min-height: 100px;
+  background: rgba(0,0,0,0.92); border: 2px solid #FFD700;
+  border-radius: 15px; padding: 20px 30px;
+  box-shadow: 0 0 30px rgba(255,215,0,0.3);
+  display: none; opacity: 0; transition: opacity 0.5s;
+}
+#dialogue-box.show { display: block; opacity: 1; }
+#dialogue-speaker {
+  font-size: 16px; font-weight: bold; color: #FFD700;
+  text-shadow: 0 0 10px #FFD700;
+  margin-bottom: 8px;
+}
+#dialogue-text {
+  font-size: 15px; color: #eee; line-height: 1.8;
+  letter-spacing: 1px;
+}
+#dialogue-continue {
+  position: absolute; bottom: 10px; right: 20px;
+  font-size: 12px; color: #FFD700; animation: blinkCursor 1s infinite;
+}
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; } 50% { opacity: 0; }
+}
+
+/* ===== ACTION BUTTONS ===== */
+#action-panel {
+  position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%);
+  display: none; gap: 15px; z-index: 20;
+}
+#action-panel.show { display: flex; }
+.action-btn {
+  padding: 15px 30px; font-size: 16px; font-weight: bold;
+  border: 2px solid #FFD700; border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,215,0,0.2), rgba(0,0,0,0.8));
+  color: #FFD700; cursor: pointer; transition: all 0.3s;
+  text-shadow: 0 0 10px #FFD700;
+  box-shadow: 0 0 15px rgba(255,215,0,0.3);
+  letter-spacing: 2px;
+  min-width: 160px; text-align: center;
+}
+.action-btn:hover {
+  background: linear-gradient(180deg, rgba(255,215,0,0.5), rgba(255,107,0,0.3));
+  box-shadow: 0 0 30px rgba(255,215,0,0.6);
+  transform: scale(1.05);
+}
+.action-btn:active { transform: scale(0.95); }
+.action-btn.special {
+  border-color: #FF0040;
+  background: linear-gradient(180deg, rgba(255,0,64,0.3), rgba(0,0,0,0.8));
+  color: #FF0040; text-shadow: 0 0 10px #FF0040;
+  box-shadow: 0 0 15px rgba(255,0,64,0.3);
+  animation: specialBtnPulse 2s infinite alternate;
+}
+@keyframes specialBtnPulse {
+  0% { box-shadow: 0 0 15px rgba(255,0,64,0.3); }
+  100% { box-shadow: 0 0 35px rgba(255,0,64,0.7); }
+}
+
+/* ===== TURN INDICATOR ===== */
+#turn-indicator {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 60px; font-weight: 900; color: #FFD700;
+  text-shadow: 0 0 30px #FFD700, 0 0 60px #FF6B00, 0 0 90px #FF0040;
+  opacity: 0; z-index: 50; letter-spacing: 10px;
+  white-space: nowrap;
+}
+
+/* ===== DAMAGE NUMBERS ===== */
+.damage-number {
+  position: absolute; font-weight: 900; z-index: 40;
+  pointer-events: none; animation: damageFloat 1.5s forwards;
+}
+@keyframes damageFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  50% { opacity: 1; transform: translateY(-60px) scale(1.3); }
+  100% { opacity: 0; transform: translateY(-120px) scale(0.8); }
+}
+
+/* ===== SCREEN FLASH ===== */
+#screen-flash {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 45; pointer-events: none; opacity: 0;
+  transition: opacity 0.1s;
+}
+
+/* ===== TROPHY FLOAT ===== */
+.trophy-float {
+  position: absolute; font-size: 30px; opacity: 0.6;
+  animation: trophySpin 4s linear infinite;
+  pointer-events: none; z-index: 5;
+}
+@keyframes trophySpin {
+  0% { transform: rotateY(0deg) translateY(0px); }
+  25% { transform: rotateY(90deg) translateY(-10px); }
+  50% { transform: rotateY(180deg) translateY(0px); }
+  75% { transform: rotateY(270deg) translateY(10px); }
+  100% { transform: rotateY(360deg) translateY(0px); }
+}
+
+/* ===== DOMAIN EXPANSION OVERLAY ===== */
+#domain-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 100; background: #000; display: flex;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+}
+#domain-overlay.hidden { display: none; }
+#domain-text {
+  font-size: 72px; font-weight: 900; color: #FFD700;
+  text-shadow: 0 0 40px #FFD700, 0 0 80px #FF6B00, 0 0 120px #FF0040;
+  letter-spacing: 15px; opacity: 0;
+  animation: domainAppear 3s 1s forwards;
+}
+@keyframes domainAppear {
+  0% { opacity: 0; transform: scale(0.3); letter-spacing: 60px; }
+  50% { opacity: 1; transform: scale(1.2); letter-spacing: 20px; }
+  70% { transform: scale(0.95); letter-spacing: 12px; }
+  100% { opacity: 1; transform: scale(1); letter-spacing: 15px; }
+}
+#domain-sub {
+  font-size: 28px; color: #FF0040; margin-top: 20px;
+  letter-spacing: 8px; opacity: 0;
+  animation: domainSubAppear 2s 3s forwards;
+}
+@keyframes domainSubAppear {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+#domain-kanji {
+  font-size: 120px; color: transparent;
+  -webkit-text-stroke: 2px #FFD700;
+  text-shadow: 0 0 50px rgba(255,215,0,0.5);
+  position: absolute; opacity: 0.15;
+  animation: kanjiRotate 10s linear infinite;
+}
+@keyframes kanjiRotate {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* ===== PHASE TITLES ===== */
+.phase-title {
+  position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 48px; font-weight: 900; z-index: 55;
+  opacity: 0; pointer-events: none; white-space: nowrap;
+}
+
+/* ===== CHARACTER SPRITES ===== */
+.character-sprite {
+  position: absolute; bottom: 180px; z-index: 15;
+  transition: transform 0.3s;
+}
+.character-sprite.left { left: 10%; }
+.character-sprite.right { right: 10%; }
+.character-sprite:hover { transform: scale(1.05); }
+
+/* ===== SKILL NAME DISPLAY ===== */
+#skill-display {
+  position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+  z-index: 55; opacity: 0; pointer-events: none; text-align: center;
+}
+#skill-name {
+  font-size: 42px; font-weight: 900; letter-spacing: 8px;
+  white-space: nowrap;
+}
+#skill-desc {
+  font-size: 16px; margin-top: 10px; letter-spacing: 3px;
+}
+
+/* ===== COMBO COUNTER ===== */
+#combo-display {
+  position: absolute; top: 200px; right: 40px;
+  font-size: 36px; font-weight: 900; color: #FF0040;
+  text-shadow: 0 0 20px #FF0040;
+  opacity: 0; z-index: 30;
+}
+
+/* ===== SCREEN SHAKE ===== */
+.screen-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes shake {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(4px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+  40%, 60% { transform: translate3d(8px, 0, 0); }
+}
+.screen-shake-heavy {
+  animation: shakeHeavy 0.8s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes shakeHeavy {
+  10%, 90% { transform: translate3d(-5px, -3px, 0); }
+  20%, 80% { transform: translate3d(8px, 5px, 0); }
+  30%, 50%, 70% { transform: translate3d(-15px, -2px, 0) rotate(-1deg); }
+  40%, 60% { transform: translate3d(15px, 2px, 0) rotate(1deg); }
+}
+
+/* ===== VIGNETTE ===== */
+#vignette {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 3; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+}
+
+/* ===== LOADING ===== */
+#loading-screen {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 200; background: #000; display: flex;
+  align-items: center; justify-content: center; flex-direction: column;
+}
+#loading-screen.hidden { display: none; }
+#loading-text {
+  font-size: 24px; color: #FFD700; letter-spacing: 5px;
+  animation: loadPulse 1s infinite alternate;
+}
+@keyframes loadPulse {
+  0% { opacity: 0.5; } 100% { opacity: 1; }
+}
+#loading-bar-outer {
+  width: 300px; height: 6px; background: #222; border-radius: 3px;
+  margin-top: 20px; overflow: hidden;
+}
+#loading-bar-inner {
+  width: 0%; height: 100%; background: linear-gradient(90deg, #FFD700, #FF6B00);
+  border-radius: 3px; transition: width 0.3s;
+}
+
+/* ===== START SCREEN ===== */
+#start-screen {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 150; background: #000; display: flex;
+  align-items: center; justify-content: center; flex-direction: column;
+}
+#start-screen.hidden { display: none; }
+#start-title {
+  font-size: 56px; font-weight: 900; color: #FFD700;
+  text-shadow: 0 0 40px #FFD700, 0 0 80px #FF6B00;
+  letter-spacing: 8px; text-align: center;
+  margin-bottom: 20px;
+}
+#start-subtitle {
+  font-size: 22px; color: #FF0040; letter-spacing: 5px;
+  margin-bottom: 60px; text-align: center;
+}
+#start-btn {
+  padding: 20px 60px; font-size: 24px; font-weight: bold;
+  background: linear-gradient(180deg, rgba(255,215,0,0.3), rgba(0,0,0,0.9));
+  border: 3px solid #FFD700; border-radius: 15px;
+  color: #FFD700; cursor: pointer; letter-spacing: 5px;
+  box-shadow: 0 0 30px rgba(255,215,0,0.5);
+  transition: all 0.3s;
+}
+#start-btn:hover {
+  background: linear-gradient(180deg, rgba(255,215,0,0.6), rgba(255,107,0,0.3));
+  box-shadow: 0 0 60px rgba(255,215,0,0.8);
+  transform: scale(1.08);
+}
+#start-vs {
+  font-size: 100px; color: #FF0040; font-weight: 900;
+  text-shadow: 0 0 50px #FF0040;
+  margin: 30px 0; letter-spacing: 20px;
+}
+.start-char-name {
+  font-size: 32px; font-weight: bold; letter-spacing: 5px;
+  margin: 10px 0;
+}
+.start-char-name.gold { color: #FFD700; text-shadow: 0 0 20px #FFD700; }
+.start-char-name.cyan { color: #00BFFF; text-shadow: 0 0 20px #00BFFF; }
+
+/* ===== CUTSCENE BARS ===== */
+.cutscene-bar {
+  position: absolute; left: 0; width: 100%; height: 0;
+  background: #000; z-index: 60; transition: height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.cutscene-bar.top { top: 0; }
+.cutscene-bar.bottom { bottom: 0; }
+.cutscene-bar.active { height: 60px; }
+
+/* ===== GLITCH EFFECT ===== */
+.glitch {
+  animation: glitchAnim 0.3s infinite;
+}
+@keyframes glitchAnim {
+  0% { transform: translate(0); filter: hue-rotate(0deg); }
+  20% { transform: translate(-3px, 3px); filter: hue-rotate(90deg); }
+  40% { transform: translate(3px, -3px); filter: hue-rotate(180deg); }
+  60% { transform: translate(-3px, -3px); filter: hue-rotate(270deg); }
+  80% { transform: translate(3px, 3px); filter: hue-rotate(360deg); }
+  100% { transform: translate(0); filter: hue-rotate(0deg); }
+}
+
+/* ===== BACKGROUND ARENA ===== */
+#arena-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0; overflow: hidden;
+}
+
+/* ===== WIN SCREEN ===== */
+#win-screen {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 160; background: rgba(0,0,0,0.95);
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+#win-screen.show { display: flex; }
+#win-text {
+  font-size: 72px; font-weight: 900; color: #FFD700;
+  text-shadow: 0 0 50px #FFD700, 0 0 100px #FF6B00;
+  letter-spacing: 15px;
+}
+#win-sub {
+  font-size: 24px; color: #FF0040; margin-top: 20px;
+  letter-spacing: 5px;
+}
+
+/* ===== AURA EFFECTS ===== */
+.aura-gold {
+  filter: drop-shadow(0 0 20px #FFD700) drop-shadow(0 0 40px #FF6B00);
+}
+.aura-cyan {
+  filter: drop-shadow(0 0 20px #00BFFF) drop-shadow(0 0 40px #0088FF);
+}
+.aura-red {
+  filter: drop-shadow(0 0 20px #FF0040) drop-shadow(0 0 40px #FF0000);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .hp-container { width: 42%; height: 60px; }
+  .hp-name { font-size: 12px; }
+  #scoreboard { min-width: 250px; padding: 10px 20px; }
+  #scoreboard-rank { font-size: 16px; }
+  #domain-text { font-size: 36px; }
+  #start-title { font-size: 32px; }
+  #start-vs { font-size: 60px; }
+  .action-btn { padding: 10px 18px; font-size: 13px; min-width: 110px; }
+  #dialogue-box { width: 92%; padding: 15px 20px; }
+  .character-sprite { bottom: 160px; }
+}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+
+<!-- MAIN CANVAS -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- VIGNETTE -->
+<div id="vignette"></div>
+
+<!-- SCREEN FLASH -->
+<div id="screen-flash"></div>
+
+<!-- UI OVERLAY -->
+<div id="ui-overlay">
+  <!-- HP BARS -->
+  <div class="hp-container left" id="hp-katsu-container" style="display:none;">
+    <div class="hp-name">カツカツ <span style="font-size:11px;color:#FF6B00;">【勝者の血脈】</span></div>
+    <div class="hp-bar-outer">
+      <div class="hp-bar-inner katsu" id="hp-katsu-bar" style="width:100%;">
+        <span class="hp-text" id="hp-katsu-text">1350/1350</span>
+      </div>
+    </div>
+    <div class="hp-label-sub" id="hp-katsu-sub">祖先「かつもんもん」の術式発動中</div>
+  </div>
+
+  <div class="hp-container right" id="hp-somen-container" style="display:none;">
+    <div class="hp-name">そうめんロボ <span style="font-size:11px;color:#00BFFF;">【冷麺機械兵】</span></div>
+    <div class="hp-bar-outer">
+      <div class="hp-bar-inner somen" id="hp-somen-bar" style="width:100%;">
+        <span class="hp-text" id="hp-somen-text">2000/2000</span>
+      </div>
+    </div>
+    <div class="hp-label-sub" id="hp-somen-sub">流しそうめんモード待機中</div>
+  </div>
+
+  <!-- SCOREBOARD -->
+  <div id="scoreboard" style="display:none;">
+    <div id="scoreboard-title">順 位 争 い 中</div>
+    <div id="scoreboard-rank">1位: ??? / 2位: ???</div>
+    <div id="scoreboard-sub">領域「ALL WINNER」ルール適用中</div>
+  </div>
+
+  <!-- SKILL DISPLAY -->
+  <div id="skill-display">
+    <div id="skill-name"></div>
+    <div id="skill-desc"></div>
+  </div>
+
+  <!-- COMBO -->
+  <div id="combo-display"></div>
+
+  <!-- TURN INDICATOR -->
+  <div id="turn-indicator"></div>
+
+  <!-- ACTION PANEL -->
+  <div id="action-panel">
+    <button class="action-btn" onclick="Game.playerAction('attack')">通常攻撃</button>
+    <button class="action-btn" onclick="Game.playerAction('skill')">術式攻撃</button>
+    <button class="action-btn special" onclick="Game.playerAction('counter')">勝ちカウンター</button>
+    <button class="action-btn" onclick="Game.playerAction('heal')">勝ち飯回復</button>
+  </div>
+
+  <!-- DIALOGUE -->
+  <div id="dialogue-box" onclick="Game.advanceDialogue()">
+    <div id="dialogue-speaker"></div>
+    <div id="dialogue-text"></div>
+    <div id="dialogue-continue">▼ クリックで続く</div>
+  </div>
+
+  <!-- CUTSCENE BARS -->
+  <div class="cutscene-bar top" id="cutscene-top"></div>
+  <div class="cutscene-bar bottom" id="cutscene-bottom"></div>
+</div>
+
+<!-- DOMAIN EXPANSION OVERLAY -->
+<div id="domain-overlay">
+  <div id="domain-kanji">勝</div>
+  <div id="domain-text">領域展開</div>
+  <div id="domain-sub">「ALL WINNER」</div>
+</div>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div id="loading-text">LOADING...</div>
+  <div id="loading-bar-outer">
+    <div id="loading-bar-inner" id="load-bar"></div>
+  </div>
+</div>
+
+<!-- START SCREEN -->
+<div id="start-screen" class="hidden">
+  <div id="start-title">領域展開</div>
+  <div id="start-subtitle">「 A L L &nbsp; W I N N E R 」</div>
+  <div class="start-char-name gold">カツカツ</div>
+  <div id="start-vs">VS</div>
+  <div class="start-char-name cyan">そうめんロボ</div>
+  <div style="height:40px;"></div>
+  <button id="start-btn" onclick="Game.startGame()">戦 闘 開 始</button>
+</div>
+
+<!-- WIN SCREEN -->
+<div id="win-screen">
+  <div id="win-text">WINNER</div>
+  <div id="win-sub"></div>
+</div>
+
+<script>
+// ============================================================================
+// SECTION 1: AUDIO SYNTHESIZER (Web Audio API based sound effects)
+// ============================================================================
+class AudioSynth {
+  constructor() {
+    this.ctx = null;
+    this.initialized = false;
+    this.masterGain = null;
+  }
+
+  init() {
+    if (this.initialized) return;
+    try {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.value = 0.3;
+      this.masterGain.connect(this.ctx.destination);
+      this.initialized = true;
+    } catch(e) {
+      console.log('Audio not available');
+    }
+  }
+
+  playTone(freq, duration, type = 'sine', volume = 0.3) {
+    if (!this.initialized) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+    gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+    osc.start();
+    osc.stop(this.ctx.currentTime + duration);
+  }
+
+  playHit() {
+    this.playTone(150, 0.15, 'sawtooth', 0.5);
+    this.playTone(80, 0.2, 'square', 0.3);
+    setTimeout(() => this.playTone(60, 0.1, 'sine', 0.2), 50);
+  }
+
+  playHeavyHit() {
+    this.playTone(80, 0.3, 'sawtooth', 0.6);
+    this.playTone(40, 0.4, 'square', 0.4);
+    this.playTone(200, 0.1, 'sine', 0.3);
+    setTimeout(() => {
+      this.playTone(50, 0.2, 'sawtooth', 0.3);
+      this.playTone(30, 0.3, 'square', 0.2);
+    }, 100);
+  }
+
+  playCharge() {
+    for (let i = 0; i < 10; i++) {
+      setTimeout(() => {
+        this.playTone(200 + i * 80, 0.15, 'sine', 0.2);
+      }, i * 80);
+    }
+  }
+
+  playExplosion() {
+    this.playTone(60, 0.5, 'sawtooth', 0.6);
+    this.playTone(30, 0.8, 'square', 0.5);
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        this.playTone(40 + Math.random() * 100, 0.2, 'sawtooth', 0.3);
+      }, i * 60);
+    }
+  }
+
+  playDomainExpansion() {
+    const notes = [261, 329, 392, 523, 659, 784, 1046];
+    notes.forEach((note, i) => {
+      setTimeout(() => {
+        this.playTone(note, 0.8, 'sine', 0.3);
+        this.playTone(note * 0.5, 0.8, 'triangle', 0.2);
+      }, i * 200);
+    });
+  }
+
+  playCounter() {
+    this.playTone(880, 0.1, 'square', 0.4);
+    setTimeout(() => this.playTone(1100, 0.15, 'sine', 0.5), 100);
+    setTimeout(() => this.playTone(1320, 0.3, 'triangle', 0.4), 200);
+    setTimeout(() => this.playHeavyHit(), 350);
+  }
+
+  playHeal() {
+    const notes = [523, 659, 784, 1046];
+    notes.forEach((note, i) => {
+      setTimeout(() => {
+        this.playTone(note, 0.4, 'sine', 0.25);
+      }, i * 150);
+    });
+  }
+
+  playVictory() {
+    const melody = [523, 523, 523, 698, 880, 784, 698, 880, 1046];
+    melody.forEach((note, i) => {
+      setTimeout(() => {
+        this.playTone(note, 0.3, 'sine', 0.3);
+        this.playTone(note * 0.5, 0.3, 'triangle', 0.15);
+      }, i * 200);
+    });
+  }
+
+  playBeam() {
+    for (let i = 0; i < 20; i++) {
+      setTimeout(() => {
+        this.playTone(300 + i * 50 + Math.random() * 100, 0.1, 'sawtooth', 0.15);
+      }, i * 30);
+    }
+  }
+
+  playWarning() {
+    for (let i = 0; i < 4; i++) {
+      setTimeout(() => {
+        this.playTone(440, 0.15, 'square', 0.4);
+      }, i * 200);
+    }
+  }
+
+  playBGMLoop() {
+    if (!this.initialized) return;
+    const playBar = () => {
+      if (!this.bgmPlaying) return;
+      const bassNotes = [65, 82, 73, 87];
+      const melodyNotes = [261, 329, 392, 349];
+      const idx = Math.floor(Math.random() * 4);
+      this.playTone(bassNotes[idx], 0.8, 'triangle', 0.08);
+      this.playTone(melodyNotes[idx], 0.4, 'sine', 0.05);
+      if (Math.random() > 0.5) {
+        this.playTone(bassNotes[idx] * 2, 0.2, 'square', 0.03);
+      }
+      setTimeout(playBar, 800);
+    };
+    this.bgmPlaying = true;
+    playBar();
+  }
+
+  stopBGM() {
+    this.bgmPlaying = false;
+  }
+}
+
+// ============================================================================
+// SECTION 2: PARTICLE SYSTEM ENGINE
+// ============================================================================
+class Particle {
+  constructor(x, y, config = {}) {
+    this.x = x;
+    this.y = y;
+    this.vx = config.vx || (Math.random() - 0.5) * 4;
+    this.vy = config.vy || (Math.random() - 0.5) * 4;
+    this.ax = config.ax || 0;
+    this.ay = config.ay || 0;
+    this.life = config.life || 60;
+    this.maxLife = this.life;
+    this.size = config.size || 3;
+    this.sizeEnd = config.sizeEnd !== undefined ? config.sizeEnd : 0;
+    this.color = config.color || '#FFD700';
+    this.colorEnd = config.colorEnd || null;
+    this.alpha = config.alpha || 1;
+    this.alphaEnd = config.alphaEnd !== undefined ? config.alphaEnd : 0;
+    this.rotation = config.rotation || 0;
+    this.rotationSpeed = config.rotationSpeed || 0;
+    this.shape = config.shape || 'circle'; // circle, square, triangle, star, line, ring, text, image
+    this.text = config.text || '';
+    this.gravity = config.gravity || 0;
+    this.friction = config.friction || 1;
+    this.bounce = config.bounce || false;
+    this.trail = config.trail || false;
+    this.trailLength = config.trailLength || 5;
+    this.trailHistory = [];
+    this.glow = config.glow || 0;
+    this.glowColor = config.glowColor || this.color;
+    this.blendMode = config.blendMode || 'lighter';
+    this.oscillateX = config.oscillateX || 0;
+    this.oscillateY = config.oscillateY || 0;
+    this.oscillateSpeed = config.oscillateSpeed || 0.1;
+    this.oscillatePhase = config.oscillatePhase || Math.random() * Math.PI * 2;
+    this.scale = config.scale || 1;
+    this.scaleEnd = config.scaleEnd !== undefined ? config.scaleEnd : this.scale;
+    this.emitChild = config.emitChild || null;
+    this.emitRate = config.emitRate || 0;
+    this.emitTimer = 0;
+    this.alive = true;
+    this.age = 0;
+    this.flash = config.flash || false;
+    this.flashRate = config.flashRate || 5;
+    this.turbulence = config.turbulence || 0;
+    this.hueShift = config.hueShift || false;
+    this.hueSpeed = config.hueSpeed || 2;
+    this.hue = config.hue || 0;
+    this.customDraw = config.customDraw || null;
+    this.spring = config.spring || null;
+    this.springK = config.springK || 0.01;
+    this.damping = config.damping || 0.95;
+  }
+
+  update(particles) {
+    this.age++;
+    if (this.age >= this.maxLife) {
+      this.alive = false;
+      return;
+    }
+
+    if (this.trail) {
+      this.trailHistory.push({ x: this.x, y: this.y });
+      if (this.trailHistory.length > this.trailLength) {
+        this.trailHistory.shift();
+      }
+    }
+
+    if (this.spring) {
+      const dx = this.spring.x - this.x;
+      const dy = this.spring.y - this.y;
+      this.vx += dx * this.springK;
+      this.vy += dy * this.springK;
+      this.vx *= this.damping;
+      this.vy *= this.damping;
+    }
+
+    this.vx += this.ax;
+    this.vy += this.ay + this.gravity;
+    this.vx *= this.friction;
+    this.vy *= this.friction;
+
+    if (this.turbulence > 0) {
+      this.vx += (Math.random() - 0.5) * this.turbulence;
+      this.vy += (Math.random() - 0.5) * this.turbulence;
+    }
+
+    if (this.oscillateX) {
+      this.x += Math.sin(this.age * this.oscillateSpeed + this.oscillatePhase) * this.oscillateX;
+    }
+    if (this.oscillateY) {
+      this.y += Math.cos(this.age * this.oscillateSpeed + this.oscillatePhase) * this.oscillateY;
+    }
+
+    this.x += this.vx;
+    this.y += this.vy;
+
+    if (this.bounce) {
+      const W = window.innerWidth, H = window.innerHeight;
+      if (this.x < 0 || this.x > W) this.vx *= -0.8;
+      if (this.y < 0 || this.y > H) this.vy *= -0.8;
+    }
+
+    this.rotation += this.rotationSpeed;
+
+    if (this.hueShift) {
+      this.hue = (this.hue + this.hueSpeed) % 360;
+      this.color = `hsl(${this.hue}, 100%, 60%)`;
+      this.glowColor = `hsl(${this.hue}, 100%, 50%)`;
+    }
+
+    const t = this.age / this.maxLife;
+    this.life = this.maxLife - this.age;
+    this.alpha = this.alpha + (this.alphaEnd - (this.alpha)) * 0;
+    const currentAlpha = lerp(1, this.alphaEnd, t) * this.alpha;
+    this._renderAlpha = Math.max(0, currentAlpha);
+    this._renderSize = lerp(this.size, this.sizeEnd, t);
+    this._renderScale = lerp(this.scale, this.scaleEnd, t);
+
+    if (this.emitChild && this.emitRate > 0) {
+      this.emitTimer++;
+      if (this.emitTimer >= this.emitRate) {
+        this.emitTimer = 0;
+        const childConfig = typeof this.emitChild === 'function' ? this.emitChild() : { ...this.emitChild };
+        particles.push(new Particle(this.x, this.y, childConfig));
+      }
+    }
+  }
+
+  draw(ctx) {
+    if (!this.alive) return;
+    if (this.flash && Math.floor(this.age / this.flashRate) % 2 === 0) return;
+
+    const alpha = this._renderAlpha;
+    if (alpha <= 0) return;
+
+    const size = this._renderSize * this._renderScale;
+    if (size <= 0) return;
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.globalCompositeOperation = this.blendMode;
+
+    if (this.trail && this.trailHistory.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(this.trailHistory[0].x, this.trailHistory[0].y);
+      for (let i = 1; i < this.trailHistory.length; i++) {
+        ctx.lineTo(this.trailHistory[i].x, this.trailHistory[i].y);
+      }
+      ctx.lineTo(this.x, this.y);
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = size * 0.5;
+      ctx.globalAlpha = alpha * 0.4;
+      ctx.stroke();
+      ctx.globalAlpha = alpha;
+    }
+
+    if (this.glow > 0) {
+      ctx.shadowBlur = this.glow;
+      ctx.shadowColor = this.glowColor;
+    }
+
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotation);
+
+    if (this.customDraw) {
+      this.customDraw(ctx, size, alpha, this);
+    } else {
+      ctx.fillStyle = this.color;
+      switch (this.shape) {
+        case 'circle':
+          ctx.beginPath();
+          ctx.arc(0, 0, size, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+        case 'square':
+          ctx.fillRect(-size, -size, size * 2, size * 2);
+          break;
+        case 'triangle':
+          ctx.beginPath();
+          ctx.moveTo(0, -size);
+          ctx.lineTo(-size, size);
+          ctx.lineTo(size, size);
+          ctx.closePath();
+          ctx.fill();
+          break;
+        case 'star':
+          this.drawStar(ctx, 0, 0, 5, size, size * 0.5);
+          break;
+        case 'line':
+          ctx.strokeStyle = this.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(-size, 0);
+          ctx.lineTo(size, 0);
+          ctx.stroke();
+          break;
+        case 'ring':
+          ctx.strokeStyle = this.color;
+          ctx.lineWidth = size * 0.2;
+          ctx.beginPath();
+          ctx.arc(0, 0, size, 0, Math.PI * 2);
+          ctx.stroke();
+          break;
+        case 'text':
+          ctx.font = `bold ${size * 2}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(this.text, 0, 0);
+          break;
+        case 'diamond':
+          ctx.beginPath();
+          ctx.moveTo(0, -size);
+          ctx.lineTo(size * 0.6, 0);
+          ctx.lineTo(0, size);
+          ctx.lineTo(-size * 0.6, 0);
+          ctx.closePath();
+          ctx.fill();
+          break;
+        case 'cross':
+          ctx.fillRect(-size * 0.2, -size, size * 0.4, size * 2);
+          ctx.fillRect(-size, -size * 0.2, size * 2, size * 0.4);
+          break;
+        case 'hexagon':
+          ctx.beginPath();
+          for (let i = 0; i < 6; i++) {
+            const angle = Math.PI / 3 * i - Math.PI / 2;
+            const hx = Math.cos(angle) * size;
+            const hy = Math.sin(angle) * size;
+            i === 0 ? ctx.moveTo(hx, hy) : ctx.lineTo(hx, hy);
+          }
+          ctx.closePath();
+          ctx.fill();
+          break;
+      }
+    }
+
+    ctx.restore();
+  }
+
+  drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+    let rot = Math.PI / 2 * 3;
+    let x = cx, y = cy;
+    const step = Math.PI / spikes;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerRadius);
+    for (let i = 0; i < spikes; i++) {
+      x = cx + Math.cos(rot) * outerRadius;
+      y = cy + Math.sin(rot) * outerRadius;
+      ctx.lineTo(x, y);
+      rot += step;
+      x = cx + Math.cos(rot) * innerRadius;
+      y = cy + Math.sin(rot) * innerRadius;
+      ctx.lineTo(x, y);
+      rot += step;
+    }
+    ctx.lineTo(cx, cy - outerRadius);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+class ParticleSystem {
+  constructor() {
+    this.particles = [];
+    this.emitters = [];
+  }
+
+  add(x, y, config) {
+    this.particles.push(new Particle(x, y, config));
+  }
+
+  addBurst(x, y, count, config) {
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 / count) * i + (config.angleJitter ? (Math.random() - 0.5) * config.angleJitter : 0);
+      const speed = (config.speed || 3) + (config.speedJitter ? (Math.random() - 0.5) * config.speedJitter : 0);
+      const pConfig = { ...config };
+      pConfig.vx = Math.cos(angle) * speed;
+      pConfig.vy = Math.sin(angle) * speed;
+      if (config.sizeJitter) pConfig.size = (config.size || 3) + (Math.random() - 0.5) * config.sizeJitter;
+      if (config.lifeJitter) pConfig.life = (config.life || 60) + Math.random() * config.lifeJitter;
+      this.particles.push(new Particle(x, y, pConfig));
+    }
+  }
+
+  addEmitter(config) {
+    const emitter = {
+      x: config.x || 0,
+      y: config.y || 0,
+      rate: config.rate || 5,
+      timer: 0,
+      duration: config.duration || -1,
+      elapsed: 0,
+      particleConfig: config.particleConfig || {},
+      active: true,
+      follow: config.follow || null,
+      spread: config.spread || { x: 0, y: 0 },
+      id: config.id || null
+    };
+    this.emitters.push(emitter);
+    return emitter;
+  }
+
+  removeEmitter(id) {
+    this.emitters = this.emitters.filter(e => e.id !== id);
+  }
+
+  update() {
+    for (let i = this.emitters.length - 1; i >= 0; i--) {
+      const em = this.emitters[i];
+      if (!em.active) continue;
+      em.elapsed++;
+      if (em.duration > 0 && em.elapsed > em.duration) {
+        em.active = false;
+        this.emitters.splice(i, 1);
+        continue;
+      }
+      em.timer++;
+      if (em.timer >= em.rate) {
+        em.timer = 0;
+        let ex = em.x + (Math.random() - 0.5) * em.spread.x;
+        let ey = em.y + (Math.random() - 0.5) * em.spread.y;
+        if (em.follow) {
+          ex += em.follow.x || 0;
+          ey += em.follow.y || 0;
+        }
+        const pConf = typeof em.particleConfig === 'function' ? em.particleConfig() : { ...em.particleConfig };
+        this.particles.push(new Particle(ex, ey, pConf));
+      }
+    }
+
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      this.particles[i].update(this.particles);
+      if (!this.particles[i].alive) {
+        this.particles.splice(i, 1);
+      }
+    }
+  }
+
+  draw(ctx) {
+    for (const p of this.particles) {
+      p.draw(ctx);
+    }
+  }
+
+  clear() {
+    this.particles = [];
+    this.emitters = [];
+  }
+
+  get count() {
+    return this.particles.length;
+  }
+}
+
+// ============================================================================
+// SECTION 3: UTILITY FUNCTIONS
+// ============================================================================
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+function randomRange(min, max) { return Math.random() * (max - min) + min; }
+function randomColor(colors) { return colors[Math.floor(Math.random() * colors.length)]; }
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return { r, g, b };
+}
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(x => Math.round(x).toString(16).padStart(2, '0')).join('');
+}
+function lerpColor(c1, c2, t) {
+  const a = hexToRgb(c1), b = hexToRgb(c2);
+  return rgbToHex(lerp(a.r, b.r, t), lerp(a.g, b.g, t), lerp(a.b, b.b, t));
+}
+function easeInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+function easeOutBounce(t) {
+  if (t < 1 / 2.75) return 7.5625 * t * t;
+  else if (t < 2 / 2.75) return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+  else if (t < 2.5 / 2.75) return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+  return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+}
+function easeOutElastic(t) {
+  const c4 = (2 * Math.PI) / 3;
+  return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
+}
+function easeOutBack(t) {
+  const c1 = 1.70158;
+  const c3 = c1 + 1;
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+}
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+// ============================================================================
+// SECTION 4: CHARACTER DRAWING SYSTEM
+// ============================================================================
+class CharacterRenderer {
+  static drawKatsuKatsu(ctx, x, y, scale, state, frame) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    const breathe = Math.sin(frame * 0.05) * 3;
+    const idle = Math.sin(frame * 0.03) * 2;
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(0, 75, 45, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.translate(idle, breathe);
+
+    // Aura glow
+    if (state === 'powered' || state === 'counter' || state === 'attack') {
+      const auraSize = 80 + Math.sin(frame * 0.1) * 20;
+      const grad = ctx.createRadialGradient(0, 0, 10, 0, 0, auraSize);
+      grad.addColorStop(0, 'rgba(255,215,0,0.4)');
+      grad.addColorStop(0.5, 'rgba(255,107,0,0.2)');
+      grad.addColorStop(1, 'rgba(255,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(0, 0, auraSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Body (katsu-don bowl shape)
+    ctx.fillStyle = '#8B4513';
+    ctx.beginPath();
+    ctx.moveTo(-40, 20);
+    ctx.quadraticCurveTo(-45, -10, -35, -40);
+    ctx.quadraticCurveTo(0, -55, 35, -40);
+    ctx.quadraticCurveTo(45, -10, 40, 20);
+    ctx.quadraticCurveTo(35, 55, 0, 65);
+    ctx.quadraticCurveTo(-35, 55, -40, 20);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#6B3410';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Bowl rim
+    ctx.fillStyle = '#A0522D';
+    ctx.beginPath();
+    ctx.ellipse(0, -38, 38, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#6B3410';
+    ctx.stroke();
+
+    // Rice
+    ctx.fillStyle = '#FFF8DC';
+    ctx.beginPath();
+    ctx.ellipse(0, -35, 32, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Katsu (golden crispy cutlet)
+    ctx.fillStyle = '#DAA520';
+    ctx.beginPath();
+    ctx.ellipse(0, -40, 25, 8, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#B8860B';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Crispy texture lines
+    ctx.strokeStyle = '#CD853F';
+    ctx.lineWidth = 0.8;
+    for (let i = -20; i < 20; i += 6) {
+      ctx.beginPath();
+      ctx.moveTo(i, -43);
+      ctx.lineTo(i + 3, -37);
+      ctx.stroke();
+    }
+
+    // Eyes (golden glow)
+    const eyeGlow = state === 'powered' || state === 'counter';
+    // Left eye
+    ctx.fillStyle = eyeGlow ? '#FFD700' : '#FFF';
+    ctx.beginPath();
+    ctx.ellipse(-14, -15, 9, 11, 0, 0, Math.PI * 2);
+    ctx.fill();
+    if (eyeGlow) {
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#FFD700';
+    }
+    ctx.fillStyle = eyeGlow ? '#FF6B00' : '#222';
+    ctx.beginPath();
+    ctx.ellipse(-14, -15, 5, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath();
+    ctx.arc(-12, -18, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Right eye
+    ctx.fillStyle = eyeGlow ? '#FFD700' : '#FFF';
+    ctx.beginPath();
+    ctx.ellipse(14, -15, 9, 11, 0, 0, Math.PI * 2);
+    ctx.fill();
+    if (eyeGlow) {
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#FFD700';
+    }
+    ctx.fillStyle = eyeGlow ? '#FF6B00' : '#222';
+    ctx.beginPath();
+    ctx.ellipse(14, -15, 5, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath();
+    ctx.arc(16, -18, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Mouth
+    if (state === 'attack' || state === 'counter') {
+      ctx.fillStyle = '#200';
+      ctx.beginPath();
+      ctx.arc(0, 5, 10, 0, Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#FF4444';
+      ctx.beginPath();
+      ctx.arc(0, 8, 4, 0, Math.PI);
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 2, 8, 0.1, Math.PI - 0.1);
+      ctx.stroke();
+    }
+
+    // Arms
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    // Left arm
+    const armAngle = state === 'attack' ? Math.sin(frame * 0.2) * 0.5 - 0.8 : -0.3;
+    ctx.beginPath();
+    ctx.moveTo(-38, 10);
+    ctx.quadraticCurveTo(-55, 10 + armAngle * 20, -60, -10 + armAngle * 30);
+    ctx.stroke();
+    // Hand
+    ctx.fillStyle = '#DAA520';
+    ctx.beginPath();
+    ctx.arc(-60, -10 + armAngle * 30, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Right arm
+    const armAngle2 = state === 'counter' ? -1.2 + Math.sin(frame * 0.3) * 0.3 : 0.3;
+    ctx.beginPath();
+    ctx.moveTo(38, 10);
+    ctx.quadraticCurveTo(55, 10 + armAngle2 * 20, 60, -10 + armAngle2 * 30);
+    ctx.stroke();
+    ctx.fillStyle = '#DAA520';
+    ctx.beginPath();
+    ctx.arc(60, -10 + armAngle2 * 30, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 勝 kanji on body (when powered)
+    if (state === 'powered' || state === 'counter') {
+      ctx.font = 'bold 28px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = `rgba(255, 215, 0, ${0.5 + Math.sin(frame * 0.1) * 0.3})`;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#FFD700';
+      ctx.fillText('勝', 0, 25);
+      ctx.shadowBlur = 0;
+    }
+
+    // Legs
+    ctx.strokeStyle = '#6B3410';
+    ctx.lineWidth = 5;
+    const walkCycle = state === 'attack' ? Math.sin(frame * 0.15) * 8 : 0;
+    ctx.beginPath();
+    ctx.moveTo(-15, 60);
+    ctx.lineTo(-18, 75 + walkCycle);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(15, 60);
+    ctx.lineTo(18, 75 - walkCycle);
+    ctx.stroke();
+
+    // Feet
+    ctx.fillStyle = '#5C2E00';
+    ctx.beginPath();
+    ctx.ellipse(-18, 78 + walkCycle, 10, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(18, 78 - walkCycle, 10, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  static drawSomenRobo(ctx, x, y, scale, state, frame) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    const hover = Math.sin(frame * 0.04) * 4;
+    const idle = Math.cos(frame * 0.025) * 2;
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(0, 80, 50, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.translate(idle, hover);
+
+    // Aura for overheat / berserk
+    if (state === 'berserk' || state === 'overheat') {
+      const auraSize = 90 + Math.sin(frame * 0.15) * 25;
+      const grad = ctx.createRadialGradient(0, 0, 10, 0, 0, auraSize);
+      grad.addColorStop(0, 'rgba(0,191,255,0.3)');
+      grad.addColorStop(0.5, 'rgba(255,0,64,0.2)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(0, 0, auraSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Noodle tentacles (10 of them!)
+    ctx.strokeStyle = '#F5F5DC';
+    ctx.lineWidth = 3;
+    const tentacleBase = state === 'berserk' ? 8 : (state === 'attack' ? 6 : 3);
+    for (let i = 0; i < 10; i++) {
+      const angle = (Math.PI * 2 / 10) * i;
+      const baseX = Math.cos(angle) * 35;
+      const baseY = Math.sin(angle) * 20 + 10;
+      const waveAmp = tentacleBase + Math.sin(frame * 0.08 + i) * 5;
+      const length = 40 + Math.sin(frame * 0.05 + i * 0.7) * 15;
+      ctx.beginPath();
+      ctx.moveTo(baseX, baseY);
+      const cp1x = baseX + Math.cos(angle) * length * 0.5 + Math.sin(frame * 0.1 + i) * waveAmp;
+      const cp1y = baseY + Math.sin(angle) * length * 0.5 + Math.cos(frame * 0.12 + i) * waveAmp;
+      const endX = baseX + Math.cos(angle) * length + Math.sin(frame * 0.08 + i * 1.3) * waveAmp * 1.5;
+      const endY = baseY + Math.sin(angle) * length + Math.cos(frame * 0.09 + i * 1.1) * waveAmp * 1.5;
+      ctx.quadraticCurveTo(cp1x, cp1y, endX, endY);
+      ctx.stroke();
+
+      // Noodle glow if attacking
+      if (state === 'attack' || state === 'berserk') {
+        ctx.strokeStyle = 'rgba(0, 191, 255, 0.3)';
+        ctx.lineWidth = 6;
+        ctx.stroke();
+        ctx.strokeStyle = '#F5F5DC';
+        ctx.lineWidth = 3;
+      }
+    }
+
+    // Main body (cylindrical robot)
+    const bodyGrad = ctx.createLinearGradient(-35, -50, 35, 50);
+    bodyGrad.addColorStop(0, '#C0C0C0');
+    bodyGrad.addColorStop(0.3, '#E8E8E8');
+    bodyGrad.addColorStop(0.7, '#A0A0A0');
+    bodyGrad.addColorStop(1, '#808080');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.moveTo(-35, -45);
+    ctx.lineTo(-38, 45);
+    ctx.quadraticCurveTo(-38, 65, 0, 68);
+    ctx.quadraticCurveTo(38, 65, 38, 45);
+    ctx.lineTo(35, -45);
+    ctx.quadraticCurveTo(35, -60, 0, -62);
+    ctx.quadraticCurveTo(-35, -60, -35, -45);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Body panel lines
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-30, -30);
+    ctx.lineTo(30, -30);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-32, 20);
+    ctx.lineTo(32, 20);
+    ctx.stroke();
+
+    // Noodle chute (bowl on top)
+    ctx.fillStyle = '#4682B4';
+    ctx.beginPath();
+    ctx.ellipse(0, -58, 28, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#36648B';
+    ctx.stroke();
+
+    // Water / tsuyu in chute
+    ctx.fillStyle = 'rgba(0, 191, 255, 0.6)';
+    ctx.beginPath();
+    ctx.ellipse(0, -56, 22, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Sensor eye (main)
+    const sensorColor = state === 'berserk' || state === 'overheat'
+      ? `hsl(${(frame * 5) % 360}, 100%, 50%)`
+      : state === 'attack' ? '#FF0040' : '#00FF88';
+    ctx.fillStyle = '#222';
+    ctx.beginPath();
+    ctx.ellipse(0, -10, 18, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = sensorColor;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = sensorColor;
+    ctx.beginPath();
+    ctx.ellipse(0, -10, 12, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Inner sensor
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath();
+    ctx.arc(-4, -14, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Sensor ring
+    ctx.strokeStyle = sensorColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(0, -10, 18, 18, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Side sensors
+    ctx.fillStyle = state === 'berserk' ? '#FF0040' : '#00BFFF';
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = ctx.fillStyle;
+    ctx.beginPath();
+    ctx.arc(-25, -5, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(25, -5, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Mechanical arms
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    const mechArmAngle = state === 'attack' ? Math.sin(frame * 0.2) * 0.6 : Math.sin(frame * 0.03) * 0.15;
+    // Left
+    ctx.beginPath();
+    ctx.moveTo(-36, 5);
+    ctx.lineTo(-55, 0 + mechArmAngle * 30);
+    ctx.lineTo(-65, -15 + mechArmAngle * 40);
+    ctx.stroke();
+    // Claw
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-65, -15 + mechArmAngle * 40);
+    ctx.lineTo(-72, -20 + mechArmAngle * 40);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-65, -15 + mechArmAngle * 40);
+    ctx.lineTo(-72, -10 + mechArmAngle * 40);
+    ctx.stroke();
+
+    // Right
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(36, 5);
+    ctx.lineTo(55, 0 - mechArmAngle * 30);
+    ctx.lineTo(65, -15 - mechArmAngle * 40);
+    ctx.stroke();
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(65, -15 - mechArmAngle * 40);
+    ctx.lineTo(72, -20 - mechArmAngle * 40);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(65, -15 - mechArmAngle * 40);
+    ctx.lineTo(72, -10 - mechArmAngle * 40);
+    ctx.stroke();
+
+    // Legs (treads)
+    ctx.fillStyle = '#555';
+    ctx.fillRect(-28, 60, 18, 20);
+    ctx.fillRect(10, 60, 18, 20);
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(-28, 63 + i * 5);
+      ctx.lineTo(-10, 63 + i * 5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(10, 63 + i * 5);
+      ctx.lineTo(28, 63 + i * 5);
+      ctx.stroke();
+    }
+
+    // Label
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#00BFFF';
+    ctx.fillText('SOMEN-X1', 0, 40);
+
+    // Self-bind effect (noodle wrapped around self)
+    if (state === 'selfbind') {
+      ctx.strokeStyle = '#F5F5DC';
+      ctx.lineWidth = 4;
+      ctx.globalAlpha = 0.7;
+      for (let i = 0; i < 5; i++) {
+        const wrapY = -40 + i * 22;
+        const wrapAmp = 40 + Math.sin(frame * 0.1 + i) * 5;
+        ctx.beginPath();
+        ctx.moveTo(-wrapAmp, wrapY);
+        ctx.quadraticCurveTo(0, wrapY + 10, wrapAmp, wrapY);
+        ctx.quadraticCurveTo(wrapAmp + 10, wrapY + 5, wrapAmp, wrapY + 11);
+        ctx.quadraticCurveTo(0, wrapY + 20, -wrapAmp, wrapY + 11);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Overheat smoke
+    if (state === 'overheat') {
+      ctx.fillStyle = 'rgba(255,100,100,0.3)';
+      for (let i = 0; i < 5; i++) {
+        const sx = Math.sin(frame * 0.1 + i * 2) * 20;
+        const sy = -70 - Math.abs(Math.sin(frame * 0.05 + i)) * 30;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 8 + Math.sin(frame * 0.08 + i) * 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    ctx.restore();
+  }
+}
+
+// ============================================================================
+// SECTION 5: BACKGROUND ARENA RENDERER
+// ============================================================================
+class ArenaRenderer {
+  constructor(ctx, W, H) {
+    this.ctx = ctx;
+    this.W = W;
+    this.H = H;
+    this.frame = 0;
+    this.stars = [];
+    this.trophies = [];
+    this.gridLines = [];
+    this.setupStars();
+    this.setupTrophies();
+  }
+
+  resize(W, H) {
+    this.W = W;
+    this.H = H;
+    this.setupStars();
+    this.setupTrophies();
+  }
+
+  setupStars() {
+    this.stars = [];
+    for (let i = 0; i < 200; i++) {
+      this.stars.push({
+        x: Math.random() * this.W,
+        y: Math.random() * this.H,
+        size: Math.random() * 2 + 0.5,
+        speed: Math.random() * 0.5 + 0.1,
+        brightness: Math.random(),
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  setupTrophies() {
+    this.trophies = [];
+    for (let i = 0; i < 30; i++) {
+      this.trophies.push({
+        x: Math.random() * this.W,
+        y: Math.random() * this.H,
+        size: Math.random() * 20 + 10,
+        speed: Math.random() * 0.3 + 0.05,
+        rotY: Math.random() * Math.PI * 2,
+        rotSpeed: Math.random() * 0.02 + 0.005,
+        opacity: Math.random() * 0.3 + 0.1,
+        floatPhase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  drawBackground(phase) {
+    const ctx = this.ctx;
+    const W = this.W;
+    const H = this.H;
+    this.frame++;
+
+    // Base gradient
+    const bgGrad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.7);
+    if (phase === 'domain') {
+      bgGrad.addColorStop(0, '#1a0a2e');
+      bgGrad.addColorStop(0.5, '#0d0520');
+      bgGrad.addColorStop(1, '#000005');
+    } else if (phase === 'battle') {
+      bgGrad.addColorStop(0, '#1a0520');
+      bgGrad.addColorStop(0.5, '#100318');
+      bgGrad.addColorStop(1, '#050008');
+    } else {
+      bgGrad.addColorStop(0, '#0a0a1e');
+      bgGrad.addColorStop(0.5, '#050510');
+      bgGrad.addColorStop(1, '#000');
+    }
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid floor (perspective)
+    this.drawGrid(ctx, W, H);
+
+    // Stars
+    this.drawStars(ctx);
+
+    // Floating trophies
+    this.drawTrophies(ctx);
+
+    // Arena boundary rings
+    this.drawArenaRings(ctx, W, H);
+
+    // Floating kanji
+    this.drawFloatingKanji(ctx, W, H);
+
+    // Energy streams
+    this.drawEnergyStreams(ctx, W, H);
+  }
+
+  drawGrid(ctx, W, H) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.08)';
+    ctx.lineWidth = 1;
+    const horizon = H * 0.45;
+    const gridCount = 40;
+    const gridSpacing = W / gridCount;
+
+    // Vertical lines (perspective)
+    for (let i = -gridCount; i <= gridCount * 2; i++) {
+      const x = i * gridSpacing + Math.sin(this.frame * 0.005) * 10;
+      const vanishX = W / 2;
+      ctx.beginPath();
+      ctx.moveTo(x, H);
+      ctx.lineTo(lerp(x, vanishX, 0.9), horizon);
+      ctx.stroke();
+    }
+
+    // Horizontal lines
+    for (let i = 0; i < 20; i++) {
+      const t = i / 20;
+      const y = lerp(H, horizon, t * t);
+      const shrink = 1 - t * 0.7;
+      ctx.beginPath();
+      ctx.moveTo(W / 2 - W * shrink, y);
+      ctx.lineTo(W / 2 + W * shrink, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  drawStars(ctx) {
+    ctx.save();
+    for (const star of this.stars) {
+      const twinkle = Math.sin(this.frame * 0.05 + star.phase) * 0.5 + 0.5;
+      ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness * twinkle * 0.7})`;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.size * twinkle, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Some stars have gold tint
+      if (star.brightness > 0.7) {
+        ctx.fillStyle = `rgba(255, 215, 0, ${(star.brightness - 0.7) * twinkle * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size * twinkle * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      star.y += star.speed;
+      if (star.y > this.H) {
+        star.y = 0;
+        star.x = Math.random() * this.W;
+      }
+    }
+    ctx.restore();
+  }
+
+  drawTrophies(ctx) {
+    ctx.save();
+    for (const trophy of this.trophies) {
+      trophy.rotY += trophy.rotSpeed;
+      trophy.y += trophy.speed;
+      const floatY = Math.sin(this.frame * 0.02 + trophy.floatPhase) * 10;
+
+      if (trophy.y > this.H + 50) {
+        trophy.y = -50;
+        trophy.x = Math.random() * this.W;
+      }
+
+      const scaleX = Math.cos(trophy.rotY);
+      ctx.save();
+      ctx.translate(trophy.x, trophy.y + floatY);
+      ctx.scale(scaleX, 1);
+      ctx.globalAlpha = trophy.opacity;
+
+      // Trophy cup shape
+      const s = trophy.size;
+      ctx.fillStyle = '#FFD700';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = 'rgba(255,215,0,0.5)';
+
+      // Cup body
+      ctx.beginPath();
+      ctx.moveTo(-s * 0.4, 0);
+      ctx.quadraticCurveTo(-s * 0.5, -s * 0.4, -s * 0.3, -s * 0.7);
+      ctx.lineTo(s * 0.3, -s * 0.7);
+      ctx.quadraticCurveTo(s * 0.5, -s * 0.4, s * 0.4, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Cup base
+      ctx.fillRect(-s * 0.15, 0, s * 0.3, s * 0.15);
+      ctx.fillRect(-s * 0.25, s * 0.15, s * 0.5, s * 0.08);
+
+      // Handles
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = s * 0.06;
+      ctx.beginPath();
+      ctx.arc(-s * 0.45, -s * 0.3, s * 0.15, -Math.PI / 2, Math.PI / 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(s * 0.45, -s * 0.3, s * 0.15, Math.PI / 2, -Math.PI / 2);
+      ctx.stroke();
+
+      // "1" text
+      ctx.font = `bold ${s * 0.35}px serif`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#B8860B';
+      ctx.fillText('1', 0, -s * 0.2);
+
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  drawArenaRings(ctx, W, H) {
+    ctx.save();
+    const cx = W / 2;
+    const cy = H * 0.55;
+    ctx.globalCompositeOperation = 'lighter';
+
+    for (let i = 0; i < 3; i++) {
+      const radius = 200 + i * 80 + Math.sin(this.frame * 0.02 + i) * 20;
+      const rotation = this.frame * 0.003 * (i % 2 === 0 ? 1 : -1);
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rotation);
+      ctx.scale(1, 0.3);
+
+      ctx.strokeStyle = `rgba(255, 215, 0, ${0.06 - i * 0.015})`;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([10, 20]);
+      ctx.lineDashOffset = this.frame * 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  drawFloatingKanji(ctx, W, H) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const kanjiList = ['勝', '１位', '覇', '王', '制', '勝利'];
+    for (let i = 0; i < kanjiList.length; i++) {
+      const x = W * 0.1 + (W * 0.8 / kanjiList.length) * i;
+      const y = H * 0.2 + Math.sin(this.frame * 0.015 + i * 1.5) * 60;
+      const alpha = 0.04 + Math.sin(this.frame * 0.02 + i) * 0.02;
+      ctx.font = 'bold 80px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+      ctx.fillText(kanjiList[i], x, y);
+    }
+    ctx.restore();
+  }
+
+  drawEnergyStreams(ctx, W, H) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const streamCount = 6;
+    for (let i = 0; i < streamCount; i++) {
+      const baseAngle = (Math.PI * 2 / streamCount) * i + this.frame * 0.005;
+      const cx = W / 2;
+      const cy = H / 2;
+      const r1 = 100;
+      const r2 = 350 + Math.sin(this.frame * 0.01 + i) * 50;
+
+      ctx.strokeStyle = `rgba(255, 0, 64, ${0.03 + Math.sin(this.frame * 0.03 + i) * 0.02})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const x1 = cx + Math.cos(baseAngle) * r1;
+      const y1 = cy + Math.sin(baseAngle) * r1;
+      const x2 = cx + Math.cos(baseAngle + 0.5) * r2;
+      const y2 = cy + Math.sin(baseAngle + 0.5) * r2;
+      const cpx = cx + Math.cos(baseAngle + 0.25) * (r1 + r2) * 0.4 + Math.sin(this.frame * 0.02) * 30;
+      const cpy = cy + Math.sin(baseAngle + 0.25) * (r1 + r2) * 0.4;
+      ctx.moveTo(x1, y1);
+      ctx.quadraticCurveTo(cpx, cpy, x2, y2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+// ============================================================================
+// SECTION 6: EFFECT PRESETS (Particle effect templates)
+// ============================================================================
+const Effects = {
+  goldBurst(ps, x, y, count = 50) {
+    ps.addBurst(x, y, count, {
+      speed: 6, speedJitter: 4, size: 4, sizeEnd: 0, sizeJitter: 3,
+      life: 40, lifeJitter: 20, color: '#FFD700', glow: 15,
+      glowColor: '#FFD700', gravity: 0.05, shape: 'circle',
+      trail: true, trailLength: 4
+    });
+    ps.addBurst(x, y, count / 2, {
+      speed: 3, speedJitter: 2, size: 6, sizeEnd: 0,
+      life: 30, lifeJitter: 15, color: '#FF6B00', glow: 20,
+      glowColor: '#FF6B00', shape: 'star', rotationSpeed: 0.1
+    });
+  },
+
+  hitImpact(ps, x, y) {
+    ps.addBurst(x, y, 30, {
+      speed: 8, speedJitter: 5, size: 3, sizeEnd: 0,
+      life: 20, lifeJitter: 10, color: '#FFF', glow: 10,
+      shape: 'circle'
+    });
+    ps.addBurst(x, y, 15, {
+      speed: 4, speedJitter: 3, size: 8, sizeEnd: 20,
+      life: 15, color: '#FFD700', glow: 30, glowColor: '#FFD700',
+      shape: 'ring', alphaEnd: 0
+    });
+    // Speed lines
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      ps.add(x, y, {
+        vx: Math.cos(angle) * 15, vy: Math.sin(angle) * 15,
+        size: 10, sizeEnd: 2, life: 10, color: '#FFF',
+        shape: 'line', rotation: angle, glow: 5
+      });
+    }
+  },
+
+  heavyImpact(ps, x, y) {
+    // Main burst
+    ps.addBurst(x, y, 60, {
+      speed: 10, speedJitter: 6, size: 5, sizeEnd: 0, sizeJitter: 3,
+      life: 35, lifeJitter: 15, color: '#FF6B00', glow: 25,
+      glowColor: '#FF4400', gravity: 0.08, trail: true, trailLength: 6
+    });
+    // Shockwave rings
+    for (let i = 0; i < 3; i++) {
+      ps.add(x, y, {
+        size: 5, sizeEnd: 120 + i * 40, life: 25 + i * 5,
+        color: '#FFD700', shape: 'ring', glow: 20, alphaEnd: 0,
+        vx: 0, vy: 0
+      });
+    }
+    // Debris
+    ps.addBurst(x, y, 20, {
+      speed: 7, speedJitter: 4, size: 3, sizeEnd: 1,
+      life: 50, lifeJitter: 20, color: '#8B4513', gravity: 0.15,
+      shape: 'square', rotationSpeed: 0.2, friction: 0.98
+    });
+    // Sparks
+    ps.addBurst(x, y, 40, {
+      speed: 12, speedJitter: 5, size: 2, sizeEnd: 0,
+      life: 25, lifeJitter: 10, color: '#FFD700',
+      glow: 8, shape: 'circle', gravity: 0.1, trail: true, trailLength: 3
+    });
+  },
+
+  counterFlash(ps, x, y) {
+    // Gold explosion
+    ps.addBurst(x, y, 80, {
+      speed: 8, speedJitter: 6, size: 6, sizeEnd: 0, sizeJitter: 4,
+      life: 40, lifeJitter: 20, color: '#FFD700', glow: 30,
+      glowColor: '#FFD700', shape: 'star', rotationSpeed: 0.15,
+      trail: true, trailLength: 5
+    });
+    // 勝 kanji particles
+    for (let i = 0; i < 15; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 3 + Math.random() * 5;
+      ps.add(x, y, {
+        vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 2,
+        size: 12, sizeEnd: 6, life: 60, color: '#FFD700',
+        glow: 20, shape: 'text', text: '勝',
+        rotationSpeed: (Math.random() - 0.5) * 0.1, gravity: 0.03
+      });
+    }
+    // Massive shockwave
+    for (let i = 0; i < 5; i++) {
+      ps.add(x, y, {
+        size: 10, sizeEnd: 200 + i * 50, life: 30 + i * 8,
+        color: i % 2 === 0 ? '#FFD700' : '#FF6B00',
+        shape: 'ring', glow: 25, alphaEnd: 0, vx: 0, vy: 0
+      });
+    }
+  },
+
+  healEffect(ps, x, y) {
+    // Rising golden particles
+    for (let i = 0; i < 40; i++) {
+      ps.add(x + (Math.random() - 0.5) * 80, y + Math.random() * 40, {
+        vx: (Math.random() - 0.5) * 1, vy: -2 - Math.random() * 3,
+        size: 4, sizeEnd: 0, life: 50 + Math.random() * 30,
+        color: '#FFD700', glow: 15, shape: 'star',
+        rotationSpeed: 0.05, oscillateX: 1, oscillateSpeed: 0.08
+      });
+    }
+    // Katsudon particles (bowl emoji substitute)
+    for (let i = 0; i < 8; i++) {
+      const angle = (Math.PI * 2 / 8) * i;
+      ps.add(x, y, {
+        vx: Math.cos(angle) * 2, vy: Math.sin(angle) * 2 - 1,
+        size: 10, sizeEnd: 5, life: 40, color: '#DAA520',
+        glow: 10, shape: 'text', text: '🍛',
+        rotationSpeed: 0.02
+      });
+    }
+    // Healing ring
+    ps.add(x, y, {
+      size: 5, sizeEnd: 80, life: 30, color: '#00FF88',
+      shape: 'ring', glow: 20, alphaEnd: 0, vx: 0, vy: 0
+    });
+  },
+
+  beamAttack(ps, startX, startY, endX, endY, color = '#00BFFF') {
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const steps = Math.floor(dist / 5);
+    for (let i = 0; i < steps; i++) {
+      const t = i / steps;
+      const bx = lerp(startX, endX, t);
+      const by = lerp(startY, endY, t);
+      ps.add(bx + (Math.random() - 0.5) * 15, by + (Math.random() - 0.5) * 15, {
+        vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
+        size: 4 + Math.random() * 3, sizeEnd: 0,
+        life: 20 + Math.random() * 15,
+        color: color, glow: 15, glowColor: color,
+        shape: Math.random() > 0.5 ? 'circle' : 'diamond'
+      });
+    }
+    // Core beam line particles
+    for (let i = 0; i < steps / 2; i++) {
+      const t = i / (steps / 2);
+      const bx = lerp(startX, endX, t);
+      const by = lerp(startY, endY, t);
+      ps.add(bx, by, {
+        vx: 0, vy: 0, size: 8, sizeEnd: 0, life: 10,
+        color: '#FFF', glow: 25, shape: 'circle'
+      });
+    }
+  },
+
+  noodleTentacles(ps, x, y) {
+    for (let i = 0; i < 10; i++) {
+      const angle = (Math.PI * 2 / 10) * i;
+      const length = 80 + Math.random() * 40;
+      for (let j = 0; j < 15; j++) {
+        const t = j / 15;
+        const nx = x + Math.cos(angle) * length * t;
+        const ny = y + Math.sin(angle) * length * t;
+        ps.add(nx + (Math.random() - 0.5) * 10, ny + (Math.random() - 0.5) * 10, {
+          vx: Math.cos(angle) * 1, vy: Math.sin(angle) * 1,
+          size: 3, sizeEnd: 1, life: 30 + Math.random() * 20,
+          color: '#F5F5DC', glow: 5, shape: 'circle', gravity: 0.02
+        });
+      }
+    }
+  },
+
+  domainExpansion(ps, W, H) {
+    // Massive burst from center
+    ps.addBurst(W / 2, H / 2, 200, {
+      speed: 15, speedJitter: 10, size: 5, sizeEnd: 0, sizeJitter: 4,
+      life: 80, lifeJitter: 40, color: '#FFD700', glow: 30,
+      glowColor: '#FFD700', shape: 'star', rotationSpeed: 0.1,
+      friction: 0.98
+    });
+    // Purple void particles
+    ps.addBurst(W / 2, H / 2, 100, {
+      speed: 8, speedJitter: 5, size: 8, sizeEnd: 0,
+      life: 60, lifeJitter: 30, color: '#8B00FF', glow: 20,
+      shape: 'diamond', rotationSpeed: 0.05, friction: 0.97
+    });
+    // Red ominous particles
+    ps.addBurst(W / 2, H / 2, 80, {
+      speed: 12, speedJitter: 8, size: 3, sizeEnd: 0,
+      life: 50, lifeJitter: 25, color: '#FF0040', glow: 15,
+      shape: 'circle', trail: true, trailLength: 8, friction: 0.99
+    });
+    // 勝 kanji burst
+    for (let i = 0; i < 20; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 5 + Math.random() * 8;
+      ps.add(W / 2, H / 2, {
+        vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+        size: 15, sizeEnd: 8, life: 80, color: '#FFD700',
+        glow: 25, shape: 'text', text: '勝',
+        rotationSpeed: (Math.random() - 0.5) * 0.1, friction: 0.98
+      });
+    }
+    // Giant rings
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => {
+        ps.add(W / 2, H / 2, {
+          size: 10, sizeEnd: Math.min(W, H) * 0.6, life: 60,
+          color: i % 2 === 0 ? '#FFD700' : '#FF0040',
+          shape: 'ring', glow: 30, alphaEnd: 0, vx: 0, vy: 0
+        });
+      }, i * 100);
+    }
+  },
+
+  fairnessScale(ps, x, y) {
+    // Light particles around scale
+    for (let i = 0; i < 30; i++) {
+      ps.add(x + (Math.random() - 0.5) * 100, y + (Math.random() - 0.5) * 60, {
+        vx: (Math.random() - 0.5) * 2, vy: -1 - Math.random() * 2,
+        size: 3, sizeEnd: 0, life: 40 + Math.random() * 20,
+        color: '#FFF', glow: 15, shape: 'circle',
+        oscillateX: 0.5, oscillateSpeed: 0.1
+      });
+    }
+    // Balance beam particles
+    ps.add(x, y, {
+      size: 5, sizeEnd: 60, life: 30, color: '#FFF',
+      shape: 'ring', glow: 20, alphaEnd: 0, vx: 0, vy: 0
+    });
+  },
+
+  soumenBeam(ps, startX, startY, endX, endY) {
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx);
+    const steps = Math.floor(dist / 4);
+
+    // Cold tsuyu particles
+    for (let i = 0; i < steps; i++) {
+      const t = i / steps;
+      const bx = lerp(startX, endX, t);
+      const by = lerp(startY, endY, t);
+      ps.add(bx + (Math.random() - 0.5) * 20, by + (Math.random() - 0.5) * 20, {
+        vx: Math.cos(angle) * 2 + (Math.random() - 0.5) * 3,
+        vy: Math.sin(angle) * 2 + (Math.random() - 0.5) * 3,
+        size: 3 + Math.random() * 2, sizeEnd: 0,
+        life: 25 + Math.random() * 15,
+        color: randomColor(['#00BFFF', '#87CEEB', '#F5F5DC', '#ADD8E6']),
+        glow: 10, shape: Math.random() > 0.7 ? 'line' : 'circle',
+        rotation: angle
+      });
+    }
+    // Noodle strands
+    for (let i = 0; i < 20; i++) {
+      const t = Math.random();
+      const bx = lerp(startX, endX, t);
+      const by = lerp(startY, endY, t);
+      ps.add(bx, by, {
+        vx: Math.cos(angle + (Math.random() - 0.5) * 0.5) * 5,
+        vy: Math.sin(angle + (Math.random() - 0.5) * 0.5) * 5,
+        size: 6, sizeEnd: 2, life: 30,
+        color: '#F5F5DC', glow: 5, shape: 'line',
+        rotation: angle + (Math.random() - 0.5) * 0.3,
+        trail: true, trailLength: 4
+      });
+    }
+  },
+
+  vinegarPoison(ps, x, y) {
+    for (let i = 0; i < 25; i++) {
+      ps.add(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40, {
+        vx: (Math.random() - 0.5) * 3, vy: -1 - Math.random() * 2,
+        size: 5 + Math.random() * 3, sizeEnd: 0,
+        life: 40 + Math.random() * 20,
+        color: randomColor(['#00FF00', '#32CD32', '#ADFF2F', '#7CFC00']),
+        glow: 15, shape: 'circle', turbulence: 0.5
+      });
+    }
+    // Skull emoji
+    for (let i = 0; i < 5; i++) {
+      ps.add(x + (Math.random() - 0.5) * 30, y, {
+        vx: (Math.random() - 0.5) * 2, vy: -2 - Math.random() * 1,
+        size: 10, sizeEnd: 5, life: 50,
+        color: '#00FF00', shape: 'text', text: '☠️',
+        rotationSpeed: 0.02
+      });
+    }
+  },
+
+  katsudonTransform(ps, x, y) {
+    // Beam transforming into golden katsudon
+    ps.addBurst(x, y, 40, {
+      speed: 5, speedJitter: 3, size: 4, sizeEnd: 0,
+      life: 30, lifeJitter: 15,
+      color: '#FFD700', glow: 20, shape: 'star',
+      rotationSpeed: 0.1
+    });
+    // Food particles
+    for (let i = 0; i < 12; i++) {
+      ps.add(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40, {
+        vx: (Math.random() - 0.5) * 3, vy: -1 - Math.random() * 2,
+        size: 8, sizeEnd: 4, life: 45,
+        color: randomColor(['#DAA520', '#8B4513', '#FFF8DC', '#FFD700']),
+        glow: 10, shape: 'circle', gravity: 0.02
+      });
+    }
+    // Steam
+    for (let i = 0; i < 15; i++) {
+      ps.add(x + (Math.random() - 0.5) * 30, y - 10, {
+        vx: (Math.random() - 0.5) * 0.5, vy: -1 - Math.random() * 1.5,
+        size: 8, sizeEnd: 15, life: 50,
+        color: '#FFF', glow: 5, shape: 'circle',
+        alphaEnd: 0, turbulence: 0.3, blendMode: 'lighter'
+      });
+    }
+  },
+
+  rankingFlash(ps, W, H) {
+    // Number 1 particles falling
+    for (let i = 0; i < 30; i++) {
+      ps.add(Math.random() * W, -20, {
+        vx: (Math.random() - 0.5) * 2, vy: 2 + Math.random() * 3,
+        size: 14, sizeEnd: 8, life: 80 + Math.random() * 40,
+        color: '#FFD700', glow: 15, shape: 'text', text: '1',
+        rotationSpeed: (Math.random() - 0.5) * 0.05
+      });
+    }
+    // Confetti
+    for (let i = 0; i < 60; i++) {
+      ps.add(Math.random() * W, -10, {
+        vx: (Math.random() - 0.5) * 4, vy: 3 + Math.random() * 4,
+        size: 4, sizeEnd: 2, life: 100 + Math.random() * 50,
+        color: randomColor(['#FFD700', '#FF0040', '#00BFFF', '#FF6B00', '#00FF88']),
+        glow: 5, shape: 'square',
+        rotationSpeed: (Math.random() - 0.5) * 0.2,
+        oscillateX: 1, oscillateSpeed: 0.05
+      });
+    }
+  },
+
+  overheatSmoke(ps, x, y) {
+    for (let i = 0; i < 20; i++) {
+      ps.add(x + (Math.random() - 0.5) * 50, y - 20, {
+        vx: (Math.random() - 0.5) * 2, vy: -2 - Math.random() * 2,
+        size: 10, sizeEnd: 25, life: 60 + Math.random() * 30,
+        color: randomColor(['#FF4444', '#FF6666', '#CC0000', '#FF8888']),
+        glow: 10, shape: 'circle', alphaEnd: 0,
+        turbulence: 0.5, blendMode: 'lighter'
+      });
+    }
+    // Sparks from overheating
+    ps.addBurst(x, y, 15, {
+      speed: 4, speedJitter: 3, size: 2, sizeEnd: 0,
+      life: 20, lifeJitter: 10, color: '#FF4444',
+      glow: 8, shape: 'circle', gravity: 0.1
+    });
+  },
+
+  selfBindNoodle(ps, x, y) {
+    for (let i = 0; i < 8; i++) {
+      const angle = (Math.PI * 2 / 8) * i;
+      const r = 30;
+      ps.add(x + Math.cos(angle) * r, y + Math.sin(angle) * r, {
+        vx: Math.cos(angle + Math.PI / 2) * 1,
+        vy: Math.sin(angle + Math.PI / 2) * 1,
+        size: 3, sizeEnd: 1, life: 40,
+        color: '#F5F5DC', glow: 5, shape: 'circle',
+        spring: { x: x + Math.cos(angle) * r, y: y + Math.sin(angle) * r },
+        springK: 0.05, damping: 0.9
+      });
+    }
+    // Distress particles
+    for (let i = 0; i < 10; i++) {
+      ps.add(x + (Math.random() - 0.5) * 40, y - 40, {
+        vx: (Math.random() - 0.5) * 1, vy: -1 - Math.random(),
+        size: 8, sizeEnd: 4, life: 40,
+        color: '#FF0040', shape: 'text', text: '！',
+        glow: 10
+      });
+    }
+  },
+
+  ambientDomain(ps, W, H) {
+    // Constant ambient particles for domain
+    if (Math.random() > 0.7) {
+      ps.add(Math.random() * W, H + 10, {
+        vx: (Math.random() - 0.5) * 0.5, vy: -1 - Math.random() * 0.5,
+        size: 2, sizeEnd: 0, life: 120 + Math.random() * 60,
+        color: randomColor(['#FFD700', '#FF6B00', '#FF0040']),
+        glow: 8, shape: 'circle', oscillateX: 0.3, oscillateSpeed: 0.02
+      });
+    }
+    // Floating embers
+    if (Math.random() > 0.85) {
+      ps.add(Math.random() * W, Math.random() * H, {
+        vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+        size: 1.5, sizeEnd: 0, life: 80 + Math.random() * 40,
+        color: '#FFD700', glow: 12, shape: 'circle',
+        oscillateX: 0.5, oscillateY: 0.3, oscillateSpeed: 0.03
+      });
+    }
+  },
+
+  victoryExplosion(ps, W, H) {
+    // Massive celebration
+    for (let burst = 0; burst < 5; burst++) {
+      const bx = W * 0.2 + Math.random() * W * 0.6;
+      const by = H * 0.2 + Math.random() * H * 0.4;
+      setTimeout(() => {
+        ps.addBurst(bx, by, 100, {
+          speed: 10, speedJitter: 8, size: 5, sizeEnd: 0, sizeJitter: 3,
+          life: 60, lifeJitter: 30,
+          color: randomColor(['#FFD700', '#FF6B00', '#FF0040', '#FFF', '#00FF88']),
+          glow: 20, shape: randomColor(['circle', 'star', 'diamond']),
+          rotationSpeed: (Math.random() - 0.5) * 0.2,
+          gravity: 0.05, friction: 0.99
+        });
+      }, burst * 300);
+    }
+    // Gold rain
+    for (let i = 0; i < 100; i++) {
+      setTimeout(() => {
+        ps.add(Math.random() * W, -10, {
+          vx: (Math.random() - 0.5) * 3, vy: 3 + Math.random() * 4,
+          size: 3 + Math.random() * 4, sizeEnd: 1,
+          life: 120 + Math.random() * 60,
+          color: randomColor(['#FFD700', '#FF6B00', '#FFC107']),
+          glow: 10, shape: 'star', rotationSpeed: 0.1,
+          oscillateX: 1, oscillateSpeed: 0.03
+        });
+      }, Math.random() * 1500);
+    }
+    // Trophy particles
+    for (let i = 0; i < 20; i++) {
+      ps.add(W / 2 + (Math.random() - 0.5) * 200, H / 2, {
+        vx: (Math.random() - 0.5) * 5, vy: -3 - Math.random() * 5,
+        size: 12, sizeEnd: 6, life: 80,
+        color: '#FFD700', shape: 'text', text: '🏆',
+        gravity: 0.04, rotationSpeed: 0.02
+      });
+    }
+  }
+};
+
+// ============================================================================
+// SECTION 7: MAIN GAME ENGINE
+// ============================================================================
+const Game = {
+  canvas: null,
+  ctx: null,
+  W: 0,
+  H: 0,
+  frame: 0,
+  particleSystem: new ParticleSystem(),
+  audio: new AudioSynth(),
+  arena: null,
+  state: 'loading', // loading, start, domain_intro, battle, cutscene, win
+  phase: 'normal',
+
+  // Character data
+  katsu: {
+    name: 'カツカツ',
+    hp: 1350, maxHp: 1350,
+    x: 0, y: 0, targetX: 0, targetY: 0,
+    scale: 1.0, state: 'idle',
+    combo: 0
+  },
+  somen: {
+    name: 'そうめんロボ',
+    hp: 2000, maxHp: 2000,
+    x: 0, y: 0, targetX: 0, targetY: 0,
+    scale: 1.0, state: 'idle',
+    combo: 0
+  },
+
+  // Battle state
+  turn: 'intro', // intro, player, enemy, resolution
+  turnCount: 0,
+  battlePhase: 0, // story progression
+  isAnimating: false,
+  dialogueQueue: [],
+  currentDialogue: null,
+  dialogueCallback: null,
+  actionQueue: [],
+
+  // Timers / animations
+  animations: [],
+  scheduledEvents: [],
+  screenShakeTimer: 0,
+  screenShakeIntensity: 0,
+  flashColor: null,
+  flashTimer: 0,
+
+  // ===== INITIALIZATION =====
+  init() {
+    this.canvas = document.getElementById('gameCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+
+    this.arena = new ArenaRenderer(this.ctx, this.W, this.H);
+    this.simulateLoading();
+    this.gameLoop();
+  },
+
+  resize() {
+    this.W = window.innerWidth;
+    this.H = window.innerHeight;
+    this.canvas.width = this.W;
+    this.canvas.height = this.H;
+    if (this.arena) this.arena.resize(this.W, this.H);
+
+    // Update character positions
+    this.katsu.targetX = this.W * 0.22;
+    this.katsu.targetY = this.H * 0.55;
+    this.somen.targetX = this.W * 0.78;
+    this.somen.targetY = this.H * 0.55;
+
+    if (this.state === 'loading' || this.state === 'start') {
+      this.katsu.x = this.katsu.targetX;
+      this.katsu.y = this.katsu.targetY;
+      this.somen.x = this.somen.targetX;
+      this.somen.y = this.somen.targetY;
+    }
+  },
+
+  simulateLoading() {
+    const bar = document.getElementById('loading-bar-inner');
+    let progress = 0;
+    const loadInterval = setInterval(() => {
+      progress += Math.random() * 15 + 5;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(loadInterval);
+        bar.style.width = '100%';
+        setTimeout(() => {
+          document.getElementById('loading-screen').classList.add('hidden');
+          document.getElementById('start-screen').classList.remove('hidden');
+          this.state = 'start';
+        }, 500);
+      }
+      bar.style.width = progress + '%';
+    }, 200);
+  },
+
+  // ===== START GAME =====
+  async startGame() {
+    this.audio.init();
+    document.getElementById('start-screen').classList.add('hidden');
+    this.state = 'domain_intro';
+
+    // Position characters
+    this.katsu.x = this.katsu.targetX;
+    this.katsu.y = this.katsu.targetY;
+    this.somen.x = this.somen.targetX;
+    this.somen.y = this.somen.targetY;
+
+    this.audio.playDomainExpansion();
+
+    // Domain expansion animation
+    await sleep(6000);
+
+    // Trigger domain particles
+    Effects.domainExpansion(this.particleSystem, this.W, this.H);
+    this.screenShake(1.5, 15);
+    this.flashScreen('#FFD700', 500);
+
+    await sleep(2000);
+
+    // Hide domain overlay
+    document.getElementById('domain-overlay').classList.add('hidden');
+
+    // Show battle UI
+    this.state = 'battle';
+    this.phase = 'battle';
+    document.getElementById('hp-katsu-container').style.display = 'block';
+    document.getElementById('hp-somen-container').style.display = 'block';
+    document.getElementById('scoreboard').style.display = 'block';
+
+    this.audio.playBGMLoop();
+
+    // Start story sequence
+    await sleep(1000);
+    this.startStoryPhase(0);
+  },
+
+  // ===== STORY PHASES =====
+  async startStoryPhase(phase) {
+    this.battlePhase = phase;
+    this.isAnimating = true;
+
+    switch (phase) {
+      case 0: await this.storyIntro(); break;
+      case 1: await this.storyFairnessRule(); break;
+      case 2: await this.storySomenAttack(); break;
+      case 3: await this.storyKatsuCounter(); break;
+      case 4: await this.storyAftermath(); break;
+      case 5: await this.storyPlayerTurn(); break;
+    }
+  },
+
+  // ----- Phase 0: Intro -----
+  async storyIntro() {
+    this.setCutscene(true);
+    this.katsu.state = 'powered';
+
+    await this.showDialogue('カツカツ', '勝つ。勝つ。勝つ。ただそれだけだ……！');
+    this.audio.playCharge();
+    await this.showDialogue('ナレーション', 'カツカツの瞳が金色に輝き、虚空が歪む——');
+
+    // Golden eye flash effect
+    Effects.goldBurst(this.particleSystem, this.katsu.x, this.katsu.y - 30, 60);
+    this.flashScreen('#FFD700', 300);
+    this.screenShake(0.5, 8);
+    this.audio.playHeavyHit();
+
+    await sleep(800);
+
+    await this.showDialogue('ナレーション', '祖先「かつもんもん」の術式が血脈を駆け巡り、領域が展開された——');
+
+    // Massive domain energy burst
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        Effects.goldBurst(this.particleSystem, this.katsu.x + (Math.random() - 0.5) * 100, this.katsu.y + (Math.random() - 0.5) * 80, 30);
+      }, i * 200);
+    }
+    this.audio.playExplosion();
+    this.screenShake(1.0, 12);
+
+    await sleep(1200);
+
+    await this.showDialogue('ナレーション', '周囲は無限の競技場へと変わる。観客席には無数の「1位」トロフィーが浮かび、巨大な電光掲示板が「順位争い中」と点滅する。');
+
+    Effects.rankingFlash(this.particleSystem, this.W, this.H);
+    this.audio.playWarning();
+
+    await sleep(600);
+
+    await this.showDialogue('ナレーション', 'ここでは「勝つことだけを意識する精神」が絶対ルール。相手は逃げも守りも許されず、常に「俺が1位を取る！」という狂った競争心で戦わなければならない。');
+
+    this.updateScoreboard('順位争い中', '領域ルール適用——逃走・防御不可');
+
+    await sleep(500);
+    this.setCutscene(false);
+    await sleep(300);
+
+    this.startStoryPhase(1);
+  },
+
+  // ----- Phase 1: Fairness Rule -----
+  async storyFairnessRule() {
+    this.setCutscene(true);
+
+    await this.showDialogue('ナレーション', '——公平ルール発動。');
+    this.showTurnIndicator('公平ルール発動', '#FFF', 2000);
+    this.audio.playCharge();
+
+    await sleep(1500);
+
+    // Draw fairness scale animation
+    Effects.fairnessScale(this.particleSystem, this.W / 2, this.H / 2);
+    this.flashScreen('#FFFFFF', 400);
+
+    await sleep(800);
+
+    await this.showDialogue('ナレーション', '領域の中心で光の天秤が回る。');
+
+    // Animate HP reduction for Katsu
+    await sleep(500);
+    this.showSkillName('天秤の裁定', '互いのHPを均す——', '#FFF', '#AAA', 2500);
+    this.audio.playHit();
+
+    await this.animateHpChange('katsu', 1350, 1250, 1500);
+    this.showDamageNumber(this.katsu.x, this.katsu.y - 60, '-100', '#FF4444');
+    this.screenShake(0.3, 5);
+
+    await sleep(600);
+
+    await this.showDialogue('ナレーション', 'カツカツのHP：1350 → 1250');
+
+    // Animate HP reduction for Somen
+    await sleep(400);
+    this.audio.playHit();
+    await this.animateHpChange('somen', 2000, 1900, 1500);
+    this.showDamageNumber(this.somen.x, this.somen.y - 60, '-100', '#FF4444');
+    this.screenShake(0.3, 5);
+
+    await sleep(600);
+
+    await this.showDialogue('ナレーション', 'そうめんロボのHP：2000 → 1900（冷たい麺の耐久力は意外と高い）');
+
+    await this.showDialogue('ナレーション', '……どちらも死なず。ゲームは続く。');
+
+    this.updateScoreboard('1位: ???  2位: ???', '天秤の裁定完了——戦闘開始');
+
+    // Somen robot awakening
+    await sleep(400);
+    this.somen.state = 'berserk';
+    Effects.overheatSmoke(this.particleSystem, this.somen.x, this.somen.y - 30);
+    this.audio.playWarning();
+
+    await this.showDialogue('ナレーション', 'そうめんロボの赤いセンサーが狂ったように点滅した。');
+
+    await sleep(300);
+
+    await this.showDialogue('ナレーション', '普段は「ひゅるる〜〜〜」と流しそうめんを流して遊んでいるだけのロボットが、領域の呪縛で「勝ち勝ちモード」に強制覚醒。');
+
+    this.somen.state = 'berserk';
+    Effects.overheatSmoke(this.particleSystem, this.somen.x, this.somen.y);
+    this.audio.playExplosion();
+    this.screenShake(0.6, 8);
+    this.flashScreen('#FF0040', 300);
+
+    await sleep(500);
+
+    await this.showDialogue('そうめんロボ', '勝たねば……1位にならねば……！！');
+
+    this.updateHpSub('somen', '⚠ 勝ち勝ちモード強制覚醒');
+
+    await sleep(500);
+    this.setCutscene(false);
+    await sleep(300);
+
+    this.startStoryPhase(2);
+  },
+
+  // ----- Phase 2: Somen Robot's Attack -----
+  async storySomenAttack() {
+    this.setCutscene(true);
+
+    this.showTurnIndicator('そうめんロボのターン', '#00BFFF', 2000);
+    this.audio.playWarning();
+    await sleep(2200);
+
+    this.somen.state = 'attack';
+
+    // Show skill name
+    this.showSkillName('流しそうめん・デッドヒートビーム！！', '冷たいつゆを混ぜた高速麺ビーム', '#00BFFF', '#87CEEB', 3000);
+    this.audio.playCharge();
+
+    await sleep(1000);
+
+    await this.showDialogue('そうめんロボ', '流しそうめん・デッドヒートビーム！！');
+
+    // Charging effect at somen
+    for (let i = 0; i < 3; i++) {
+      await sleep(300);
+      this.particleSystem.addBurst(this.somen.x, this.somen.y, 30, {
+        speed: 3, speedJitter: 2, size: 4, sizeEnd: 0,
+        life: 20, color: '#00BFFF', glow: 15, shape: 'circle'
+      });
+      this.audio.playTone(300 + i * 200, 0.2, 'sine', 0.3);
+    }
+
+    await sleep(500);
+
+    // FIRE THE BEAM!
+    this.audio.playBeam();
+    this.screenShake(1.0, 10);
+    this.flashScreen('#00BFFF', 200);
+    Effects.soumenBeam(this.particleSystem, this.somen.x - 40, this.somen.y, this.katsu.x + 40, this.katsu.y);
+
+    // Beam animation - multiple waves
+    for (let wave = 0; wave < 3; wave++) {
+      setTimeout(() => {
+        Effects.soumenBeam(this.particleSystem, this.somen.x - 40, this.somen.y - 10 + wave * 10, this.katsu.x + 40, this.katsu.y - 10 + wave * 10);
+        this.audio.playTone(200 + wave * 100, 0.15, 'sawtooth', 0.2);
+      }, wave * 150);
+    }
+
+    await sleep(800);
+
+    // Noodle tentacles
+    await this.showDialogue('ナレーション', '同時に麺の触手が10本伸びて「麺縛り・1位争奪！」で動きを封じようとする。');
+
+    this.showSkillName('麺縛り・1位争奪！', '10本の麺触手が封じる——', '#F5F5DC', '#DDD', 2500);
+    Effects.noodleTentacles(this.particleSystem, this.somen.x, this.somen.y);
+    this.audio.playHeavyHit();
+    this.screenShake(0.7, 8);
+
+    await sleep(1500);
+
+    // Poison effect
+    await this.showDialogue('ナレーション', 'つゆには毒成分（酢酸）が入っており、触れたらHPさらに-50の追加ダメージ！');
+
+    Effects.vinegarPoison(this.particleSystem, this.katsu.x, this.katsu.y);
+    this.flashScreen('#00FF00', 200);
+    this.audio.playTone(150, 0.3, 'square', 0.3);
+
+    await sleep(1000);
+
+    await this.showDialogue('ナレーション', 'だが——');
+    this.flashScreen('#FFD700', 100);
+    this.audio.playTone(880, 0.1, 'sine', 0.4);
+
+    await sleep(600);
+    this.setCutscene(false);
+    await sleep(200);
+
+    this.startStoryPhase(3);
+  },
+
+  // ----- Phase 3: Katsu Counter -----
+  async storyKatsuCounter() {
+    this.setCutscene(true);
+
+    this.showTurnIndicator('カツカツの反撃', '#FFD700', 2500);
+    this.audio.playWarning();
+    await sleep(2000);
+
+    this.katsu.state = 'counter';
+
+    await this.showDialogue('カツカツ', 'ふざけるな……お前は2位以下だ……！');
+
+    // Dramatic pause with aura buildup
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => {
+        this.particleSystem.addBurst(this.katsu.x, this.katsu.y, 15, {
+          speed: 2, speedJitter: 1, size: 3, sizeEnd: 0,
+          life: 25, color: '#FFD700', glow: 20, shape: 'circle'
+        });
+      }, i * 150);
+    }
+    this.audio.playCharge();
+
+    await sleep(1500);
+
+    // Skill announcement
+    this.showSkillName('祖先の術式「かつもんもん」発動！', '「勝ち」で相手の攻撃を上書きするカウンター', '#FFD700', '#FF6B00', 3500);
+
+    await this.showDialogue('ナレーション', '祖先の術式「かつもんもん」発動！「勝ち」で相手の攻撃を上書きするカウンター能力——');
+
+    await sleep(500);
+
+    // The beam touches Katsu
+    await this.showDialogue('ナレーション', 'そうめんビームがカツカツに触れた瞬間——');
+
+    // Beam reaches katsu
+    Effects.soumenBeam(this.particleSystem, this.somen.x - 40, this.somen.y, this.katsu.x, this.katsu.y);
+    this.audio.playBeam();
+    this.screenShake(0.5, 6);
+
+    await sleep(800);
+
+    // COUNTER ACTIVATION!
+    this.flashScreen('#FFD700', 600);
+    this.audio.playCounter();
+    this.screenShake(2.0, 20);
+
+    // Massive counter effect
+    Effects.counterFlash(this.particleSystem, this.katsu.x, this.katsu.y);
+
+    await sleep(400);
+
+    await this.showDialogue('ナレーション', '「勝ち」エフェクトが炸裂！ビームが突然「金色の勝ちカツ丼」に変わり、カツカツの口に吸い込まれる！');
+
+    // Transform beam to katsudon
+    Effects.katsudonTransform(this.particleSystem, this.katsu.x, this.katsu.y - 20);
+    this.flashScreen('#DAA520', 300);
+    this.audio.playHeal();
+
+    // Show 勝 kanji explosions everywhere
+    for (let i = 0; i < 10; i++) {
+      setTimeout(() => {
+        const rx = this.katsu.x + (Math.random() - 0.5) * 200;
+        const ry = this.katsu.y + (Math.random() - 0.5) * 150;
+        this.particleSystem.add(rx, ry, {
+          vx: 0, vy: -1, size: 18, sizeEnd: 10, life: 50,
+          color: '#FFD700', glow: 25, shape: 'text', text: '勝',
+          rotationSpeed: 0.02
+        });
+      }, i * 100);
+    }
+
+    await sleep(1000);
+
+    // HP changes
+    this.showDamageNumber(this.katsu.x, this.katsu.y - 80, '+80 回復', '#00FF88');
+    Effects.healEffect(this.particleSystem, this.katsu.x, this.katsu.y);
+    this.audio.playHeal();
+
+    await this.showDialogue('ナレーション', 'HP回復+80（勝ち飯効果）！');
+    await this.animateHpChange('katsu', 1250, 1330, 1200);
+
+    await sleep(500);
+
+    // Somen takes reflected damage
+    this.flashScreen('#FF6B00', 200);
+    this.audio.playHeavyHit();
+    this.screenShake(0.8, 10);
+    Effects.heavyImpact(this.particleSystem, this.somen.x, this.somen.y);
+    this.showDamageNumber(this.somen.x, this.somen.y - 80, '-80', '#FF4444');
+
+    await this.showDialogue('ナレーション', 'カツカツのHP：1250 → 1330');
+    await this.animateHpChange('somen', 1900, 1820, 1200);
+
+    await sleep(300);
+
+    await this.showDialogue('ナレーション', 'そうめんロボのHP：1900 → 1820（ビーム反転ダメージ）');
+
+    await sleep(500);
+    this.setCutscene(false);
+    await sleep(300);
+
+    this.startStoryPhase(4);
+  },
+
+  // ----- Phase 4: Aftermath -----
+  async storyAftermath() {
+    this.setCutscene(true);
+    this.katsu.state = 'powered';
+
+    await this.showDialogue('ナレーション', 'カツカツがニヤリと笑う。');
+
+    await sleep(300);
+
+    await this.showDialogue('カツカツ', '順位は俺が決める。お前は永遠に2位だ。');
+
+    // Scoreboard dramatic update
+    this.flashScreen('#FF0040', 400);
+    this.audio.playExplosion();
+    this.screenShake(1.0, 12);
+    this.updateScoreboard('1位：カツカツ　2位：そうめんロボ（確定）', '⚡ 順位確定 ⚡');
+    Effects.rankingFlash(this.particleSystem, this.W, this.H);
+
+    await sleep(800);
+
+    await this.showDialogue('ナレーション', '領域の電光掲示板が大音量で叫ぶ——「現在1位：カツカツ　2位：そうめんロボ（確定）」');
+
+    await sleep(500);
+
+    // Somen robot overheat
+    this.somen.state = 'overheat';
+    Effects.overheatSmoke(this.particleSystem, this.somen.x, this.somen.y - 20);
+    this.audio.playWarning();
+
+    await this.showDialogue('ナレーション', 'そうめんロボのセンサーがオーバーヒート。');
+
+    await sleep(300);
+
+    await this.showDialogue('そうめんロボ', '勝ち……勝ち……でも1位が……取れない……！！');
+
+    // Glitch effect on somen
+    this.addAnimation({
+      duration: 120,
+      onUpdate: (t) => {
+        if (Math.random() > 0.7) {
+          Effects.overheatSmoke(this.particleSystem, this.somen.x + (Math.random() - 0.5) * 30, this.somen.y - 30);
+        }
+      }
+    });
+
+    await sleep(500);
+
+    await this.showDialogue('ナレーション', '領域のルールで「勝つことしか考えられない」精神が暴走し、自ら麺触手を自分のボディに巻き付けて自縛し始めた！');
+
+    this.somen.state = 'selfbind';
+    Effects.selfBindNoodle(this.particleSystem, this.somen.x, this.somen.y);
+    this.audio.playHit();
+    this.screenShake(0.4, 5);
+
+    this.updateHpSub('somen', '⚠ 自縛状態——暴走モード全開');
+
+    await sleep(800);
+
+    await this.showDialogue('ナレーション', '次ターン待機中……カツカツ（HP1330）はまだ余裕の表情。そうめんロボ（HP1820）は「1位になりたい……」と暴走モード全開。');
+
+    await sleep(500);
+    this.setCutscene(false);
+    await sleep(500);
+
+    this.startStoryPhase(5);
+  },
+
+  // ----- Phase 5: Player Turn -----
+  async storyPlayerTurn() {
+    this.isAnimating = false;
+    this.turn = 'player';
+    this.turnCount++;
+
+    this.showTurnIndicator('あなたのターン', '#FFD700', 2000);
+    this.audio.playTone(523, 0.3, 'sine', 0.3);
+
+    await sleep(2200);
+
+    // Show action buttons
+    document.getElementById('action-panel').classList.add('show');
+
+    await this.showDialogue('ナレーション', 'カツカツのターン！　行動を選択せよ——');
+  },
+
+  // ===== PLAYER ACTIONS =====
+  async playerAction(action) {
+    if (this.isAnimating) return;
+    this.isAnimating = true;
+    document.getElementById('action-panel').classList.remove('show');
+    this.hideDialogue();
+
+    switch (action) {
+      case 'attack': await this.doAttack(); break;
+      case 'skill': await this.doSkillAttack(); break;
+      case 'counter': await this.doCounterAttack(); break;
+      case 'heal': await this.doHeal(); break;
+    }
+
+    // Check win condition
+    if (this.somen.hp <= 0) {
+      await this.doVictory();
+      return;
+    }
+
+    // Enemy turn
+    await sleep(800);
+    await this.doEnemyTurn();
+
+    // Check lose condition
+    if (this.katsu.hp <= 0) {
+      await this.doDefeat();
+      return;
+    }
+
+    // Next player turn
+    await sleep(500);
+    this.startStoryPhase(5);
+  },
+
+  // --- Normal Attack ---
+  async doAttack() {
+    this.katsu.state = 'attack';
+    this.showTurnIndicator('通常攻撃', '#FFD700', 1500);
+    await sleep(500);
+
+    const damage = 80 + Math.floor(Math.random() * 40);
+
+    // Charge forward animation
+    this.addAnimation({
+      duration: 15,
+      onUpdate: (t) => {
+        this.katsu.x = lerp(this.katsu.targetX, this.somen.targetX - 120, easeOutBack(t));
+      },
+      onComplete: () => {}
+    });
+
+    this.audio.playCharge();
+    await sleep(300);
+
+    // Impact
+    this.audio.playHit();
+    this.screenShake(0.6, 8);
+    this.flashScreen('#FFD700', 150);
+    Effects.hitImpact(this.particleSystem, this.somen.x, this.somen.y);
+    this.showDamageNumber(this.somen.x, this.somen.y - 70, `-${damage}`, '#FF4444');
+
+    await this.animateHpChange('somen', this.somen.hp, this.somen.hp - damage, 800);
+    this.somen.hp -= damage;
+
+    // Return to position
+    this.addAnimation({
+      duration: 20,
+      onUpdate: (t) => {
+        this.katsu.x = lerp(this.somen.targetX - 120, this.katsu.targetX, easeInOut(t));
+      }
+    });
+
+    this.katsu.combo++;
+    this.showCombo(this.katsu.combo);
+    this.katsu.state = 'powered';
+
+    await this.showDialogue('カツカツ', '甘いな……！');
+    await sleep(500);
+  },
+
+  // --- Skill Attack (かつもんもん術式) ---
+  async doSkillAttack() {
+    this.katsu.state = 'attack';
+    this.showSkillName('術式「かつもんもん」——勝撃', '勝利の一撃が突き抜ける', '#FFD700', '#FF6B00', 3000);
+    this.audio.playCharge();
+
+    await sleep(1200);
+
+    const damage = 150 + Math.floor(Math.random() * 50);
+
+    // Big charge effect
+    for (let i = 0; i < 5; i++) {
+      await sleep(200);
+      this.particleSystem.addBurst(this.katsu.x, this.katsu.y, 20, {
+        speed: 4, speedJitter: 2, size: 5, sizeEnd: 0,
+        life: 15, color: '#FFD700', glow: 20, shape: 'star'
+      });
+      this.audio.playTone(400 + i * 100, 0.1, 'sine', 0.3);
+    }
+
+    // Dash forward
+    this.addAnimation({
+      duration: 10,
+      onUpdate: (t) => {
+        this.katsu.x = lerp(this.katsu.targetX, this.somen.targetX - 100, easeOutBack(t));
+      }
+    });
+
+    await sleep(200);
+
+    // Heavy impact
+    this.audio.playHeavyHit();
+    this.screenShake(1.5, 15);
+    this.flashScreen('#FF6B00', 300);
+    Effects.heavyImpact(this.particleSystem, this.somen.x, this.somen.y);
+    this.showDamageNumber(this.somen.x, this.somen.y - 80, `-${damage}`, '#FF0040');
+
+    // 勝 kanji explosion
+    for (let i = 0; i < 8; i++) {
+      this.particleSystem.add(
+        this.somen.x + (Math.random() - 0.5) * 100,
+        this.somen.y + (Math.random() - 0.5) * 80,
+        {
+          vx: (Math.random() - 0.5) * 4, vy: -2 - Math.random() * 3,
+          size: 14, sizeEnd: 7, life: 45, color: '#FFD700',
+          glow: 20, shape: 'text', text: '勝', rotationSpeed: 0.03
+        }
+      );
+    }
+
+    await this.animateHpChange('somen', this.somen.hp, this.somen.hp - damage, 1000);
+    this.somen.hp -= damage;
+
+    // Return
+    this.addAnimation({
+      duration: 20,
+      onUpdate: (t) => {
+        this.katsu.x = lerp(this.somen.targetX - 100, this.katsu.targetX, easeInOut(t));
+      }
+    });
+
+    this.katsu.combo += 2;
+    this.showCombo(this.katsu.combo);
+    this.katsu.state = 'powered';
+
+    await this.showDialogue('カツカツ', '勝つのは……俺だッ！！');
+    await sleep(500);
+  },
+
+  // --- Counter Attack ---
+  async doCounterAttack() {
+    this.katsu.state = 'counter';
+    this.showSkillName('勝ちカウンター', '全ての攻撃を「勝ち」で上書きする', '#FFD700', '#FF0040', 3000);
+    this.audio.playCharge();
+
+    await sleep(1000);
+
+    // Counter stance - golden aura intensifies
+    for (let i = 0; i < 10; i++) {
+      setTimeout(() => {
+        this.particleSystem.addBurst(this.katsu.x, this.katsu.y, 10, {
+          speed: 1, speedJitter: 1, size: 4, sizeEnd: 0,
+          life: 20, color: '#FFD700', glow: 25, shape: 'diamond'
+        });
+      }, i * 100);
+    }
+
+    await sleep(500);
+
+    await this.showDialogue('カツカツ', 'さぁ……来い。全て「勝ち」に変えてやる。');
+
+    // Somen attacks into counter
+    this.somen.state = 'attack';
+    Effects.soumenBeam(this.particleSystem, this.somen.x - 40, this.somen.y, this.katsu.x + 40, this.katsu.y);
+    this.audio.playBeam();
+
+    await sleep(600);
+
+    // Counter triggers!
+    this.flashScreen('#FFD700', 500);
+    this.audio.playCounter();
+    this.screenShake(2.0, 20);
+    Effects.counterFlash(this.particleSystem, this.katsu.x, this.katsu.y);
+
+    await sleep(400);
+
+    // Transform and heal
+    const healAmount = 80;
+    const reflectDamage = 120 + Math.floor(Math.random() * 40);
+
+    Effects.katsudonTransform(this.particleSystem, this.katsu.x, this.katsu.y - 20);
+    this.showDamageNumber(this.katsu.x, this.katsu.y - 80, `+${healAmount} 勝ち飯`, '#00FF88');
+    this.audio.playHeal();
+
+    await this.animateHpChange('katsu', this.katsu.hp, Math.min(this.katsu.hp + healAmount, this.katsu.maxHp), 1000);
+    this.katsu.hp = Math.min(this.katsu.hp + healAmount, this.katsu.maxHp);
+
+    await sleep(500);
+
+    // Reflect damage
+    Effects.heavyImpact(this.particleSystem, this.somen.x, this.somen.y);
+    this.showDamageNumber(this.somen.x, this.somen.y - 80, `-${reflectDamage}`, '#FF0040');
+    this.audio.playHeavyHit();
+    this.screenShake(1.0, 12);
+    this.flashScreen('#FF6B00', 200);
+
+    await this.animateHpChange('somen', this.somen.hp, this.somen.hp - reflectDamage, 1000);
+    this.somen.hp -= reflectDamage;
+
+    this.somen.state = this.somen.hp < 1000 ? 'overheat' : 'berserk';
+    this.katsu.combo += 3;
+    this.showCombo(this.katsu.combo);
+    this.katsu.state = 'powered';
+
+    await this.showDialogue('カツカツ', '言っただろう？　お前は永遠に2位だ。');
+    await sleep(500);
+  },
+
+  // --- Heal ---
+  async doHeal() {
+    this.katsu.state = 'powered';
+    this.showSkillName('勝ち飯回復', '勝利のカツ丼で気力回復', '#00FF88', '#FFD700', 2500);
+    this.audio.playHeal();
+
+    await sleep(800);
+
+    const healAmount = 120 + Math.floor(Math.random() * 30);
+
+    Effects.healEffect(this.particleSystem, this.katsu.x, this.katsu.y);
+    this.showDamageNumber(this.katsu.x, this.katsu.y - 80, `+${healAmount}`, '#00FF88');
+    this.flashScreen('#00FF88', 200);
+
+    const newHp = Math.min(this.katsu.hp + healAmount, this.katsu.maxHp);
+    await this.animateHpChange('katsu', this.katsu.hp, newHp, 1200);
+    this.katsu.hp = newHp;
+
+    // Katsudon particles
+    for (let i = 0; i < 15; i++) {
+      this.particleSystem.add(
+        this.katsu.x + (Math.random() - 0.5) * 60,
+        this.katsu.y + (Math.random() - 0.5) * 40,
+        {
+          vx: (Math.random() - 0.5) * 2, vy: -2 - Math.random() * 2,
+          size: 10, sizeEnd: 5, life: 40,
+          color: '#FFD700', glow: 15, shape: 'text',
+          text: randomColor(['🍛', '✨', '💪', '勝']),
+          rotationSpeed: 0.02
+        }
+      );
+    }
+
+    await this.showDialogue('カツカツ', 'うまい……この勝ち飯で力が漲る！');
+    await sleep(500);
+  },
+
+  // --- Enemy Turn ---
+  async doEnemyTurn() {
+    this.showTurnIndicator('そうめんロボのターン', '#00BFFF', 2000);
+    this.audio.playWarning();
+    await sleep(2200);
+
+    const isBerserk = this.somen.hp < 1000;
+    this.somen.state = isBerserk ? 'berserk' : 'attack';
+
+    // Select attack based on state
+    const attackRoll = Math.random();
+    if (isBerserk && attackRoll > 0.5) {
+      await this.enemyBerserkAttack();
+    } else if (attackRoll > 0.3) {
+      await this.enemyBeamAttack();
+    } else {
+      await this.enemyTentacleAttack();
+    }
+
+    this.somen.state = isBerserk ? 'overheat' : 'berserk';
+  },
+
+  async enemyBeamAttack() {
+    this.showSkillName('流しそうめんビーム', '冷たい高速麺の一閃', '#00BFFF', '#87CEEB', 2500);
+    this.audio.playCharge();
+
+    await sleep(800);
+
+    const damage = 60 + Math.floor(Math.random() * 30);
+
+    Effects.soumenBeam(this.particleSystem, this.somen.x - 40, this.somen.y, this.katsu.x + 40, this.katsu.y);
+    this.audio.playBeam();
+
+    await sleep(400);
+
+    Effects.hitImpact(this.particleSystem, this.katsu.x, this.katsu.y);
+    this.audio.playHit();
+    this.screenShake(0.5, 6);
+    this.flashScreen('#00BFFF', 150);
+    this.showDamageNumber(this.katsu.x, this.katsu.y - 70, `-${damage}`, '#FF4444');
+
+    await this.animateHpChange('katsu', this.katsu.hp, this.katsu.hp - damage, 800);
+    this.katsu.hp -= damage;
+
+    await this.showDialogue('そうめんロボ', '1位を……渡さない……！');
+    await sleep(300);
+  },
+
+  async enemyTentacleAttack() {
+    this.showSkillName('麺縛り・1位争奪', '10本の触手で拘束する', '#F5F5DC', '#DDD', 2500);
+    this.audio.playCharge();
+
+    await sleep(800);
+
+    const damage = 45 + Math.floor(Math.random() * 25);
+    const poisonDmg = 30;
+
+    Effects.noodleTentacles(this.particleSystem, this.somen.x, this.somen.y);
+    this.audio.playHeavyHit();
+
+    await sleep(500);
+
+    Effects.hitImpact(this.particleSystem, this.katsu.x, this.katsu.y);
+    this.screenShake(0.4, 5);
+    this.showDamageNumber(this.katsu.x, this.katsu.y - 70, `-${damage}`, '#FF4444');
+
+    await this.animateHpChange('katsu', this.katsu.hp, this.katsu.hp - damage, 600);
+    this.katsu.hp -= damage;
+
+    await sleep(400);
+
+    // Poison tick
+    Effects.vinegarPoison(this.particleSystem, this.katsu.x, this.katsu.y);
+    this.showDamageNumber(this.katsu.x, this.katsu.y - 50, `-${poisonDmg} 毒`, '#00FF00');
+    this.flashScreen('#00FF00', 150);
+
+    await this.animateHpChange('katsu', this.katsu.hp, this.katsu.hp - poisonDmg, 600);
+    this.katsu.hp -= poisonDmg;
+
+    await this.showDialogue('そうめんロボ', '麺の……縛りから……逃げられない……！');
+    await sleep(300);
+  },
+
+  async enemyBerserkAttack() {
+    this.showSkillName('暴走・デッドヒートフルバースト', '全エネルギー解放の狂気攻撃', '#FF0040', '#FF4444', 3000);
+    this.audio.playCharge();
+    this.screenShake(0.3, 20);
+
+    // Long charge with warning
+    for (let i = 0; i < 6; i++) {
+      await sleep(300);
+      this.particleSystem.addBurst(this.somen.x, this.somen.y, 25, {
+        speed: 5, speedJitter: 3, size: 4, sizeEnd: 0,
+        life: 20, color: randomColor(['#FF0040', '#00BFFF', '#FF6B00']),
+        glow: 20, shape: 'circle'
+      });
+      this.audio.playTone(200 + i * 150, 0.15, 'sawtooth', 0.3);
+    }
+
+    await sleep(500);
+
+    const damage = 100 + Math.floor(Math.random() * 50);
+    const selfDamage = 40;
+
+    // Massive beam
+    for (let w = 0; w < 5; w++) {
+      Effects.soumenBeam(this.particleSystem, this.somen.x - 40, this.somen.y - 20 + w * 10, this.katsu.x + 40, this.katsu.y - 20 + w * 10);
+    }
+    this.audio.playExplosion();
+    this.screenShake(1.5, 15);
+    this.flashScreen('#FF0040', 300);
+
+    await sleep(500);
+
+    Effects.heavyImpact(this.particleSystem, this.katsu.x, this.katsu.y);
+    this.showDamageNumber(this.katsu.x, this.katsu.y - 80, `-${damage}`, '#FF0040');
+
+    await this.animateHpChange('katsu', this.katsu.hp, this.katsu.hp - damage, 1000);
+    this.katsu.hp -= damage;
+
+    await sleep(500);
+
+    // Self damage from berserk
+    Effects.overheatSmoke(this.particleSystem, this.somen.x, this.somen.y);
+    this.showDamageNumber(this.somen.x, this.somen.y - 70, `-${selfDamage} 暴走反動`, '#FF8888');
+
+    await this.animateHpChange('somen', this.somen.hp, this.somen.hp - selfDamage, 600);
+    this.somen.hp -= selfDamage;
+
+    await this.showDialogue('そうめんロボ', 'ギギ……ギギギ……1位に……なるんだ……！！（オーバーヒート）');
+    await sleep(300);
+  },
+
+  // ===== VICTORY / DEFEAT =====
+  async doVictory() {
+    this.somen.hp = 0;
+    this.isAnimating = true;
+    this.state = 'win';
+    this.audio.stopBGM();
+
+    this.setCutscene(true);
+    this.updateHpBar('somen', 0, this.somen.maxHp);
+
+    await sleep(500);
+
+    // Final explosion on somen
+    this.flashScreen('#FFD700', 800);
+    this.audio.playExplosion();
+    this.screenShake(3.0, 25);
+    Effects.heavyImpact(this.particleSystem, this.somen.x, this.somen.y);
+
+    await sleep(300);
+    Effects.counterFlash(this.particleSystem, this.somen.x, this.somen.y);
+
+    await sleep(800);
+
+    this.somen.state = 'selfbind';
+
+    await this.showDialogue('そうめんロボ', '1位が……取れ……なかった…………');
+
+    await sleep(500);
+
+    // Victory effects
+    Effects.victoryExplosion(this.particleSystem, this.W, this.H);
+    this.audio.playVictory();
+
+    await sleep(1000);
+
+    this.updateScoreboard('最終結果：1位 カツカツ【勝者】', 'そうめんロボ——機能停止');
+
+    this.katsu.state = 'powered';
+
+    await this.showDialogue('カツカツ', '勝つ。勝つ。勝つ。——それだけで十分だ。');
+
+    await sleep(800);
+
+    await this.showDialogue('ナレーション', '領域「ALL WINNER」——決着。カツカツの完全勝利。');
+
+    await sleep(1000);
+
+    // Show win screen
+    document.getElementById('win-text').textContent = 'WINNER';
+    document.getElementById('win-sub').textContent = 'カツカツ —— 永遠の1位';
+    document.getElementById('win-screen').classList.add('show');
+
+    // Continuous victory particles
+    this.addAnimation({
+      duration: 600,
+      onUpdate: (t) => {
+        if (Math.random() > 0.5) {
+          this.particleSystem.add(Math.random() * this.W, -10, {
+            vx: (Math.random() - 0.5) * 3, vy: 2 + Math.random() * 3,
+            size: 3 + Math.random() * 3, sizeEnd: 1,
+            life: 100, color: randomColor(['#FFD700', '#FF6B00', '#FF0040', '#FFF']),
+            glow: 10, shape: 'star', rotationSpeed: 0.1,
+            oscillateX: 0.5, oscillateSpeed: 0.03
+          });
+        }
+      }
+    });
+  },
+
+  async doDefeat() {
+    this.katsu.hp = 0;
+    this.isAnimating = true;
+    this.state = 'win';
+    this.audio.stopBGM();
+
+    this.setCutscene(true);
+    this.updateHpBar('katsu', 0, this.katsu.maxHp);
+
+    await sleep(500);
+
+    this.flashScreen('#FF0040', 500);
+    this.audio.playExplosion();
+    this.screenShake(2.0, 20);
+    Effects.heavyImpact(this.particleSystem, this.katsu.x, this.katsu.y);
+
+    await sleep(800);
+
+    await this.showDialogue('そうめんロボ', '1位は……私だ……！！');
+
+    await sleep(500);
+
+    this.updateScoreboard('最終結果：1位 そうめんロボ', 'まさかの逆転……！');
+
+    await this.showDialogue('ナレーション', '領域「ALL WINNER」——まさかの逆転。そうめんロボの勝利。');
+
+    await sleep(800);
+
+    document.getElementById('win-text').textContent = 'DEFEAT';
+    document.getElementById('win-text').style.color = '#FF0040';
+    document.getElementById('win-text').style.textShadow = '0 0 50px #FF0040, 0 0 100px #FF0000';
+    document.getElementById('win-sub').textContent = 'そうめんロボ —— 狂気の1位';
+    document.getElementById('win-screen').classList.add('show');
+  },
+
+  // ============================================================================
+  // SECTION 8: UI HELPER FUNCTIONS
+  // ============================================================================
+
+  showDialogue(speaker, text) {
+    return new Promise((resolve) => {
+      const box = document.getElementById('dialogue-box');
+      const speakerEl = document.getElementById('dialogue-speaker');
+      const textEl = document.getElementById('dialogue-text');
+
+      // Set speaker color
+      if (speaker === 'カツカツ') {
+        speakerEl.style.color = '#FFD700';
+      } else if (speaker === 'そうめんロボ') {
+        speakerEl.style.color = '#00BFFF';
+      } else {
+        speakerEl.style.color = '#AAA';
+      }
+
+      speakerEl.textContent = speaker;
+      textEl.textContent = '';
+      box.classList.add('show');
+
+      // Typewriter effect
+      let charIndex = 0;
+      const typeSpeed = 30;
+      const typeInterval = setInterval(() => {
+        if (charIndex < text.length) {
+          textEl.textContent += text[charIndex];
+          charIndex++;
+          // Typing sound
+          if (charIndex % 3 === 0) {
+            this.audio.playTone(600 + Math.random() * 200, 0.03, 'sine', 0.05);
+          }
+        } else {
+          clearInterval(typeInterval);
+        }
+      }, typeSpeed);
+
+      this.dialogueCallback = () => {
+        clearInterval(typeInterval);
+        if (charIndex < text.length) {
+          // Show all text immediately
+          textEl.textContent = text;
+          charIndex = text.length;
+        } else {
+          box.classList.remove('show');
+          this.dialogueCallback = null;
+          resolve();
+        }
+      };
+    });
+  },
+
+  advanceDialogue() {
+    if (this.dialogueCallback) {
+      this.dialogueCallback();
+    }
+  },
+
+  hideDialogue() {
+    document.getElementById('dialogue-box').classList.remove('show');
+    this.dialogueCallback = null;
+  },
+
+  updateHpBar(who, current, max) {
+    const bar = document.getElementById(`hp-${who === 'katsu' ? 'katsu' : 'somen'}-bar`);
+    const text = document.getElementById(`hp-${who === 'katsu' ? 'katsu' : 'somen'}-text`);
+    const pct = Math.max(0, (current / max) * 100);
+    bar.style.width = pct + '%';
+    text.textContent = `${Math.max(0, Math.floor(current))}/${max}`;
+  },
+
+  animateHpChange(who, fromHp, toHp, duration) {
+    return new Promise((resolve) => {
+      const max = who === 'katsu' ? this.katsu.maxHp : this.somen.maxHp;
+      const startTime = performance.now();
+      const animate = (now) => {
+        const elapsed = now - startTime;
+        const t = Math.min(1, elapsed / duration);
+        const currentHp = lerp(fromHp, toHp, easeInOut(t));
+        this.updateHpBar(who, currentHp, max);
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          this.updateHpBar(who, toHp, max);
+          resolve();
+        }
+      };
+      requestAnimationFrame(animate);
+    });
+  },
+
+  updateHpSub(who, text) {
+    document.getElementById(`hp-${who === 'katsu' ? 'katsu' : 'somen'}-sub`).textContent = text;
+  },
+
+  updateScoreboard(rank, sub) {
+    document.getElementById('scoreboard-rank').textContent = rank;
+    document.getElementById('scoreboard-sub').textContent = sub;
+  },
+
+  showTurnIndicator(text, color, duration) {
+    const el = document.getElementById('turn-indicator');
+    el.textContent = text;
+    el.style.color = color;
+    el.style.textShadow = `0 0 30px ${color}, 0 0 60px ${color}`;
+    el.style.opacity = '0';
+
+    // Animate in
+    let start = performance.now();
+    const animate = (now) => {
+      const t = (now - start) / duration;
+      if (t < 0.2) {
+        el.style.opacity = String(t / 0.2);
+        el.style.transform = `translate(-50%, -50%) scale(${lerp(2, 1, t / 0.2)})`;
+      } else if (t < 0.8) {
+        el.style.opacity = '1';
+        el.style.transform = 'translate(-50%, -50%) scale(1)';
+      } else if (t < 1) {
+        el.style.opacity = String(1 - (t - 0.8) / 0.2);
+      } else {
+        el.style.opacity = '0';
+        return;
+      }
+      requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  },
+
+  showSkillName(name, desc, color, descColor, duration) {
+    const container = document.getElementById('skill-display');
+    const nameEl = document.getElementById('skill-name');
+    const descEl = document.getElementById('skill-desc');
+
+    nameEl.textContent = name;
+    nameEl.style.color = color;
+    nameEl.style.textShadow = `0 0 20px ${color}, 0 0 40px ${color}`;
+    descEl.textContent = desc;
+    descEl.style.color = descColor;
+
+    let start = performance.now();
+    const animate = (now) => {
+      const t = (now - start) / duration;
+      if (t < 0.15) {
+        container.style.opacity = String(t / 0.15);
+        container.style.transform = `translate(-50%, -50%) scale(${lerp(0.5, 1.1, easeOutBack(t / 0.15))})`;
+      } else if (t < 0.25) {
+        container.style.opacity = '1';
+        container.style.transform = `translate(-50%, -50%) scale(${lerp(1.1, 1, (t - 0.15) / 0.1)})`;
+      } else if (t < 0.8) {
+        container.style.opacity = '1';
+        container.style.transform = 'translate(-50%, -50%) scale(1)';
+      } else if (t < 1) {
+        container.style.opacity = String(1 - (t - 0.8) / 0.2);
+      } else {
+        container.style.opacity = '0';
+        return;
+      }
+      requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  },
+
+  showDamageNumber(x, y, text, color) {
+    const el = document.createElement('div');
+    el.className = 'damage-number';
+    el.textContent = text;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.color = color;
+    el.style.fontSize = text.includes('+') ? '28px' : '36px';
+    el.style.textShadow = `0 0 10px ${color}, 0 0 20px ${color}`;
+    document.getElementById('ui-overlay').appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+  },
+
+  showCombo(count) {
+    if (count < 2) return;
+    const el = document.getElementById('combo-display');
+    el.textContent = `${count} COMBO!`;
+    el.style.opacity = '1';
+    el.style.transform = 'scale(1.3)';
+    setTimeout(() => {
+      el.style.transition = 'all 0.5s';
+      el.style.transform = 'scale(1)';
+    }, 100);
+    setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transition = '';
+    }, 1500);
+  },
+
+  setCutscene(active) {
+    document.getElementById('cutscene-top').classList.toggle('active', active);
+    document.getElementById('cutscene-bottom').classList.toggle('active', active);
+  },
+
+  screenShake(duration, intensity) {
+    this.screenShakeTimer = duration * 60;
+    this.screenShakeIntensity = intensity;
+  },
+
+  flashScreen(color, duration) {
+    const el = document.getElementById('screen-flash');
+    el.style.backgroundColor = color;
+    el.style.opacity = '0.6';
+    setTimeout(() => { el.style.opacity = '0'; }, duration);
+  },
+
+  addAnimation(config) {
+    config._frame = 0;
+    config._maxFrame = config.duration || 60;
+    this.animations.push(config);
+  },
+
+  // ============================================================================
+  // SECTION 9: MAIN GAME LOOP
+  // ============================================================================
+  gameLoop() {
+    this.frame++;
+    const ctx = this.ctx;
+    const W = this.W;
+    const H = this.H;
+
+    // Clear
+    ctx.clearRect(0, 0, W, H);
+
+    // Screen shake transform
+    ctx.save();
+    if (this.screenShakeTimer > 0) {
+      this.screenShakeTimer--;
+      const shakeX = (Math.random() - 0.5) * this.screenShakeIntensity;
+      const shakeY = (Math.random() - 0.5) * this.screenShakeIntensity;
+      ctx.translate(shakeX, shakeY);
+      this.screenShakeIntensity *= 0.95;
+    }
+
+    // Draw arena background
+    if (this.state === 'battle' || this.state === 'win') {
+      this.arena.drawBackground(this.phase);
+    } else if (this.state === 'domain_intro') {
+      this.arena.drawBackground('domain');
+    }
+
+    // Ambient domain particles
+    if (this.state === 'battle') {
+      Effects.ambientDomain(this.particleSystem, W, H);
+    }
+
+    // Draw characters
+    if (this.state === 'battle' || this.state === 'win') {
+      // Smooth character movement
+      this.katsu.x = lerp(this.katsu.x, this.katsu.targetX, 0.08);
+      this.katsu.y = lerp(this.katsu.y, this.katsu.targetY, 0.08);
+      this.somen.x = lerp(this.somen.x, this.somen.targetX, 0.08);
+      this.somen.y = lerp(this.somen.y, this.somen.targetY, 0.08);
+
+      CharacterRenderer.drawKatsuKatsu(ctx, this.katsu.x, this.katsu.y, this.katsu.scale, this.katsu.state, this.frame);
+      CharacterRenderer.drawSomenRobo(ctx, this.somen.x, this.somen.y, this.somen.scale, this.somen.state, this.frame);
+    }
+
+    // Update and draw particles
+    this.particleSystem.update();
+    this.particleSystem.draw(ctx);
+
+    // Update animations
+    for (let i = this.animations.length - 1; i >= 0; i--) {
+      const anim = this.animations[i];
+      anim._frame++;
+      const t = Math.min(1, anim._frame / anim._maxFrame);
+      if (anim.onUpdate) anim.onUpdate(t);
+      if (anim._frame >= anim._maxFrame) {
+        if (anim.onComplete) anim.onComplete();
+        this.animations.splice(i, 1);
+      }
+    }
+
+    ctx.restore();
+
+    // Particle count display (debug, subtle)
+    ctx.save();
+    ctx.font = '10px monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.fillText(`Particles: ${this.particleSystem.count}`, 10, this.H - 10);
+    ctx.restore();
+
+    requestAnimationFrame(() => this.gameLoop());
+  }
+};
+
+// ============================================================================
+// SECTION 10: INITIALIZATION
+// ============================================================================
+window.addEventListener('DOMContentLoaded', () => {
+  Game.init();
+});
+
+// Prevent context menu on long press (mobile)
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// Handle visibility change (pause/resume BGM)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    Game.audio.stopBGM();
+  } else if (Game.state === 'battle') {
+    Game.audio.playBGMLoop();
+  }
+});
+</script>
+</body>
+</html>
