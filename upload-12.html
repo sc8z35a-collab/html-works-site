@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ミドルクラス衛門 vs 関暁夫 — COMPLETE EDITION</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Hiragino Kaku Gothic ProN','Yu Gothic','Meiryo',sans-serif}
+
+#stage{position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden;cursor:pointer}
+#camera{position:absolute;top:0;left:0;width:100%;height:100%}
+
+canvas{position:absolute;top:0;left:0;width:100%;height:100%}
+#bgCanvas{z-index:1}
+#fxCanvas{z-index:3}
+#frontCanvas{z-index:5}
+
+#charLayer{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none}
+
+.character{
+  position:absolute;bottom:5%;
+  width:200px;height:420px;
+  transition:transform 0.4s ease,opacity 0.4s ease,filter 0.3s ease;
+  opacity:0;transform:scale(0.8) translateY(40px);
+  filter:brightness(1);
+}
+.character.visible{opacity:1;transform:scale(1) translateY(0)}
+.character.hit{filter:brightness(3) saturate(0);animation:hitFlash 0.15s ease 3}
+.character.power-up{animation:powerUp 0.6s ease infinite alternate}
+.character.shadow-mode{filter:brightness(0.4) contrast(1.8) drop-shadow(0 0 20px rgba(100,0,200,0.8))}
+.character.safe-zone{filter:brightness(1.3) saturate(0.4) blur(0.5px);animation:safeFloat 2s ease infinite alternate}
+.character.rage{animation:rageAura 0.4s ease infinite alternate}
+
+#seki{left:10%}
+#emon{right:10%}
+#shadow{right:25%;opacity:0;filter:brightness(0.15) contrast(2) drop-shadow(0 0 30px rgba(80,0,160,0.9))}
+
+.char-body{position:relative;width:100%;height:100%}
+.char-head{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:70px;height:80px;border-radius:50% 50% 45% 45%;
+}
+.char-torso{
+  position:absolute;top:75px;left:50%;transform:translateX(-50%);
+  width:80px;height:120px;border-radius:10px;
+}
+.char-arm{
+  position:absolute;top:80px;width:25px;height:100px;border-radius:12px;
+  transform-origin:top center;
+}
+.char-arm.left{left:12px}
+.char-arm.right{right:12px}
+.char-leg{
+  position:absolute;top:190px;width:30px;height:120px;border-radius:10px;
+}
+.char-leg.left{left:35px}
+.char-leg.right{right:35px}
+.char-eye{position:absolute;width:10px;height:12px;border-radius:50%;top:30px}
+.char-eye.left{left:16px}
+.char-eye.right{right:16px}
+.char-mouth{
+  position:absolute;bottom:15px;left:50%;transform:translateX(-50%);
+  width:20px;height:8px;border-radius:0 0 10px 10px;
+}
+
+#seki .char-head{background:linear-gradient(180deg,#e8d5b7,#d4b896)}
+#seki .char-torso{background:linear-gradient(180deg,#1a1a2e,#16213e)}
+#seki .char-arm{background:#1a1a2e}
+#seki .char-leg{background:#0f0f23}
+#seki .char-eye{background:#ff4444;box-shadow:0 0 8px #ff4444}
+#seki .char-mouth{background:#8b0000}
+
+#emon .char-head{background:linear-gradient(180deg,#d4c5a9,#c4b393)}
+#emon .char-torso{background:linear-gradient(180deg,#111,#222)}
+#emon .char-arm{background:#111}
+#emon .char-leg{background:#0a0a0a}
+#emon .char-eye{background:#00ccff;box-shadow:0 0 8px #00ccff}
+#emon .char-mouth{background:#444}
+.coat{
+  position:absolute;top:70px;left:50%;transform:translateX(-50%);
+  width:100px;height:160px;
+  background:linear-gradient(180deg,#0a0a0a,#1a1a1a);
+  border-radius:5px 5px 20px 20px;
+  clip-path:polygon(10% 0%,90% 0%,100% 100%,70% 95%,50% 100%,30% 95%,0% 100%);
+}
+
+#shadow .char-head{background:linear-gradient(180deg,#2a2a3a,#1a1a2a)}
+#shadow .char-torso{background:linear-gradient(180deg,#0a0a15,#050510)}
+#shadow .char-arm{background:#0a0a15}
+#shadow .char-leg{background:#050508}
+#shadow .char-eye{background:#aa44ff;box-shadow:0 0 12px #aa44ff}
+#shadow .char-mouth{background:#222}
+#shadow .coat{background:linear-gradient(180deg,#050510,#0a0a18)}
+
+#dialogBox{
+  position:fixed;bottom:0;left:0;width:100%;z-index:20;
+  padding:20px 30px 30px;
+  background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,0.85) 20%,rgba(5,5,20,0.95));
+  opacity:0;transform:translateY(20px);
+  transition:opacity 0.4s ease,transform 0.4s ease;
+  pointer-events:none;
+}
+#dialogBox.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+#speakerName{
+  font-size:14px;font-weight:bold;
+  color:#ffd700;letter-spacing:2px;
+  margin-bottom:6px;text-shadow:0 0 10px rgba(255,215,0,0.5);
+}
+#dialogText{
+  font-size:18px;line-height:1.8;color:#eee;
+  min-height:60px;text-shadow:0 1px 3px rgba(0,0,0,0.8);
+}
+#dialogText .highlight{color:#ff6b6b;font-weight:bold}
+#dialogText .gold{color:#ffd700;font-weight:bold;text-shadow:0 0 10px rgba(255,215,0,0.6)}
+#dialogText .cyan{color:#00ccff;font-weight:bold;text-shadow:0 0 10px rgba(0,204,255,0.6)}
+#dialogText .purple{color:#bb66ff;font-weight:bold;text-shadow:0 0 10px rgba(170,68,255,0.6)}
+#dialogText .green{color:#44ff88;font-weight:bold;text-shadow:0 0 10px rgba(68,255,136,0.6)}
+#dialogText .white{color:#fff;font-weight:bold;text-shadow:0 0 15px rgba(255,255,255,0.8)}
+#clickHint{
+  position:absolute;bottom:10px;right:30px;
+  font-size:12px;color:rgba(255,255,255,0.4);
+  animation:blink 1.2s ease infinite;
+}
+
+#roundTitle{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.5);
+  z-index:30;opacity:0;
+  font-size:42px;font-weight:900;letter-spacing:8px;text-align:center;
+  color:#fff;
+  text-shadow:0 0 30px rgba(255,70,70,0.8),0 0 60px rgba(255,70,70,0.4);
+  transition:opacity 0.5s ease,transform 0.5s ease;
+  pointer-events:none;
+}
+#roundTitle.visible{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#roundTitle .sub{display:block;font-size:18px;letter-spacing:4px;margin-top:10px;color:#ffd700}
+
+#impactOverlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:15;pointer-events:none;opacity:0;
+  transition:opacity 0.05s ease;
+}
+
+#domainOverlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:4;pointer-events:none;opacity:0;
+  transition:opacity 1s ease;
+}
+
+#safeOverlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:14;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse at center,rgba(180,255,200,0.25),rgba(100,200,150,0.1),transparent 70%);
+  transition:opacity 1.5s ease;
+}
+
+#vignette{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:6;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%);
+}
+
+#titleScreen{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:100;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  background:#000;cursor:pointer;
+}
+#titleScreen h1{
+  font-size:24px;letter-spacing:5px;color:#fff;
+  text-shadow:0 0 30px rgba(255,215,0,0.6);
+  animation:titlePulse 2s ease infinite alternate;
+  text-align:center;line-height:1.6;
+}
+#titleScreen h1 .main-title{display:block;font-size:44px;color:#ffd700;margin:10px 0}
+#titleScreen h1 .edition{display:block;font-size:16px;color:#aa66ff;margin-top:5px;letter-spacing:8px}
+#titleScreen p{margin-top:30px;font-size:14px;color:rgba(255,255,255,0.4);animation:blink 1.5s ease infinite}
+#titleScreen.hidden{opacity:0;pointer-events:none;transition:opacity 0.8s ease}
+
+#hpBars{
+  position:fixed;top:15px;left:50%;transform:translateX(-50%);
+  z-index:20;display:flex;gap:20px;opacity:0;
+  transition:opacity 0.5s ease;width:90%;max-width:700px;
+}
+#hpBars.visible{opacity:1}
+.hp-group{flex:1}
+.hp-label{font-size:11px;color:#ccc;margin-bottom:3px;letter-spacing:1px}
+.hp-bar-bg{
+  width:100%;height:10px;background:rgba(255,255,255,0.1);
+  border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,0.2);
+}
+.hp-bar{height:100%;border-radius:5px;transition:width 0.8s ease}
+#sekiHp .hp-bar{background:linear-gradient(90deg,#ff4444,#ffd700);width:100%}
+#emonHp .hp-bar{background:linear-gradient(90deg,#00ccff,#7b68ee);width:100%}
+
+#abilityName{
+  position:fixed;top:40%;left:50%;transform:translate(-50%,-50%) scale(0.3);
+  z-index:25;opacity:0;pointer-events:none;
+  font-size:52px;font-weight:900;letter-spacing:8px;
+  color:#fff;white-space:nowrap;
+  text-shadow:0 0 40px currentColor,0 0 80px currentColor;
+  transition:opacity 0.3s ease,transform 0.4s cubic-bezier(0.2,1,0.3,1);
+}
+#abilityName.visible{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#abilityName.gold{color:#ffd700}
+#abilityName.cyan{color:#00ccff}
+#abilityName.red{color:#ff3333}
+#abilityName.purple{color:#bb66ff}
+#abilityName.green{color:#44ff88}
+#abilityName.white{color:#fff}
+
+.ghost{
+  position:absolute;z-index:2;pointer-events:none;
+  opacity:0;transition:opacity 0.6s ease,transform 0.6s ease,font-size 0.4s ease,filter 0.4s ease;
+  font-size:60px;filter:drop-shadow(0 0 15px rgba(255,0,0,0.6));
+}
+.ghost.visible{opacity:0.8}
+
+/* Final overlay */
+#finalOverlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:50;pointer-events:none;opacity:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.9);
+  transition:opacity 1.5s ease;
+}
+#finalOverlay.visible{opacity:1}
+#finalOverlay .final-text{
+  font-size:20px;color:#ccc;line-height:2.2;text-align:center;
+  letter-spacing:2px;opacity:0;
+  transform:translateY(30px);
+  transition:opacity 1s ease,transform 1s ease;
+}
+#finalOverlay .final-text.show{opacity:1;transform:translateY(0)}
+#finalOverlay .final-title{
+  font-size:36px;color:#ffd700;font-weight:900;letter-spacing:10px;
+  margin-bottom:30px;opacity:0;transform:scale(0.8);
+  transition:opacity 1s ease 0.3s,transform 1s ease 0.3s;
+  text-shadow:0 0 40px rgba(255,215,0,0.6);
+}
+#finalOverlay .final-title.show{opacity:1;transform:scale(1)}
+#finalOverlay .credit{
+  margin-top:40px;font-size:13px;color:rgba(255,255,255,0.3);
+  letter-spacing:4px;opacity:0;transition:opacity 1s ease 1s;
+}
+#finalOverlay .credit.show{opacity:1}
+
+@keyframes blink{0%,100%{opacity:0.3}50%{opacity:1}}
+@keyframes titlePulse{0%{text-shadow:0 0 30px rgba(255,215,0,0.3)}100%{text-shadow:0 0 60px rgba(255,215,0,0.8),0 0 100px rgba(255,100,100,0.3)}}
+@keyframes hitFlash{0%{filter:brightness(1)}50%{filter:brightness(4) saturate(0)}100%{filter:brightness(1)}}
+@keyframes powerUp{0%{filter:brightness(1.2) drop-shadow(0 0 10px #ffd700)}100%{filter:brightness(1.5) drop-shadow(0 0 25px #ffaa00)}}
+@keyframes safeFloat{0%{transform:scale(1) translateY(0)}100%{transform:scale(1.02) translateY(-5px)}}
+@keyframes rageAura{0%{filter:brightness(1.3) drop-shadow(0 0 15px #ff4400) drop-shadow(0 0 30px #ffd700)}100%{filter:brightness(1.6) drop-shadow(0 0 25px #ff6600) drop-shadow(0 0 50px #ffaa00)}}
+@keyframes shadowPulse{0%{filter:brightness(0.15) drop-shadow(0 0 20px rgba(80,0,160,0.7))}100%{filter:brightness(0.25) drop-shadow(0 0 40px rgba(120,0,200,0.9))}}
+@keyframes clashFlicker{
+  0%{background:rgba(255,215,0,0.15)}
+  25%{background:rgba(0,150,255,0.15)}
+  50%{background:rgba(170,68,255,0.1)}
+  75%{background:rgba(255,50,50,0.1)}
+  100%{background:rgba(255,215,0,0.15)}
+}
+
+@media(max-width:600px){
+  .character{width:120px;height:260px;bottom:8%}
+  #seki{left:2%}
+  #emon{right:2%}
+  #shadow{right:18%}
+  .char-head{width:45px!important;height:52px!important}
+  .char-torso{width:52px!important;height:78px!important;top:48px!important}
+  .char-arm{width:16px!important;height:65px!important;top:52px!important}
+  .char-leg{width:20px!important;height:78px!important;top:122px!important}
+  .coat{top:44px!important;width:64px!important;height:100px!important}
+  #dialogText{font-size:15px}
+  #speakerName{font-size:12px}
+  #roundTitle{font-size:26px}
+  #roundTitle .sub{font-size:14px}
+  #abilityName{font-size:28px;letter-spacing:4px}
+  #titleScreen h1{font-size:18px}
+  #titleScreen h1 .main-title{font-size:28px}
+  #finalOverlay .final-text{font-size:16px}
+  #finalOverlay .final-title{font-size:24px}
+}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+
+<div id="titleScreen">
+  <h1>
+    闇の路地裏バトル
+    <span class="main-title">ミドルクラス衛門 vs 関暁夫</span>
+    <span class="edition">— COMPLETE EDITION —</span>
+  </h1>
+  <p>— クリックして開始 —</p>
+</div>
+
+<div id="stage">
+  <div id="camera">
+    <canvas id="bgCanvas"></canvas>
+    <div id="charLayer">
+      <div id="seki" class="character">
+        <div class="char-body">
+          <div class="char-head"><div class="char-eye left"></div><div class="char-eye right"></div><div class="char-mouth"></div></div>
+          <div class="char-torso"></div><div class="char-arm left"></div><div class="char-arm right"></div>
+          <div class="char-leg left"></div><div class="char-leg right"></div>
+        </div>
+      </div>
+      <div id="emon" class="character">
+        <div class="char-body">
+          <div class="coat"></div>
+          <div class="char-head"><div class="char-eye left"></div><div class="char-eye right"></div><div class="char-mouth"></div></div>
+          <div class="char-torso"></div><div class="char-arm left"></div><div class="char-arm right"></div>
+          <div class="char-leg left"></div><div class="char-leg right"></div>
+        </div>
+      </div>
+      <div id="shadow" class="character">
+        <div class="char-body">
+          <div class="coat"></div>
+          <div class="char-head"><div class="char-eye left"></div><div class="char-eye right"></div><div class="char-mouth"></div></div>
+          <div class="char-torso"></div><div class="char-arm left"></div><div class="char-arm right"></div>
+          <div class="char-leg left"></div><div class="char-leg right"></div>
+        </div>
+      </div>
+    </div>
+    <canvas id="fxCanvas"></canvas>
+    <canvas id="frontCanvas"></canvas>
+  </div>
+</div>
+
+<div id="domainOverlay"></div>
+<div id="safeOverlay"></div>
+<div id="impactOverlay"></div>
+<div id="vignette"></div>
+
+<div id="hpBars">
+  <div class="hp-group" id="sekiHp">
+    <div class="hp-label">関 暁夫 — SINZIRU</div>
+    <div class="hp-bar-bg"><div class="hp-bar"></div></div>
+  </div>
+  <div class="hp-group" id="emonHp">
+    <div class="hp-label">ミドルクラス衛門 — MIDDLE CLASSY</div>
+    <div class="hp-bar-bg"><div class="hp-bar"></div></div>
+  </div>
+</div>
+
+<div id="roundTitle"><span class="main"></span><span class="sub"></span></div>
+<div id="abilityName"></div>
+
+<div id="dialogBox">
+  <div id="speakerName"></div>
+  <div id="dialogText"></div>
+  <div id="clickHint">▼ CLICK</div>
+</div>
+
+<div id="finalOverlay">
+  <div class="final-title"></div>
+  <div class="final-text"></div>
+  <div class="credit"></div>
+</div>
+
+<script>
+// ============================================================
+// CORE ENGINE
+// ============================================================
+const W=()=>window.innerWidth, H=()=>window.innerHeight;
+const bgCanvas=document.getElementById('bgCanvas'), bgCtx=bgCanvas.getContext('2d');
+const fxCanvas=document.getElementById('fxCanvas'), fxCtx=fxCanvas.getContext('2d');
+const frontCanvas=document.getElementById('frontCanvas'), frontCtx=frontCanvas.getContext('2d');
+
+function resizeAll(){[bgCanvas,fxCanvas,frontCanvas].forEach(c=>{c.width=W();c.height=H()});}
+resizeAll(); window.addEventListener('resize',resizeAll);
+
+// ============================================================
+// PARTICLE SYSTEM
+// ============================================================
+class Particle{
+  constructor(x,y,o={}){
+    this.x=x;this.y=y;
+    this.vx=o.vx||(Math.random()-0.5)*4;
+    this.vy=o.vy||(Math.random()-0.5)*4;
+    this.life=o.life||60;this.maxLife=this.life;
+    this.size=o.size||3;this.color=o.color||'#ffd700';
+    this.gravity=o.gravity||0;this.friction=o.friction||0.98;
+    this.type=o.type||'circle';
+    this.rotation=Math.random()*Math.PI*2;
+    this.rotSpeed=(Math.random()-0.5)*0.2;
+  }
+  update(){
+    this.vx*=this.friction;this.vy*=this.friction;
+    this.vy+=this.gravity;this.x+=this.vx;this.y+=this.vy;
+    this.life--;this.rotation+=this.rotSpeed;
+  }
+  draw(ctx){
+    const a=Math.max(0,this.life/this.maxLife);
+    ctx.save();ctx.globalAlpha=a;ctx.translate(this.x,this.y);ctx.rotate(this.rotation);
+    if(this.type==='circle'){
+      ctx.beginPath();ctx.arc(0,0,this.size*(0.5+a*0.5),0,Math.PI*2);
+      ctx.fillStyle=this.color;ctx.shadowColor=this.color;ctx.shadowBlur=10;ctx.fill();
+    }else if(this.type==='spark'){
+      ctx.strokeStyle=this.color;ctx.lineWidth=this.size*0.5;
+      ctx.shadowColor=this.color;ctx.shadowBlur=8;
+      ctx.beginPath();ctx.moveTo(-this.size*2,0);ctx.lineTo(this.size*2,0);ctx.stroke();
+    }else if(this.type==='blood'){
+      ctx.beginPath();ctx.arc(0,0,this.size*(0.3+a*0.7),0,Math.PI*2);
+      ctx.fillStyle=this.color;ctx.fill();
+    }else if(this.type==='ring'){
+      ctx.strokeStyle=this.color;ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(0,0,this.size*(1-a)*3+2,0,Math.PI*2);ctx.stroke();
+    }else if(this.type==='star'){
+      ctx.fillStyle=this.color;ctx.shadowColor=this.color;ctx.shadowBlur=12;
+      ctx.beginPath();
+      for(let i=0;i<5;i++){
+        const ang=i*Math.PI*2/5-Math.PI/2;
+        const r=this.size*(0.5+a*0.5);
+        ctx[i===0?'moveTo':'lineTo'](Math.cos(ang)*r,Math.sin(ang)*r);
+        const ang2=ang+Math.PI/5;
+        ctx.lineTo(Math.cos(ang2)*r*0.4,Math.sin(ang2)*r*0.4);
+      }
+      ctx.closePath();ctx.fill();
+    }
+    ctx.restore();
+  }
+  get dead(){return this.life<=0;}
+}
+
+const particles=[];
+function emit(x,y,count,o={}){
+  for(let i=0;i<count;i++){
+    const ang=Math.random()*Math.PI*2;
+    const spd=(o.speed||3)*Math.random();
+    particles.push(new Particle(x,y,{
+      vx:Math.cos(ang)*spd+(o.dirX||0),vy:Math.sin(ang)*spd+(o.dirY||0),
+      life:o.life||(30+Math.random()*40),size:o.size||(1+Math.random()*3),
+      color:o.color||'#ffd700',gravity:o.gravity||0,friction:o.friction||0.98,type:o.type||'circle'
+    }));
+  }
+}
+
+// ============================================================
+// SPEED LINES
+// ============================================================
+const speedLineParts=[];
+function activateSpeedLines(angle=0,duration=800){
+  for(let i=0;i<40;i++){
+    speedLineParts.push({
+      x:W()/2+Math.cos(angle)*(Math.random()*W()),
+      y:H()/2+Math.sin(angle)*(Math.random()*H()),
+      len:80+Math.random()*200, alpha:0.2+Math.random()*0.5,
+      speed:8+Math.random()*15, life:duration/16
+    });
+  }
+}
+
+// ============================================================
+// BACKGROUND
+// ============================================================
+const bgStars=[];for(let i=0;i<80;i++)bgStars.push({x:Math.random(),y:Math.random()*0.4,s:Math.random()*1.5+0.5,b:Math.random()});
+const bgLanterns=[];for(let i=0;i<5;i++)bgLanterns.push({x:0.1+Math.random()*0.8,y:0.15+Math.random()*0.15,phase:Math.random()*Math.PI*2});
+let fogOffset=0,bgHue=240,bgBright=0.08,domainActive=null;
+let safeZoneActive=false;
+
+function drawBG(t){
+  const w=W(),h=H();bgCtx.clearRect(0,0,w,h);
+
+  if(safeZoneActive){
+    // Peaceful safe zone bg
+    const sg=bgCtx.createLinearGradient(0,0,0,h);
+    sg.addColorStop(0,'#1a3a2a');sg.addColorStop(0.5,'#0f2a1f');sg.addColorStop(1,'#0a1a12');
+    bgCtx.fillStyle=sg;bgCtx.fillRect(0,0,w,h);
+    // Soft floating lights
+    for(let i=0;i<8;i++){
+      const lx=w*(0.1+i*0.1+Math.sin(t*0.001+i)*0.05);
+      const ly=h*(0.3+Math.sin(t*0.0015+i*1.5)*0.15);
+      const g=bgCtx.createRadialGradient(lx,ly,0,lx,ly,40+Math.sin(t*0.002+i)*10);
+      g.addColorStop(0,`rgba(150,255,180,${0.15+0.05*Math.sin(t*0.003+i)})`);
+      g.addColorStop(1,'rgba(150,255,180,0)');
+      bgCtx.fillStyle=g;bgCtx.fillRect(lx-60,ly-60,120,120);
+    }
+    return;
+  }
+
+  const skyG=bgCtx.createLinearGradient(0,0,0,h*0.4);
+  skyG.addColorStop(0,`hsl(${bgHue},60%,${bgBright*100}%)`);
+  skyG.addColorStop(1,`hsl(${bgHue+20},50%,${bgBright*60}%)`);
+  bgCtx.fillStyle=skyG;bgCtx.fillRect(0,0,w,h*0.4);
+
+  bgStars.forEach(s=>{
+    const f=0.5+0.5*Math.sin(t*0.002+s.b*10);
+    bgCtx.fillStyle=`rgba(255,255,255,${f*0.7})`;
+    bgCtx.beginPath();bgCtx.arc(s.x*w,s.y*h,s.s,0,Math.PI*2);bgCtx.fill();
+  });
+
+  bgCtx.fillStyle='#0a0a12';
+  bgCtx.beginPath();bgCtx.moveTo(0,0);bgCtx.lineTo(w*0.18,0);bgCtx.lineTo(w*0.22,h);bgCtx.lineTo(0,h);bgCtx.fill();
+  bgCtx.beginPath();bgCtx.moveTo(w,0);bgCtx.lineTo(w*0.82,0);bgCtx.lineTo(w*0.78,h);bgCtx.lineTo(w,h);bgCtx.fill();
+
+  bgCtx.strokeStyle='rgba(255,255,255,0.03)';bgCtx.lineWidth=1;
+  for(let i=0;i<20;i++){const yy=i/20*h;bgCtx.beginPath();bgCtx.moveTo(0,yy);bgCtx.lineTo(w*0.22,yy);bgCtx.stroke();bgCtx.beginPath();bgCtx.moveTo(w*0.78,yy);bgCtx.lineTo(w,yy);bgCtx.stroke();}
+
+  const gg=bgCtx.createLinearGradient(0,h*0.75,0,h);
+  gg.addColorStop(0,'#0f0f18');gg.addColorStop(1,'#080810');
+  bgCtx.fillStyle=gg;bgCtx.fillRect(w*0.2,h*0.75,w*0.6,h*0.25);
+
+  for(let i=0;i<15;i++){const rx=w*0.25+Math.random()*w*0.5,ry=h*0.78+Math.random()*h*0.18;
+    bgCtx.fillStyle=`rgba(100,120,180,${0.02+Math.random()*0.03})`;bgCtx.fillRect(rx,ry,20+Math.random()*60,1);}
+
+  bgLanterns.forEach(l=>{
+    const glow=0.4+0.2*Math.sin(t*0.003+l.phase);const lx=l.x*w,ly=l.y*h;
+    const gr=bgCtx.createRadialGradient(lx,ly,2,lx,ly,60);
+    gr.addColorStop(0,`rgba(255,180,80,${glow})`);gr.addColorStop(1,'rgba(255,180,80,0)');
+    bgCtx.fillStyle=gr;bgCtx.fillRect(lx-60,ly-60,120,120);
+    bgCtx.fillStyle=`rgba(255,200,100,${glow+0.2})`;bgCtx.fillRect(lx-3,ly-8,6,16);
+  });
+
+  fogOffset+=0.3;
+  for(let i=0;i<3;i++){const fy=h*0.5+i*h*0.15;
+    bgCtx.fillStyle=`rgba(60,60,80,${0.04+i*0.02})`;bgCtx.fillRect(0,fy,w,30);}
+
+  if(domainActive==='middle'){
+    const g=bgCtx.createRadialGradient(w*0.65,h*0.5,0,w*0.65,h*0.5,w*0.6);
+    g.addColorStop(0,'rgba(0,80,180,0.08)');g.addColorStop(0.5,'rgba(0,150,255,0.04)');g.addColorStop(1,'rgba(0,0,0,0)');
+    bgCtx.fillStyle=g;bgCtx.fillRect(0,0,w,h);
+  }else if(domainActive==='sinziru'){
+    const g=bgCtx.createRadialGradient(w*0.35,h*0.5,0,w*0.35,h*0.5,w*0.6);
+    g.addColorStop(0,'rgba(255,180,0,0.1)');g.addColorStop(0.5,'rgba(255,100,0,0.04)');g.addColorStop(1,'rgba(0,0,0,0)');
+    bgCtx.fillStyle=g;bgCtx.fillRect(0,0,w,h);
+  }else if(domainActive==='clash'){
+    bgCtx.fillStyle=`rgba(${128+Math.sin(t*0.01)*50},${50+Math.sin(t*0.013)*30},${100+Math.cos(t*0.008)*80},0.06)`;
+    bgCtx.fillRect(0,0,w,h);
+  }
+}
+
+// ============================================================
+// FX DRAW
+// ============================================================
+function drawFX(t){
+  const w=W(),h=H();fxCtx.clearRect(0,0,w,h);
+  for(let i=particles.length-1;i>=0;i--){particles[i].update();particles[i].draw(fxCtx);if(particles[i].dead)particles.splice(i,1);}
+  for(let i=speedLineParts.length-1;i>=0;i--){
+    const s=speedLineParts[i];s.x+=Math.cos(0)*s.speed;s.y+=Math.sin(0)*s.speed;s.life--;
+    fxCtx.strokeStyle=`rgba(255,255,255,${s.alpha*(s.life/60)})`;fxCtx.lineWidth=1;
+    fxCtx.beginPath();fxCtx.moveTo(s.x,s.y);fxCtx.lineTo(s.x-s.len,s.y);fxCtx.stroke();
+    if(s.life<=0)speedLineParts.splice(i,1);
+  }
+}
+
+// ============================================================
+// FRONT CANVAS — domain rings, auras, energy beams
+// ============================================================
+let auraConfig=null;
+const domainRings=[];
+let energyBeam=null; // {x1,y1,x2,y2,color,life,maxLife}
+let clashPoint=null; // {x,y,life}
+
+function drawFront(t){
+  const w=W(),h=H();frontCtx.clearRect(0,0,w,h);
+
+  // Domain rings
+  for(let i=domainRings.length-1;i>=0;i--){
+    const r=domainRings[i];r.radius+=r.speed;
+    const a=Math.max(0,1-r.radius/r.maxRadius);
+    frontCtx.strokeStyle=r.color.replace(/[\d.]+\)$/,a+')');
+    frontCtx.lineWidth=3;frontCtx.shadowColor=r.color;frontCtx.shadowBlur=20;
+    frontCtx.beginPath();frontCtx.arc(r.x,r.y,r.radius,0,Math.PI*2);frontCtx.stroke();
+    frontCtx.shadowBlur=0;
+    if(r.radius>=r.maxRadius)domainRings.splice(i,1);
+  }
+
+  // Aura
+  if(auraConfig){
+    const p=Math.sin(t*0.005)*0.3+0.7;
+    const g=frontCtx.createRadialGradient(auraConfig.x,auraConfig.y,0,auraConfig.x,auraConfig.y,auraConfig.radius*p);
+    g.addColorStop(0,auraConfig.inner||'rgba(255,215,0,0.3)');
+    g.addColorStop(0.5,auraConfig.mid||'rgba(255,215,0,0.1)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    frontCtx.fillStyle=g;frontCtx.beginPath();frontCtx.arc(auraConfig.x,auraConfig.y,auraConfig.radius*p,0,Math.PI*2);frontCtx.fill();
+  }
+
+  // Energy beam
+  if(energyBeam){
+    const a=energyBeam.life/energyBeam.maxLife;
+    frontCtx.strokeStyle=energyBeam.color.replace(/[\d.]+\)$/,a+')');
+    frontCtx.lineWidth=8*a+2;
+    frontCtx.shadowColor=energyBeam.color;frontCtx.shadowBlur=30*a;
+    frontCtx.beginPath();frontCtx.moveTo(energyBeam.x1,energyBeam.y1);
+    frontCtx.lineTo(energyBeam.x2,energyBeam.y2);frontCtx.stroke();
+    frontCtx.shadowBlur=0;
+    energyBeam.life--;
+    if(energyBeam.life<=0)energyBeam=null;
+  }
+
+  // Clash point
+  if(clashPoint){
+    const a=clashPoint.life/60;
+    const r=40*(1-a)+5;
+    for(let i=0;i<3;i++){
+      const g=frontCtx.createRadialGradient(clashPoint.x,clashPoint.y,0,clashPoint.x,clashPoint.y,r*(i+1)*0.5);
+      g.addColorStop(0,`rgba(255,255,255,${a*0.5})`);
+      g.addColorStop(1,'rgba(255,255,255,0)');
+      frontCtx.fillStyle=g;
+      frontCtx.beginPath();frontCtx.arc(clashPoint.x,clashPoint.y,r*(i+1)*0.5,0,Math.PI*2);frontCtx.fill();
+    }
+    clashPoint.life--;
+    if(clashPoint.life<=0)clashPoint=null;
+  }
+}
+
+function addRing(x,y,color,maxR,speed){domainRings.push({x,y,color,radius:0,maxRadius:maxR||W(),speed:speed||12});}
+
+// ============================================================
+// CAMERA SHAKE
+// ============================================================
+const camera=document.getElementById('camera');
+let shakeI=0,shakeD=0,shakeT=0;
+function triggerShake(i=10,d=500){shakeI=i;shakeD=d;shakeT=0;}
+function updateShake(dt){
+  if(shakeD<=0){camera.style.transform='translate(0,0)';return;}
+  shakeT+=dt;if(shakeT>=shakeD){shakeD=0;camera.style.transform='translate(0,0)';return;}
+  const decay=1-shakeT/shakeD;
+  camera.style.transform=`translate(${(Math.random()-0.5)*2*shakeI*decay}px,${(Math.random()-0.5)*2*shakeI*decay}px)`;
+}
+
+// ============================================================
+// IMPACT FLASH
+// ============================================================
+const impactOv=document.getElementById('impactOverlay');
+function flash(dur=150,color=null){
+  if(color)impactOv.style.background=`radial-gradient(ellipse at center,${color},transparent 70%)`;
+  else impactOv.style.background='radial-gradient(ellipse at center,rgba(255,255,255,0.9),transparent 70%)';
+  impactOv.style.opacity='1';setTimeout(()=>{impactOv.style.opacity='0';},dur);
+}
+
+// ============================================================
+// DIALOGUE
+// ============================================================
+const dialogBox=document.getElementById('dialogBox');
+const speakerEl=document.getElementById('speakerName');
+const textEl=document.getElementById('dialogText');
+let typeTimer=null,currentCB=null,isTyping=false,fullText='';
+
+function showDialog(speaker,text,o={}){
+  return new Promise(resolve=>{
+    dialogBox.classList.add('visible');
+    speakerEl.textContent=speaker||'';
+    speakerEl.style.color=o.nameColor||'#ffd700';
+    textEl.innerHTML='';textEl.className=o.narration?'narration':'';
+    fullText=text;isTyping=true;currentCB=resolve;
+    let i=0;const spd=o.speed||35;
+    clearInterval(typeTimer);
+    typeTimer=setInterval(()=>{
+      if(i<text.length){
+        if(text[i]==='<'){const ci=text.indexOf('>',i);if(ci!==-1){textEl.innerHTML+=text.substring(i,ci+1);i=ci+1;return;}}
+        textEl.innerHTML+=text[i];i++;
+      }else{clearInterval(typeTimer);isTyping=false;}
+    },spd);
+  });
+}
+function hideDialog(){dialogBox.classList.remove('visible');}
+
+// ============================================================
+// ROUND TITLE / ABILITY NAME
+// ============================================================
+const roundTitleEl=document.getElementById('roundTitle');
+function showRoundTitle(main,sub,dur=2500){
+  return new Promise(resolve=>{
+    roundTitleEl.querySelector('.main').textContent=main;
+    roundTitleEl.querySelector('.sub').textContent=sub;
+    roundTitleEl.style.textShadow='0 0 30px rgba(255,70,70,0.8),0 0 60px rgba(255,70,70,0.4)';
+    roundTitleEl.classList.add('visible');
+    setTimeout(()=>{roundTitleEl.classList.remove('visible');setTimeout(resolve,500);},dur);
+  });
+}
+const abilityEl=document.getElementById('abilityName');
+function showAbility(name,cls='gold',dur=2000){
+  return new Promise(resolve=>{
+    abilityEl.textContent=name;abilityEl.className=cls;
+    setTimeout(()=>abilityEl.classList.add('visible'),50);
+    setTimeout(()=>{abilityEl.classList.remove('visible');setTimeout(resolve,400);},dur);
+  });
+}
+
+// ============================================================
+// HP BARS
+// ============================================================
+let sekiHp=100,emonHp=100;
+const sekiBar=document.querySelector('#sekiHp .hp-bar');
+const emonBar=document.querySelector('#emonHp .hp-bar');
+function setSekiHp(v){sekiHp=Math.max(0,v);sekiBar.style.width=sekiHp+'%';if(sekiHp<30)sekiBar.style.background='linear-gradient(90deg,#ff0000,#ff4444)';}
+function setEmonHp(v){emonHp=Math.max(0,v);emonBar.style.width=emonHp+'%';if(emonHp<30)emonBar.style.background='linear-gradient(90deg,#0044ff,#4488ff)';}
+
+// ============================================================
+// CHARACTER HELPERS
+// ============================================================
+const sekiEl=document.getElementById('seki');
+const emonEl=document.getElementById('emon');
+const shadowEl=document.getElementById('shadow');
+function showChar(el){el.classList.add('visible');}
+function hideChar(el){el.classList.remove('visible');}
+function hitChar(el,dur=450){el.classList.add('hit');setTimeout(()=>el.classList.remove('hit'),dur);}
+function charPos(el){const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};}
+
+// ============================================================
+// GHOSTS
+// ============================================================
+const ghostEmojis=['👩','👻','🔪','⛩️','🚂','🌀'];
+const ghostLayer=document.getElementById('charLayer');
+let ghostEls=[];
+function summonGhosts(weak=false){
+  clearGhosts();
+  const pos=[{x:'28%',y:'30%'},{x:'18%',y:'50%'},{x:'35%',y:'20%'},{x:'25%',y:'60%'},{x:'40%',y:'45%'},{x:'15%',y:'35%'}];
+  ghostEmojis.forEach((em,i)=>{
+    const el=document.createElement('div');el.className='ghost';el.textContent=em;
+    el.style.left=pos[i].x;el.style.top=pos[i].y;
+    el.style.fontSize=weak?'30px':'60px';
+    el.style.filter=weak?'grayscale(0.7) brightness(0.5)':'drop-shadow(0 0 15px rgba(255,0,0,0.6))';
+    ghostLayer.appendChild(el);ghostEls.push(el);
+    setTimeout(()=>el.classList.add('visible'),i*150);
+  });
+}
+function clearGhosts(){ghostEls.forEach(el=>{el.classList.remove('visible');setTimeout(()=>el.remove(),600);});ghostEls=[];}
+function strengthenGhosts(){ghostEls.forEach(el=>{el.style.fontSize='65px';el.style.filter='drop-shadow(0 0 20px rgba(255,215,0,0.8))';});}
+function fadeGhosts(){ghostEls.forEach(el=>{el.style.opacity='0.2';el.style.filter='blur(3px) grayscale(1)';});}
+
+// ============================================================
+// DOMAIN / SAFE OVERLAYS
+// ============================================================
+const domainOv=document.getElementById('domainOverlay');
+const safeOv=document.getElementById('safeOverlay');
+function showDomain(type){
+  domainActive=type;
+  if(type==='middle'){domainOv.style.background='radial-gradient(ellipse at 65% 50%, rgba(0,100,200,0.15), transparent 70%)';}
+  else if(type==='sinziru'){domainOv.style.background='radial-gradient(ellipse at 35% 50%, rgba(255,180,0,0.15), transparent 70%)';}
+  else if(type==='clash'){domainOv.style.background='radial-gradient(ellipse at center, rgba(200,100,255,0.1), transparent 70%)';}
+  domainOv.style.opacity='1';
+}
+function hideDomain(){domainActive=null;domainOv.style.opacity='0';}
+function showSafe(){safeZoneActive=true;safeOv.style.opacity='1';}
+function hideSafe(){safeZoneActive=false;safeOv.style.opacity='0';}
+
+// ============================================================
+// UTILITY
+// ============================================================
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+let advanceR=null;
+function waitClick(){return new Promise(r=>{advanceR=r;});}
+document.getElementById('stage').addEventListener('click',()=>{
+  if(isTyping){clearInterval(typeTimer);textEl.innerHTML=fullText;isTyping=false;return;}
+  if(advanceR){const r=advanceR;advanceR=null;r();}
+  if(currentCB){const cb=currentCB;currentCB=null;cb();}
+});
+
+// ============================================================
+// MAIN LOOP
+// ============================================================
+let lastT=0;
+function loop(t){const dt=t-lastT;lastT=t;drawBG(t);drawFX(t);drawFront(t);updateShake(dt);requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+
+// ============================================================
+// === COMPLETE STORY SCRIPT ===
+// ============================================================
+async function startStory(){
+
+  // ===================== PROLOGUE =====================
+  await sleep(500);
+  await showDialog('','夜の路地が、まるで生き物のように息を潜めていた。',{narration:true,speed:40});
+  await waitClick();
+
+  await showDialog('','関暁夫が完全勝利の余韻に浸り、黄金のSINZIRU領域の光がまだ残る中——',{narration:true,speed:35});
+  showChar(sekiEl);domainActive='sinziru';
+  emit(W()*0.2,H()*0.5,30,{color:'#ffd700',speed:2,life:80});
+  await waitClick();
+
+  await showDialog('','突然、霧の奥から重い足音が響き始めた。',{narration:true,speed:40});
+  triggerShake(3,800);
+  await waitClick();
+
+  await showDialog('','黒いコートを翻し、目が鋭く光る中肉中背の男。\nその佇まいは明らかに違う——静かな自信と、底知れぬ計算が滲み出ている。',{narration:true,speed:30});
+  showChar(emonEl);
+  emit(W()*0.8,H()*0.5,20,{color:'#00ccff',speed:1.5,life:60});
+  await waitClick();
+
+  await showDialog('','彼こそが——新キャラ <span class="cyan">「ミドルクラス衛門」</span>。',{narration:true,speed:30});
+  await waitClick();
+
+  document.getElementById('hpBars').classList.add('visible');
+
+  await showDialog('関 暁夫','ふふっ……お前、誰だ？\n俺がGrokをぶっ飛ばして、SINZIRUで完全勝利を掴んだ直後だぜ？',{nameColor:'#ffd700',speed:30});
+  await waitClick();
+  await showDialog('関 暁夫','ちょうどいい……新しい獲物が来たか。\nよし、本気のバトルといこうじゃねえか！',{nameColor:'#ffd700',speed:25});
+  await waitClick();
+  await showDialog('関 暁夫','<span class="gold">信じるか信じないかは……お前次第だぜ！</span>',{nameColor:'#ffd700',speed:35});
+  sekiEl.classList.add('power-up');
+  emit(W()*0.2,H()*0.4,40,{color:'#ffd700',speed:3,life:60});
+  triggerShake(4,400);
+  await waitClick();
+
+  await showDialog('','ミドルクラス衛門は無言でコートの襟を立て、静かに一歩踏み出した。\nその一歩で、空気が変わった。',{narration:true,speed:30});
+  triggerShake(6,600);emit(W()*0.8,H()*0.6,25,{color:'#00ccff',speed:2,life:50});
+  await waitClick();
+  sekiEl.classList.remove('power-up');hideDialog();
+
+  // ===================== ROUND 1 =====================
+  await sleep(300);
+  await showRoundTitle('ROUND 1','ミドルクラス衛門の待ち構え');
+  await sleep(500);
+
+  await showDialog('','ミドルクラス衛門が小さく息を吐き、領域を展開した。',{narration:true,speed:30});
+  await waitClick();hideDialog();await sleep(200);
+
+  showDomain('middle');
+  addRing(W()*0.75,H()*0.5,'rgba(0,180,255,1)',W(),12);
+  triggerShake(8,1000);
+  await showAbility('「ミドルクラッシー」','cyan',2500);
+  emit(W()*0.75,H()*0.5,60,{color:'#00ccff',speed:5,life:80});
+  bgHue=220;
+  await sleep(300);
+
+  await showDialog('','関暁夫が無意識に一歩踏み込んだ瞬間——\n領域の境界が関の体を包み込んだ。',{narration:true,speed:30});
+  await waitClick();
+
+  await showDialog('','都市伝説力が、強制的に <span class="cyan">ミドルクラスレベル</span> まで引きずり下げられた！',{narration:true,speed:25});
+  summonGhosts(true);setSekiHp(85);triggerShake(5,500);
+  await waitClick();
+
+  await showDialog('','口裂け女のハサミが鈍く光を失い、八尺様の腕が短くなり……\nすべてが「ミドルクラス相当」に弱体化！',{narration:true,speed:25});
+  await waitClick();
+
+  await showDialog('ミドルクラス衛門','入ったな……',{nameColor:'#00ccff',speed:60});
+  await waitClick();
+
+  hideDialog();await sleep(200);
+  activateSpeedLines(Math.PI,600);
+  flash(200,'rgba(0,180,255,0.6)');triggerShake(18,700);hitChar(sekiEl);setSekiHp(62);
+  emit(W()*0.25,H()*0.45,50,{color:'#ff4444',speed:6,life:50,type:'blood',gravity:0.15});
+  emit(W()*0.25,H()*0.45,30,{color:'#ffffff',speed:8,life:30,type:'spark'});
+  await sleep(400);
+
+  await showDialog('','<span class="highlight">ドンッ！！</span>\n彼の掌底が、関暁夫の腹部に完璧に直撃した。',{narration:true,speed:20});
+  await waitClick();
+
+  await showDialog('関 暁夫','ぐはぁっ……！？　この……一撃……！',{nameColor:'#ffd700',speed:30});
+  await waitClick();
+
+  await showDialog('','ミドルクラス衛門は止まらない。\n左の肘打ち、右の膝蹴り、連続の掌打——',{narration:true,speed:25});
+  for(let i=0;i<4;i++){
+    await sleep(250);flash(80,i%2===0?'rgba(0,150,255,0.4)':'rgba(255,255,255,0.3)');
+    triggerShake(10+i*2,300);hitChar(sekiEl);
+    const p=charPos(sekiEl);emit(p.x,p.y,15,{color:i%2===0?'#00ccff':'#ff4444',speed:5,life:30,type:'spark'});
+  }
+  setSekiHp(41);
+  await waitClick();
+
+  await showDialog('','関の体が路地を転がり、壁に何度も叩きつけられる。',{narration:true,speed:25});
+  await waitClick();
+
+  await showDialog('関 暁夫','ははっ……お前、なかなかやるじゃねえか……！',{nameColor:'#ffd700',speed:30});
+  await waitClick();
+  hideDialog();
+
+  // ===================== ROUND 2 =====================
+  await sleep(500);clearGhosts();hideDomain();
+  await showRoundTitle('ROUND 2','関暁夫の逆襲——信じる力の爆発');
+  await sleep(500);
+
+  await showDialog('','関暁夫が地面に片膝をついたまま、ゆっくりと顔を上げた。\nその目には狂気と覚悟が宿っている。',{narration:true,speed:28});
+  sekiEl.style.filter='brightness(0.6)';
+  await waitClick();
+
+  sekiEl.style.filter='';
+  await showDialog('関 暁夫','ふふっ……ふははははっ！！\nお前、面白い能力じゃねえか！',{nameColor:'#ffd700',speed:28});
+  emit(W()*0.2,H()*0.4,15,{color:'#ffd700',speed:1.5,life:50});
+  await waitClick();
+
+  await showDialog('関 暁夫','俺の力をミドルクラスまで落とすとは……\nでもよ……<span class="gold">俺の力は信じる心で無限なんだぜ！！</span>',{nameColor:'#ffd700',speed:25});
+  triggerShake(5,400);
+  await waitClick();
+
+  hideDialog();await sleep(200);
+  showDomain('sinziru');
+  addRing(W()*0.25,H()*0.5,'rgba(255,215,0,1)',W(),15);
+  triggerShake(15,1200);sekiEl.classList.add('power-up');
+  bgHue=30;bgBright=0.15;
+  emit(W()*0.25,H()*0.5,80,{color:'#ffd700',speed:6,life:100});
+  emit(W()*0.25,H()*0.5,40,{color:'#ff8800',speed:4,life:80});
+  flash(300,'rgba(255,215,0,0.5)');
+  await showAbility('都市伝説操術＋SINZIRU','gold',2800);
+  await sleep(300);
+
+  await showDialog('','黄金の光が爆発的に広がった！\nSINZIRUの信じる力が、弱体化を一部無効化し始める。',{narration:true,speed:25});
+  await waitClick();
+
+  summonGhosts(false);await sleep(400);
+
+  await showDialog('','口裂け女が「アタシ……きれい……？」とハサミを構え、\n八尺様が無限の腕を伸ばし——軍団が再び力を取り戻した！',{narration:true,speed:25});
+  strengthenGhosts();
+  emit(W()*0.3,H()*0.35,30,{color:'#ff0044',speed:3,life:60});
+  await waitClick();
+
+  await showDialog('関 暁夫','さあ、みんな！\nこの<span class="cyan">ミドルクラスの野郎</span>に、<span class="highlight">本当の恐怖</span>を教えてやれ！！',{nameColor:'#ffd700',speed:22});
+  triggerShake(10,500);emit(W()*0.3,H()*0.3,50,{color:'#ffd700',speed:5,life:70});
+  flash(150,'rgba(255,180,0,0.3)');
+  await waitClick();
+
+  await showDialog('','軍団がミドルクラス衛門を囲み、ハサミが振り下ろされ、\nコートが切り裂かれ、血が飛び散る……',{narration:true,speed:22});
+  for(let i=0;i<4;i++){await sleep(250);const ep=charPos(emonEl);flash(80,'rgba(255,100,0,0.3)');
+    triggerShake(7,300);hitChar(emonEl);emit(ep.x,ep.y,15,{color:'#ff4444',speed:4,life:30,type:'blood',gravity:0.1});}
+  setEmonHp(55);
+  await waitClick();
+
+  await showDialog('','しかし——彼の表情は変わらない。\nむしろ、わずかに<span class="cyan">笑みが深くなった</span>。',{narration:true,speed:30});
+  emit(W()*0.78,H()*0.35,20,{color:'#00ccff',speed:1,life:60});
+  await waitClick();
+  hideDialog();sekiEl.classList.remove('power-up');
+
+  // ===================== ROUND 3 =====================
+  await sleep(600);clearGhosts();hideDomain();
+  bgHue=270;bgBright=0.06;
+  await showRoundTitle('ROUND 3','ミドルクラス衛門の切り札');
+  await sleep(500);
+
+  await showDialog('','ミドルクラス衛門が冷静に指を鳴らした。',{narration:true,speed:35});
+  triggerShake(4,400);
+  emit(W()*0.78,H()*0.4,30,{color:'#aa44ff',speed:3,life:60});
+  await waitClick();
+
+  // === SHADOW MINE ===
+  hideDialog();await sleep(300);
+  addRing(W()*0.75,H()*0.5,'rgba(170,68,255,1)',W()*0.8,10);
+  triggerShake(12,800);
+  flash(250,'rgba(100,0,200,0.5)');
+  await showAbility('術式「シャドーマイン」','purple',2500);
+
+  emit(W()*0.7,H()*0.6,60,{color:'#6600aa',speed:4,life:80});
+  emit(W()*0.7,H()*0.6,30,{color:'#aa44ff',speed:3,life:60,type:'ring'});
+  await sleep(400);
+
+  // Shadow appears
+  await showDialog('','彼の影が地面から分離し——もう一人の自己（シャドー）が実体化した！',{narration:true,speed:25});
+  shadowEl.style.animation='shadowPulse 1s ease infinite alternate';
+  showChar(shadowEl);
+  triggerShake(8,600);
+  emit(W()*0.6,H()*0.6,40,{color:'#330066',speed:3,life:70});
+  emit(W()*0.6,H()*0.6,20,{color:'#aa44ff',speed:2,life:50,type:'spark'});
+  await waitClick();
+
+  await showDialog('','シャドーは本体と同じ顔、同じ体躯だが、\n領域も特殊技も一切使えない——<span class="purple">純粋な戦闘マシン</span>。',{narration:true,speed:25});
+  await waitClick();
+
+  // Shadow + main attack ghosts
+  await showDialog('','本体とシャドーが同時に動き、関の軍団を物理でぶっ飛ばし始める！',{narration:true,speed:22});
+  summonGhosts(false);
+  await sleep(500);
+
+  // Multiple simultaneous attacks
+  for(let i=0;i<3;i++){
+    await sleep(350);
+    const gp=ghostEls[i]?{x:parseFloat(ghostEls[i].style.left)/100*W(),y:parseFloat(ghostEls[i].style.top)/100*H()}:{x:W()*0.3,y:H()*0.4};
+    flash(60,'rgba(170,68,255,0.3)');
+    emit(gp.x,gp.y,20,{color:'#aa44ff',speed:5,life:25,type:'spark'});
+    triggerShake(5,200);
+    if(ghostEls[i]){ghostEls[i].style.opacity='0.1';ghostEls[i].style.transform='scale(0.3) rotate(30deg)';}
+  }
+  await waitClick();
+
+  await showDialog('','シャドーが口裂け女のハサミを素手で受け止め、八尺様の腕をねじ切り、\n本体が犬鳴村の村人を蹴散らし、同時攻撃で関の隙を突く！',{narration:true,speed:22});
+
+  // Hit seki through the gap
+  await sleep(300);
+  activateSpeedLines(Math.PI,500);
+  flash(150,'rgba(170,68,255,0.5)');triggerShake(14,600);
+  hitChar(sekiEl);setSekiHp(32);
+  const sp=charPos(sekiEl);
+  emit(sp.x,sp.y,40,{color:'#aa44ff',speed:6,life:40,type:'spark'});
+  emit(sp.x,sp.y,25,{color:'#ff2222',speed:4,life:35,type:'blood',gravity:0.1});
+  await waitClick();
+
+  await showDialog('関 暁夫','くっ……この影野郎……！',{nameColor:'#ffd700',speed:30});
+  fadeGhosts();
+  await waitClick();
+
+  await showDialog('','関の軍団が次々と弾き飛ばされ、SINZIRUの光が揺らぐ。',{narration:true,speed:28});
+  await waitClick();
+
+  // === MERUSU — SAFE ZONE ===
+  hideDialog();await sleep(400);
+  clearGhosts();
+
+  await showDialog('','そして、ミドルクラス衛門が全ての呪力を捧げて叫んだ。',{narration:true,speed:28});
+  triggerShake(6,500);
+  emit(W()*0.75,H()*0.4,40,{color:'#44ff88',speed:2,life:80});
+  await waitClick();
+
+  hideDialog();await sleep(200);
+
+  // Massive domain expansion
+  addRing(W()*0.5,H()*0.5,'rgba(68,255,136,1)',W()*1.2,8);
+  addRing(W()*0.5,H()*0.5,'rgba(100,255,180,0.8)',W()*1.0,6);
+  triggerShake(20,1500);
+  flash(400,'rgba(68,255,136,0.6)');
+  bgHue=150;bgBright=0.12;
+  await showAbility('契約領域・目留守','green',3000);
+
+  emit(W()*0.5,H()*0.5,100,{color:'#44ff88',speed:5,life:120});
+  emit(W()*0.5,H()*0.5,50,{color:'#88ffcc',speed:3,life:90,type:'star'});
+  await sleep(500);
+
+  // Enter safe zone
+  showSafe();
+  showDomain('middle');
+  domainOv.style.background='radial-gradient(ellipse at center, rgba(100,255,180,0.12), transparent 70%)';
+  sekiEl.classList.add('safe-zone');
+
+  await showDialog('','瞬間——関暁夫の体が強制的に引きずり込まれた！\n<span class="green">安心安全の罠領域</span>に完全移動。',{narration:true,speed:25});
+  await waitClick();
+
+  await showDialog('','周囲が柔らかな光に包まれ、奇妙な安心感が脳を満たす。',{narration:true,speed:30});
+  auraConfig={x:W()*0.25,y:H()*0.5,radius:120,inner:'rgba(100,255,150,0.3)',mid:'rgba(100,255,150,0.1)'};
+  await waitClick();
+
+  await showDialog('関 暁夫','ここは……安全だ……\n戦う必要なんて……ない……',{nameColor:'#88cc88',speed:50});
+  await waitClick();
+
+  await showDialog('','関の精神が少しずつ戦闘モードを解除しかける。\n口裂け女の声が遠くなり、犬鳴村の村人たちがぼんやりと霞む……',{narration:true,speed:25});
+  await waitClick();
+
+  await showDialog('','関が必死に頭を振って抵抗するが、精神が弱い隙を突かれ、\n膝がガクガクと震え始める！',{narration:true,speed:25});
+  setSekiHp(24);
+  await waitClick();
+
+  // Emon and Shadow smile
+  await showDialog('ミドルクラス衛門','安心しろ……ここは安全だ。\n<span class="green">戦う必要なんてない……</span>',{nameColor:'#00ccff',speed:40});
+  emit(W()*0.5,H()*0.5,30,{color:'#44ff88',speed:1,life:100});
+  await waitClick();
+
+  // Seki resists!
+  await showDialog('','しかし——路地全体が、三つの力が激しくぶつかり合い、\n火花と闇と黄金の光が乱舞する大混戦に！',{narration:true,speed:22});
+  hideSafe();sekiEl.classList.remove('safe-zone');auraConfig=null;
+  showDomain('clash');bgHue=280;bgBright=0.1;
+  triggerShake(12,800);
+  emit(W()*0.5,H()*0.5,60,{color:'#ffd700',speed:5,life:60});
+  emit(W()*0.5,H()*0.5,40,{color:'#00ccff',speed:4,life:50});
+  emit(W()*0.5,H()*0.5,30,{color:'#aa44ff',speed:3,life:55});
+  await waitClick();
+
+  // ===================== FINAL CLASH =====================
+  hideDialog();await sleep(300);
+  roundTitleEl.style.textShadow='0 0 30px rgba(255,200,0,0.8),0 0 60px rgba(100,0,255,0.6)';
+  await showRoundTitle('FINAL CLASH','——決着の時');
+  await sleep(500);
+
+  await showDialog('関 暁夫','ははははっ……お前……マジでヤバい能力の持ち主じゃねえか……',{nameColor:'#ffd700',speed:25});
+  await waitClick();
+
+  await showDialog('関 暁夫','でもよ……俺はまだ……<span class="gold">信じてるぜ！！</span>\nこの安心なんか……俺の恐怖の前じゃ……<span class="highlight">ただの幻想だ！！</span>',{nameColor:'#ffd700',speed:22});
+  sekiEl.classList.add('rage');
+  triggerShake(10,600);
+  emit(W()*0.25,H()*0.4,50,{color:'#ffd700',speed:6,life:70});
+  flash(200,'rgba(255,215,0,0.4)');
+  setSekiHp(30);
+  await waitClick();
+
+  await showDialog('ミドルクラス衛門','幻想か……それとも現実か。\nお前が信じるか信じないか……<span class="white">ここで決まるな。</span>',{nameColor:'#00ccff',speed:30});
+  emit(W()*0.75,H()*0.4,30,{color:'#00ccff',speed:2,life:60});
+  await waitClick();
+
+  // Both charge their final attacks
+  hideDialog();await sleep(300);
+
+  await showDialog('','二人が同時に踏み出した——！！',{narration:true,speed:20});
+  await waitClick();
+
+  // SINZIRU full burst
+  hideDialog();await sleep(200);
+  sekiEl.classList.remove('rage');
+  sekiEl.classList.add('power-up');
+  addRing(W()*0.25,H()*0.5,'rgba(255,215,0,1)',W()*0.5,20);
+  emit(W()*0.25,H()*0.5,60,{color:'#ffd700',speed:8,life:50});
+
+  // Middle Classy + Shadow simultaneous
+  addRing(W()*0.75,H()*0.5,'rgba(0,180,255,1)',W()*0.5,20);
+  emit(W()*0.75,H()*0.5,40,{color:'#00ccff',speed:7,life:50});
+  emit(W()*0.6,H()*0.5,30,{color:'#aa44ff',speed:6,life:40});
+
+  triggerShake(25,2000);
+  await sleep(400);
+
+  // Energy beams collide!
+  energyBeam={x1:W()*0.25,y1:H()*0.5,x2:W()*0.75,y2:H()*0.5,color:'rgba(255,215,0,1)',life:40,maxLife:40};
+  await sleep(200);
+  energyBeam={x1:W()*0.75,y1:H()*0.5,x2:W()*0.25,y2:H()*0.5,color:'rgba(0,180,255,1)',life:40,maxLife:40};
+  await sleep(200);
+
+  // CLASH POINT
+  clashPoint={x:W()*0.5,y:H()*0.5,life:60};
+  flash(500,'rgba(255,255,255,0.9)');
+  triggerShake(30,1500);
+  emit(W()*0.5,H()*0.5,100,{color:'#ffffff',speed:10,life:60,type:'spark'});
+  emit(W()*0.5,H()*0.5,80,{color:'#ffd700',speed:8,life:50,type:'star'});
+  emit(W()*0.5,H()*0.5,60,{color:'#00ccff',speed:7,life:55,type:'ring'});
+  emit(W()*0.5,H()*0.5,40,{color:'#aa44ff',speed:6,life:45});
+
+  await sleep(600);
+
+  // Multiple clashes
+  for(let i=0;i<6;i++){
+    await sleep(200);
+    const cx=W()*(0.35+Math.random()*0.3);
+    const cy=H()*(0.35+Math.random()*0.3);
+    clashPoint={x:cx,y:cy,life:30};
+    flash(80,`rgba(${Math.random()>0.5?255:100},${Math.random()>0.5?215:180},${Math.random()>0.5?0:255},0.5)`);
+    triggerShake(15,250);
+    emit(cx,cy,30,{color:['#ffd700','#00ccff','#aa44ff','#ff4444'][i%4],speed:8,life:30,type:'spark'});
+  }
+
+  await sleep(500);
+
+  // Final massive explosion
+  flash(800,'rgba(255,255,255,1)');
+  triggerShake(35,2000);
+  for(let i=0;i<5;i++){
+    await sleep(100);
+    emit(W()*0.5,H()*0.5,50,{color:['#ffd700','#00ccff','#aa44ff','#ff4444','#ffffff'][i],speed:12,life:80,type:'star'});
+  }
+
+  await sleep(1000);
+
+  // Both take damage
+  hitChar(sekiEl);hitChar(emonEl);hitChar(shadowEl);
+  setSekiHp(8);setEmonHp(12);
+  emit(W()*0.25,H()*0.5,40,{color:'#ff0000',speed:5,life:40,type:'blood',gravity:0.15});
+  emit(W()*0.75,H()*0.5,30,{color:'#ff0000',speed:4,life:35,type:'blood',gravity:0.12});
+
+  await sleep(800);
+  sekiEl.classList.remove('power-up');
+  hideDomain();bgHue=240;bgBright=0.05;
+
+  // Aftermath
+  await showDialog('','路地が……静まり返った。\n破壊の限界を迎えた空間に、二つの影が立ち尽くしている。',{narration:true,speed:30});
+  await waitClick();
+
+  // Shadow dissolves
+  await showDialog('','シャドーがゆっくりと崩れ、闇に還っていく……',{narration:true,speed:35});
+  shadowEl.style.opacity='0';shadowEl.style.transition='opacity 2s ease';
+  emit(W()*0.6,H()*0.5,30,{color:'#330066',speed:2,life:80});
+  await waitClick();
+
+  await showDialog('','関暁夫が血だらけの体で立ち、荒い息を吐いている。\nミドルクラス衛門もまた、コートがボロボロのまま、微動だにしない。',{narration:true,speed:25});
+  await waitClick();
+
+  // Final exchange
+  await showDialog('関 暁夫','ははっ……はははっ……\nお前……認めてやるよ。\n<span class="gold">お前は本物だ。</span>',{nameColor:'#ffd700',speed:30});
+  emit(W()*0.25,H()*0.4,15,{color:'#ffd700',speed:1,life:80});
+  await waitClick();
+
+  await showDialog('ミドルクラス衛門','……お前もな。\n<span class="cyan">信じる力</span>……侮れない。',{nameColor:'#00ccff',speed:35});
+  emit(W()*0.78,H()*0.4,15,{color:'#00ccff',speed:1,life:80});
+  await waitClick();
+
+  await showDialog('','二人の間に、奇妙な緊張と——\nそしてかすかな敬意が漂った。',{narration:true,speed:30});
+  await waitClick();
+
+  await showDialog('関 暁夫','次は……負けねえぜ。\n<span class="gold">信じるか信じないかは……お前次第だ。</span>',{nameColor:'#ffd700',speed:28});
+  await waitClick();
+
+  await showDialog('ミドルクラス衛門','次があるなら……\n<span class="cyan">ミドルクラスの全力を見せてやる。</span>',{nameColor:'#00ccff',speed:28});
+  await waitClick();
+
+  await showDialog('','霧が再び路地を包み、二つの影が背を向けて消えていく。\n決着は——まだ、ついていない。',{narration:true,speed:30});
+  emit(W()*0.5,H()*0.5,40,{color:'#8888aa',speed:1,life:120});
+  await waitClick();
+
+  // ===================== ENDING =====================
+  hideDialog();
+  hideChar(sekiEl);hideChar(emonEl);
+  document.getElementById('hpBars').classList.remove('visible');
+  await sleep(1500);
+
+  // Final overlay
+  const finalOv=document.getElementById('finalOverlay');
+  const finalTitle=finalOv.querySelector('.final-title');
+  const finalText=finalOv.querySelector('.final-text');
+  const credit=finalOv.querySelector('.credit');
+
+  finalTitle.textContent='— 超激戦・互角の大混戦 —';
+  finalText.innerHTML=`
+    ミドルクラス衛門の「ミドルクラッシー」弱体化<br>
+    ＋ シャドーマイン同時攻撃<br>
+    ＋ 契約領域・目留守の精神罠が関を追い詰め<br><br>
+    関暁夫のSINZIRU信じる力<br>
+    ＋ 無限都市伝説軍団が死力を尽くして抵抗——<br><br>
+    <span style="color:#ffd700;font-size:24px;font-weight:bold">決着はついていない。</span><br>
+    <span style="color:#aaa;font-size:16px">この戦いは、まだ続く——</span>
+  `;
+  credit.textContent='COMPLETE EDITION — FIN';
+
+  finalOv.classList.add('visible');
+  await sleep(800);
+  finalTitle.classList.add('show');
+  await sleep(600);
+  finalText.classList.add('show');
+  await sleep(800);
+  credit.classList.add('show');
+
+  // Continuous ambient particles
+  const endLoop=setInterval(()=>{
+    emit(Math.random()*W(),Math.random()*H(),2,{color:['#ffd700','#00ccff','#aa44ff'][Math.floor(Math.random()*3)],speed:0.5,life:120,type:'star'});
+  },300);
+
+  // Clean up after 30s
+  setTimeout(()=>clearInterval(endLoop),30000);
+}
+
+// ============================================================
+// TITLE START
+// ============================================================
+document.getElementById('titleScreen').addEventListener('click',()=>{
+  const ts=document.getElementById('titleScreen');
+  ts.classList.add('hidden');
+  setTimeout(()=>{ts.style.display='none';startStory();},800);
+});
+</script>
+</body>
+</html>
