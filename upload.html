@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube</title>
+<style>
+/* ============================================================
+   RESET & BASE STYLES (Section 1/5)
+   ============================================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --yt-bg:#0f0f0f;
+  --yt-header-bg:#0f0f0f;
+  --yt-sidebar-bg:#0f0f0f;
+  --yt-text:#f1f1f1;
+  --yt-text-secondary:#aaa;
+  --yt-hover:#272727;
+  --yt-chip-bg:#333;
+  --yt-chip-active-bg:#f1f1f1;
+  --yt-chip-active-text:#0f0f0f;
+  --yt-red:#ff0000;
+  --yt-border:#333;
+  --yt-card-bg:#0f0f0f;
+  --yt-overlay-bg:rgba(0,0,0,0.6);
+  --sidebar-width:72px;
+  --header-height:56px;
+  --chip-height:42px;
+  font-family:"Roboto","Noto Sans JP","Yu Gothic",Arial,sans-serif;
+  font-size:14px;
+  color:var(--yt-text);
+  background:var(--yt-bg);
+}
+html{scrollbar-width:thin;scrollbar-color:#555 var(--yt-bg)}
+body{overflow-x:hidden;background:var(--yt-bg);min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{border:none;background:none;color:inherit;cursor:pointer;font:inherit}
+img,svg{display:block}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--yt-bg)}
+::-webkit-scrollbar-thumb{background:#555;border-radius:4px}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.yt-header{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  height:var(--header-height);
+  background:var(--yt-header-bg);
+  display:flex;align-items:center;
+  padding:0 16px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.yt-header-left{display:flex;align-items:center;gap:16px;min-width:200px}
+.yt-hamburger{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;cursor:pointer}
+.yt-hamburger:hover{background:var(--yt-hover)}
+.yt-hamburger svg{fill:#fff;width:24px;height:24px}
+.yt-logo{display:flex;align-items:center;gap:1px;cursor:pointer}
+.yt-logo-icon{width:90px;height:20px}
+.yt-logo-jp{font-size:10px;color:#aaa;position:relative;top:-8px;left:0px}
+.yt-header-center{flex:1;display:flex;align-items:center;justify-content:center;max-width:640px;margin:0 auto}
+.yt-search-box{display:flex;align-items:center;width:100%;max-width:572px}
+.yt-search-input{
+  flex:1;height:40px;
+  background:#121212;border:1px solid #303030;
+  border-radius:20px 0 0 20px;
+  padding:0 16px;color:#fff;font-size:16px;
+  outline:none;
+}
+.yt-search-input:focus{border-color:#1c62b9}
+.yt-search-input::placeholder{color:#888}
+.yt-search-btn{
+  width:64px;height:40px;
+  background:#222;border:1px solid #303030;border-left:none;
+  border-radius:0 20px 20px 0;
+  display:flex;align-items:center;justify-content:center;
+}
+.yt-search-btn:hover{background:#333}
+.yt-search-btn svg{fill:#fff;width:24px;height:24px}
+.yt-voice-btn{width:40px;height:40px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;margin-left:8px}
+.yt-voice-btn:hover{background:#333}
+.yt-voice-btn svg{fill:#fff;width:24px;height:24px}
+.yt-header-right{display:flex;align-items:center;gap:8px;min-width:200px;justify-content:flex-end}
+.yt-header-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.yt-header-btn:hover{background:var(--yt-hover)}
+.yt-header-btn svg{fill:#fff;width:24px;height:24px}
+.yt-create-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:20px;font-size:14px;font-weight:500}
+.yt-create-btn:hover{background:var(--yt-hover)}
+.yt-create-btn svg{fill:#fff;width:24px;height:24px}
+.yt-notif-btn{position:relative}
+.yt-notif-badge{position:absolute;top:2px;right:2px;background:var(--yt-red);color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:500}
+.yt-avatar-btn{width:32px;height:32px;border-radius:50%;overflow:hidden;cursor:pointer;background:#555;display:flex;align-items:center;justify-content:center}
+.yt-avatar-btn svg{fill:#fff;width:20px;height:20px}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.yt-sidebar{
+  position:fixed;left:0;top:var(--header-height);bottom:0;
+  width:var(--sidebar-width);
+  background:var(--yt-sidebar-bg);
+  z-index:500;
+  display:flex;flex-direction:column;align-items:center;
+  padding-top:4px;
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+.yt-sidebar::-webkit-scrollbar{display:none}
+.yt-sidebar-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:64px;min-height:74px;
+  border-radius:10px;cursor:pointer;
+  padding:4px 0;
+  gap:4px;
+}
+.yt-sidebar-item:hover{background:var(--yt-hover)}
+.yt-sidebar-item.active{color:#fff}
+.yt-sidebar-item svg{fill:#fff;width:24px;height:24px}
+.yt-sidebar-label{font-size:10px;color:#f1f1f1;text-align:center;line-height:1.2}
+
+/* ============================================================
+   CHIP BAR (Category filters)
+   ============================================================ */
+.yt-chips-wrapper{
+  position:fixed;top:var(--header-height);
+  left:var(--sidebar-width);right:0;
+  height:var(--chip-height);
+  background:var(--yt-bg);
+  z-index:400;
+  display:flex;align-items:center;
+  padding:0 24px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  overflow-x:hidden;
+}
+.yt-chips-scroll{
+  display:flex;gap:12px;
+  overflow-x:auto;scrollbar-width:none;
+  -ms-overflow-style:none;
+  padding:4px 0;
+}
+.yt-chips-scroll::-webkit-scrollbar{display:none}
+.yt-chip{
+  white-space:nowrap;
+  padding:6px 12px;
+  border-radius:8px;
+  background:var(--yt-chip-bg);
+  color:#fff;font-size:14px;font-weight:400;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:background 0.15s;
+}
+.yt-chip:hover{background:#555}
+.yt-chip.active{background:var(--yt-chip-active-bg);color:var(--yt-chip-active-text);font-weight:500}
+
+/* ============================================================
+   MAIN CONTENT AREA
+   ============================================================ */
+.yt-main{
+  margin-left:var(--sidebar-width);
+  margin-top:calc(var(--header-height) + var(--chip-height));
+  padding:16px 16px 40px 16px;
+  min-height:calc(100vh - var(--header-height) - var(--chip-height));
+}
+
+/* ============================================================
+   VIDEO GRID (Virtualized)
+   ============================================================ */
+.yt-grid-container{
+  position:relative;
+  width:100%;
+}
+.yt-video-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:16px 16px;
+}
+.yt-video-card{
+  cursor:pointer;
+  border-radius:12px;
+  overflow:hidden;
+  transition:transform 0.15s;
+}
+.yt-video-card:hover{transform:scale(1.02)}
+.yt-thumb-wrap{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  background:#222;
+  border-radius:12px;
+  overflow:hidden;
+}
+.yt-thumb-wrap svg{width:100%;height:100%;display:block}
+.yt-duration{
+  position:absolute;bottom:6px;right:6px;
+  background:rgba(0,0,0,0.8);
+  color:#fff;font-size:12px;font-weight:500;
+  padding:2px 6px;border-radius:4px;
+  pointer-events:none;
+}
+.yt-progress-bar{
+  position:absolute;bottom:0;left:0;
+  height:3px;background:var(--yt-red);
+  border-radius:0 0 0 0;
+}
+.yt-card-info{display:flex;gap:12px;padding:12px 4px 0 0}
+.yt-card-avatar{
+  width:36px;height:36px;border-radius:50%;
+  flex-shrink:0;overflow:hidden;background:#444;
+  display:flex;align-items:center;justify-content:center;
+}
+.yt-card-avatar svg{width:100%;height:100%}
+.yt-card-meta{flex:1;min-width:0}
+.yt-card-title{
+  font-size:14px;font-weight:500;line-height:1.4;
+  color:var(--yt-text);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:4px;
+}
+.yt-card-channel{font-size:12px;color:var(--yt-text-secondary);display:flex;align-items:center;gap:4px}
+.yt-card-channel .verified{display:inline-flex;align-items:center}
+.yt-card-channel .verified svg{width:14px;height:14px;fill:#aaa}
+.yt-card-stats{font-size:12px;color:var(--yt-text-secondary)}
+.yt-card-menu{
+  position:absolute;top:8px;right:-4px;
+  width:24px;height:24px;display:none;align-items:center;justify-content:center;
+  border-radius:50%;
+}
+.yt-video-card:hover .yt-card-menu{display:flex}
+
+/* ============================================================
+   VIDEO PLAYER OVERLAY
+   ============================================================ */
+.yt-player-overlay{
+  display:none;
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  z-index:2000;background:var(--yt-bg);
+  overflow-y:auto;
+}
+.yt-player-overlay.active{display:block}
+.yt-player-top{
+  width:100%;max-width:1280px;margin:0 auto;
+  padding:0 24px;
+}
+.yt-player-back{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 0;cursor:pointer;color:#fff;font-size:14px;
+}
+.yt-player-back:hover{color:#aaa}
+.yt-player-back svg{fill:#fff;width:24px;height:24px}
+.yt-player-video{
+  width:100%;aspect-ratio:16/9;
+  background:#000;border-radius:12px;
+  overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.yt-player-video svg{width:60%;height:60%;opacity:0.3}
+.yt-player-controls{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(0,0,0,0.8));
+  padding:8px 12px;display:flex;align-items:center;gap:12px;
+}
+.yt-player-progress{flex:1;height:4px;background:#555;border-radius:2px;cursor:pointer;position:relative}
+.yt-player-progress-fill{height:100%;background:var(--yt-red);border-radius:2px;width:35%}
+.yt-player-time{font-size:12px;color:#ddd}
+.yt-ctrl-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.yt-ctrl-btn:hover{background:rgba(255,255,255,0.1)}
+.yt-ctrl-btn svg{fill:#fff;width:24px;height:24px}
+.yt-player-content{
+  width:100%;max-width:1280px;margin:0 auto;
+  padding:16px 24px;display:flex;gap:24px;
+}
+.yt-player-primary{flex:1;min-width:0}
+.yt-player-secondary{width:400px;flex-shrink:0}
+.yt-video-title-big{font-size:20px;font-weight:600;line-height:1.4;margin-bottom:12px}
+.yt-video-actions{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.yt-action-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:20px;
+  background:rgba(255,255,255,0.1);
+  font-size:14px;font-weight:500;
+}
+.yt-action-btn:hover{background:rgba(255,255,255,0.2)}
+.yt-action-btn svg{fill:#fff;width:24px;height:24px}
+.yt-action-btn.like-active{background:#3ea6ff;color:#000}
+.yt-action-btn.like-active svg{fill:#000}
+.yt-channel-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.yt-channel-avatar-lg{width:40px;height:40px;border-radius:50%;overflow:hidden;background:#444}
+.yt-channel-avatar-lg svg{width:100%;height:100%}
+.yt-channel-info{flex:1}
+.yt-channel-name-big{font-size:16px;font-weight:500;display:flex;align-items:center;gap:4px}
+.yt-channel-subs{font-size:12px;color:var(--yt-text-secondary)}
+.yt-subscribe-btn{
+  padding:10px 20px;border-radius:20px;
+  background:#fff;color:#000;
+  font-size:14px;font-weight:600;
+  cursor:pointer;
+}
+.yt-subscribe-btn:hover{background:#d9d9d9}
+.yt-description-box{
+  background:rgba(255,255,255,0.1);
+  border-radius:12px;padding:12px 16px;
+  margin-bottom:24px;font-size:14px;line-height:1.5;
+  color:var(--yt-text-secondary);
+  white-space:pre-wrap;
+}
+.yt-desc-stats{font-size:14px;font-weight:500;color:#fff;margin-bottom:8px}
+
+/* ============================================================
+   COMMENTS SECTION
+   ============================================================ */
+.yt-comments-section{margin-top:24px}
+.yt-comments-header{font-size:16px;font-weight:600;margin-bottom:20px}
+.yt-comment-input-row{display:flex;gap:12px;margin-bottom:24px;align-items:flex-start}
+.yt-comment-input-row .yt-card-avatar{width:40px;height:40px}
+.yt-comment-input{
+  flex:1;background:transparent;border:none;
+  border-bottom:1px solid #555;
+  padding:8px 0;color:#fff;font-size:14px;outline:none;
+}
+.yt-comment-input:focus{border-bottom-color:#fff}
+.yt-comment-input::placeholder{color:#888}
+.yt-comment{display:flex;gap:12px;margin-bottom:20px;align-items:flex-start}
+.yt-comment-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;background:#444;flex-shrink:0}
+.yt-comment-avatar svg{width:100%;height:100%}
+.yt-comment-body{flex:1}
+.yt-comment-author{font-size:13px;font-weight:500;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.yt-comment-author span{color:var(--yt-text-secondary);font-size:12px;font-weight:400}
+.yt-comment-text{font-size:14px;line-height:1.5;color:#ddd;margin-bottom:8px}
+.yt-comment-actions{display:flex;align-items:center;gap:8px}
+.yt-comment-actions button{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--yt-text-secondary);padding:4px 8px;border-radius:16px}
+.yt-comment-actions button:hover{background:rgba(255,255,255,0.1)}
+.yt-comment-actions svg{fill:#aaa;width:20px;height:20px}
+
+/* ============================================================
+   SIDEBAR RECOMMENDATIONS (in player)
+   ============================================================ */
+.yt-rec-card{display:flex;gap:8px;margin-bottom:8px;cursor:pointer;border-radius:8px;padding:4px}
+.yt-rec-card:hover{background:var(--yt-hover)}
+.yt-rec-thumb{width:168px;min-width:168px;aspect-ratio:16/9;background:#222;border-radius:8px;overflow:hidden;position:relative}
+.yt-rec-thumb svg{width:100%;height:100%}
+.yt-rec-dur{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.8);color:#fff;font-size:11px;padding:1px 4px;border-radius:3px}
+.yt-rec-info{flex:1;min-width:0;padding-top:4px}
+.yt-rec-title{font-size:14px;font-weight:500;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:4px}
+.yt-rec-channel{font-size:12px;color:var(--yt-text-secondary)}
+.yt-rec-stats{font-size:12px;color:var(--yt-text-secondary)}
+
+/* ============================================================
+   LOADING SKELETON
+   ============================================================ */
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.skeleton{
+  background:linear-gradient(90deg,#222 25%,#333 50%,#222 75%);
+  background-size:800px 100%;
+  animation:shimmer 1.5s infinite linear;
+  border-radius:8px;
+}
+.skel-thumb{width:100%;aspect-ratio:16/9;border-radius:12px}
+.skel-text{height:14px;margin:6px 0;width:80%}
+.skel-text-sm{height:12px;margin:4px 0;width:50%}
+.skel-avatar{width:36px;height:36px;border-radius:50%}
+
+/* ============================================================
+   VIRTUAL SCROLL SENTINEL
+   ============================================================ */
+.yt-sentinel{height:1px;width:100%}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:1024px){
+  .yt-player-secondary{width:340px}
+  .yt-video-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+}
+@media(max-width:800px){
+  .yt-sidebar{display:none}
+  .yt-main{margin-left:0}
+  .yt-chips-wrapper{left:0}
+  .yt-player-content{flex-direction:column}
+  .yt-player-secondary{width:100%}
+  .yt-rec-thumb{width:120px;min-width:120px}
+}
+@media(max-width:550px){
+  .yt-video-grid{grid-template-columns:1fr}
+  .yt-header-center{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header class="yt-header">
+  <div class="yt-header-left">
+    <button class="yt-hamburger" aria-label="メニュー">
+      <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
+    <a class="yt-logo" href="#" onclick="closePlayer();return false;">
+      <svg class="yt-logo-icon" viewBox="0 0 90 20" fill="none">
+        <rect x="0" y="2" width="28" height="16" rx="4" fill="#FF0000"/>
+        <polygon points="11,6 11,14 19,10" fill="#FFF"/>
+        <text x="32" y="15.5" font-size="15" font-weight="700" fill="#FFF" font-family="Roboto,Arial">YouTube</text>
+      </svg>
+      <span class="yt-logo-jp">JP</span>
+    </a>
+  </div>
+  <div class="yt-header-center">
+    <div class="yt-search-box">
+      <input class="yt-search-input" type="text" placeholder="検索" id="searchInput">
+      <button class="yt-search-btn" aria-label="検索" onclick="handleSearch()">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      </button>
+    </div>
+    <button class="yt-voice-btn" aria-label="音声検索">
+      <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c0 3.31-2.69 6-6 6s-6-2.69-6-6H4c0 3.76 2.86 6.87 6.56 7.25V21h2.88v-2.75C17.14 17.87 20 14.76 20 11h-2.09z"/></svg>
+    </button>
+  </div>
+  <div class="yt-header-right">
+    <button class="yt-create-btn">
+      <svg viewBox="0 0 24 24"><path d="M14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2zm3-6H3v12h14v-6.39l4 1.83V8.56l-4 1.83V7m1-1v2.83L22 7v10l-4-1.83V18H2V6h16z"/></svg>
+      <span>作成</span>
+    </button>
+    <button class="yt-header-btn yt-notif-btn" aria-label="通知">
+      <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4a2 2 0 002 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
+      <span class="yt-notif-badge">3</span>
+    </button>
+    <div class="yt-avatar-btn" aria-label="アカウント">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2a7.2 7.2 0 01-6-3.22c.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08a7.2 7.2 0 01-6 3.22z"/></svg>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     SIDEBAR
+     ============================================================ -->
+<nav class="yt-sidebar">
+  <div class="yt-sidebar-item active">
+    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <span class="yt-sidebar-label">ホーム</span>
+  </div>
+  <div class="yt-sidebar-item">
+    <svg viewBox="0 0 24 24"><path d="M10 14.65v-5.3L15 12l-5 2.65zm7.77-4.33c-.77-.32-1.2-.5-1.2-.5L18 9.06c1.84-.96 2.53-3.23 1.56-5.06s-3.24-2.53-5.07-1.56L6 6.94c-1.29.68-2.07 2.04-2 3.49.07 1.42.93 2.67 2.22 3.25.03.01 1.2.5 1.2.5L6 14.93c-1.83.97-2.53 3.24-1.56 5.07.97 1.83 3.24 2.53 5.07 1.56l8.5-4.5c1.29-.68 2.06-2.04 1.99-3.49-.07-1.42-.94-2.68-2.23-3.25zm-.77 5.3L8.5 20.12c-.97.51-2.09.13-2.59-.84-.49-.97-.12-2.09.85-2.59L15.26 12 8.5 7.38c-.97-.51-1.35-1.62-.85-2.6.51-.97 1.62-1.34 2.6-.84L18.74 12 17 15.62z"/></svg>
+    <span class="yt-sidebar-label">ショート</span>
+  </div>
+  <div class="yt-sidebar-item">
+    <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg>
+    <span class="yt-sidebar-label">登録チャンネ...</span>
+  </div>
+  <div class="yt-sidebar-item">
+    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+    <span class="yt-sidebar-label">マイページ</span>
+  </div>
+</nav>
+
+<!-- ============================================================
+     CHIP BAR
+     ============================================================ -->
+<div class="yt-chips-wrapper">
+  <div class="yt-chips-scroll" id="chipsScroll">
+    <!-- chips are generated by JS -->
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<main class="yt-main" id="mainContent">
+  <div class="yt-grid-container">
+    <div class="yt-video-grid" id="videoGrid">
+      <!-- Virtual render target -->
+    </div>
+    <div class="yt-sentinel" id="sentinel"></div>
+  </div>
+</main>
+
+<!-- ============================================================
+     VIDEO PLAYER OVERLAY
+     ============================================================ -->
+<div class="yt-player-overlay" id="playerOverlay">
+  <div class="yt-player-top">
+    <div class="yt-player-back" onclick="closePlayer()">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      <span>戻る</span>
+    </div>
+    <div class="yt-player-video" id="playerVideoArea">
+      <!-- Dynamic content -->
+    </div>
+  </div>
+  <div class="yt-player-content">
+    <div class="yt-player-primary" id="playerPrimary">
+      <!-- Dynamic content -->
+    </div>
+    <div class="yt-player-secondary" id="playerSecondary">
+      <!-- Recommendations -->
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// SECTION 1: ULTRA-LIGHT VIRTUAL RENDERING ENGINE (VRE)
+// ============================================================
+// This custom engine ensures that only visible DOM nodes exist.
+// It uses IntersectionObserver for lazy-load, recycles DOM nodes
+// via an object pool, and batches all DOM writes into a single
+// requestAnimationFrame to avoid layout thrashing.
+
+const VRE = {
+  pool: [],
+  activeNodes: new Map(),
+  batchQueue: [],
+  frameRequested: false,
+  observer: null,
+  PAGE_SIZE: 12,
+  currentPage: 0,
+  totalItems: 0,
+  renderFn: null,
+  containerEl: null,
+  sentinelEl: null,
+
+  init(container, sentinel, total, renderFn) {
+    this.containerEl = container;
+    this.sentinelEl = sentinel;
+    this.totalItems = total;
+    this.renderFn = renderFn;
+    this.currentPage = 0;
+
+    // Clear
+    container.innerHTML = '';
+    this.pool = [];
+    this.activeNodes.clear();
+
+    // Setup IntersectionObserver for infinite scroll
+    if (this.observer) this.observer.disconnect();
+    this.observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          this.loadNextPage();
+        }
+      }
+    }, { rootMargin: '400px' });
+    this.observer.observe(sentinel);
+
+    // Initial load
+    this.loadNextPage();
+  },
+
+  loadNextPage() {
+    const start = this.currentPage * this.PAGE_SIZE;
+    if (start >= this.totalItems) return;
+    const end = Math.min(start + this.PAGE_SIZE, this.totalItems);
+    this.currentPage++;
+
+    for (let i = start; i < end; i++) {
+      this.scheduleRender(i);
+    }
+    this.flush();
+  },
+
+  scheduleRender(index) {
+    this.batchQueue.push(index);
+    if (!this.frameRequested) {
+      this.frameRequested = true;
+      requestAnimationFrame(() => this.flush());
+    }
+  },
+
+  flush() {
+    const fragment = document.createDocumentFragment();
+    while (this.batchQueue.length > 0) {
+      const idx = this.batchQueue.shift();
+      if (this.activeNodes.has(idx)) continue;
+      const node = this.acquireNode();
+      this.renderFn(node, idx);
+      node.dataset.idx = idx;
+      this.activeNodes.set(idx, node);
+      fragment.appendChild(node);
+    }
+    this.containerEl.appendChild(fragment);
+    this.frameRequested = false;
+  },
+
+  acquireNode() {
+    if (this.pool.length > 0) {
+      const n = this.pool.pop();
+      n.innerHTML = '';
+      n.className = 'yt-video-card';
+      n.style.display = '';
+      return n;
+    }
+    const n = document.createElement('div');
+    n.className = 'yt-video-card';
+    return n;
+  },
+
+  releaseNode(node) {
+    node.style.display = 'none';
+    this.pool.push(node);
+  },
+
+  reset() {
+    this.batchQueue = [];
+    this.currentPage = 0;
+    this.activeNodes.clear();
+    if (this.containerEl) this.containerEl.innerHTML = '';
+  }
+};
+
+// ============================================================
+// SECTION 2: SVG THUMBNAIL GENERATOR
+// ============================================================
+// Generates unique SVG thumbnails for each video with:
+// - Gradient backgrounds
+// - Geometric shapes
+// - Stylized text overlays
+// - Color palettes derived from video ID for consistency
+
+const ThumbnailGen = {
+  palettes: [
+    ['#ff6b6b','#ee5a24','#fad390'],
+    ['#6c5ce7','#a29bfe','#dfe6e9'],
+    ['#00cec9','#81ecec','#55efc4'],
+    ['#fd79a8','#e84393','#fdcb6e'],
+    ['#0984e3','#74b9ff','#dfe6e9'],
+    ['#e17055','#fab1a0','#ffeaa7'],
+    ['#00b894','#55efc4','#b2bec3'],
+    ['#636e72','#b2bec3','#dfe6e9'],
+    ['#d63031','#ff7675','#ffeaa7'],
+    ['#6c5ce7','#fd79a8','#ffeaa7'],
+    ['#2d3436','#636e72','#dfe6e9'],
+    ['#e84393','#fd79a8','#a29bfe'],
+    ['#fdcb6e','#f39c12','#e74c3c'],
+    ['#1abc9c','#2ecc71','#3498db'],
+    ['#9b59b6','#8e44ad','#2c3e50'],
+    ['#e74c3c','#c0392b','#ecf0f1'],
+    ['#16a085','#27ae60','#f1c40f'],
+    ['#2980b9','#3498db','#1abc9c'],
+    ['#f39c12','#e67e22','#d35400'],
+    ['#1a1a2e','#16213e','#e94560'],
+  ],
+
+  shapes: ['circles','rectangles','triangles','waves','grid','diamond','star','cross','hexagon','lines'],
+
+  generateSVG(videoId, title) {
+    const palette = this.palettes[videoId % this.palettes.length];
+    const shape = this.shapes[videoId % this.shapes.length];
+    const seed = videoId * 7 + 13;
+
+    let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" width="320" height="180">`;
+    svgContent += `<defs><linearGradient id="bg${videoId}" x1="0%" y1="0%" x2="100%" y2="100%">`;
+    svgContent += `<stop offset="0%" stop-color="${palette[0]}"/>`;
+    svgContent += `<stop offset="100%" stop-color="${palette[1]}"/>`;
+    svgContent += `</linearGradient></defs>`;
+    svgContent += `<rect width="320" height="180" fill="url(#bg${videoId})"/>`;
+
+    svgContent += this.drawShape(shape, palette, seed, videoId);
+
+    // Text overlay
+    const shortTitle = title.length > 12 ? title.substring(0, 12) + '…' : title;
+    svgContent += `<rect x="10" y="130" width="300" height="42" rx="6" fill="rgba(0,0,0,0.5)"/>`;
+    svgContent += `<text x="160" y="158" text-anchor="middle" fill="#fff" font-size="16" font-weight="700" font-family="sans-serif">${this.escapeXml(shortTitle)}</text>`;
+
+    svgContent += `</svg>`;
+    return svgContent;
+  },
+
+  drawShape(shape, palette, seed, vid) {
+    let s = '';
+    const r = (max) => ((seed * (vid+1) * 31 + 17) % max);
+    switch(shape) {
+      case 'circles':
+        for(let i=0;i<5;i++){
+          const cx=40+i*60+r(30);const cy=40+r(60);const cr=15+r(30);
+          s+=`<circle cx="${cx}" cy="${cy}" r="${cr}" fill="${palette[2]}" opacity="0.4"/>`;
+        }
+        s+=`<circle cx="160" cy="90" r="40" fill="rgba(255,255,255,0.15)"/>`;
+        // play icon
+        s+=`<polygon points="148,70 148,110 180,90" fill="rgba(255,255,255,0.8)"/>`;
+        break;
+      case 'rectangles':
+        for(let i=0;i<6;i++){
+          const x=20+i*50;const y=20+r(40)+i*5;
+          s+=`<rect x="${x}" y="${y}" width="${30+r(20)}" height="${20+r(30)}" rx="4" fill="${palette[2]}" opacity="0.3" transform="rotate(${r(30)-15},${x+15},${y+15})"/>`;
+        }
+        s+=`<rect x="120" y="55" width="80" height="50" rx="8" fill="rgba(255,255,255,0.15)"/>`;
+        s+=`<polygon points="148,68 148,92 172,80" fill="rgba(255,255,255,0.8)"/>`;
+        break;
+      case 'triangles':
+        for(let i=0;i<4;i++){
+          const x=30+i*75;const y=100;
+          s+=`<polygon points="${x},${y-40-r(20)} ${x-25},${y+10} ${x+25},${y+10}" fill="${palette[2]}" opacity="0.35"/>`;
+        }
+        s+=`<polygon points="145,65 145,105 185,85" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>`;
+        break;
+      case 'waves':
+        s+=`<path d="M0,100 Q40,${60+r(30)} 80,100 T160,100 T240,100 T320,100 V180 H0 Z" fill="${palette[2]}" opacity="0.3"/>`;
+        s+=`<path d="M0,120 Q50,${80+r(30)} 100,120 T200,120 T320,120 V180 H0 Z" fill="${palette[1]}" opacity="0.2"/>`;
+        s+=`<circle cx="160" cy="75" r="30" fill="rgba(255,255,255,0.15)"/>`;
+        s+=`<polygon points="150,60 150,90 175,75" fill="rgba(255,255,255,0.8)"/>`;
+        break;
+      case 'grid':
+        for(let x=0;x<8;x++)for(let y=0;y<5;y++){
+          s+=`<rect x="${x*42+5}" y="${y*38+5}" width="36" height="32" rx="3" fill="${(x+y)%2===0?palette[2]:palette[1]}" opacity="0.15"/>`;
+        }
+        s+=`<circle cx="160" cy="85" r="35" fill="rgba(0,0,0,0.3)"/>`;
+        s+=`<polygon points="150,70 150,100 178,85" fill="rgba(255,255,255,0.9)"/>`;
+        break;
+      case 'diamond':
+        s+=`<polygon points="160,20 260,90 160,160 60,90" fill="${palette[2]}" opacity="0.25" stroke="${palette[2]}" stroke-width="2"/>`;
+        s+=`<polygon points="160,45 230,90 160,135 90,90" fill="rgba(255,255,255,0.1)"/>`;
+        s+=`<polygon points="150,75 150,105 175,90" fill="rgba(255,255,255,0.8)"/>`;
+        break;
+      case 'star':
+        const cx=160,cy=80,or=50,ir=25;
+        let pts=[];
+        for(let i=0;i<10;i++){
+          const a=Math.PI/2+i*Math.PI/5;
+          const R=i%2===0?or:ir;
+          pts.push(`${cx+R*Math.cos(a)},${cy-R*Math.sin(a)}`);
+        }
+        s+=`<polygon points="${pts.join(' ')}" fill="${palette[2]}" opacity="0.3"/>`;
+        s+=`<polygon points="150,70 150,100 178,85" fill="rgba(255,255,255,0.8)"/>`;
+        break;
+      case 'cross':
+        s+=`<rect x="130" y="30" width="60" height="120" rx="6" fill="${palette[2]}" opacity="0.25"/>`;
+        s+=`<rect x="70" y="60" width="180" height="60" rx="6" fill="${palette[2]}" opacity="0.25"/>`;
+        s+=`<circle cx="160" cy="90" r="28" fill="rgba(0,0,0,0.3)"/>`;
+        s+=`<polygon points="150,76 150,104 175,90" fill="rgba(255,255,255,0.8)"/>`;
+        break;
+      case 'hexagon':
+        const hx=160,hy=85,hr=55;
+        let hp=[];
+        for(let i=0;i<6;i++){
+          const a=i*Math.PI/3-Math.PI/6;
+          hp.push(`${hx+hr*Math.cos(a)},${hy+hr*Math.sin(a)}`);
+        }
+        s+=`<polygon points="${hp.join(' ')}" fill="${palette[2]}" opacity="0.25" stroke="${palette[2]}" stroke-width="2"/>`;
+        let hp2=[];
+        for(let i=0;i<6;i++){
+          const a=i*Math.PI/3-Math.PI/6;
+          hp2.push(`${hx+(hr-15)*Math.cos(a)},${hy+(hr-15)*Math.sin(a)}`);
+        }
+        s+=`<polygon points="${hp2.join(' ')}" fill="rgba(255,255,255,0.08)"/>`;
+        s+=`<polygon points="150,75 150,100 175,87" fill="rgba(255,255,255,0.8)"/>`;
+        break;
+      case 'lines':
+        for(let i=0;i<12;i++){
+          s+=`<line x1="${i*28}" y1="0" x2="${i*28+40}" y2="180" stroke="${palette[2]}" stroke-width="2" opacity="0.2"/>`;
+        }
+        s+=`<circle cx="160" cy="85" r="32" fill="rgba(0,0,0,0.35)"/>`;
+        s+=`<polygon points="150,72 150,98 175,85" fill="rgba(255,255,255,0.8)"/>`;
+        break;
+    }
+    return s;
+  },
+
+  escapeXml(str){
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+  },
+
+  // Generate a small avatar SVG
+  generateAvatarSVG(channelId) {
+    const colors = ['#ff6b6b','#6c5ce7','#00cec9','#fd79a8','#0984e3','#e17055','#00b894','#636e72','#d63031','#e84393','#fdcb6e','#1abc9c','#9b59b6','#e74c3c','#2980b9','#f39c12'];
+    const bg = colors[channelId % colors.length];
+    const letter = String.fromCharCode(65 + (channelId % 26));
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="${bg}"/><text x="18" y="24" text-anchor="middle" fill="#fff" font-size="18" font-weight="700" font-family="sans-serif">${letter}</text></svg>`;
+  }
+};
+
+// ============================================================
+// SECTION 3: FULL VIDEO DATABASE (50 videos)
+// ============================================================
+
+const CHANNELS = [
+  { id:0, name:'西園寺', verified:true, subs:'250万人' },
+  { id:1, name:'アニメタイムズ公式 / Anime Times Official', verified:true, subs:'180万人' },
+  { id:2, name:'イキル者タチ', verified:false, subs:'95万人' },
+  { id:3, name:'CHILLTOWN', verified:true, subs:'120万人' },
+  { id:4, name:'門実玄児', verified:false, subs:'45万人' },
+  { id:5, name:'レジスタンス', verified:true, subs:'78万人' },
+  { id:6, name:'テックガジェットCH', verified:true, subs:'200万人' },
+  { id:7, name:'料理の鉄人TV', verified:true, subs:'310万人' },
+  { id:8, name:'旅するYouTuber', verified:false, subs:'67万人' },
+  { id:9, name:'ゲーム実況MAX', verified:true, subs:'450万人' },
+  { id:10, name:'音楽チャンネルVibes', verified:true, subs:'88万人' },
+  { id:11, name:'サイエンスLab', verified:true, subs:'130万人' },
+  { id:12, name:'ストリートフード探訪', verified:false, subs:'55万人' },
+  { id:13, name:'DIYクラフトRoom', verified:true, subs:'92万人' },
+  { id:14, name:'アウトドアLife', verified:false, subs:'73万人' },
+  { id:15, name:'ペットパラダイス', verified:true, subs:'160万人' },
+  { id:16, name:'歴史ミステリーCH', verified:true, subs:'105万人' },
+  { id:17, name:'フィットネスPro', verified:false, subs:'84万人' },
+  { id:18, name:'映画レビューStation', verified:true, subs:'115万人' },
+  { id:19, name:'都市伝説ファイル', verified:false, subs:'62万人' },
+];
+
+const VIDEOS = [
+  // Video 0-9
+  { id:0, title:'【0泊7日】寝台特急サンライズ号に"1週間"乗り続ける生活してみた！', ch:0, views:'110万', time:'11日前', dur:'2:29:30', category:'すべて', desc:'サンライズ瀬戸・出雲に1週間乗り続けるという過酷な企画に挑戦しました。車内での食事、睡眠、過ごし方を徹底レポート！\n\n0:00 オープニング\n5:30 1日目スタート\n25:00 車内食レビュー\n1:00:00 3日目の壁\n1:45:00 終盤戦\n2:20:00 まとめ', progress:45 },
+  { id:1, title:'【公式: 期間限定】『NANA ーナナー』（#6-9）#MoreAnimeOnYouTube', ch:1, views:'2.6万', time:'1日前', dur:'1:29:31', category:'アニメーション', desc:'TVアニメ「NANA」第6話～第9話を期間限定で公式配信中！\n\n大崎ナナと小松奈々、二人のナナの運命が交差する物語。\n\n©矢沢あい/集英社・VAP・MADHOUSE', progress:0 },
+  { id:2, title:'ポテトのLサイズを注文してる人をLだと思ってビビりまくる夜神月', ch:2, views:'66万', time:'9か月前', dur:'9:52', category:'コント', desc:'デスノートのコントシリーズ第15弾！\n\n夜神月がファストフード店でポテトのLサイズを注文している人を見て「L...!?」とビビりまくる様子をお届けします。', progress:78 },
+  { id:3, title:'【洋楽Playlist】部屋でかけ流したいお洒落な洋楽プレイリスト🎧【Unseen Melodies】', ch:3, views:'102万', time:'5か月前', dur:'1:01:56', category:'音楽', desc:'おしゃれな洋楽をまとめたプレイリストです。作業用BGM、リラックスタイムにどうぞ。\n\nTrack List:\n0:00 Opening Vibes\n3:45 Sunset Drive\n7:20 Coffee Morning\n...全20曲収録', progress:12 },
+  { id:4, title:'【デスノート】もしもミサが賢かったら', ch:4, views:'25万', time:'1か月前', dur:'6:10', category:'コント', desc:'もしも弥海砂が天才的な頭脳を持っていたら...？デスノートの世界が完全に変わる！\n\nIFストーリーをコント形式でお届けします。', progress:0 },
+  { id:5, title:'【ドバガキ】ドーパミン中毒大学生あるある。【スマホ依存症】', ch:5, views:'9.9万', time:'23時間前', dur:'9:35', category:'コント', desc:'ドーパミン中毒の大学生あるあるをお届け！\n\nスマホ依存、SNS中毒、通知地獄...\n現代の大学生が抱える闘いをリアルに描きます。', progress:0 },
+  { id:6, title:'2024年買ってよかったガジェット TOP20【総額100万円超え】', ch:6, views:'89万', time:'3か月前', dur:'25:42', category:'ゲーム', desc:'2024年に実際に購入して本当に良かったガジェットをランキング形式で紹介！\n\nスマホ、タブレット、PC周辺機器、スマートホームデバイスまで幅広くカバー。', progress:33 },
+  { id:7, title:'プロが教える！本格チャーハンの作り方【町中華の味を完全再現】', ch:7, views:'245万', time:'2週間前', dur:'18:30', category:'料理', desc:'町中華の味を家庭で完全再現！プロの料理人が火力の使い方からコツまで丁寧に解説します。\n\n材料（2人前）:\n・ご飯 400g\n・卵 2個\n・長ネギ 1本\n・チャーシュー 100g', progress:67 },
+  { id:8, title:'【車中泊】愛知県の山奥でひとり過ごす週末 | ロードスターで行く', ch:8, views:'18万', time:'1か月前', dur:'23:13', category:'ライブ', desc:'マツダ・ロードスターで愛知県の山奥へ。一人で過ごす静かな週末の車中泊vlogです。\n\n焚き火、星空、朝のコーヒー...最高の休日をお届けします。', progress:0 },
+  { id:9, title:'【ムラムラ】で生活がヤバい話 | 朝起きて一発 寝る前に一発', ch:9, views:'156万', time:'2週間前', dur:'15:28', category:'ゲーム', desc:'ゲーム実況者の日常vlog。「ムラムラ」っていうゲームにハマりすぎて生活が崩壊した話。\n\n朝起きて一発（プレイ）、寝る前に一発（プレイ）の日々...', progress:55 },
+
+  // Video 10-19
+  { id:10, title:'【長期使用レビュー】ゲーミングノートの限界【もう限界】', ch:6, views:'42万', time:'1週間前', dur:'28:40', category:'ゲーム', desc:'ゲーミングノートPCを1年間使い続けた正直レビュー。熱問題、バッテリー劣化、性能低下...リアルな使用感をお伝えします。', progress:20 },
+  { id:11, title:'東京→大阪 全駅停車の旅【各停だけで行く東海道】', ch:8, views:'34万', time:'3週間前', dur:'45:20', category:'すべて', desc:'東海道本線を各駅停車だけで東京から大阪まで移動する旅。全ての駅を味わい尽くす12時間の旅路をダイジェストでお届け。', progress:0 },
+  { id:12, title:'【AI作曲】AIに100曲作らせたら神曲が生まれた件', ch:10, views:'78万', time:'2か月前', dur:'22:15', category:'音楽', desc:'最新のAI作曲ツールを使って100曲を自動生成。その中から選りすぐりの名曲をランキング形式で紹介！AIの進化がヤバすぎる...', progress:40 },
+  { id:13, title:'量子コンピュータを小学生にも分かるように解説してみた', ch:11, views:'156万', time:'4か月前', dur:'19:48', category:'すべて', desc:'量子コンピュータの仕組みを、難しい数式を一切使わずに解説！小学生でも理解できるレベルで、量子の不思議な世界をお伝えします。', progress:72 },
+  { id:14, title:'【大食い】築地の海鮮丼10杯チャレンジ！制限時間30分', ch:12, views:'93万', time:'1か月前', dur:'20:05', category:'料理', desc:'築地場外市場で海鮮丼10杯に挑戦！新鮮な海の幸を堪能しながらの大食いチャレンジ。果たして制限時間内に完食できるのか!?', progress:0 },
+  { id:15, title:'100均素材だけで作る！本格ミニチュアハウス【DIY】', ch:13, views:'67万', time:'2か月前', dur:'35:22', category:'すべて', desc:'100均の素材だけを使って、精巧なミニチュアハウスを製作！全工程を丁寧に解説します。総額たったの1,500円で驚きのクオリティ。', progress:15 },
+  { id:16, title:'真冬の富士山ソロ登山【-20℃の世界】', ch:14, views:'51万', time:'3か月前', dur:'32:10', category:'すべて', desc:'真冬の富士山にソロで挑戦。気温-20℃、風速20m/sの過酷な環境での登山記録。装備紹介から山頂までの全記録をお届けします。\n\n※十分な経験と装備なしでの冬季富士山登山は非常に危険です', progress:0 },
+  { id:17, title:'子猫を保護して1年が経ちました【成長記録総まとめ】', ch:15, views:'312万', time:'2週間前', dur:'16:45', category:'すべて', desc:'1年前に保護した子猫のミルクちゃんの成長記録総まとめ！手のひらサイズだった子猫が立派な猫に成長するまでの感動の記録。', progress:88 },
+  { id:18, title:'【完全解説】日本の城ベスト10 | なぜこの城が凄いのか', ch:16, views:'87万', time:'1か月前', dur:'42:30', category:'すべて', desc:'日本の名城TOP10を、建築学的・歴史的観点から徹底解説！姫路城、松本城、熊本城...各城の凄さの秘密に迫ります。', progress:25 },
+  { id:19, title:'30日間毎日10km走った結果...【ランニングチャレンジ】', ch:17, views:'124万', time:'3週間前', dur:'14:55', category:'すべて', desc:'30日間毎日10kmランニングチャレンジの結果報告！体重変化、タイム変化、体調の変化を全記録。ランニング初心者の参考にもなります。', progress:0 },
+
+  // Video 20-29
+  { id:20, title:'2024年映画ランキングTOP20【洋画・邦画総まとめ】', ch:18, views:'198万', time:'1か月前', dur:'38:20', category:'すべて', desc:'2024年に公開された映画の中から、ベスト20をランキング形式で紹介！洋画・邦画問わず、本当に面白かった作品だけを厳選。', progress:30 },
+  { id:21, title:'【都市伝説】日本の地下に存在する秘密の空間5選', ch:19, views:'76万', time:'2か月前', dur:'27:33', category:'すべて', desc:'日本各地の地下に存在すると言われる秘密の空間を5つ紹介。都市伝説と実際の事実を検証していきます。', progress:0 },
+  { id:22, title:'【生配信アーカイブ】深夜のゲーム実況 マイクラ建築バトル', ch:9, views:'45万', time:'5日前', dur:'3:22:10', category:'ゲーム', desc:'深夜の生配信アーカイブ！マイクラ建築バトルで視聴者と対決しました。\n\nタイムスタンプ:\n0:00 配信開始\n15:00 ルール説明\n30:00 バトル開始\n2:30:00 結果発表', progress:10 },
+  { id:23, title:'【ASMR】日本庭園の雨音 3時間 | 睡眠・作業用', ch:10, views:'234万', time:'6か月前', dur:'3:00:00', category:'音楽', desc:'日本庭園に降る雨の音を3時間収録。睡眠導入、集中作業、リラックスにお使いください。\n\n録音場所：京都某所の日本庭園', progress:5 },
+  { id:24, title:'宇宙の果てには何があるのか？【最新研究まとめ2024】', ch:11, views:'267万', time:'2か月前', dur:'24:18', category:'すべて', desc:'宇宙の果てには何があるのか？最新の研究結果をもとに、宇宙の構造と境界について分かりやすく解説します。', progress:50 },
+  { id:25, title:'【屋台メシ】タイのバンコクで食べ歩き！激安グルメ旅', ch:12, views:'41万', time:'3週間前', dur:'26:44', category:'料理', desc:'タイ・バンコクの屋台グルメを食べ歩き！一食100円以下の激安グルメから高級屋台まで、バンコクの食の魅力を徹底取材。', progress:0 },
+  { id:26, title:'廃材だけでツリーハウスを作ってみた【3ヶ月の記録】', ch:13, views:'189万', time:'1か月前', dur:'48:30', category:'すべて', desc:'廃材だけを使って本格的なツリーハウスを3ヶ月かけて製作！設計から完成までの全工程を記録したドキュメンタリー。', progress:35 },
+  { id:27, title:'真冬のソロキャンプ | 雪中テント泊で過ごす静かな夜', ch:14, views:'38万', time:'2か月前', dur:'29:55', category:'すべて', desc:'雪の降る森でソロキャンプ。テント設営、焚き火料理、雪中での就寝まで、冬キャンプの魅力を余すことなくお届け。', progress:0 },
+  { id:28, title:'犬と猫を初めて会わせてみた結果...【感動】', ch:15, views:'478万', time:'1週間前', dur:'12:30', category:'すべて', desc:'我が家の猫ミルクと、新しく迎えた子犬のモカの初対面！最初は警戒していた二匹が、徐々に距離を縮めていく感動の瞬間をお届け。', progress:92 },
+  { id:29, title:'織田信長の本当の姿とは？【通説を覆す最新研究】', ch:16, views:'143万', time:'3週間前', dur:'36:15', category:'すべて', desc:'織田信長に関する最新の歴史研究をもとに、通説とは異なる信長の実像に迫ります。残虐な魔王か、合理的な改革者か？', progress:18 },
+
+  // Video 30-39
+  { id:30, title:'【初心者向け】筋トレの正しいフォーム完全ガイド', ch:17, views:'215万', time:'2か月前', dur:'33:40', category:'すべて', desc:'筋トレ初心者のための正しいフォーム解説！スクワット、デッドリフト、ベンチプレスのBIG3を中心に、怪我をしないための基本を徹底解説。', progress:0 },
+  { id:31, title:'【考察】クリストファー・ノーラン全作品を時系列で解説', ch:18, views:'167万', time:'2か月前', dur:'55:20', category:'すべて', desc:'メメント、インセプション、テネット...クリストファー・ノーラン監督の全作品を公開順に解説＆考察！各作品の伏線と繋がりを紐解きます。', progress:42 },
+  { id:32, title:'あなたの知らないGoogleの隠し機能10選【2024年版】', ch:6, views:'334万', time:'4か月前', dur:'15:55', category:'すべて', desc:'Googleの知られざる隠し機能を10個紹介！知っているだけで生産性が爆上がりする便利機能から、遊び心のあるイースターエッグまで。', progress:60 },
+  { id:33, title:'世界一辛いカレーを食べてみた【ギネス級の激辛】', ch:7, views:'89万', time:'1か月前', dur:'13:22', category:'料理', desc:'世界一辛いと噂のカレーに挑戦！キャロライナ・リーパーを大量に使用した、ギネス級の激辛カレーの味はいかに!?', progress:0 },
+  { id:34, title:'【検証】24時間トレインサーフィン！東京の電車だけで生活', ch:8, views:'72万', time:'2週間前', dur:'31:08', category:'すべて', desc:'24時間、東京の電車の中だけで生活してみた！食事、睡眠、仕事...全てを電車内で行うチャレンジ企画。', progress:22 },
+  { id:35, title:'【マイクラ】1000日サバイバルの全記録【総集編】', ch:9, views:'567万', time:'1か月前', dur:'2:15:33', category:'ゲーム', desc:'マインクラフト1000日サバイバルの全記録！豆腐ハウスから始まり、巨大城塞都市を築き上げるまでの壮大な冒険記録。', progress:8 },
+  { id:36, title:'Lo-fi Hip Hop Radio 📚 勉強・作業用BGM【24/7】', ch:10, views:'1,200万', time:'1年前', dur:'0:00', category:'音楽', desc:'勉強・作業に最適なLo-fi Hip Hopをエンドレスでお届け。チルなビートでリラックスしながら集中力UP！\n\n※この動画はライブ配信のアーカイブです', progress:0 },
+  { id:37, title:'ブラックホールの中はどうなっている？【物理学で解説】', ch:11, views:'198万', time:'3か月前', dur:'21:33', category:'すべて', desc:'ブラックホールの内部構造を最新の物理学理論に基づいて解説！事象の地平面を超えた先には何があるのか？', progress:55 },
+  { id:38, title:'【台湾グルメ】台北の夜市で食べ放題！厳選10品', ch:12, views:'63万', time:'2か月前', dur:'19:42', category:'料理', desc:'台北の夜市で食べ歩きグルメ旅！小籠包、臭豆腐、タピオカなど、台湾を代表するグルメを厳選して10品レポート。', progress:0 },
+  { id:39, title:'【レジン】初心者でも作れる！宇宙アクセサリーの作り方', ch:13, views:'85万', time:'3週間前', dur:'24:18', category:'すべて', desc:'レジンを使った宇宙モチーフのアクセサリー作り方講座！初心者でも簡単に作れる方法を、材料の選び方からコーティングまで解説。', progress:30 },
+
+  // Video 40-49
+  { id:40, title:'【渓流釣り】秘境の沢で幻のイワナを追う', ch:14, views:'29万', time:'1か月前', dur:'37:22', category:'すべて', desc:'人里離れた秘境の渓流で、幻と呼ばれるイワナの原種を追い求める釣り旅。大自然の絶景と共にお届けする渓流釣りドキュメンタリー。', progress:0 },
+  { id:41, title:'ハムスターの1日に密着してみた【24時間観察】', ch:15, views:'245万', time:'3週間前', dur:'15:08', category:'すべて', desc:'ハムスターの1日を24時間カメラで密着撮影！昼間の睡眠から夜の大冒険まで、ハムスターの知られざる日常をお届け。', progress:70 },
+  { id:42, title:'ピラミッドの新発見が世界を震撼させた【2024年考古学】', ch:16, views:'176万', time:'2か月前', dur:'28:45', category:'すべて', desc:'2024年にエジプトのピラミッドで発見された新しい空間と遺物について、考古学の最新研究をもとに徹底解説！', progress:0 },
+  { id:43, title:'【ダイエット】3ヶ月で-15kgに成功した食事法を全公開', ch:17, views:'356万', time:'1か月前', dur:'22:10', category:'すべて', desc:'3ヶ月で15kgの減量に成功した食事法を完全公開！1日の食事メニュー、カロリー管理、間食のコツまで実体験をもとに解説。', progress:38 },
+  { id:44, title:'【ネタバレなし】2024年アニメ映画ベスト5【本音レビュー】', ch:18, views:'93万', time:'1か月前', dur:'26:35', category:'アニメーション', desc:'2024年に公開されたアニメ映画の中から、本当に面白かった5作品をネタバレなしでレビュー！各作品の魅力を熱く語ります。', progress:0 },
+  { id:45, title:'【怖い話】実際にあった不可解な事件ファイル5選', ch:19, views:'134万', time:'2週間前', dur:'41:20', category:'すべて', desc:'実際に起きた不可解な事件を5つ紹介。未解決事件から説明のつかない現象まで、背筋が凍る実話をお届けします。', progress:15 },
+  { id:46, title:'【最新スマホ比較】iPhone vs Android 2024年末決定戦', ch:6, views:'278万', time:'2か月前', dur:'30:15', category:'ゲーム', desc:'2024年末時点での最新iPhoneとAndroidスマホを徹底比較！カメラ、処理速度、バッテリー、コスパ...あらゆる観点から検証。', progress:48 },
+  { id:47, title:'失われた日本の伝統料理を再現してみた【江戸時代の料理】', ch:7, views:'167万', time:'3週間前', dur:'24:50', category:'料理', desc:'江戸時代の料理書をもとに、現代ではほぼ失われた日本の伝統料理を再現！当時の食材と調理法にこだわった本格レシピ。', progress:0 },
+  { id:48, title:'日本縦断3000km！自転車で北海道→沖縄チャレンジ', ch:8, views:'89万', time:'1か月前', dur:'52:40', category:'すべて', desc:'自転車で日本縦断3000kmに挑戦！北海道の最北端からスタートし、沖縄を目指す壮大な旅。60日間の記録をダイジェストでお届け。', progress:5 },
+  { id:49, title:'【Minecraft】レッドストーンで作る自動工場【上級者向け】', ch:9, views:'123万', time:'2週間前', dur:'44:18', category:'ゲーム', desc:'マインクラフトのレッドストーン回路を駆使して、全自動の工場システムを構築！アイテム仕分け、自動製錬、自動農場まで完全自動化。', progress:25 },
+];
+
+// ============================================================
+// SECTION 4: COMMENTS DATABASE (50×6 = 300 comments)
+// ============================================================
+
+const COMMENT_NAMES = [
+  'たかし','みゆき','ゆうた','さくら','けんじ','あかね','りょう','はるか',
+  'だいき','まい','そうた','ゆい','こうき','あおい','しゅん','ひなた',
+  'かずま','みさき','れん','ことね','たくみ','ももか','はると','さき',
+  'ゆうま','ななみ','そら','えりか','りく','のどか','あきら','ちひろ',
+  'けいすけ','まなみ','こうへい','ありさ','たいが','みずき','しょうた','かなで',
+  'ゆうき','ほのか','だいち','れいな','かいと','すみれ','りゅう','つばさ',
+  'まさき','ゆりか','こうた','あんな','はやと','ひかり','じゅん','まほ'
+];
+
+const COMMENT_TIMES = [
+  '1時間前','2時間前','3時間前','5時間前','8時間前','12時間前',
+  '1日前','2日前','3日前','5日前','1週間前','2週間前',
+  '3週間前','1か月前','2か月前','3か月前'
+];
+
+function generateComments(videoId) {
+  const comments = [];
+  const seed = videoId * 13 + 7;
+  const video = VIDEOS[videoId];
+
+  // Pre-defined comment templates per category/video type
+  const commentSets = {
+    // Each video gets 6 unique comments
+    0: [
+      { text:'サンライズ号で1週間は本当にすごい企画！自分も一度は乗ってみたいです。車内の雰囲気がよく伝わってきました。', likes:1243 },
+      { text:'25:00の車内食レビューが最高でした。あのカレー美味しそう...', likes:856 },
+      { text:'3日目あたりから精神的にキツそうなのがリアルで良かった。西園寺さんの表情が物語ってる。', likes:2104 },
+      { text:'終盤の達成感がすごく伝わってきました。感動しました！', likes:678 },
+      { text:'こういう企画を本気でやる人、尊敬します。編集も丁寧で見やすかった。', likes:432 },
+      { text:'次はブルートレインの復活運転とかどうですか？見てみたい！', likes:321 },
+    ],
+    1: [
+      { text:'NANA公式配信ありがとうございます！懐かしすぎて泣ける...', likes:2340 },
+      { text:'レイラの歌のシーン、何度見ても鳥肌が立つ。名作は色褪せない。', likes:1876 },
+      { text:'この世代じゃないけど初めて見てハマりました。続きが気になる！', likes:987 },
+      { text:'ナナとハチの関係性が切なくて美しい。矢沢あい先生の天才さ...', likes:1543 },
+      { text:'期間限定とは言わず、ずっと配信してほしい！！', likes:3210 },
+      { text:'8話のラストシーンで号泣した。連載再開してほしい...', likes:2105 },
+    ],
+    2: [
+      { text:'ポテトのLwwwww 発想が天才すぎるwww', likes:4521 },
+      { text:'「Lサイズひとつ」「L...!? まさか...」のくだりで腹筋崩壊した', likes:3876 },
+      { text:'このシリーズほんと好き。夜神月の演技がうますぎる。', likes:2543 },
+      { text:'Mサイズ頼んでる人見て「メロ...!?」ってなる続編希望', likes:5432 },
+      { text:'何回見ても笑えるの凄い。デスノートコントの最高傑作では？', likes:1987 },
+      { text:'友達に見せたら飲み物吹き出してた。責任取ってくださいw', likes:1234 },
+    ],
+    3: [
+      { text:'作業用BGMとして毎日聴いてます。選曲センスが神。', likes:3456 },
+      { text:'このプレイリストのおかげで仕事の効率が上がった気がする', likes:1876 },
+      { text:'7:20のCoffee Morning が特にお気に入り。朝のルーティンにぴったり。', likes:987 },
+      { text:'おしゃれすぎて部屋がカフェになった気分。ありがとう。', likes:2345 },
+      { text:'全曲Spotifyで探してプレイリスト作りました。最高です。', likes:765 },
+      { text:'CHILLTOWNさんのプレイリストシリーズ全部好き。次も楽しみにしてます！', likes:543 },
+    ],
+    4: [
+      { text:'賢いミサ、想像以上に怖かった...これはLも勝てない。', likes:2134 },
+      { text:'6分でこのクオリティは凄い。構成力がプロ級。', likes:1567 },
+      { text:'「死神の目を戦略的に使う」って発想が賢いミサらしくて笑った', likes:3421 },
+      { text:'IFストーリーシリーズもっとやってほしい！「もしもLがアホだったら」とか', likes:876 },
+      { text:'普通にアニメ化してほしいレベルのストーリー', likes:654 },
+      { text:'ミサの知能が上がるだけでこんなに話が変わるのか...面白い', likes:1432 },
+    ],
+    5: [
+      { text:'大学生としてグサグサ刺さる...まさに自分のことで草', likes:4567 },
+      { text:'「通知が来てないのにスマホ見る」あるあるすぎて泣いた', likes:3210 },
+      { text:'レジスタンスのあるある系は毎回共感度が高すぎる', likes:1876 },
+      { text:'これ見ながらスマホいじってる自分に気づいて鳥肌立った', likes:5432 },
+      { text:'大学の講義中にこっそり見てるのがもうドーパミン中毒の証拠では', likes:2345 },
+      { text:'スクリーンタイム12時間の自分、完全にこの動画のターゲット層', likes:1654 },
+    ],
+    6: [
+      { text:'TOP3のガジェットは本当に同意！自分も買って大満足でした', likes:2345 },
+      { text:'総額100万超えは草。でもレビューの質が高いから参考になる', likes:1876 },
+      { text:'15位のワイヤレス充電器、この動画見て即ポチりました', likes:987 },
+      { text:'来年のも楽しみにしてます！', likes:654 },
+      { text:'ガジェット系YouTuberの中で一番信頼してるチャンネル', likes:1543 },
+      { text:'毎年恒例のこの企画が年末の楽しみになってる', likes:876 },
+    ],
+    7: [
+      { text:'プロのチャーハン、家で作ったら本当に美味しくできた！感謝！', likes:5678 },
+      { text:'火力の話がめちゃくちゃ参考になった。家庭用コンロでもいけるんだ', likes:3421 },
+      { text:'パラパラに仕上がるコツがやっと分かりました。ありがとうございます！', likes:2876 },
+      { text:'町中華のチャーハンが一番うまいという事実。それを再現できるなんて。', likes:1987 },
+      { text:'嫁に作ったら「店の味」って言われました！感謝です！', likes:4321 },
+      { text:'この動画のおかげでチャーハン作りが趣味になりました', likes:1234 },
+    ],
+    8: [
+      { text:'ロードスターでの車中泊、最高のロケーションですね。憧れます。', likes:1876 },
+      { text:'星空のタイムラプスが美しすぎて言葉を失った...', likes:2345 },
+      { text:'朝のコーヒーシーン、自分もやりたくなりました', likes:987 },
+      { text:'BGMの選曲も最高。静かな動画に合ってる。', likes:654 },
+      { text:'ロードスター乗りとしてたまらない動画。愛車愛が伝わる。', likes:1543 },
+      { text:'こういう丁寧に作られたvlog、もっと見たい', likes:432 },
+    ],
+    9: [
+      { text:'タイトルで釣られたけど普通にゲーム実況で草', likes:6789 },
+      { text:'「ムラムラ」ってゲーム名なのかよwww紛らわしすぎるwww', likes:5432 },
+      { text:'朝起きて一発プレイ、寝る前に一発プレイ...中毒性やばいゲームだな', likes:3210 },
+      { text:'サムネの釣り具合が芸術的。でも内容も面白いから許す', likes:2876 },
+      { text:'コメント欄の反応込みで楽しい動画', likes:1654 },
+      { text:'次のゲーム実況も楽しみにしてます！', likes:876 },
+    ],
+    10: [
+      { text:'1年使用レビューは本当に貴重。短期レビューじゃ分からない問題点が分かる', likes:2345 },
+      { text:'熱問題ほんとそれ。膝の上で使えないレベルになるよね...', likes:1876 },
+      { text:'デスクトップに乗り換えた身としては激しく同意', likes:987 },
+      { text:'でもモバイル性能は捨てがたいんだよなぁ', likes:654 },
+      { text:'バッテリー劣化の検証データが参考になりました', likes:1234 },
+      { text:'次は据え置きゲーミングPCの長期レビューもお願いします！', likes:543 },
+    ],
+    11: [
+      { text:'各停の旅って意外と面白いんだよなぁ。駅弁もたくさん食べられるし', likes:1543 },
+      { text:'12時間の旅を45分にまとめる編集力がすごい', likes:987 },
+      { text:'途中下車して散策するのも各停の醍醐味ですよね', likes:765 },
+      { text:'自分もやってみたい！青春18きっぷの季節にぜひ', likes:1234 },
+      { text:'静岡県の長さがよく分かる動画www', likes:2345 },
+      { text:'次は日本海側ルートでお願いします！', likes:432 },
+    ],
+    12: [
+      { text:'AIの進化マジでやばい。人間の作曲家の仕事なくなるんじゃ...', likes:3456 },
+      { text:'5位の曲、普通にSpotifyで配信されてても違和感ないレベル', likes:2345 },
+      { text:'AIと人間のコラボ作曲が最強だと思う', likes:1876 },
+      { text:'使ったツールの名前教えてほしい！自分も試したい', likes:2567 },
+      { text:'100曲中の当たり率がすごい。技術の進歩を感じる', likes:987 },
+      { text:'でもやっぱり人間の感情は機械には再現できないと信じたい', likes:1654 },
+    ],
+    13: [
+      { text:'量子コンピュータの解説で初めて理解できた！ありがとう！', likes:5678 },
+      { text:'「猫の箱」の例えが秀逸。シュレディンガーもびっくり', likes:3421 },
+      { text:'小学生の娘と一緒に見ました。「なんとなく分かった」って言ってた', likes:2876 },
+      { text:'こういう難しい話を分かりやすく説明できる人、天才だと思う', likes:4321 },
+      { text:'大学で物理を専攻してるけど、この説明は正確で素晴らしい', likes:1987 },
+      { text:'続編で量子暗号についても解説してほしいです！', likes:1234 },
+    ],
+    14: [
+      { text:'海鮮丼10杯はヤバいwww 途中から目が死んでたのが面白かった', likes:3456 },
+      { text:'築地の海鮮丼ってレベル高いよね。あれを10杯とは...', likes:2345 },
+      { text:'7杯目あたりから明らかにペースが落ちてて草', likes:1876 },
+      { text:'最後の1杯を食べきった時の達成感、見てるこっちも嬉しくなった', likes:987 },
+      { text:'次は回転寿司100皿チャレンジをお願いします！', likes:2567 },
+      { text:'お腹壊さなかったのか心配...でも面白かった！', likes:654 },
+    ],
+    15: [
+      { text:'100均でここまでできるとは...クオリティが高すぎる！', likes:4321 },
+      { text:'自分も挑戦してみます！材料リストありがとうございます', likes:2876 },
+      { text:'子供と一緒に作りたい！週末のプロジェクトにぴったり', likes:1987 },
+      { text:'窓のステンドグラス風の加工が特に感動しました', likes:1543 },
+      { text:'総額1500円でこれは凄すぎる。センスの問題なんだなぁ', likes:3210 },
+      { text:'DIYクラフトRoom のクオリティは毎回期待を超えてくる', likes:876 },
+    ],
+    16: [
+      { text:'冬富士の厳しさが伝わってきた。経験者じゃないと無理ですね...', likes:2345 },
+      { text:'装備紹介が詳しくて参考になりました。安全第一ですね', likes:1876 },
+      { text:'-20℃の世界、想像を絶する...', likes:987 },
+      { text:'映像が美しい。辛さの中にある絶景が印象的', likes:1543 },
+      { text:'「絶対に真似しないでください」って注意書きが必要なレベル', likes:2567 },
+      { text:'プロの登山家のリアルな動画、貴重です。ありがとうございます', likes:654 },
+    ],
+    17: [
+      { text:'ミルクちゃん大きくなったなぁ...最初の手のひらサイズが懐かしい', likes:6789 },
+      { text:'保護猫を育てる素晴らしさが伝わる動画。泣いた。', likes:5432 },
+      { text:'3ヶ月目の甘え始めた瞬間が一番好き', likes:3210 },
+      { text:'うちも保護猫を迎えようかと本気で考え始めました', likes:2876 },
+      { text:'ミルクちゃんの成長と共にこのチャンネルも成長してるの感慨深い', likes:1987 },
+      { text:'次は2年目の記録もお願いします！ずっと見守りたい', likes:1654 },
+    ],
+    18: [
+      { text:'姫路城の解説が特に素晴らしかった。行きたくなった！', likes:3456 },
+      { text:'城好きとして納得のランキング。解説も専門的で勉強になる', likes:2345 },
+      { text:'42分があっという間だった。それだけ内容が濃い', likes:1876 },
+      { text:'松本城の黒漆の話、初めて知りました', likes:987 },
+      { text:'海外の城との比較もしてほしい！', likes:1543 },
+      { text:'このチャンネルの歴史解説シリーズ、全部面白い', likes:765 },
+    ],
+    19: [
+      { text:'30日間毎日10kmはすごい...尊敬します', likes:4321 },
+      { text:'タイムの変化グラフが面白かった。後半めちゃくちゃ速くなってる', likes:2876 },
+      { text:'自分も始めてみようと思います！まずは3kmから...', likes:1987 },
+      { text:'体重の変化が予想と違って面白かった。筋肉で重くなるんだね', likes:1543 },
+      { text:'怪我しなかったのは正しいフォームのおかげですね。参考になります', likes:2345 },
+      { text:'メンタルの変化についても詳しく聞きたかった', likes:654 },
+    ],
+    20: [
+      { text:'TOP5は完全に同意！今年は豊作だったなぁ', likes:3456 },
+      { text:'邦画の評価が高めなのが嬉しい。日本映画も頑張ってる', likes:2345 },
+      { text:'ネタバレなしのレビューが助かる。まだ見てない作品あったから', likes:1876 },
+      { text:'毎年このランキング楽しみにしてます', likes:987 },
+      { text:'7位の作品、ノーマークだったけど見てみようと思う', likes:1543 },
+      { text:'38分の大作レビュー、見応えありました！', likes:765 },
+    ],
+    21: [
+      { text:'3番目のやつ怖すぎ...夜に見るんじゃなかった', likes:3210 },
+      { text:'実際の写真や資料を使ってるから説得力がある', likes:2345 },
+      { text:'都市伝説と事実の線引きが丁寧で好感持てる', likes:1876 },
+      { text:'東京の地下道のネットワークは本当に興味深い', likes:987 },
+      { text:'BGMが怖さを引き立ててる。演出がうまい', likes:1543 },
+      { text:'パート2お願いします！もっと知りたい', likes:654 },
+    ],
+    22: [
+      { text:'リアタイで見てた！建築バトル最高だった', likes:2876 },
+      { text:'2:30:00の結果発表が熱すぎた。あの逆転は伝説', likes:1987 },
+      { text:'次の配信はいつですか？絶対参加したい！', likes:1234 },
+      { text:'3時間22分があっという間だった', likes:876 },
+      { text:'視聴者参加型の企画、もっとやってほしい', likes:1543 },
+      { text:'チャット欄も盛り上がってて楽しかった', likes:654 },
+    ],
+    23: [
+      { text:'毎晩これを聴きながら寝てます。最高の睡眠導入剤', likes:5678 },
+      { text:'雨音のASMR系で一番自然。本当に庭園にいる気分になる', likes:3456 },
+      { text:'受験勉強のお供に。このおかげで集中できてる', likes:2345 },
+      { text:'京都の日本庭園、いつか実際に行ってみたい', likes:1876 },
+      { text:'3時間ちょうどなのがありがたい。タイマー代わりに使ってる', likes:987 },
+      { text:'1000回以上再生してます。もう生活に欠かせない', likes:1543 },
+    ],
+    24: [
+      { text:'宇宙の話になると自分の悩みがちっぽけに感じる', likes:4321 },
+      { text:'多元宇宙論の解説が分かりやすくて感動した', likes:2876 },
+      { text:'サイエンスLabの宇宙シリーズは毎回クオリティが高い', likes:1987 },
+      { text:'子供の頃から宇宙が好きで、この動画で知識がアップデートされた', likes:1543 },
+      { text:'ダークエネルギーについてもっと詳しく知りたい', likes:2345 },
+      { text:'これ見た後に夜空を見上げたくなった', likes:876 },
+    ],
+    25: [
+      { text:'バンコクの屋台グルメ最高！自分も行った時にハマった', likes:2345 },
+      { text:'100円以下であのクオリティはすごい。タイ旅行行きたくなった', likes:1876 },
+      { text:'パッタイの屋台、自分も行きました！美味しいよね', likes:987 },
+      { text:'食べ歩きvlogの中で一番食欲をそそられる', likes:1543 },
+      { text:'タイ語のやり取りが面白かったw', likes:654 },
+      { text:'次はチェンマイとかプーケットもお願いします！', likes:432 },
+    ],
+    26: [
+      { text:'廃材だけでこのクオリティ...プロすぎる', likes:5432 },
+      { text:'3ヶ月の工程をまとめた編集が見事。ドキュメンタリーとして秀逸', likes:3210 },
+      { text:'子供の頃の夢が詰まってる。ツリーハウスっていいよなぁ', likes:2876 },
+      { text:'構造計算とかもしっかりやってるのが安心感ある', likes:1987 },
+      { text:'完成した時の感動が画面越しでも伝わってきた', likes:1543 },
+      { text:'次は廃材でサウナ作ってほしい！', likes:876 },
+    ],
+    27: [
+      { text:'雪中テント泊の静けさが伝わる映像美。最高です。', likes:1876 },
+      { text:'焚き火料理のシーンが好き。シンプルだけど美味しそう', likes:1234 },
+      { text:'ソロキャンプの良さが詰まった動画', likes:987 },
+      { text:'装備リスト、めちゃくちゃ参考になりました', likes:654 },
+      { text:'冬キャンプは寒いけど空気が澄んでて星が綺麗なんだよね', likes:1543 },
+      { text:'この動画見て冬キャンプデビューしました！', likes:432 },
+    ],
+    28: [
+      { text:'最初の警戒してる姿からの仲良しシーンで泣いた', likes:7654 },
+      { text:'犬と猫って意外と仲良くなれるんだ...感動', likes:5432 },
+      { text:'モカちゃん可愛すぎる！ミルクちゃんとのコンビ最高', likes:4321 },
+      { text:'3日目に一緒に寝てるシーンが一番好き', likes:3210 },
+      { text:'ペットパラダイスの動画はいつも癒される', likes:2345 },
+      { text:'うちでも多頭飼いしたくなりました。参考にします！', likes:1876 },
+    ],
+    29: [
+      { text:'通説の信長像が覆される...歴史って面白い', likes:3456 },
+      { text:'最新研究の紹介が丁寧で分かりやすい', likes:2345 },
+      { text:'「魔王」のイメージが先行しすぎてたんだなぁ', likes:1876 },
+      { text:'大学の日本史の授業より面白いです先生...', likes:2567 },
+      { text:'文献の引用が正確で信頼できる内容', likes:987 },
+      { text:'秀吉編、家康編もぜひお願いします！', likes:1543 },
+    ],
+    30: [
+      { text:'フォーム解説で一番分かりやすい動画。初心者に超おすすめ', likes:4321 },
+      { text:'スクワットのフォーム直したら膝の痛みがなくなった！', likes:3210 },
+      { text:'BIG3の正しいフォーム、ジムで教えてもらえなかったから助かる', likes:2876 },
+      { text:'これを見てから筋トレ始めて3ヶ月、体変わってきた', likes:1987 },
+      { text:'NGフォームの解説が特に参考になりました', likes:1543 },
+      { text:'ダンベル種目のフォーム解説もお願いします！', likes:987 },
+    ],
+    31: [
+      { text:'ノーラン全作品を55分で網羅するとは...凄い情報量', likes:3456 },
+      { text:'テネットの考察が一番面白かった。やっと理解できた気がする', likes:2876 },
+      { text:'メメントの時系列解説、長年の謎が解けた', likes:1987 },
+      { text:'インターステラーのシーンで泣いてしまった...何度見ても泣ける', likes:2345 },
+      { text:'次はデニ・ヴィルヌーヴ全作品解説をお願いします！', likes:987 },
+      { text:'映画好きなら必見の動画。保存しました', likes:1543 },
+    ],
+    32: [
+      { text:'3番目の隠し機能、マジで知らなかった！即実践した', likes:5678 },
+      { text:'仕事で使える機能ばかりで最高。同僚にもシェアしました', likes:3456 },
+      { text:'Googleの開発者はこういう遊び心が好きだよねw', likes:2345 },
+      { text:'334万再生も納得の内容。何回も見返してる', likes:1876 },
+      { text:'7番目のイースターエッグ、会社で試したら盛り上がったw', likes:987 },
+      { text:'次はYouTubeの隠し機能もお願いします！', likes:1543 },
+    ],
+    33: [
+      { text:'見てるだけで辛い...よく完食したなぁ', likes:3210 },
+      { text:'キャロライナ・リーパーの量がおかしいwww', likes:2876 },
+      { text:'リアクションが面白すぎるw表情がヤバイ', likes:1987 },
+      { text:'お腹大丈夫だったのか本気で心配...', likes:1543 },
+      { text:'料理の鉄人なのに鉄人が倒されてて草', likes:2345 },
+      { text:'次はカレーじゃなくて激辛ラーメンでお願いします！', likes:654 },
+    ],
+    34: [
+      { text:'24時間電車生活は想像以上にハードそう...', likes:2345 },
+      { text:'終電から始発までの時間をどう過ごすのかが見どころ', likes:1876 },
+      { text:'山手線で仮眠してるのシュールで好きw', likes:987 },
+      { text:'トイレ問題とか食事問題、リアルだなぁ', likes:1543 },
+      { text:'企画力がすごい。次は何やるんだろう', likes:654 },
+      { text:'都内の電車の路線図が頭に叩き込まれた', likes:432 },
+    ],
+    35: [
+      { text:'1000日サバイバル、圧巻の一言。城塞都市すごすぎ', likes:7654 },
+      { text:'2時間15分が一瞬だった。それくらい見入ってしまった', likes:5432 },
+      { text:'500日目あたりの建築ラッシュが特に見応えあった', likes:3210 },
+      { text:'レッドストーン回路の自動化がエグい', likes:2876 },
+      { text:'マイクラの可能性を感じる動画。モチベ上がった', likes:1987 },
+      { text:'次は2000日目指してほしい！応援してます', likes:1543 },
+    ],
+    36: [
+      { text:'毎日お世話になってます。作業効率が段違い', likes:9876 },
+      { text:'1200万再生は伊達じゃない。これがないと勉強できない体になった', likes:6543 },
+      { text:'深夜3時にこれ聴きながら論文書いてます', likes:4321 },
+      { text:'チルなビートが最高。永遠に聴いていられる', likes:3210 },
+      { text:'このBGMのおかげで受験乗り越えられました。ありがとう', likes:5432 },
+      { text:'カフェでこれ流してほしい', likes:2345 },
+    ],
+    37: [
+      { text:'ブラックホールの内部、想像するだけでゾクゾクする', likes:3456 },
+      { text:'スパゲッティ化の説明が秀逸。分かりやすすぎる', likes:2876 },
+      { text:'物理学って難しいけど、この動画なら理解できる', likes:1987 },
+      { text:'ホーキング放射の解説も詳しくて勉強になった', likes:1543 },
+      { text:'宇宙シリーズの中で一番好きな回', likes:2345 },
+      { text:'映像のクオリティがNHKスペシャル級', likes:876 },
+    ],
+    38: [
+      { text:'台北の夜市、懐かしい！また行きたくなった', likes:2345 },
+      { text:'臭豆腐に挑戦する勇気がすごい。リアクションが面白い', likes:1876 },
+      { text:'小籠包のお店、メモしました。次の台湾旅行で行く！', likes:987 },
+      { text:'食べ歩きvlogの理想形。テンポが良くて見やすい', likes:1543 },
+      { text:'台湾グルメは本当にコスパ最高だよね', likes:654 },
+      { text:'他のアジアの夜市も紹介してほしい！', likes:432 },
+    ],
+    39: [
+      { text:'レジン初心者だけど、この動画のおかげで上手くできた！', likes:3210 },
+      { text:'宇宙モチーフのアクセサリー、プレゼントに作ったら喜ばれた', likes:2345 },
+      { text:'材料の選び方から丁寧に解説してくれてるから安心', likes:1876 },
+      { text:'完成品が売り物レベル。これが手作り!?', likes:2567 },
+      { text:'週末にやってみます！楽しみ', likes:987 },
+      { text:'次は海モチーフのアクセサリーもお願いします！', likes:654 },
+    ],
+    40: [
+      { text:'渓流釣りの映像美がすごい。自然の音だけの贅沢な時間', likes:1876 },
+      { text:'幻のイワナ、本当に美しい魚体だ...', likes:1543 },
+      { text:'こういう人里離れた場所での釣り、憧れるなぁ', likes:987 },
+      { text:'リリースしてくれて嬉しい。自然を大切にしてる姿勢が好き', likes:2345 },
+      { text:'37分の動画だけど没入感がすごくてあっという間だった', likes:654 },
+      { text:'来シーズンは自分も渓流釣りデビューしたい！', likes:432 },
+    ],
+    41: [
+      { text:'ハムスターの1日、想像以上にアクティブで驚いた', likes:4321 },
+      { text:'回し車で深夜にめっちゃ走ってるのかわいいw', likes:3210 },
+      { text:'ほっぺに餌を詰め込むシーンが最高。何回でも見られる', likes:2876 },
+      { text:'24時間観察するカメラワークが素晴らしい', likes:1987 },
+      { text:'うちのハムスターも同じ行動してる！共感', likes:1543 },
+      { text:'癒し動画として永久保存します', likes:876 },
+    ],
+    42: [
+      { text:'ピラミッドの謎、まだまだ解明されてないんだなぁ', likes:3456 },
+      { text:'新発見の空間の映像、ワクワクが止まらない', likes:2876 },
+      { text:'考古学の最前線をこんなに分かりやすく伝えてくれるチャンネル他にない', likes:1987 },
+      { text:'エジプトに行ってみたくなった', likes:1543 },
+      { text:'ロマンがある...人類の歴史って面白い', likes:2345 },
+      { text:'次の発掘調査の結果も楽しみにしてます！', likes:654 },
+    ],
+    43: [
+      { text:'3ヶ月で-15kgはすごい。食事法の詳細が参考になる', likes:6543 },
+      { text:'カロリー管理のアプリ、同じの使ってます！効果ありますよね', likes:4321 },
+      { text:'間食のコツが目からウロコだった。実践してみます', likes:3210 },
+      { text:'無理のないペースで健康的に痩せてるのが良い', likes:2876 },
+      { text:'ビフォーアフターの変化がすごすぎる', likes:1987 },
+      { text:'自分も始めてみようと思います！モチベもらった', likes:1543 },
+    ],
+    44: [
+      { text:'ネタバレなしのアニメ映画レビュー、ありがたすぎる', likes:2345 },
+      { text:'3位の作品、まさに同意！隠れた名作だよね', likes:1876 },
+      { text:'レビューの後すぐ見に行きました。最高でした', likes:987 },
+      { text:'2024年のアニメ映画は本当にレベル高かった', likes:1543 },
+      { text:'来年のアニメ映画も楽しみ。また年末にランキングお願いします', likes:654 },
+      { text:'本音レビューだから信頼できる。忖度なしが良い', likes:1234 },
+    ],
+    45: [
+      { text:'3番目の事件、怖すぎて夜眠れなくなった...', likes:4321 },
+      { text:'実話ベースだから余計に怖い。フィクションより恐ろしい', likes:3210 },
+      { text:'BGMと演出が絶妙。ホラー映画より怖い', likes:2876 },
+      { text:'未解決事件の闇深さを改めて感じた', likes:1987 },
+      { text:'このシリーズの新作待ってました！', likes:1543 },
+      { text:'一人で見るのはおすすめしません...（経験者）', likes:876 },
+    ],
+    46: [
+      { text:'結局どっち買えばいいか迷う...両方良いんだよなぁ', likes:5432 },
+      { text:'カメラ比較が一番参考になった。実際の写真で見せてくれるのがいい', likes:3210 },
+      { text:'コスパ考えるとAndroid、エコシステム考えるとiPhoneかな', likes:2876 },
+      { text:'毎年恒例の比較動画、今年も参考になりました', likes:1987 },
+      { text:'バッテリーテストの結果が意外だった', likes:1543 },
+      { text:'次機種変する時の参考にします！', likes:876 },
+    ],
+    47: [
+      { text:'江戸時代の料理、意外と美味しそう...再現ありがとう', likes:3456 },
+      { text:'料理書の解読から始めてるのがすごい。学者かよ', likes:2876 },
+      { text:'昔の日本人はこういうもの食べてたんだなぁ。感慨深い', likes:1987 },
+      { text:'出汁の取り方が現代と違って面白い', likes:1543 },
+      { text:'歴史×料理のジャンル、もっと流行ってほしい', likes:2345 },
+      { text:'次は明治時代の洋食をお願いします！', likes:654 },
+    ],
+    48: [
+      { text:'自転車で日本縦断...体力お化けか！尊敬しかない', likes:4321 },
+      { text:'60日間の旅を52分にまとめるセンスがすごい', likes:3210 },
+      { text:'沖縄に着いた時の感動シーンで泣いた', likes:2876 },
+      { text:'途中の地方グルメも美味しそうだった', likes:1987 },
+      { text:'最大の敵は天候じゃなくて向かい風という名言www', likes:1543 },
+      { text:'自分もいつか挑戦したい。まずは体力づくりから...', likes:876 },
+    ],
+    49: [
+      { text:'レッドストーンの使い方がプロすぎる。自動工場すごい', likes:3456 },
+      { text:'上級者向けだけど解説が丁寧だから初心者でも理解できた', likes:2876 },
+      { text:'アイテム仕分け機の仕組み、やっと理解できた！', likes:1987 },
+      { text:'これワールドデータ配布してほしい...', likes:2345 },
+      { text:'回路の設計センスが芸術的。エンジニアかよ', likes:1543 },
+      { text:'マイクラのレッドストーン動画で一番分かりやすい', likes:987 },
+    ],
+  };
+
+  for (let i = 0; i < 6; i++) {
+    const nameIdx = (seed + i * 7) % COMMENT_NAMES.length;
+    const timeIdx = (seed + i * 3) % COMMENT_TIMES.length;
+    const cdata = commentSets[videoId] ? commentSets[videoId][i] : { text:'とても面白い動画でした！', likes: Math.floor(Math.random()*1000) };
+    comments.push({
+      author: '@' + COMMENT_NAMES[nameIdx],
+      time: COMMENT_TIMES[timeIdx],
+      text: cdata.text,
+      likes: cdata.likes,
+      avatarId: (seed + i * 11) % 56,
+    });
+  }
+  return comments;
+}
+
+// ============================================================
+// SECTION 5: CHIP CATEGORIES
+// ============================================================
+
+const CATEGORIES = ['すべて','音楽','ゲーム','ライブ','コント','アニメーション','料理','最近アップロードされた動画','新しい動画の発見'];
+
+function renderChips() {
+  const scroll = document.getElementById('chipsScroll');
+  scroll.innerHTML = '';
+  CATEGORIES.forEach((cat, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'yt-chip' + (i === 0 ? ' active' : '');
+    chip.textContent = cat;
+    chip.onclick = () => filterByCategory(cat, chip);
+    scroll.appendChild(chip);
+  });
+}
+
+let currentCategory = 'すべて';
+
+function filterByCategory(cat, chipEl) {
+  currentCategory = cat;
+  document.querySelectorAll('.yt-chip').forEach(c => c.classList.remove('active'));
+  chipEl.classList.add('active');
+
+  const filtered = getFilteredVideos();
+  VRE.reset();
+  VRE.init(
+    document.getElementById('videoGrid'),
+    document.getElementById('sentinel'),
+    filtered.length,
+    (node, idx) => renderVideoCard(node, filtered[idx])
+  );
+}
+
+function getFilteredVideos() {
+  if (currentCategory === 'すべて') return VIDEOS;
+  if (currentCategory === '最近アップロードされた動画') {
+    return VIDEOS.filter(v => v.time.includes('時間前') || v.time.includes('日前') || v.time.includes('1週間前'));
+  }
+  if (currentCategory === '新しい動画の発見') {
+    // Shuffle-ish: return reversed
+    return [...VIDEOS].reverse();
+  }
+  return VIDEOS.filter(v => v.category === currentCategory);
+}
+
+// ============================================================
+// SECTION 6: VIDEO CARD RENDERER
+// ============================================================
+
+function renderVideoCard(node, video) {
+  const ch = CHANNELS[video.ch];
+  const thumbSVG = ThumbnailGen.generateSVG(video.id, video.title);
+  const avatarSVG = ThumbnailGen.generateAvatarSVG(ch.id);
+  const verifiedIcon = ch.verified ? `<span class="verified"><svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></span>` : '';
+
+  node.innerHTML = `
+    <div class="yt-thumb-wrap">
+      ${thumbSVG}
+      <span class="yt-duration">${video.dur}</span>
+      ${video.progress > 0 ? `<div class="yt-progress-bar" style="width:${video.progress}%"></div>` : ''}
+    </div>
+    <div class="yt-card-info">
+      <div class="yt-card-avatar">${avatarSVG}</div>
+      <div class="yt-card-meta">
+        <div class="yt-card-title">${video.title}</div>
+        <div class="yt-card-channel">${ch.name} ${verifiedIcon}</div>
+        <div class="yt-card-stats">${video.views}回視聴・${video.time}</div>
+      </div>
+    </div>
+  `;
+  node.onclick = () => openPlayer(video.id);
+}
+
+// ============================================================
+// SECTION 7: VIDEO PLAYER
+// ============================================================
+
+function openPlayer(videoId) {
+  const video = VIDEOS[videoId];
+  const ch = CHANNELS[video.ch];
+  const overlay = document.getElementById('playerOverlay');
+  const comments = generateComments(videoId);
+
+  // Player video area
+  const videoArea = document.getElementById('playerVideoArea');
+  const thumbSVG = ThumbnailGen.generateSVG(video.id, video.title);
+  videoArea.innerHTML = `
+    ${thumbSVG}
+    <div class="yt-player-controls">
+      <button class="yt-ctrl-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+      <span class="yt-player-time">3:45 / ${video.dur}</span>
+      <div class="yt-player-progress"><div class="yt-player-progress-fill" style="width:${video.progress || 35}%"></div></div>
+      <button class="yt-ctrl-btn"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></button>
+      <button class="yt-ctrl-btn"><svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>
+    </div>
+  `;
+
+  // Primary content
+  const primary = document.getElementById('playerPrimary');
+  const avatarSVG = ThumbnailGen.generateAvatarSVG(ch.id);
+  const verifiedIcon = ch.verified ? `<span class="verified" style="display:inline-flex"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#aaa"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></span>` : '';
+  
+  const likesCount = Math.floor(1000 + Math.random() * 50000);
+  const viewsNum = video.views;
+
+  let commentsHtml = '';
+  comments.forEach(c => {
+    const cAvatarSVG = ThumbnailGen.generateAvatarSVG(c.avatarId);
+    commentsHtml += `
+      <div class="yt-comment">
+        <div class="yt-comment-avatar">${cAvatarSVG}</div>
+        <div class="yt-comment-body">
+          <div class="yt-comment-author">${c.author} <span>${c.time}</span></div>
+          <div class="yt-comment-text">${c.text}</div>
+          <div class="yt-comment-actions">
+            <button><svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>${c.likes.toLocaleString()}</button>
+            <button><svg viewBox="0 0 24 24" style="transform:rotate(180deg)"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg></button>
+            <button>返信</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  primary.innerHTML = `
+    <div class="yt-video-title-big">${video.title}</div>
+    <div class="yt-channel-row">
+      <div class="yt-channel-avatar-lg">${avatarSVG}</div>
+      <div class="yt-channel-info">
+        <div class="yt-channel-name-big">${ch.name} ${verifiedIcon}</div>
+        <div class="yt-channel-subs">チャンネル登録者数 ${ch.subs}</div>
+      </div>
+      <button class="yt-subscribe-btn">チャンネル登録</button>
+    </div>
+    <div class="yt-video-actions">
+      <button class="yt-action-btn" onclick="this.classList.toggle('like-active')">
+        <svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+        ${likesCount.toLocaleString()}
+      </button>
+      <button class="yt-action-btn">
+        <svg viewBox="0 0 24 24" style="transform:rotate(180deg)"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+      </button>
+      <button class="yt-action-btn">
+        <svg viewBox="0 0 24 24"><path d="M15 5.63L20.66 12 15 18.37V14h-1c-3.96 0-7.14 1-9.75 3.09 1.84-4.07 5.11-6.4 9.89-7.1l.86-.13V5.63M14 3v6C6.22 10.13 3.11 15.33 2 21c2.78-3.97 6.44-6 12-6v6l8-9-8-9z"/></svg>
+        共有
+      </button>
+      <button class="yt-action-btn">
+        <svg viewBox="0 0 24 24"><path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/></svg>
+        保存
+      </button>
+    </div>
+    <div class="yt-description-box">
+      <div class="yt-desc-stats">${viewsNum}回視聴 ${video.time}</div>
+      ${video.desc}
+    </div>
+    <div class="yt-comments-section">
+      <div class="yt-comments-header">コメント ${comments.length}件</div>
+      <div class="yt-comment-input-row">
+        <div class="yt-card-avatar">${ThumbnailGen.generateAvatarSVG(99)}</div>
+        <input class="yt-comment-input" type="text" placeholder="コメントを追加...">
+      </div>
+      ${commentsHtml}
+    </div>
+  `;
+
+  // Recommendations (sidebar)
+  const secondary = document.getElementById('playerSecondary');
+  let recsHtml = '<div style="font-size:16px;font-weight:600;margin-bottom:16px">関連動画</div>';
+  const recIndices = [];
+  for (let i = 0; i < VIDEOS.length; i++) {
+    if (i !== videoId) recIndices.push(i);
+  }
+  // Shuffle
+  for (let i = recIndices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [recIndices[i], recIndices[j]] = [recIndices[j], recIndices[i]];
+  }
+  const recsToShow = recIndices.slice(0, 20);
+  recsToShow.forEach(ri => {
+    const rv = VIDEOS[ri];
+    const rc = CHANNELS[rv.ch];
+    const rThumb = ThumbnailGen.generateSVG(rv.id, rv.title);
+    recsHtml += `
+      <div class="yt-rec-card" onclick="openPlayer(${rv.id})">
+        <div class="yt-rec-thumb">
+          ${rThumb}
+          <span class="yt-rec-dur">${rv.dur}</span>
+        </div>
+        <div class="yt-rec-info">
+          <div class="yt-rec-title">${rv.title}</div>
+          <div class="yt-rec-channel">${rc.name}</div>
+          <div class="yt-rec-stats">${rv.views}回視聴・${rv.time}</div>
+        </div>
+      </div>
+    `;
+  });
+  secondary.innerHTML = recsHtml;
+
+  overlay.classList.add('active');
+  overlay.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+
+function closePlayer() {
+  const overlay = document.getElementById('playerOverlay');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// ============================================================
+// SECTION 8: SEARCH FUNCTIONALITY
+// ============================================================
+
+function handleSearch() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!query) {
+    // Reset to all
+    currentCategory = 'すべて';
+    document.querySelectorAll('.yt-chip').forEach((c, i) => {
+      c.classList.toggle('active', i === 0);
+    });
+    VRE.reset();
+    VRE.init(
+      document.getElementById('videoGrid'),
+      document.getElementById('sentinel'),
+      VIDEOS.length,
+      (node, idx) => renderVideoCard(node, VIDEOS[idx])
+    );
+    return;
+  }
+  
+  const results = VIDEOS.filter(v => {
+    const ch = CHANNELS[v.ch];
+    return v.title.toLowerCase().includes(query) ||
+           ch.name.toLowerCase().includes(query) ||
+           v.desc.toLowerCase().includes(query) ||
+           v.category.toLowerCase().includes(query);
+  });
+  
+  // Deselect chips
+  document.querySelectorAll('.yt-chip').forEach(c => c.classList.remove('active'));
+  
+  VRE.reset();
+  VRE.init(
+    document.getElementById('videoGrid'),
+    document.getElementById('sentinel'),
+    results.length,
+    (node, idx) => renderVideoCard(node, results[idx])
+  );
+}
+
+document.getElementById('searchInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') handleSearch();
+});
+
+// ============================================================
+// SECTION 9: INITIALIZATION
+// ============================================================
+
+function init() {
+  renderChips();
+  VRE.init(
+    document.getElementById('videoGrid'),
+    document.getElementById('sentinel'),
+    VIDEOS.length,
+    (node, idx) => renderVideoCard(node, VIDEOS[idx])
+  );
+}
+
+// Keyboard shortcut: Escape to close player
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closePlayer();
+});
+
+// Start
+document.addEventListener('DOMContentLoaded', init);
+if (document.readyState !== 'loading') init();
+
+</script>
+</body>
+</html>
