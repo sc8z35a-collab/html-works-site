@@ -2,67 +2,175 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTML Works Collection | TOYO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0b10">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>HTML Works Hub | TOYO</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  :root{--bg:#0f0f14;--card:#1a1a24;--card-hover:#22222f;--text:#f1f1f4;--sub:#a7a7b5;--blue:#4da3ff}
-  body{background:var(--bg);color:var(--text);font-family:"Noto Sans JP","Yu Gothic",system-ui,sans-serif;min-height:100vh}
-  header{max-width:1080px;margin:0 auto;padding:56px 20px 8px}
-  header .kicker{color:var(--blue);font-size:13px;letter-spacing:.18em;font-weight:700}
-  header h1{font-size:clamp(28px,5vw,44px);margin:10px 0 12px;line-height:1.2}
-  header p{color:var(--sub);line-height:1.8;max-width:720px}
-  main{max-width:1080px;margin:0 auto;padding:28px 20px 64px}
-  h3.section{font-size:15px;letter-spacing:.12em;color:var(--sub);margin:28px 0 14px}
-  h3.section:first-child{margin-top:0}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
-  .card{display:flex;flex-direction:column;gap:10px;background:var(--card);border:1px solid #2a2a38;border-radius:16px;padding:22px;text-decoration:none;color:inherit;transition:.18s}
-  .card:hover{background:var(--card-hover);transform:translateY(-3px);border-color:#3a3a52}
-  .badge{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.08em;padding:4px 10px;border-radius:999px;color:#0f0f14;background:#c9c9d6}
-  .b-red{background:#ff4d4d}.b-blue{background:#4da3ff}.b-green{background:#00ff41}.b-orange{background:#ffaa00}.b-purple{background:#c792ff}.b-pink{background:#ff8ac2}.b-teal{background:#3fe0c5}.b-yellow{background:#ffd94d}
-  .card h2{font-size:19px;line-height:1.4}
-  .card p{color:var(--sub);font-size:14px;line-height:1.7;flex:1}
-  .card .open{font-size:14px;font-weight:700}
-  .card .file{font-size:12px;color:#77778a;font-family:ui-monospace,monospace}
-  footer{max-width:1080px;margin:0 auto;padding:0 20px 40px;color:#77778a;font-size:13px;line-height:1.8}
-  @media (prefers-color-scheme:light){:root{--bg:#f6f6f8;--card:#fff;--card-hover:#fff;--text:#17171c;--sub:#555562}}
+  :root{
+    --bg:#0b0b10;--panel:#15151f;--card:#1a1a26;--card-hover:#232332;
+    --text:#f2f2f6;--sub:#a8a8ba;--line:#2b2b3c;--blue:#4da3ff;
+    --sat:env(safe-area-inset-top);--sar:env(safe-area-inset-right);
+    --sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left)
+  }
+  html{scrollbar-color:#444 var(--bg)}
+  body{background:var(--bg);color:var(--text);font-family:"Noto Sans JP","Yu Gothic",system-ui,sans-serif;min-height:100dvh}
+  /* ===== Hub top bar ===== */
+  .topbar{
+    position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;
+    padding:calc(10px + var(--sat)) calc(16px + var(--sar)) 10px calc(16px + var(--sal));
+    background:rgba(11,11,16,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)
+  }
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4da3ff,#c792ff);display:flex;align-items:center;justify-content:center;font-weight:900;color:#0b0b10;font-size:17px;flex:none}
+  .topbar .name{font-weight:800;font-size:16px;line-height:1.15}
+  .topbar .name small{display:block;color:var(--sub);font-weight:500;font-size:11px;letter-spacing:.14em}
+  .topbar .spacer{flex:1}
+  .fsbtn{appearance:none;border:0;cursor:pointer;background:var(--blue);color:#08131f;font-weight:800;font-size:13px;padding:10px 14px;border-radius:999px;white-space:nowrap}
+  .fsbtn:active{transform:scale(.97)}
+  /* ===== Hero ===== */
+  .hero{max-width:1120px;margin:0 auto;padding:26px calc(16px + var(--sar)) 4px calc(16px + var(--sal))}
+  .hero h1{font-size:clamp(24px,4.5vw,38px);line-height:1.25}
+  .hero p{color:var(--sub);line-height:1.8;margin-top:8px;max-width:760px;font-size:14px}
+  .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .links a{color:var(--text);text-decoration:none;font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--panel);padding:7px 12px;border-radius:999px}
+  .links a b{color:var(--blue)}
+  /* ===== Controls ===== */
+  .controls{max-width:1120px;margin:0 auto;padding:16px calc(16px + var(--sar)) 0 calc(16px + var(--sal));display:flex;flex-direction:column;gap:12px}
+  .search{width:100%;appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:12px 14px;font-size:15px;outline:none}
+  .search:focus{border-color:var(--blue)}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .chip{flex:none;appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--sub);font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer}
+  .chip.on{background:var(--text);color:#0b0b10;border-color:var(--text)}
+  .count{color:var(--sub);font-size:12px}
+  /* ===== Grid ===== */
+  main{max-width:1120px;margin:0 auto;padding:14px calc(16px + var(--sar)) calc(48px + var(--sab)) calc(16px + var(--sal))}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .card{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;text-decoration:none;color:inherit;transition:.15s}
+  .card:hover,.card:active{background:var(--card-hover);border-color:#3d3d55}
+  .badge{align-self:flex-start;font-size:10px;font-weight:800;letter-spacing:.08em;padding:4px 9px;border-radius:999px;color:#0b0b10;background:#c9c9d6}
+  .b-red{background:#ff4d4d}.b-blue{background:#4da3ff}.b-green{background:#00ff41}.b-orange{background:#ffaa00}
+  .b-purple{background:#c792ff}.b-pink{background:#ff8ac2}.b-teal{background:#3fe0c5}.b-yellow{background:#ffd94d}
+  .card h2{font-size:17px;line-height:1.4}
+  .card p{color:var(--sub);font-size:13px;line-height:1.65;flex:1}
+  .card .meta{display:flex;justify-content:space-between;align-items:center;font-size:12px}
+  .card .open{font-weight:800;color:var(--blue)}
+  .card .file{color:#74748c;font-family:ui-monospace,monospace;font-size:11px}
+  .empty{display:none;color:var(--sub);text-align:center;padding:36px 0}
+  footer{max-width:1120px;margin:0 auto;padding:0 calc(16px + var(--sar)) calc(28px + var(--sab)) calc(16px + var(--sal));color:#74748c;font-size:12px;line-height:1.9}
+  footer a{color:var(--sub)}
+  /* ===== Smartphone landscape: hub becomes a wide launchpad ===== */
+  @media (orientation:landscape) and (max-height:520px){
+    .hero{padding-top:12px}
+    .hero h1{font-size:22px}
+    .hero p{display:none}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+    .card{padding:13px}
+    .card p{display:none}
+    .controls{padding-top:10px}
+  }
+  @media (prefers-color-scheme:light){
+    :root{--bg:#f4f4f7;--panel:#fff;--card:#fff;--card-hover:#fff;--text:#16161d;--sub:#555564;--line:#dddde6}
+    .topbar{background:rgba(244,244,247,.92)}
+  }
 </style>
 </head>
 <body>
-<header>
-  <div class="kicker">HTML WORKS COLLECTION ・ 全13作品</div>
-  <h1>作ったHTML、ぜんぶここから見られる。</h1>
-  <p>単体HTMLで動く13作品をまとめた閲覧サイトです。各カードを押すと、そのままブラウザで作品が開きます。ビルド不要・そのまま GitHub Pages でも公開できます。</p>
+<header class="topbar">
+  <div class="logo">H</div>
+  <div class="name">HTML Works Hub<small>TOYO ・ 全13作品</small></div>
+  <div class="spacer"></div>
+  <button class="fsbtn" id="hubFs" type="button">⛶ 全画面（横）</button>
 </header>
+
+<section class="hero">
+  <h1>作品ハブ — 開きたいやつを押すだけ。</h1>
+  <p>単体HTML13作品の玄関です。作品は全画面ビューワーで開きます（スマホは横向き全画面が最適）。検索とカテゴリで絞り込みもできます。</p>
+  <div class="links">
+    <a href="https://html-works-site.sc8z-35a.workers.dev/"><b>Cloudflare</b> 本番サイト</a>
+    <a href="https://sc8z35a-collab.github.io/html-works-site/"><b>GitHub Pages</b> ミラー</a>
+    <a href="https://github.com/sc8z35a-collab/html-works-site"><b>GitHub</b> リポジトリ</a>
+  </div>
+</section>
+
+<div class="controls">
+  <input class="search" id="q" type="search" placeholder="作品を検索（例：SCP、電卓、雑談）" autocomplete="off">
+  <div class="chips" id="chips">
+    <button class="chip on" data-cat="all" type="button">すべて</button>
+    <button class="chip" data-cat="tool" type="button">UI / ツール</button>
+    <button class="chip" data-cat="game" type="button">ゲーム / シミュレーション</button>
+    <button class="chip" data-cat="story" type="button">ストーリー / トーク</button>
+  </div>
+  <div class="count" id="count"></div>
+</div>
+
 <main>
-  <h3 class="section">UI / ツール</h3>
-  <div class="grid">
-    <a class="card" href="./upload.html"><span class="badge b-red">UI CLONE</span><h2>YouTube</h2><p>YouTubeの画面を再現したUIクローン。ヘッダー・サイドバー・動画カードまで作り込んだ1枚もの。</p><span class="open">開く →</span><span class="file">upload.html ・ 96 KB</span></a>
-    <a class="card" href="./3D.html"><span class="badge b-blue">3D / CSS</span><h2>3D Calculator - Ultra Realistic</h2><p>立体感と光の表現にこだわった超リアルな3D電卓。CSSの perspective と陰影で質感を作っている。</p><span class="open">開く →</span><span class="file">3D.html ・ 280 KB</span></a>
-    <a class="card" href="./upload-4.html"><span class="badge b-blue">CALCULATOR</span><h2>Ultra HD Premium Calculator Pro Max</h2><p>超高精細をうたうプレミアム電卓。電卓シリーズのもう1つの力作版。</p><span class="open">開く →</span><span class="file">upload-4.html ・ 342 KB</span></a>
-    <a class="card" href="./upload-3.html"><span class="badge b-teal">MAKER</span><h2>Super Stage Maker - Beautiful Edition</h2><p>ステージを作れるメーカー系作品の Beautiful Edition。</p><span class="open">開く →</span><span class="file">upload-3.html ・ 315 KB</span></a>
+  <div class="grid" id="grid">
+    <a class="card" data-cat="tool" data-name="youtube ui クローン" href="./viewer.html?src=upload.html"><span class="badge b-red">UI CLONE</span><h2>YouTube</h2><p>YouTubeの画面を再現したUIクローン。ヘッダー・サイドバー・動画カードまで作り込んだ1枚もの。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload.html</span></span></a>
+    <a class="card" data-cat="tool" data-name="3d calculator 電卓" href="./viewer.html?src=3D.html"><span class="badge b-blue">3D / CSS</span><h2>3D Calculator - Ultra Realistic</h2><p>立体感と光にこだわった超リアルな3D電卓。CSSの perspective と陰影で質感を作っている。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">3D.html</span></span></a>
+    <a class="card" data-cat="tool" data-name="ultra hd premium calculator 電卓" href="./viewer.html?src=upload-4.html"><span class="badge b-blue">CALCULATOR</span><h2>Ultra HD Premium Calculator Pro Max</h2><p>超高精細をうたうプレミアム電卓。電卓シリーズのもう1つの力作版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-4.html</span></span></a>
+    <a class="card" data-cat="tool" data-name="super stage maker ステージ" href="./viewer.html?src=upload-3.html"><span class="badge b-teal">MAKER</span><h2>Super Stage Maker - Beautiful Edition</h2><p>ステージを作れるメーカー系作品の Beautiful Edition。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-3.html</span></span></a>
+    <a class="card" data-cat="game" data-name="scp 収容 シミュレーター 凌空" href="./viewer.html?src=SCP-1.html"><span class="badge b-green">SCP GAME</span><h2>SCP-1-JP 「凌空」 収容シミュレーター</h2><p>SCP収容施設を舞台にしたシミュレーター。ローディング・HUD・カスタムカーソル付きの没入型UI。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SCP-1.html</span></span></a>
+    <a class="card" data-cat="game" data-name="scp 4721 observation chamber ホラー" href="./viewer.html?src=SCP-2.html"><span class="badge b-orange">SCP HORROR</span><h2>SCP-4721 Observation Chamber</h2><p>観察室を舞台にしたCLASSIFIED級ホラー。フリッカー、グリッチ、ダークな演出が中心。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SCP-2.html</span></span></a>
+    <a class="card" data-cat="game" data-name="しょぼん アクション syobon" href="./viewer.html?src=upload-2.html"><span class="badge b-yellow">ACTION GAME</span><h2>しょぼんのアクション - HD Remake</h2><p>あのアクションゲームのHDリメイク版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-2.html</span></span></a>
+    <a class="card" data-cat="game" data-name="infinite voxel world ボクセル" href="./viewer.html?src=3.1.html"><span class="badge b-teal">VOXEL</span><h2>Infinite Voxel World</h2><p>無限に広がるボクセルワールド。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">3.1.html</span></span></a>
+    <a class="card" data-cat="game" data-name="林野火災 シミュレーション fire" href="./viewer.html?src=upload-5.html"><span class="badge b-red">SIMULATION</span><h2>林野火災シミュレーション</h2><p>超高解像度アニメーションで描く林野火災シミュレーション。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-5.html</span></span></a>
+    <a class="card" data-cat="story" data-name="ai genesis 物語" href="./viewer.html?src=AI.html"><span class="badge b-purple">STORY</span><h2>AI GENESIS — 6日間の狂詩曲</h2><p>AIをテーマにした6日間の物語。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">AI.html</span></span></a>
+    <a class="card" data-cat="story" data-name="深夜の森 chat log チャット" href="./viewer.html?src=upload-6.html"><span class="badge b-purple">CHAT LOG</span><h2>深夜の森 - The Chat Log</h2><p>深夜の森を舞台にしたチャットログ形式の作品。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-6.html</span></span></a>
+    <a class="card" data-cat="story" data-name="カロン コレー 雑談 トーク" href="./viewer.html?src=2.html"><span class="badge b-pink">TALK</span><h2>カロン &amp; コレー — 雑談トーク</h2><p>カロンとコレーの雑談トーク。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">2.html</span></span></a>
+    <a class="card" data-cat="story" data-name="三人 雑談 手書き ドローン" href="./viewer.html?src=upload-7.html"><span class="badge b-pink">TALK</span><h2>三人の雑談 — 手書き × ドローン</h2><p>三人の雑談、手書きとドローンの組み合わせ。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-7.html</span></span></a>
   </div>
-
-  <h3 class="section">ゲーム / シミュレーション</h3>
-  <div class="grid">
-    <a class="card" href="./SCP-1.html"><span class="badge b-green">SCP GAME</span><h2>SCP-1-JP 「凌空」 収容シミュレーター</h2><p>SCP収容施設を舞台にしたシミュレーター。ローディング・HUD・カスタムカーソル付きの没入型UI。</p><span class="open">開く →</span><span class="file">SCP-1.html ・ 276 KB</span></a>
-    <a class="card" href="./SCP-2.html"><span class="badge b-orange">SCP HORROR</span><h2>SCP-4721 Observation Chamber</h2><p>観察室を舞台にしたCLASSIFIED級ホラー。フリッカー、グリッチ、ダークな演出が中心。</p><span class="open">開く →</span><span class="file">SCP-2.html ・ 146 KB</span></a>
-    <a class="card" href="./upload-2.html"><span class="badge b-yellow">ACTION GAME</span><h2>しょぼんのアクション - HD Remake</h2><p>あのアクションゲームのHDリメイク版。</p><span class="open">開く →</span><span class="file">upload-2.html ・ 491 KB</span></a>
-    <a class="card" href="./3.1.html"><span class="badge b-teal">VOXEL</span><h2>Infinite Voxel World</h2><p>無限に広がるボクセルワールド。</p><span class="open">開く →</span><span class="file">3.1.html ・ 24 KB</span></a>
-    <a class="card" href="./upload-5.html"><span class="badge b-red">SIMULATION</span><h2>林野火災シミュレーション</h2><p>超高解像度アニメーションで描く林野火災シミュレーション。</p><span class="open">開く →</span><span class="file">upload-5.html ・ 237 KB</span></a>
-  </div>
-
-  <h3 class="section">ストーリー / トーク</h3>
-  <div class="grid">
-    <a class="card" href="./AI.html"><span class="badge b-purple">STORY</span><h2>AI GENESIS — 6日間の狂詩曲</h2><p>AIをテーマにした6日間の物語。</p><span class="open">開く →</span><span class="file">AI.html ・ 209 KB</span></a>
-    <a class="card" href="./upload-6.html"><span class="badge b-purple">CHAT LOG</span><h2>深夜の森 - The Chat Log</h2><p>深夜の森を舞台にしたチャットログ形式の作品。</p><span class="open">開く →</span><span class="file">upload-6.html ・ 169 KB</span></a>
-    <a class="card" href="./2.html"><span class="badge b-pink">TALK</span><h2>カロン &amp; コレー — 雑談トーク</h2><p>カロンとコレーの雑談トーク。</p><span class="open">開く →</span><span class="file">2.html ・ 395 KB</span></a>
-    <a class="card" href="./upload-7.html"><span class="badge b-pink">TALK</span><h2>三人の雑談 — 手書き × ドローン</h2><p>三人の雑談、手書きとドローンの組み合わせ。</p><span class="open">開く →</span><span class="file">upload-7.html ・ 266 KB</span></a>
-  </div>
+  <div class="empty" id="empty">見つからなかった。検索ワードを変えてみて。</div>
 </main>
+
 <footer>
-  全作品とも単体HTMLファイルで動作します（外部ビルド不要）。<br>
-  Repository: sc8z35a-collab/html-works-site
+  全作品とも単体HTMLで動作（ビルド不要）。ビューワーでは「全画面（横）」ボタンでスマホ横向き全画面表示になります。<br>
+  Hosting: Cloudflare Workers（本番） / GitHub Pages（ミラー） ・ Source: github.com/sc8z35a-collab/html-works-site
 </footer>
+
+<script>
+  var q = document.getElementById("q");
+  var chips = document.getElementById("chips");
+  var cards = Array.prototype.slice.call(document.querySelectorAll(".card"));
+  var count = document.getElementById("count");
+  var empty = document.getElementById("empty");
+  var cat = "all";
+  function apply(){
+    var word = (q.value || "").trim().toLowerCase();
+    var shown = 0;
+    cards.forEach(function(c){
+      var okCat = cat === "all" || c.dataset.cat === cat;
+      var hay = (c.querySelector("h2").textContent + " " + (c.dataset.name || "")).toLowerCase();
+      var okWord = !word || hay.indexOf(word) !== -1;
+      var show = okCat && okWord;
+      c.style.display = show ? "" : "none";
+      if (show) shown++;
+    });
+    count.textContent = shown + " / " + cards.length + " 作品";
+    empty.style.display = shown ? "none" : "block";
+  }
+  q.addEventListener("input", apply);
+  chips.addEventListener("click", function(e){
+    var b = e.target.closest(".chip"); if (!b) return;
+    chips.querySelectorAll(".chip").forEach(function(x){ x.classList.remove("on"); });
+    b.classList.add("on"); cat = b.dataset.cat; apply();
+  });
+  apply();
+
+  async function goFullscreenLandscape(){
+    try {
+      if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen({ navigationUI: "hide" }).catch(async function(){
+          await document.documentElement.requestFullscreen();
+        });
+      }
+    } catch(e) {}
+    try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape"); } catch(e) {}
+  }
+  document.getElementById("hubFs").addEventListener("click", goFullscreenLandscape);
+</script>
 </body>
 </html>
