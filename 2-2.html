@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Discover UIイラスト（SVG）</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#101016;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:16px}
+  svg{max-width:100%;height:auto;max-height:96dvh}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+
+    <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.06"/>
+    </filter>
+
+    <filter id="phoneShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000" flood-opacity="0.15"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+
+    <clipPath id="screenClip">
+      <rect x="260" y="110" width="280" height="580" rx="30" />
+    </clipPath>
+  </defs>
+
+  <style>
+    /* アニメーションのイージング設定 */
+    :root {
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 1. スクロールアニメーション */
+    .anim-scroll {
+      animation: scroll 10s var(--ease) infinite;
+    }
+    @keyframes scroll {
+      0%, 12% { transform: translateY(0); }
+      18%, 82% { transform: translateY(-160px); }
+      88%, 100% { transform: translateY(0); }
+    }
+
+    /* 2. ホーム画面の遷移（スライド＆フェード） */
+    .anim-home {
+      animation: homeSlide 10s var(--ease) infinite;
+    }
+    @keyframes homeSlide {
+      0%, 39% { transform: translateX(0); opacity: 1; }
+      46%, 69% { transform: translateX(-60px); opacity: 0; }
+      76%, 100% { transform: translateX(0); opacity: 1; }
+    }
+
+    /* 3. 詳細画面の遷移（スライド＆フェード） */
+    .anim-detail {
+      animation: detailSlide 10s var(--ease) infinite;
+    }
+    @keyframes detailSlide {
+      0%, 39% { transform: translateX(280px); opacity: 0; }
+      46%, 69% { transform: translateX(0); opacity: 1; }
+      76%, 100% { transform: translateX(280px); opacity: 0; }
+    }
+
+    /* 4. カードのタップエフェクト（沈み込み） */
+    .anim-card {
+      transform-origin: 400px 430px;
+      animation: cardTap 10s var(--ease) infinite;
+    }
+    @keyframes cardTap {
+      0%, 33% { transform: scale(1); }
+      34%, 38% { transform: scale(0.95); }
+      39%, 100% { transform: scale(1); }
+    }
+
+    /* 5. 戻るボタンのタップエフェクト */
+    .anim-back {
+      transform-origin: 295px 155px;
+      animation: backTap 10s var(--ease) infinite;
+    }
+    @keyframes backTap {
+      0%, 63% { transform: scale(1); }
+      64%, 68% { transform: scale(0.85); }
+      69%, 100% { transform: scale(1); }
+    }
+
+    /* 6. 指（タッチカーソル）の移動とフェード */
+    .anim-touch {
+      animation: touchMove 10s var(--ease) infinite;
+    }
+    @keyframes touchMove {
+      /* 待機 -> スワイプ上 */
+      0%, 9% { transform: translate(400px, 550px); opacity: 0; }
+      10%, 12% { transform: translate(400px, 550px); opacity: 0.8; }
+      18% { transform: translate(400px, 390px); opacity: 0.8; }
+      19%, 31% { transform: translate(400px, 390px); opacity: 0; }
+      /* カードタップ */
+      32% { transform: translate(400px, 270px); opacity: 0; }
+      33%, 38% { transform: translate(400px, 270px); opacity: 0.8; }
+      39%, 61% { transform: translate(400px, 270px); opacity: 0; }
+      /* 戻るボタンタップ */
+      62% { transform: translate(295px, 155px); opacity: 0; }
+      63%, 68% { transform: translate(295px, 155px); opacity: 0.8; }
+      69%, 79% { transform: translate(295px, 155px); opacity: 0; }
+      /* スワイプ下（元に戻す） */
+      80% { transform: translate(400px, 390px); opacity: 0; }
+      81%, 82% { transform: translate(400px, 390px); opacity: 0.8; }
+      88% { transform: translate(400px, 550px); opacity: 0.8; }
+      89%, 100% { transform: translate(400px, 550px); opacity: 0; }
+    }
+
+    /* 7. タップ時の波紋・状態リング */
+    .anim-ring {
+      animation: ringPulse 10s var(--ease) infinite;
+    }
+    @keyframes ringPulse {
+      0%, 32% { r: 12; opacity: 0; }
+      33% { r: 12; opacity: 0.8; }
+      38% { r: 35; opacity: 0; }
+      62% { r: 12; opacity: 0; }
+      63% { r: 12; opacity: 0.8; }
+      68% { r: 35; opacity: 0; }
+      /* スワイプ中は少し広げて維持 */
+      10% { r: 12; opacity: 0; }
+      12%, 18% { r: 18; opacity: 0.4; }
+      19%, 31% { r: 12; opacity: 0; }
+      79% { r: 12; opacity: 0; }
+      81%, 88% { r: 18; opacity: 0.4; }
+      89%, 100% { r: 12; opacity: 0; }
+    }
+  </style>
+
+  <rect width="800" height="800" fill="url(#bgGrad)" />
+
+  <rect x="246" y="96" width="308" height="608" rx="38" fill="#e2e8f0" filter="url(#phoneShadow)" />
+  <rect x="250" y="100" width="300" height="600" rx="34" fill="#1e293b" />
+
+  <g clip-path="url(#screenClip)">
+    
+    <rect x="260" y="110" width="280" height="580" fill="#f8fafc" />
+
+    <g class="anim-home">
+      
+      <g class="anim-scroll">
+        <rect x="280" y="200" width="240" height="140" rx="20" fill="#ffffff" filter="url(#softShadow)" />
+        <circle cx="310" cy="230" r="16" fill="#f1f5f9" />
+        <rect x="335" y="222" width="100" height="8" rx="4" fill="#cbd5e1" />
+        <rect x="335" y="236" width="60" height="6" rx="3" fill="#e2e8f0" />
+        <rect x="295" y="260" width="210" height="64" rx="12" fill="#f8fafc" />
+
+        <g class="anim-card">
+          <rect x="280" y="360" width="240" height="140" rx="20" fill="#ffffff" filter="url(#softShadow)" />
+          <circle cx="310" cy="390" r="16" fill="#eff6ff" />
+          <circle cx="310" cy="390" r="8" fill="#3b82f6" />
+          <rect x="335" y="382" width="120" height="8" rx="4" fill="#334155" />
+          <rect x="335" y="396" width="70" height="6" rx="3" fill="#94a3b8" />
+          <rect x="295" y="420" width="210" height="64" rx="12" fill="url(#heroGrad)" />
+          <rect x="305" y="465" width="80" height="8" rx="4" fill="#ffffff" opacity="0.8" />
+        </g>
+
+        <rect x="280" y="520" width="240" height="140" rx="20" fill="#ffffff" filter="url(#softShadow)" />
+        <circle cx="310" cy="550" r="16" fill="#f1f5f9" />
+        <rect x="335" y="542" width="90" height="8" rx="4" fill="#cbd5e1" />
+        <rect x="335" y="556" width="50" height="6" rx="3" fill="#e2e8f0" />
+        <rect x="295" y="580" width="210" height="64" rx="12" fill="#f8fafc" />
+        
+        <rect x="280" y="680" width="240" height="140" rx="20" fill="#ffffff" filter="url(#softShadow)" />
+      </g>
+
+      <rect x="260" y="110" width="280" height="80" fill="rgba(248, 250, 252, 0.9)" />
+      <text x="280" y="165" font-family="-apple-system, sans-serif" font-weight="700" font-size="22" fill="#0f172a">Discover</text>
+      <g transform="translate(484, 142)">
+        <circle cx="16" cy="16" r="16" fill="#e2e8f0" />
+        <circle cx="16" cy="12" r="5" fill="#94a3b8" />
+        <path d="M6,26 C6,20 26,20 26,26" fill="#94a3b8" />
+      </g>
+    </g>
+
+    <g class="anim-detail">
+      <rect x="260" y="110" width="280" height="580" fill="#ffffff" />
+      
+      <rect x="260" y="110" width="280" height="280" fill="url(#heroGrad)" />
+      
+      <rect x="260" y="350" width="280" height="340" rx="24" fill="#ffffff" />
+      
+      <circle cx="300" cy="390" r="20" fill="#f1f5f9" />
+      <circle cx="300" cy="390" r="10" fill="#3b82f6" />
+      <rect x="330" y="378" width="120" height="10" rx="5" fill="#1e293b" />
+      <rect x="330" y="396" width="70" height="8" rx="4" fill="#94a3b8" />
+      
+      <rect x="280" y="440" width="240" height="8" rx="4" fill="#e2e8f0" />
+      <rect x="280" y="460" width="240" height="8" rx="4" fill="#e2e8f0" />
+      <rect x="280" y="480" width="210" height="8" rx="4" fill="#e2e8f0" />
+      <rect x="280" y="500" width="230" height="8" rx="4" fill="#e2e8f0" />
+      
+      <rect x="280" y="540" width="115" height="44" rx="22" fill="#f1f5f9" />
+      <rect x="405" y="540" width="115" height="44" rx="22" fill="#3b82f6" />
+      <text x="462" y="567" font-family="-apple-system, sans-serif" font-weight="600" font-size="14" fill="#ffffff" text-anchor="middle">Follow</text>
+
+      <g class="anim-back">
+        <circle cx="295" cy="155" r="18" fill="rgba(0, 0, 0, 0.25)" />
+        <path d="M300,148 L291,155 L300,162" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+    </g>
+
+    <rect x="350" y="116" width="100" height="24" rx="12" fill="#000000" />
+    <circle cx="435" cy="128" r="4" fill="#111111" />
+    <circle cx="436" cy="128" r="1.5" fill="#1e1e70" />
+
+    <text x="285" y="133" font-family="-apple-system, sans-serif" font-weight="600" font-size="13" fill="#0f172a">9:41</text>
+    <rect x="505" y="121" width="20" height="10" rx="2.5" fill="none" stroke="#0f172a" stroke-width="1.5" />
+    <path d="M526,124 v4" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" />
+    <rect x="507" y="123" width="14" height="6" rx="1.5" fill="#0f172a" />
+    <path d="M490,131 a 8 8 0 0 1 12 0 M493,128 a 4 4 0 0 1 6 0" stroke="#0f172a" stroke-width="1.5" fill="none" stroke-linecap="round" />
+
+    <rect x="360" y="675" width="80" height="4" rx="2" fill="#0f172a" />
+  </g>
+
+  <g class="anim-touch" style="pointer-events: none;">
+    <circle class="anim-ring" cx="0" cy="0" r="15" fill="none" stroke="rgba(59, 130, 246, 0.6)" stroke-width="3" />
+    <circle cx="0" cy="0" r="10" fill="rgba(255, 255, 255, 0.9)" stroke="rgba(59, 130, 246, 1)" stroke-width="2.5" filter="url(#softShadow)"/>
+  </g>
+
+</svg>
+</body>
+</html>

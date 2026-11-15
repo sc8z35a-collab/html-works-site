@@ -1,0 +1,563 @@
+<!DOCTYPE html><html><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;"><meta http-equiv="x-dns-prefetch-control" content="off"><script src="https://puc.poecdn.net/authenticated_preview_page/standard.3ef2c256959faf5a756d.js"></script>
+    <meta charset="utf-8">
+    <title>Poe</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://puc.poecdn.net/authenticated_preview_page/disableWebRTC.9710cebe07429a9e8e06.js"></script><meta name="x-poe-allow-downloads" content="true"><meta name="x-poe-datastore-behavior" content="disabled"><script src="https://puc.poecdn.net/authenticated_preview_page/tw.b9024aecac666455e183.js"></script><script src="https://puc.poecdn.net/authenticated_preview_page/deps.faccd16000d314dc16d5.js"></script><script src="https://puc.poecdn.net/authenticated_preview_page/exports.b0f0f482cdeb5302b0b9.js"></script><script src="https://puc.poecdn.net/authenticated_preview_page/renderer.75c73ae6b4235f62945a.js"></script><script>Object.defineProperty(exports, "__esModule", {value: true}); function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }var _react = require('react'); var _react2 = _interopRequireDefault(_react);
+var _framermotion = require('framer-motion');
+var _lucidereact = require('lucide-react');
+
+const PARTICLES = Array.from({ length: 35 }, (_, i) => ({
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  size: Math.random() * 2.5 + 0.5,
+  duration: Math.random() * 4 + 3,
+  delay: Math.random() * 5,
+}));
+
+const MARQUEE_WORDS = ["CREATIVE", "MOTION", "DESIGN", "DIGITAL", "EXPERIENCE", "FUTURE", "INNOVATION", "CRAFT"];
+const MARQUEE_WORDS_REV = ["CRAFT", "INNOVATION", "FUTURE", "EXPERIENCE", "DIGITAL", "DESIGN", "MOTION", "CREATIVE"];
+
+const AnimatedChar = ({ char, index }) => (
+  _react2.default.createElement(_framermotion.motion.span, {
+    className: "inline-block cursor-default" ,
+    initial: { y: 120, opacity: 0, rotateX: -90 },
+    animate: { y: 0, opacity: 1, rotateX: 0 },
+    transition: { type: "spring", stiffness: 80, damping: 12, delay: 0.6 + index * 0.09 },
+    whileHover: { y: -24, color: "#a78bfa", scale: 1.1, transition: { type: "spring", stiffness: 400, damping: 10 } },}
+
+    , char
+  )
+);
+
+const Counter = ({ target, suffix = "", label }) => {
+  const ref = _react.useRef.call(void 0, null);
+  const isInView = _framermotion.useInView.call(void 0, ref, { once: true, margin: "-50px" });
+  const [count, setCount] = _react.useState.call(void 0, 0);
+  _react.useEffect.call(void 0, () => {
+    if (isInView) {
+      const controls = _framermotion.animate.call(void 0, 0, target, {
+        duration: 2.5,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        onUpdate: (v) => setCount(Math.round(v)),
+      });
+      return () => controls.stop();
+    }
+  }, [isInView, target]);
+  return (
+    _react2.default.createElement('div', { ref: ref, className: "text-center",}
+      , _react2.default.createElement(_framermotion.motion.div, {
+        className: "text-5xl md:text-7xl font-black bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"        ,
+        initial: { scale: 0.5, opacity: 0 },
+        whileInView: { scale: 1, opacity: 1 },
+        viewport: { once: true },
+        transition: { type: "spring", stiffness: 80, damping: 15 },}
+
+        , count, suffix
+      )
+      , _react2.default.createElement(_framermotion.motion.div, {
+        className: "text-gray-500 mt-3 text-xs tracking-widest uppercase font-medium"     ,
+        initial: { opacity: 0, y: 10 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true },
+        transition: { delay: 0.6 },}
+
+        , label
+      )
+    )
+  );
+};
+
+const ServiceCard = ({ icon: Icon, title, description, index }) => {
+  const cardRef = _react.useRef.call(void 0, null);
+  const mx = _framermotion.useMotionValue.call(void 0, 0);
+  const my = _framermotion.useMotionValue.call(void 0, 0);
+  const rotateX = _framermotion.useTransform.call(void 0, my, [-150, 150], [8, -8]);
+  const rotateY = _framermotion.useTransform.call(void 0, mx, [-150, 150], [-8, 8]);
+  const handleMouse = (e) => {
+    const rect = cardRef.current.getBoundingClientRect();
+    mx.set(e.clientX - rect.left - rect.width / 2);
+    my.set(e.clientY - rect.top - rect.height / 2);
+  };
+  const handleLeave = () => { mx.set(0); my.set(0); };
+  return (
+    _react2.default.createElement(_framermotion.motion.div, {
+      ref: cardRef,
+      className: "relative group" ,
+      initial: { opacity: 0, y: 80, rotateX: -15 },
+      whileInView: { opacity: 1, y: 0, rotateX: 0 },
+      viewport: { once: true, margin: "-40px" },
+      transition: { type: "spring", stiffness: 70, damping: 14, delay: index * 0.12 },
+      onMouseMove: handleMouse,
+      onMouseLeave: handleLeave,
+      style: { rotateX, rotateY, transformStyle: "preserve-3d" },}
+
+      , _react2.default.createElement('div', { className: "absolute -inset-1 bg-gradient-to-r from-indigo-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-indigo-500/30 group-hover:via-purple-500/30 group-hover:to-pink-500/30 rounded-2xl blur-xl transition-all duration-700"            ,} )
+      , _react2.default.createElement('div', { className: "relative bg-gray-900/90 backdrop-blur border border-gray-800 rounded-2xl p-8 h-full group-hover:border-indigo-500/40 transition-all duration-500"          ,}
+        , _react2.default.createElement(_framermotion.motion.div, {
+          className: "w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/20"           ,
+          whileHover: { rotate: 180, scale: 1.15, borderRadius: "50%" },
+          transition: { duration: 0.5, type: "spring" },}
+
+          , _react2.default.createElement(Icon, { className: "w-7 h-7 text-white"  ,} )
+        )
+        , _react2.default.createElement('h3', { className: "text-xl font-bold text-white mb-3"   ,}, title)
+        , _react2.default.createElement('p', { className: "text-gray-400 leading-relaxed text-sm"  ,}, description)
+        , _react2.default.createElement(_framermotion.motion.div, {
+          className: "mt-6 flex items-center gap-2 text-indigo-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"          ,
+          whileHover: { x: 5 },}
+, "Learn more "
+            , _react2.default.createElement(_lucidereact.ArrowRight, { className: "w-4 h-4" ,} )
+        )
+      )
+    )
+  );
+};
+
+const FloatingOrb = ({ size, color, x, y, dur }) => (
+  _react2.default.createElement(_framermotion.motion.div, {
+    className: "absolute rounded-full pointer-events-none"  ,
+    style: { width: size, height: size, background: color, left: x, top: y, filter: "blur(80px)" },
+    animate: { x: [0, 80, -60, 70, 0], y: [0, -70, 50, -30, 0], scale: [1, 1.2, 0.85, 1.15, 1] },
+    transition: { duration: dur, repeat: Infinity, ease: "easeInOut" },}
+  )
+);
+
+const MarqueeRow = ({ words, reverse = false, speed = 25 }) => (
+  _react2.default.createElement('div', { className: "flex overflow-hidden py-2"  ,}
+    , _react2.default.createElement(_framermotion.motion.div, {
+      className: "flex shrink-0" ,
+      animate: { x: reverse ? ["-50%", "0%"] : ["0%", "-50%"] },
+      transition: { duration: speed, repeat: Infinity, ease: "linear" },}
+
+      , [0, 1].map((copy) => (
+        _react2.default.createElement('div', { key: copy, className: "flex shrink-0" ,}
+          , words.map((word, i) => (
+            _react2.default.createElement('span', { key: `${copy}-${i}`, className: "flex items-center" ,}
+              , _react2.default.createElement('span', { className: `text-5xl md:text-8xl font-black whitespace-nowrap px-4 ${reverse ? "text-gray-800/40" : "text-gray-800"}`,}
+                , word
+              )
+              , _react2.default.createElement('span', { className: `text-2xl px-4 ${reverse ? "text-purple-600/30" : "text-indigo-500/60"}`,}, "✦")
+            )
+          ))
+        )
+      ))
+    )
+  )
+);
+
+ function MotionShowcase() {
+  const containerRef = _react.useRef.call(void 0, null);
+  const { scrollYProgress } = _framermotion.useScroll.call(void 0, { container: containerRef });
+  const smoothProgress = _framermotion.useSpring.call(void 0, scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+  const scaleX = _framermotion.useTransform.call(void 0, smoothProgress, [0, 1], [0, 1]);
+
+  const heroY = _framermotion.useTransform.call(void 0, scrollYProgress, [0, 0.15], [0, -120]);
+  const heroOpacity = _framermotion.useTransform.call(void 0, scrollYProgress, [0, 0.12], [1, 0]);
+  const heroScale = _framermotion.useTransform.call(void 0, scrollYProgress, [0, 0.15], [1, 0.95]);
+
+  const [isLoaded, setIsLoaded] = _react.useState.call(void 0, false);
+  const [showNav, setShowNav] = _react.useState.call(void 0, false);
+
+  _react.useEffect.call(void 0, () => { setTimeout(() => setIsLoaded(true), 400); }, []);
+
+  _react.useEffect.call(void 0, () => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onScroll = () => setShowNav(el.scrollTop > 400);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const services = [
+    { icon: _lucidereact.Code, title: "Development", description: "最先端のテクノロジーで、パフォーマンスとアクセシビリティを両立した美しいウェブ体験を構築。" },
+    { icon: _lucidereact.Palette, title: "Design", description: "ブランドの本質を捉え、ユーザーの心に響くビジュアルデザインとインタラクションを設計。" },
+    { icon: _lucidereact.Layers, title: "Motion", description: "流れるようなアニメーションとトランジションで、デジタル体験に生命を吹き込みます。" },
+    { icon: _lucidereact.Globe, title: "Strategy", description: "データドリブンなアプローチで、ビジネス目標とユーザーニーズの最適解を導出。" },
+    { icon: _lucidereact.Zap, title: "Performance", description: "ミリ秒単位の最適化で、世界中どこからでも高速なアクセスを実現します。" },
+    { icon: _lucidereact.Sparkles, title: "Innovation", description: "常に新しい技術とアイデアを探求し、次世代のデジタル体験を創造します。" },
+  ];
+
+  const projects = [
+    { title: "Brand Identity", color: "from-indigo-600 to-blue-500", tall: false },
+    { title: "Web Experience", color: "from-purple-600 to-pink-500", tall: true },
+    { title: "Motion Design", color: "from-pink-600 to-rose-500", tall: true },
+    { title: "App Design", color: "from-amber-500 to-orange-500", tall: false },
+  ];
+
+  return (
+    _react2.default.createElement('div', { ref: containerRef, className: "h-screen overflow-y-auto bg-gray-950 text-white selection:bg-indigo-500/30"    ,}
+      /* Scroll progress */
+      , _react2.default.createElement(_framermotion.motion.div, { className: "fixed top-0 left-0 right-0 h-0.5 z-50 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 origin-left"          , style: { scaleX },} )
+
+      /* Floating nav */
+      , _react2.default.createElement(_framermotion.AnimatePresence, null
+        , showNav && (
+          _react2.default.createElement(_framermotion.motion.nav, {
+            className: "fixed top-0 left-0 right-0 z-40 bg-gray-950/70 backdrop-blur-xl border-b border-white/5"        ,
+            initial: { y: -80, opacity: 0 },
+            animate: { y: 0, opacity: 1 },
+            exit: { y: -80, opacity: 0 },
+            transition: { type: "spring", stiffness: 200, damping: 25 },}
+
+            , _react2.default.createElement('div', { className: "max-w-6xl mx-auto px-6 py-4 flex items-center justify-between"      ,}
+              , _react2.default.createElement(_framermotion.motion.span, { className: "text-xl font-black tracking-tight"  , whileHover: { scale: 1.05 },}, "MOTION"
+                , _react2.default.createElement('span', { className: "text-indigo-500",}, ".")
+              )
+              , _react2.default.createElement(_framermotion.motion.button, {
+                className: "px-5 py-2 bg-white text-gray-950 rounded-full text-sm font-bold"      ,
+                whileHover: { scale: 1.05, boxShadow: "0 0 20px rgba(255,255,255,0.2)" },
+                whileTap: { scale: 0.95 },}
+, "Contact"
+
+              )
+            )
+          )
+        )
+      )
+
+      /* Loading overlay */
+      , _react2.default.createElement(_framermotion.AnimatePresence, null
+        , !isLoaded && (
+          _react2.default.createElement(_framermotion.motion.div, { className: "fixed inset-0 bg-gray-950 z-50 flex items-center justify-center"      , exit: { opacity: 0 }, transition: { duration: 0.8, ease: "easeInOut" },}
+            , _react2.default.createElement(_framermotion.motion.div, { animate: { rotate: 360 }, transition: { duration: 1, repeat: Infinity, ease: "linear" },}
+              , _react2.default.createElement('div', { className: "w-12 h-12 border-2 border-indigo-500 border-t-transparent rounded-full"     ,} )
+            )
+          )
+        )
+      )
+
+      /* ====== HERO ====== */
+      , _react2.default.createElement(_framermotion.motion.section, { className: "relative min-h-screen flex flex-col items-center justify-center overflow-hidden"      , style: { y: heroY, opacity: heroOpacity, scale: heroScale },}
+        , _react2.default.createElement(FloatingOrb, { size: "28rem", color: "radial-gradient(circle, rgba(99,102,241,0.35), transparent)"  , x: "5%", y: "15%", dur: 16,} )
+        , _react2.default.createElement(FloatingOrb, { size: "22rem", color: "radial-gradient(circle, rgba(168,85,247,0.25), transparent)"  , x: "55%", y: "55%", dur: 20,} )
+        , _react2.default.createElement(FloatingOrb, { size: "18rem", color: "radial-gradient(circle, rgba(236,72,153,0.25), transparent)"  , x: "70%", y: "5%", dur: 13,} )
+
+        /* Particles */
+        , PARTICLES.map((p, i) => (
+          _react2.default.createElement(_framermotion.motion.div, {
+            key: i,
+            className: "absolute rounded-full bg-white/80"  ,
+            style: { left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size },
+            animate: { opacity: [0, 0.8, 0], scale: [0, 1, 0], y: [0, -30, 0] },
+            transition: { duration: p.duration, repeat: Infinity, delay: p.delay, ease: "easeInOut" },}
+          )
+        ))
+
+        /* Grid */
+        , _react2.default.createElement('div', { className: "absolute inset-0 opacity-5"  , style: { backgroundImage: "linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px)", backgroundSize: "80px 80px" },} )
+
+        , _react2.default.createElement('div', { className: "relative z-10 text-center px-4"   ,}
+          , _react2.default.createElement(_framermotion.motion.div, {
+            initial: { opacity: 0, y: 20, filter: "blur(10px)" },
+            animate: isLoaded ? { opacity: 1, y: 0, filter: "blur(0px)" } : {},
+            transition: { delay: 0.3, duration: 1 },
+            className: "text-xs md:text-sm tracking-widest text-indigo-400 mb-8 uppercase font-medium"      ,}
+, "✦ Digital Experience Studio ✦"
+
+          )
+
+          , _react2.default.createElement('h1', { className: "text-7xl sm:text-8xl md:text-9xl font-black tracking-tighter leading-none mb-4"      , style: { perspective: 800 },}
+            , "MOTION".split("").map((c, i) => _react2.default.createElement(AnimatedChar, { key: i, char: c, index: i,} ))
+          )
+
+          , _react2.default.createElement(_framermotion.motion.div, {
+            className: "text-6xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-none mb-8"      ,
+            initial: { opacity: 0, y: 40, filter: "blur(10px)" },
+            animate: isLoaded ? { opacity: 1, y: 0, filter: "blur(0px)" } : {},
+            transition: { delay: 1.4, duration: 1, type: "spring" },}
+
+            , _react2.default.createElement('span', { className: "bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"     ,}, "STUDIO")
+          )
+
+          , _react2.default.createElement(_framermotion.motion.p, {
+            className: "text-base md:text-lg text-gray-400 max-w-lg mx-auto mb-12 leading-relaxed"      ,
+            initial: { opacity: 0, y: 30 },
+            animate: isLoaded ? { opacity: 1, y: 0 } : {},
+            transition: { delay: 1.7, duration: 0.8 },}
+, "動きで語る。体験で魅せる。"
+            , _react2.default.createElement('br', null ), "次世代のデジタルクリエイティブ。"
+          )
+
+          , _react2.default.createElement(_framermotion.motion.button, {
+            className: "relative group px-8 py-4 bg-white text-gray-950 font-bold rounded-full overflow-hidden"        ,
+            initial: { opacity: 0, scale: 0.8 },
+            animate: isLoaded ? { opacity: 1, scale: 1 } : {},
+            transition: { delay: 2, type: "spring", stiffness: 150 },
+            whileHover: { scale: 1.05, boxShadow: "0 0 30px rgba(255,255,255,0.15)" },
+            whileTap: { scale: 0.95 },}
+
+            , _react2.default.createElement(_framermotion.motion.span, { className: "absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600"    , initial: { x: "-100%" }, whileHover: { x: "0%" }, transition: { duration: 0.4 },} )
+            , _react2.default.createElement('span', { className: "relative z-10 flex items-center gap-2 group-hover:text-white transition-colors duration-300"       ,}, "Explore "
+               , _react2.default.createElement(_lucidereact.ArrowRight, { className: "w-4 h-4 group-hover:translate-x-1 transition-transform"   ,} )
+            )
+          )
+        )
+
+        , _react2.default.createElement(_framermotion.motion.div, {
+          className: "absolute bottom-10 left-1/2 -translate-x-1/2"   ,
+          initial: { opacity: 0 },
+          animate: isLoaded ? { opacity: 1 } : {},
+          transition: { delay: 2.5 },}
+
+          , _react2.default.createElement(_framermotion.motion.div, { animate: { y: [0, 10, 0] }, transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },}
+            , _react2.default.createElement(_lucidereact.ChevronDown, { className: "w-5 h-5 text-gray-600"  ,} )
+          )
+        )
+      )
+
+      /* ====== PHILOSOPHY ====== */
+      , _react2.default.createElement('section', { className: "relative py-32 md:py-40 px-6"   ,}
+        , _react2.default.createElement('div', { className: "max-w-5xl mx-auto" ,}
+          , ["すべての", "ピクセルに", "意味がある。"].map((word, i) => (
+            _react2.default.createElement(_framermotion.motion.div, {
+              key: i,
+              className: "overflow-hidden",
+              initial: { opacity: 0 },
+              whileInView: { opacity: 1 },
+              viewport: { once: true, margin: "-30px" },}
+
+              , _react2.default.createElement(_framermotion.motion.div, {
+                className: "text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black leading-tight"     ,
+                initial: { y: "100%", opacity: 0 },
+                whileInView: { y: "0%", opacity: 1 },
+                viewport: { once: true, margin: "-30px" },
+                transition: { type: "spring", stiffness: 50, damping: 14, delay: i * 0.12 },}
+
+                , _react2.default.createElement('span', { className: i === 2 ? "bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent" : "text-white",}
+                  , word
+                )
+              )
+            )
+          ))
+          , _react2.default.createElement(_framermotion.motion.div, {
+            className: "mt-10 flex flex-col sm:flex-row gap-8 items-start"     ,
+            initial: { opacity: 0, y: 40 },
+            whileInView: { opacity: 1, y: 0 },
+            viewport: { once: true },
+            transition: { delay: 0.5, duration: 1 },}
+
+            , _react2.default.createElement('div', { className: "w-16 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 mt-3 shrink-0"      ,} )
+            , _react2.default.createElement('p', { className: "text-gray-400 text-lg leading-relaxed max-w-xl"   ,}, "私たちは、デザインとテクノロジーの交差点で、人の心を動かすデジタル体験を創造します。一つ一つのインタラクションに魂を込めて。"
+
+            )
+          )
+        )
+      )
+
+      /* ====== MARQUEE ====== */
+      , _react2.default.createElement('section', { className: "py-12 overflow-hidden border-y border-gray-800/30"   ,}
+        , _react2.default.createElement(MarqueeRow, { words: MARQUEE_WORDS, speed: 30,} )
+        , _react2.default.createElement(MarqueeRow, { words: MARQUEE_WORDS_REV, reverse: true, speed: 35,} )
+      )
+
+      /* ====== SERVICES ====== */
+      , _react2.default.createElement('section', { className: "relative py-32 md:py-40 px-6"   ,}
+        , _react2.default.createElement('div', { className: "max-w-6xl mx-auto" ,}
+          , _react2.default.createElement(_framermotion.motion.div, { className: "text-center mb-20" , initial: { opacity: 0, y: 40 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.8 },}
+            , _react2.default.createElement('span', { className: "text-xs tracking-widest text-indigo-400 uppercase font-medium"    ,}, "What We Do"  )
+            , _react2.default.createElement('h2', { className: "text-4xl md:text-6xl font-black mt-4 tracking-tight"    ,}, "Services")
+            , _react2.default.createElement('div', { className: "w-12 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto mt-6"      ,} )
+          )
+          , _react2.default.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"    , style: { perspective: 1000 },}
+            , services.map((s, i) => _react2.default.createElement(ServiceCard, { key: i, ...s, index: i,} ))
+          )
+        )
+      )
+
+      /* ====== STATS ====== */
+      , _react2.default.createElement('section', { className: "relative py-32 px-6 overflow-hidden"   ,}
+        , _react2.default.createElement('div', { className: "absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/10 to-transparent"     ,} )
+        , _react2.default.createElement(_framermotion.motion.div, {
+          className: "absolute inset-0 opacity-10"  ,
+          style: { background: "radial-gradient(circle at 50% 50%, rgba(99,102,241,0.3), transparent 60%)" },
+          animate: { scale: [1, 1.1, 1] },
+          transition: { duration: 8, repeat: Infinity, ease: "easeInOut" },}
+        )
+        , _react2.default.createElement('div', { className: "relative max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4"       ,}
+          , _react2.default.createElement(Counter, { target: 150, suffix: "+", label: "Projects",} )
+          , _react2.default.createElement(Counter, { target: 98, suffix: "%", label: "Satisfaction",} )
+          , _react2.default.createElement(Counter, { target: 12, suffix: "Y", label: "Experience",} )
+          , _react2.default.createElement(Counter, { target: 40, suffix: "+", label: "Awards",} )
+        )
+      )
+
+      /* ====== SHOWCASE ====== */
+      , _react2.default.createElement('section', { className: "py-32 px-6" ,}
+        , _react2.default.createElement('div', { className: "max-w-6xl mx-auto" ,}
+          , _react2.default.createElement(_framermotion.motion.div, { className: "text-center mb-20" , initial: { opacity: 0, y: 40 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.8 },}
+            , _react2.default.createElement('span', { className: "text-xs tracking-widest text-indigo-400 uppercase font-medium"    ,}, "Selected Work" )
+            , _react2.default.createElement('h2', { className: "text-4xl md:text-6xl font-black mt-4 tracking-tight"    ,}, "Projects")
+            , _react2.default.createElement('div', { className: "w-12 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto mt-6"      ,} )
+          )
+          , _react2.default.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-6"   ,}
+            , projects.map((p, i) => (
+              _react2.default.createElement(_framermotion.motion.div, {
+                key: i,
+                className: `relative ${p.tall ? "h-96" : "h-72"} rounded-3xl overflow-hidden group cursor-pointer`,
+                initial: { opacity: 0, y: 70, scale: 0.95 },
+                whileInView: { opacity: 1, y: 0, scale: 1 },
+                viewport: { once: true, margin: "-60px" },
+                transition: { type: "spring", stiffness: 60, damping: 15, delay: i * 0.1 },
+                whileHover: { scale: 0.97 },}
+
+                , _react2.default.createElement('div', { className: `absolute inset-0 bg-gradient-to-br ${p.color}`,} )
+                , _react2.default.createElement(_framermotion.motion.div, { className: "absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors duration-500"     ,} )
+                , _react2.default.createElement(_framermotion.motion.div, { className: "absolute w-72 h-72 rounded-full border border-white/10"     , style: { right: "-3rem", bottom: "-3rem" }, animate: { rotate: 360 }, transition: { duration: 25, repeat: Infinity, ease: "linear" },} )
+                , _react2.default.createElement(_framermotion.motion.div, { className: "absolute w-48 h-48 rounded-full border border-white/10"     , style: { right: "0", bottom: "0" }, animate: { rotate: -360 }, transition: { duration: 18, repeat: Infinity, ease: "linear" },} )
+                , _react2.default.createElement(_framermotion.motion.div, { className: "absolute w-32 h-32 rounded-full border border-white/5"     , style: { right: "2rem", bottom: "2rem" }, animate: { rotate: 360 }, transition: { duration: 12, repeat: Infinity, ease: "linear" },} )
+                , _react2.default.createElement('div', { className: "relative z-10 p-8 h-full flex flex-col justify-between"      ,}
+                  , _react2.default.createElement(_framermotion.motion.span, { className: "text-xs tracking-widest uppercase text-white/50 font-medium"    , initial: { opacity: 0, x: -20 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { delay: 0.3 + i * 0.1 },}, "0"
+                    , i + 1
+                  )
+                  , _react2.default.createElement('div', null
+                    , _react2.default.createElement(_framermotion.motion.h3, { className: "text-2xl md:text-4xl font-black text-white"   , initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: 0.4 + i * 0.1, type: "spring" },}
+                      , p.title
+                    )
+                    , _react2.default.createElement('div', { className: "mt-4 flex items-center gap-2 text-white/70 text-sm opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300"           ,}, "View Project "
+                        , _react2.default.createElement(_lucidereact.ArrowUpRight, { className: "w-4 h-4" ,} )
+                    )
+                  )
+                )
+              )
+            ))
+          )
+        )
+      )
+
+      /* ====== TESTIMONIAL / QUOTE ====== */
+      , _react2.default.createElement('section', { className: "py-32 px-6 overflow-hidden"  ,}
+        , _react2.default.createElement(_framermotion.motion.div, {
+          className: "max-w-4xl mx-auto text-center"  ,
+          initial: { opacity: 0, scale: 0.9 },
+          whileInView: { opacity: 1, scale: 1 },
+          viewport: { once: true },
+          transition: { duration: 1, type: "spring" },}
+
+          , _react2.default.createElement(_framermotion.motion.div, {
+            className: "text-6xl md:text-8xl text-indigo-500/20 font-black leading-none mb-6"     ,
+            animate: { rotateY: [0, 360] },
+            transition: { duration: 20, repeat: Infinity, ease: "linear" },}
+, "❝"
+
+          )
+          , _react2.default.createElement(_framermotion.motion.p, {
+            className: "text-2xl md:text-4xl font-bold text-white leading-snug"    ,
+            initial: { opacity: 0, y: 30 },
+            whileInView: { opacity: 1, y: 0 },
+            viewport: { once: true },
+            transition: { delay: 0.2, duration: 0.8 },}
+, "デザインは見た目だけじゃない。"
+
+            , _react2.default.createElement('br', null )
+            , _react2.default.createElement('span', { className: "bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent"    ,}, "動きこそが、体験のすべて。")
+          )
+          , _react2.default.createElement(_framermotion.motion.div, {
+            className: "mt-8 text-gray-500 text-sm"  ,
+            initial: { opacity: 0 },
+            whileInView: { opacity: 1 },
+            viewport: { once: true },
+            transition: { delay: 0.6 },}
+, "— Creative Director"
+
+          )
+        )
+      )
+
+      /* ====== CTA ====== */
+      , _react2.default.createElement('section', { className: "relative py-40 px-6 overflow-hidden"   ,}
+        , _react2.default.createElement(FloatingOrb, { size: "32rem", color: "radial-gradient(circle, rgba(99,102,241,0.25), transparent)"  , x: "30%", y: "20%", dur: 12,} )
+        , _react2.default.createElement(FloatingOrb, { size: "24rem", color: "radial-gradient(circle, rgba(168,85,247,0.2), transparent)"  , x: "60%", y: "50%", dur: 15,} )
+        , _react2.default.createElement('div', { className: "relative z-10 max-w-4xl mx-auto text-center"    ,}
+          , _react2.default.createElement(_framermotion.motion.h2, {
+            className: "text-5xl sm:text-6xl md:text-8xl font-black mb-6 tracking-tight"     ,
+            initial: { opacity: 0, y: 60, scale: 0.9 },
+            whileInView: { opacity: 1, y: 0, scale: 1 },
+            viewport: { once: true },
+            transition: { type: "spring", stiffness: 50, damping: 12 },}
+
+            , _react2.default.createElement('span', { className: "bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"     ,}, "Let's Create" )
+          )
+          , _react2.default.createElement(_framermotion.motion.p, {
+            className: "text-gray-400 text-lg md:text-xl mb-14 max-w-md mx-auto"     ,
+            initial: { opacity: 0, y: 20 },
+            whileInView: { opacity: 1, y: 0 },
+            viewport: { once: true },
+            transition: { delay: 0.3 },}
+, "あなたのビジョンを、動く体験に変えましょう。"
+
+          )
+          , _react2.default.createElement(_framermotion.motion.button, {
+            className: "relative group px-12 py-5 rounded-full font-bold text-lg overflow-hidden bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-2xl shadow-indigo-500/20"              ,
+            whileHover: { scale: 1.05, boxShadow: "0 0 60px rgba(99,102,241,0.4)" },
+            whileTap: { scale: 0.95 },
+            initial: { opacity: 0, y: 30 },
+            whileInView: { opacity: 1, y: 0 },
+            viewport: { once: true },
+            transition: { delay: 0.5, type: "spring" },}
+
+            , _react2.default.createElement(_framermotion.motion.span, {
+              className: "absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"     ,
+              animate: { x: ["-200%", "200%"] },
+              transition: { duration: 2.5, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" },}
+            )
+            , _react2.default.createElement('span', { className: "relative z-10 flex items-center gap-3"    ,}, "Get in Touch"
+
+              , _react2.default.createElement(_framermotion.motion.span, { animate: { x: [0, 5, 0] }, transition: { duration: 1.5, repeat: Infinity },}
+                , _react2.default.createElement(_lucidereact.ArrowRight, { className: "w-5 h-5" ,} )
+              )
+            )
+          )
+        )
+      )
+
+      /* ====== FOOTER ====== */
+      , _react2.default.createElement('footer', { className: "border-t border-gray-800/50 py-16 px-6"   ,}
+        , _react2.default.createElement('div', { className: "max-w-6xl mx-auto" ,}
+          , _react2.default.createElement('div', { className: "flex flex-col md:flex-row items-center justify-between gap-8"     ,}
+            , _react2.default.createElement(_framermotion.motion.div, { className: "text-3xl font-black tracking-tight"  , whileHover: { scale: 1.05 }, transition: { type: "spring" },}, "MOTION"
+              , _react2.default.createElement('span', { className: "text-indigo-500",}, ".")
+            )
+            , _react2.default.createElement('div', { className: "flex gap-6" ,}
+              , ["Twitter", "Dribbble", "GitHub", "Instagram"].map((s, i) => (
+                _react2.default.createElement(_framermotion.motion.a, {
+                  key: i,
+                  href: "#",
+                  className: "text-gray-500 text-sm hover:text-white transition-colors"   ,
+                  whileHover: { y: -2 },
+                  transition: { type: "spring", stiffness: 300 },}
+
+                  , s
+                )
+              ))
+            )
+          )
+          , _react2.default.createElement('div', { className: "mt-12 pt-8 border-t border-gray-800/30 flex flex-col md:flex-row items-center justify-between gap-4"         ,}
+            , _react2.default.createElement('div', { className: "text-gray-600 text-xs" ,}, "© 2026 Motion Studio. Crafted with passion & pixels."        )
+            , _react2.default.createElement('div', { className: "text-gray-700 text-xs" ,}, "Design × Technology × Emotion"    )
+          )
+        )
+      )
+    )
+  );
+} exports.default = MotionShowcase;
+</script>
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+  <body>
+  
+
+<div id="preview-app"></div></body></html>

@@ -1,0 +1,5449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEOMETRY — The Art of Shapes</title>
+<style>
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --white: #ffffff;
+  --black: #0a0a0a;
+  --gray-100: #f7f7f7;
+  --gray-200: #e8e8e8;
+  --gray-300: #d1d1d1;
+  --gray-400: #a0a0a0;
+  --gray-500: #6e6e6e;
+  --gray-600: #4a4a4a;
+  --gray-700: #2d2d2d;
+  --gray-800: #1a1a1a;
+  --gold: #c9a84c;
+  --gold-light: #e8d5a0;
+  --gold-dark: #8a6f2f;
+  --accent: #1a1a2e;
+  --font-display: 'Georgia', 'Times New Roman', serif;
+  --font-body: 'Helvetica Neue', 'Arial', sans-serif;
+  --font-mono: 'Courier New', monospace;
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--white);
+  color: var(--black);
+  line-height: 1.7;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gray-400);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-600);
+}
+
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background: var(--black);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 100000;
+  transition: transform 0.15s var(--ease-out-expo), opacity 0.3s;
+  transform: translate(-50%, -50%);
+}
+
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid rgba(10,10,10,0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transition: transform 0.4s var(--ease-out-expo), width 0.3s, height 0.3s, border-color 0.3s;
+  transform: translate(-50%, -50%);
+}
+
+.cursor-ring.hover {
+  width: 60px;
+  height: 60px;
+  border-color: var(--gold);
+}
+
+.cursor-dot.click {
+  transform: translate(-50%, -50%) scale(0.5);
+}
+
+/* ============================================
+   PRELOADER
+   ============================================ */
+#preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--white);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s var(--ease-out-expo), visibility 0.8s;
+}
+
+#preloader.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.preloader-shapes {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 40px;
+}
+
+.preloader-shape {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.preloader-circle {
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--black);
+  border-radius: 50%;
+  animation: preloaderCircle 2s var(--ease-in-out-cubic) infinite;
+}
+
+.preloader-square {
+  width: 50px;
+  height: 50px;
+  border: 2px solid var(--gray-500);
+  animation: preloaderSquare 2s var(--ease-in-out-cubic) infinite;
+}
+
+.preloader-triangle {
+  width: 0;
+  height: 0;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  border-bottom: 43px solid transparent;
+  border-bottom-color: var(--gray-300);
+  animation: preloaderTriangle 2s var(--ease-in-out-cubic) infinite;
+}
+
+@keyframes preloaderCircle {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
+  50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.2); opacity: 0.5; }
+}
+
+@keyframes preloaderSquare {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 0.7; }
+  50% { transform: translate(-50%, -50%) rotate(90deg) scale(0.8); opacity: 1; }
+}
+
+@keyframes preloaderTriangle {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); opacity: 0.5; }
+  50% { transform: translate(-50%, -50%) rotate(-120deg); opacity: 0.9; }
+}
+
+.preloader-text {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  animation: preloaderFade 1.5s ease-in-out infinite;
+}
+
+@keyframes preloaderFade {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.preloader-progress {
+  width: 200px;
+  height: 1px;
+  background: var(--gray-200);
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.preloader-progress-bar {
+  width: 0%;
+  height: 100%;
+  background: var(--black);
+  transition: width 0.3s var(--ease-out-expo);
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+#main-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 24px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1000;
+  transition: background 0.5s, padding 0.5s, box-shadow 0.5s;
+}
+
+#main-nav.scrolled {
+  background: rgba(255,255,255,0.95);
+  padding: 16px 48px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--black);
+}
+
+.nav-logo-icon {
+  width: 36px;
+  height: 36px;
+  position: relative;
+}
+
+.nav-logo-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.nav-logo-text {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  list-style: none;
+}
+
+.nav-link {
+  position: relative;
+  text-decoration: none;
+  color: var(--gray-600);
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 400;
+  transition: color 0.3s;
+  padding: 4px 0;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--black);
+  transition: width 0.5s var(--ease-out-expo);
+}
+
+.nav-link:hover {
+  color: var(--black);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-menu-btn {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px;
+  background: none;
+  border: none;
+}
+
+.nav-menu-btn span {
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: var(--black);
+  transition: transform 0.4s var(--ease-out-expo), opacity 0.3s;
+}
+
+.nav-menu-btn.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.nav-menu-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-menu-btn.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ============================================
+   FULL-SCREEN MENU
+   ============================================ */
+.fullscreen-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--white);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease-out-expo), visibility 0.6s;
+}
+
+.fullscreen-menu.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.fullscreen-menu-list {
+  list-style: none;
+  text-align: center;
+}
+
+.fullscreen-menu-item {
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.fullscreen-menu-link {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 48px;
+  text-decoration: none;
+  color: var(--black);
+  transform: translateY(100%);
+  transition: transform 0.6s var(--ease-out-expo), color 0.3s;
+  letter-spacing: 2px;
+}
+
+.fullscreen-menu.active .fullscreen-menu-link {
+  transform: translateY(0);
+}
+
+.fullscreen-menu-item:nth-child(1) .fullscreen-menu-link { transition-delay: 0.1s; }
+.fullscreen-menu-item:nth-child(2) .fullscreen-menu-link { transition-delay: 0.15s; }
+.fullscreen-menu-item:nth-child(3) .fullscreen-menu-link { transition-delay: 0.2s; }
+.fullscreen-menu-item:nth-child(4) .fullscreen-menu-link { transition-delay: 0.25s; }
+.fullscreen-menu-item:nth-child(5) .fullscreen-menu-link { transition-delay: 0.3s; }
+.fullscreen-menu-item:nth-child(6) .fullscreen-menu-link { transition-delay: 0.35s; }
+
+.fullscreen-menu-link:hover {
+  color: var(--gold);
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+#hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 700px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.hero-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#heroCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  margin-bottom: 24px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 1s var(--ease-out-expo) 1.5s forwards;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  color: var(--black);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.hero-title .line {
+  display: block;
+  overflow: hidden;
+}
+
+.hero-title .line-inner {
+  display: block;
+  opacity: 0;
+  transform: translateY(100%);
+  animation: heroTitleReveal 1.2s var(--ease-out-expo) forwards;
+}
+
+.hero-title .line:nth-child(1) .line-inner { animation-delay: 1.6s; }
+.hero-title .line:nth-child(2) .line-inner { animation-delay: 1.75s; }
+.hero-title .line:nth-child(3) .line-inner { animation-delay: 1.9s; }
+
+@keyframes heroTitleReveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  color: var(--gray-500);
+  max-width: 500px;
+  margin: 0 auto 40px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 1s var(--ease-out-expo) 2.1s forwards;
+  line-height: 1.8;
+}
+
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 40px;
+  border: 1px solid var(--black);
+  color: var(--black);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  pointer-events: all;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 1s var(--ease-out-expo) 2.3s forwards;
+  transition: color 0.4s;
+  background: transparent;
+  cursor: pointer;
+}
+
+.hero-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: var(--black);
+  transition: width 0.5s var(--ease-out-expo);
+  z-index: -1;
+}
+
+.hero-cta:hover {
+  color: var(--white);
+}
+
+.hero-cta:hover::before {
+  width: 100%;
+}
+
+.hero-cta-arrow {
+  transition: transform 0.3s var(--ease-out-expo);
+}
+
+.hero-cta:hover .hero-cta-arrow {
+  transform: translateX(4px);
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: fadeInUp 1s var(--ease-out-expo) 2.6s forwards;
+}
+
+.hero-scroll-text {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+}
+
+.hero-scroll-line {
+  width: 1px;
+  height: 40px;
+  background: var(--gray-300);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-scroll-line::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--black);
+  animation: scrollLine 1.5s ease-in-out infinite;
+}
+
+@keyframes scrollLine {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+
+/* ============================================
+   SECTION: PHILOSOPHY
+   ============================================ */
+#philosophy {
+  position: relative;
+  padding: 160px 48px;
+  overflow: hidden;
+}
+
+.philosophy-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.philosophy-left {
+  position: relative;
+}
+
+.philosophy-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 24px;
+}
+
+.philosophy-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 32px;
+  letter-spacing: -1px;
+}
+
+.philosophy-text {
+  font-size: 16px;
+  color: var(--gray-600);
+  line-height: 1.9;
+  margin-bottom: 24px;
+}
+
+.philosophy-quote {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-style: italic;
+  color: var(--gray-700);
+  border-left: 2px solid var(--gold);
+  padding-left: 24px;
+  margin-top: 40px;
+  line-height: 1.8;
+}
+
+.philosophy-right {
+  position: relative;
+  height: 600px;
+}
+
+.philosophy-shape-group {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.p-shape {
+  position: absolute;
+  transition: transform 0.8s var(--ease-out-expo);
+}
+
+.p-shape-circle-lg {
+  width: 300px;
+  height: 300px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.p-shape-circle-sm {
+  width: 120px;
+  height: 120px;
+  background: var(--gray-100);
+  border-radius: 50%;
+  top: 20%;
+  right: 10%;
+}
+
+.p-shape-square {
+  width: 180px;
+  height: 180px;
+  border: 1.5px solid var(--gold-light);
+  bottom: 10%;
+  left: 10%;
+  transform: rotate(15deg);
+}
+
+.p-shape-triangle {
+  width: 0;
+  height: 0;
+  border-left: 60px solid transparent;
+  border-right: 60px solid transparent;
+  border-bottom: 104px solid var(--gray-200);
+  top: 10%;
+  left: 20%;
+}
+
+.p-shape-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+.p-shape-dot-1 { top: 30%; left: 5%; }
+.p-shape-dot-2 { bottom: 30%; right: 15%; }
+.p-shape-dot-3 { top: 15%; right: 30%; }
+
+.p-shape-line {
+  width: 100px;
+  height: 1px;
+  background: var(--gray-300);
+  bottom: 35%;
+  right: 5%;
+  transform: rotate(-30deg);
+}
+
+/* ============================================
+   SECTION: SHAPES GALLERY
+   ============================================ */
+#shapes-gallery {
+  padding: 120px 48px;
+  background: var(--gray-100);
+  position: relative;
+  overflow: hidden;
+}
+
+.shapes-gallery-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 80px;
+}
+
+.shapes-gallery-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 20px;
+}
+
+.shapes-gallery-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+
+.shapes-gallery-desc {
+  font-size: 16px;
+  color: var(--gray-500);
+  line-height: 1.8;
+}
+
+.shapes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.shape-card {
+  position: relative;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 48px 32px;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.6s var(--ease-out-expo), box-shadow 0.6s var(--ease-out-expo);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.shape-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(201,168,76,0.03), transparent);
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.shape-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 32px 64px rgba(0,0,0,0.08);
+}
+
+.shape-card:hover::before {
+  opacity: 1;
+}
+
+.shape-card-visual {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.shape-card-visual svg {
+  width: 80px;
+  height: 80px;
+  transition: transform 0.6s var(--ease-out-expo);
+}
+
+.shape-card:hover .shape-card-visual svg {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.shape-card-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+.shape-card-japanese {
+  font-size: 12px;
+  color: var(--gray-400);
+  letter-spacing: 4px;
+  margin-bottom: 16px;
+}
+
+.shape-card-desc {
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.7;
+}
+
+.shape-card-number {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-300);
+}
+
+.shape-card-corner {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+}
+
+.shape-card-corner::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--gold-light);
+  border-radius: 50%;
+  transition: transform 0.5s var(--ease-out-expo);
+}
+
+.shape-card:hover .shape-card-corner::after {
+  transform: scale(2);
+}
+
+/* ============================================
+   SECTION: INTERACTIVE CANVAS
+   ============================================ */
+#interactive {
+  padding: 160px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.interactive-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.interactive-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 60px;
+}
+
+.interactive-title-group {
+  max-width: 600px;
+}
+
+.interactive-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 16px;
+}
+
+.interactive-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  letter-spacing: -1px;
+}
+
+.interactive-controls {
+  display: flex;
+  gap: 16px;
+}
+
+.control-btn {
+  padding: 12px 28px;
+  border: 1px solid var(--gray-300);
+  background: transparent;
+  color: var(--gray-600);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out-expo);
+  font-family: var(--font-body);
+}
+
+.control-btn:hover, .control-btn.active {
+  background: var(--black);
+  border-color: var(--black);
+  color: var(--white);
+}
+
+.interactive-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  background: var(--gray-100);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+
+#interactiveCanvas {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.canvas-overlay-info {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  gap: 24px;
+}
+
+.canvas-info-item {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+}
+
+.canvas-info-value {
+  color: var(--black);
+  font-family: var(--font-mono);
+}
+
+/* ============================================
+   SECTION: MATHEMATICAL BEAUTY
+   ============================================ */
+#mathematics {
+  padding: 160px 48px;
+  background: var(--gray-800);
+  color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+
+.math-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.math-header {
+  text-align: center;
+  margin-bottom: 100px;
+}
+
+.math-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 20px;
+}
+
+.math-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+
+.math-subtitle {
+  font-size: 16px;
+  color: var(--gray-400);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+.math-formulas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+}
+
+.math-formula-card {
+  padding: 48px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.5s, transform 0.5s var(--ease-out-expo);
+  background: rgba(255,255,255,0.02);
+}
+
+.math-formula-card:hover {
+  border-color: rgba(201,168,76,0.3);
+  transform: translateY(-4px);
+}
+
+.math-formula-icon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.math-formula-icon svg {
+  width: 48px;
+  height: 48px;
+  stroke: var(--gold);
+  fill: none;
+  stroke-width: 1;
+}
+
+.math-formula-name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+.math-formula-expression {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--gold-light);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.math-formula-desc {
+  font-size: 14px;
+  color: var(--gray-400);
+  line-height: 1.8;
+}
+
+.math-formula-number {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  font-family: var(--font-mono);
+  font-size: 48px;
+  color: rgba(255,255,255,0.03);
+  font-weight: 700;
+}
+
+.math-canvas-section {
+  margin-top: 100px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.math-canvas-wrap {
+  width: 100%;
+  height: 400px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+#mathCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.math-canvas-info {
+  padding: 0 24px;
+}
+
+.math-canvas-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  margin-bottom: 20px;
+  font-weight: 400;
+}
+
+.math-canvas-text {
+  font-size: 15px;
+  color: var(--gray-400);
+  line-height: 1.9;
+  margin-bottom: 32px;
+}
+
+.math-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.math-stat {
+  padding: 20px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.math-stat-value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.math-stat-label {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
+/* ============================================
+   SECTION: GOLDEN RATIO
+   ============================================ */
+#golden-ratio {
+  padding: 160px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.golden-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.golden-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.golden-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+
+.golden-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+
+.golden-subtitle {
+  font-size: 16px;
+  color: var(--gray-500);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+.golden-spiral-container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  margin-bottom: 80px;
+}
+
+#goldenCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.golden-facts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+
+.golden-fact {
+  text-align: center;
+  padding: 40px 24px;
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  transition: all 0.5s var(--ease-out-expo);
+}
+
+.golden-fact:hover {
+  border-color: var(--gold-light);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(201,168,76,0.08);
+}
+
+.golden-fact-symbol {
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.golden-fact-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.golden-fact-desc {
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.7;
+}
+
+/* ============================================
+   SECTION: DIMENSIONS
+   ============================================ */
+#dimensions {
+  padding: 160px 48px;
+  background: var(--gray-100);
+  position: relative;
+  overflow: hidden;
+}
+
+.dimensions-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dimensions-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.dimensions-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+
+.dimensions-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 60px;
+}
+
+.dim-tab {
+  position: relative;
+  padding: 12px 0;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  transition: color 0.3s;
+}
+
+.dim-tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--black);
+  transition: width 0.5s var(--ease-out-expo);
+}
+
+.dim-tab:hover, .dim-tab.active {
+  color: var(--black);
+}
+
+.dim-tab.active::after {
+  width: 100%;
+}
+
+.dimensions-viewport {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+}
+
+#dimensionsCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   SECTION: TESSELLATION
+   ============================================ */
+#tessellation {
+  padding: 160px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.tess-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.tess-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 60px;
+}
+
+.tess-title-group {
+  max-width: 600px;
+}
+
+.tess-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 16px;
+}
+
+.tess-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  letter-spacing: -1px;
+}
+
+.tess-canvas-wrap {
+  width: 100%;
+  height: 500px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  background: var(--gray-100);
+}
+
+#tessCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   SECTION: SYMMETRY EXPLORER
+   ============================================ */
+#symmetry {
+  padding: 160px 48px;
+  background: var(--accent);
+  color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+
+.symmetry-bg-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.03;
+}
+
+.symmetry-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.symmetry-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.symmetry-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 20px;
+}
+
+.symmetry-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+
+.symmetry-subtitle {
+  font-size: 16px;
+  color: var(--gray-400);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+.symmetry-showcase {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-bottom: 80px;
+}
+
+.symmetry-item {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.02);
+  transition: border-color 0.5s, transform 0.5s var(--ease-out-expo);
+}
+
+.symmetry-item:hover {
+  border-color: rgba(201,168,76,0.2);
+  transform: scale(1.02);
+}
+
+.symmetry-item canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.symmetry-item-label {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+
+.symmetry-slider-wrap {
+  text-align: center;
+}
+
+.symmetry-slider-label {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 16px;
+}
+
+.symmetry-slider {
+  -webkit-appearance: none;
+  width: 300px;
+  height: 2px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  outline: none;
+}
+
+.symmetry-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--gold);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.symmetry-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* ============================================
+   SECTION: FRACTAL WORLD
+   ============================================ */
+#fractals {
+  padding: 160px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fractals-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.fractals-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.fractals-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 20px;
+}
+
+.fractals-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+
+.fractals-subtitle {
+  font-size: 16px;
+  color: var(--gray-500);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+.fractals-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.fractal-card {
+  position: relative;
+  height: 400px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  cursor: pointer;
+  transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s;
+}
+
+.fractal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.06);
+}
+
+.fractal-card canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.fractal-card-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 32px;
+  background: linear-gradient(transparent, rgba(255,255,255,0.95));
+}
+
+.fractal-card-name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.fractal-card-desc {
+  font-size: 14px;
+  color: var(--gray-500);
+}
+
+/* ============================================
+   SECTION: 3D POLYHEDRA
+   ============================================ */
+#polyhedra {
+  padding: 160px 48px;
+  background: var(--gray-100);
+  position: relative;
+  overflow: hidden;
+}
+
+.polyhedra-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.polyhedra-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.polyhedra-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 20px;
+}
+
+.polyhedra-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+
+.polyhedra-subtitle {
+  font-size: 16px;
+  color: var(--gray-500);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+.polyhedra-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.polyhedra-card {
+  background: var(--white);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.04);
+  transition: transform 0.6s var(--ease-out-expo), box-shadow 0.6s;
+}
+
+.polyhedra-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 32px 64px rgba(0,0,0,0.08);
+}
+
+.polyhedra-canvas-wrap {
+  width: 100%;
+  height: 280px;
+  position: relative;
+}
+
+.polyhedra-canvas-wrap canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.polyhedra-card-info {
+  padding: 28px 32px;
+}
+
+.polyhedra-card-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.polyhedra-card-meta {
+  font-size: 13px;
+  color: var(--gray-400);
+  margin-bottom: 12px;
+}
+
+.polyhedra-card-desc {
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.7;
+}
+
+/* ============================================
+   SECTION: TIMELINE
+   ============================================ */
+#timeline {
+  padding: 160px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.timeline-header {
+  text-align: center;
+  margin-bottom: 100px;
+}
+
+.timeline-eyebrow {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 20px;
+}
+
+.timeline-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  letter-spacing: -1px;
+}
+
+.timeline-line {
+  position: relative;
+  padding-left: 60px;
+}
+
+.timeline-line::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--gray-200);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 80px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s var(--ease-out-expo);
+}
+
+.timeline-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -48px;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+.timeline-year {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--gold);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.timeline-item-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+  margin-bottom: 12px;
+}
+
+.timeline-item-text {
+  font-size: 15px;
+  color: var(--gray-500);
+  line-height: 1.8;
+  max-width: 600px;
+}
+
+/* ============================================
+   SECTION: FOOTER
+   ============================================ */
+#footer {
+  padding: 80px 48px;
+  background: var(--black);
+  color: var(--white);
+  position: relative;
+}
+
+.footer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 60px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 40px;
+}
+
+.footer-brand {
+  max-width: 300px;
+}
+
+.footer-logo {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.footer-brand-text {
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.8;
+}
+
+.footer-links-group {
+  display: flex;
+  gap: 80px;
+}
+
+.footer-links-col h4 {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin-bottom: 20px;
+  font-weight: 400;
+}
+
+.footer-links-col ul {
+  list-style: none;
+}
+
+.footer-links-col li {
+  margin-bottom: 12px;
+}
+
+.footer-links-col a {
+  font-size: 14px;
+  color: var(--gray-500);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-links-col a:hover {
+  color: var(--white);
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-copyright {
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+.footer-social {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-social a {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-500);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.footer-social a:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ============================================
+   SCROLL REVEAL ANIMATIONS
+   ============================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+}
+
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+}
+
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+}
+
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.stagger-1 { transition-delay: 0.1s; }
+.stagger-2 { transition-delay: 0.2s; }
+.stagger-3 { transition-delay: 0.3s; }
+.stagger-4 { transition-delay: 0.4s; }
+.stagger-5 { transition-delay: 0.5s; }
+.stagger-6 { transition-delay: 0.6s; }
+
+/* ============================================
+   FLOATING SHAPES (Background decorations)
+   ============================================ */
+.floating-shapes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.float-shape {
+  position: absolute;
+  opacity: 0.04;
+}
+
+.float-circle {
+  border-radius: 50%;
+  border: 1px solid var(--black);
+}
+
+.float-square {
+  border: 1px solid var(--black);
+}
+
+.float-cross {
+  position: relative;
+}
+
+.float-cross::before, .float-cross::after {
+  content: '';
+  position: absolute;
+  background: var(--black);
+}
+
+.float-cross::before {
+  width: 1px;
+  height: 100%;
+  left: 50%;
+  top: 0;
+}
+
+.float-cross::after {
+  width: 100%;
+  height: 1px;
+  top: 50%;
+  left: 0;
+}
+
+/* ============================================
+   MAGNETIC BUTTONS
+   ============================================ */
+.magnetic-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s var(--ease-out-expo);
+}
+
+/* ============================================
+   PARALLAX SHAPES
+   ============================================ */
+.parallax-shape {
+  will-change: transform;
+  transition: transform 0.1s linear;
+}
+
+/* ============================================
+   SECTION DIVIDER
+   ============================================ */
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.section-divider::after {
+  content: '';
+  position: absolute;
+  left: -100%;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gold);
+  animation: dividerSlide 3s ease-in-out infinite;
+}
+
+@keyframes dividerSlide {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+/* ============================================
+   TOOLTIP
+   ============================================ */
+.tooltip {
+  position: absolute;
+  background: var(--black);
+  color: var(--white);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s, transform 0.3s;
+  white-space: nowrap;
+  z-index: 100;
+}
+
+.tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: var(--black);
+}
+
+/* ============================================
+   PARTICLE SYSTEM BG
+   ============================================ */
+.particle-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ============================================
+   SHAPE MORPHING
+   ============================================ */
+.morph-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.morph-svg {
+  overflow: visible;
+}
+
+.morph-path {
+  transition: d 0.8s var(--ease-out-expo);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1200px) {
+  .shapes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .math-formulas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .polyhedra-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .philosophy-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .philosophy-right {
+    height: 400px;
+  }
+  .math-canvas-section {
+    grid-template-columns: 1fr;
+  }
+  .golden-facts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .symmetry-showcase {
+    grid-template-columns: 1fr;
+  }
+  .fractals-grid {
+    grid-template-columns: 1fr;
+  }
+  .nav-links {
+    display: none;
+  }
+  .nav-menu-btn {
+    display: flex;
+  }
+  .footer-top {
+    flex-direction: column;
+    gap: 40px;
+  }
+  .interactive-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .shapes-grid {
+    grid-template-columns: 1fr;
+  }
+  .math-formulas {
+    grid-template-columns: 1fr;
+  }
+  .polyhedra-grid {
+    grid-template-columns: 1fr;
+  }
+  .golden-facts {
+    grid-template-columns: 1fr;
+  }
+  #main-nav {
+    padding: 16px 24px;
+  }
+  section {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+}
+</style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+
+<!-- CUSTOM CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- FLOATING BG SHAPES -->
+<div class="floating-shapes" id="floatingShapes"></div>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <div class="preloader-shapes">
+    <div class="preloader-shape preloader-circle"></div>
+    <div class="preloader-shape preloader-square"></div>
+    <div class="preloader-shape preloader-triangle"></div>
+  </div>
+  <div class="preloader-text">Loading Geometry</div>
+  <div class="preloader-progress">
+    <div class="preloader-progress-bar" id="preloaderBar"></div>
+  </div>
+</div>
+
+<!-- NAVIGATION -->
+<nav id="main-nav">
+  <a href="#" class="nav-logo magnetic-btn">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.2">
+        <circle cx="18" cy="18" r="16"/>
+        <rect x="10" y="10" width="16" height="16" transform="rotate(15 18 18)"/>
+        <polygon points="18,6 28,28 8,28"/>
+      </svg>
+    </div>
+    <span class="nav-logo-text">Geometry</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#philosophy" class="nav-link">Philosophy</a></li>
+    <li><a href="#shapes-gallery" class="nav-link">Shapes</a></li>
+    <li><a href="#interactive" class="nav-link">Interactive</a></li>
+    <li><a href="#mathematics" class="nav-link">Mathematics</a></li>
+    <li><a href="#golden-ratio" class="nav-link">Golden Ratio</a></li>
+    <li><a href="#fractals" class="nav-link">Fractals</a></li>
+  </ul>
+  <button class="nav-menu-btn" id="menuBtn">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- FULLSCREEN MENU -->
+<div class="fullscreen-menu" id="fullscreenMenu">
+  <ul class="fullscreen-menu-list">
+    <li class="fullscreen-menu-item"><a href="#philosophy" class="fullscreen-menu-link">Philosophy</a></li>
+    <li class="fullscreen-menu-item"><a href="#shapes-gallery" class="fullscreen-menu-link">Shapes</a></li>
+    <li class="fullscreen-menu-item"><a href="#interactive" class="fullscreen-menu-link">Interactive</a></li>
+    <li class="fullscreen-menu-item"><a href="#mathematics" class="fullscreen-menu-link">Mathematics</a></li>
+    <li class="fullscreen-menu-item"><a href="#golden-ratio" class="fullscreen-menu-link">Golden Ratio</a></li>
+    <li class="fullscreen-menu-item"><a href="#fractals" class="fullscreen-menu-link">Fractals</a></li>
+  </ul>
+</div>
+
+<!-- ============================================
+     HERO SECTION
+     ============================================ -->
+<section id="hero">
+  <div class="hero-canvas-container">
+    <canvas id="heroCanvas"></canvas>
+  </div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">The Art of Mathematics</p>
+    <h1 class="hero-title">
+      <span class="line"><span class="line-inner">The Beauty of</span></span>
+      <span class="line"><span class="line-inner">Geometric</span></span>
+      <span class="line"><span class="line-inner">Forms</span></span>
+    </h1>
+    <p class="hero-subtitle">幾何学の永遠の美しさを探求する。点、線、面が織りなす数学的な調和の世界へようこそ。</p>
+    <button class="hero-cta magnetic-btn" onclick="document.getElementById('shapes-gallery').scrollIntoView({behavior:'smooth'})">
+      <span>Explore Shapes</span>
+      <span class="hero-cta-arrow">→</span>
+    </button>
+  </div>
+  <div class="hero-scroll-indicator">
+    <span class="hero-scroll-text">Scroll</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- ============================================
+     PHILOSOPHY SECTION
+     ============================================ -->
+<section id="philosophy">
+  <div class="philosophy-container">
+    <div class="philosophy-left reveal-left">
+      <p class="philosophy-eyebrow">— 01 / Philosophy</p>
+      <h2 class="philosophy-title">Geometry is the<br>Language of the<br>Universe</h2>
+      <p class="philosophy-text">幾何学は、人類が世界を理解するために生み出した最も古く、最も美しい言語です。ユークリッドの「原論」から現代のフラクタル理論まで、図形は常に自然界の根本的な真理を表現してきました。</p>
+      <p class="philosophy-text">円は完全性を、三角形は安定性を、螺旋は成長を象徴します。これらの図形は単なる数学的概念ではなく、宇宙の構造そのものを反映しているのです。</p>
+      <blockquote class="philosophy-quote">
+        "神は幾何学する"<br>
+        <span style="font-size:14px; color: var(--gray-500); font-style: normal;">— プラトン</span>
+      </blockquote>
+    </div>
+    <div class="philosophy-right reveal-right">
+      <div class="philosophy-shape-group" id="philosophyShapes">
+        <div class="p-shape p-shape-circle-lg parallax-shape" data-speed="2"></div>
+        <div class="p-shape p-shape-circle-sm parallax-shape" data-speed="4"></div>
+        <div class="p-shape p-shape-square parallax-shape" data-speed="3"></div>
+        <div class="p-shape p-shape-triangle parallax-shape" data-speed="5"></div>
+        <div class="p-shape p-shape-dot p-shape-dot-1 parallax-shape" data-speed="6"></div>
+        <div class="p-shape p-shape-dot p-shape-dot-2 parallax-shape" data-speed="4"></div>
+        <div class="p-shape p-shape-dot p-shape-dot-3 parallax-shape" data-speed="7"></div>
+        <div class="p-shape p-shape-line parallax-shape" data-speed="3"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================
+     SHAPES GALLERY
+     ============================================ -->
+<section id="shapes-gallery">
+  <div class="shapes-gallery-header reveal">
+    <p class="shapes-gallery-eyebrow">— 02 / Gallery</p>
+    <h2 class="shapes-gallery-title">Fundamental Shapes</h2>
+    <p class="shapes-gallery-desc">すべての複雑な形状の基礎となる、基本的な幾何学図形たち。各図形は独自の数学的性質と美学を持っています。</p>
+  </div>
+  <div class="shapes-grid">
+
+    <!-- Card 1: Circle -->
+    <div class="shape-card reveal stagger-1" data-tilt>
+      <span class="shape-card-number">01</span>
+      <div class="shape-card-visual">
+        <svg viewBox="0 0 80 80" fill="none" stroke="#0a0a0a" stroke-width="1.2">
+          <circle cx="40" cy="40" r="35">
+            <animate attributeName="r" values="35;32;35" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="40" cy="40" r="20" stroke-dasharray="4 4">
+            <animateTransform attributeName="transform" type="rotate" values="0 40 40;360 40 40" dur="20s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </div>
+      <h3 class="shape-card-name">Circle</h3>
+      <p class="shape-card-japanese">円 — えん</p>
+      <p class="shape-card-desc">完全な対称性を持つ究極の図形。中心からの等距離点の集合。π(パイ)との深い関係。</p>
+      <div class="shape-card-corner"></div>
+    </div>
+
+    <!-- Card 2: Triangle -->
+    <div class="shape-card reveal stagger-2" data-tilt>
+      <span class="shape-card-number">02</span>
+      <div class="shape-card-visual">
+        <svg viewBox="0 0 80 80" fill="none" stroke="#0a0a0a" stroke-width="1.2">
+          <polygon points="40,8 72,68 8,68">
+            <animate attributeName="points" values="40,8 72,68 8,68;40,12 68,68 12,68;40,8 72,68 8,68" dur="4s" repeatCount="indefinite"/>
+          </polygon>
+          <line x1="40" y1="8" x2="40" y2="68" stroke-dasharray="3 3" opacity="0.3"/>
+        </svg>
+      </div>
+      <h3 class="shape-card-name">Triangle</h3>
+      <p class="shape-card-japanese">三角形 — さんかくけい</p>
+      <p class="shape-card-desc">最も安定した構造形態。三辺三角で構成される最もシンプルな多角形。</p>
+      <div class="shape-card-corner"></div>
+    </div>
+
+    <!-- Card 3: Square -->
+    <div class="shape-card reveal stagger-3" data-tilt>
+      <span class="shape-card-number">03</span>
+      <div class="shape-card-visual">
+        <svg viewBox="0 0 80 80" fill="none" stroke="#0a0a0a" stroke-width="1.2">
+          <rect x="16" y="16" width="48" height="48">
+            <animateTransform attributeName="transform" type="rotate" values="0 40 40;5 40 40;0 40 40;-5 40 40;0 40 40" dur="6s" repeatCount="indefinite"/>
+          </rect>
+          <rect x="24" y="24" width="32" height="32" stroke-dasharray="4 4" opacity="0.4">
+            <animateTransform attributeName="transform" type="rotate" values="0 40 40;45 40 40;0 40 40" dur="8s" repeatCount="indefinite"/>
+          </rect>
+        </svg>
+      </div>
+      <h3 class="shape-card-name">Square</h3>
+      <p class="shape-card-japanese">正方形 — せいほうけい</p>
+      <p class="shape-card-desc">四辺等長・四角直角。秩序と均衡の象徴であり、建築の基礎。</p>
+      <div class="shape-card-corner"></div>
+    </div>
+
+    <!-- Card 4: Pentagon -->
+    <div class="shape-card reveal stagger-4" data-tilt>
+      <span class="shape-card-number">04</span>
+      <div class="shape-card-visual">
+        <svg viewBox="0 0 80 80" fill="none" stroke="#0a0a0a" stroke-width="1.2">
+          <polygon points="40,8 73,32 60,70 20,70 7,32">
+            <animate attributeName="opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite"/>
+          </polygon>
+          <line x1="40" y1="8" x2="60" y2="70" stroke-dasharray="2 3" opacity="0.2"/>
+          <line x1="40" y1="8" x2="20" y2="70" stroke-dasharray="2 3" opacity="0.2"/>
+          <line x1="73" y1="32" x2="20" y2="70" stroke-dasharray="2 3" opacity="0.2"/>
+          <line x1="7" y1="32" x2="60" y2="70" stroke-dasharray="2 3" opacity="0.2"/>
+          <line x1="73" y1="32" x2="7" y2="32" stroke-dasharray="2 3" opacity="0.2"/>
+        </svg>
+      </div>
+      <h3 class="shape-card-name">Pentagon</h3>
+      <p class="shape-card-japanese">五角形 — ごかくけい</p>
+      <p class="shape-card-desc">黄金比を内包する神秘的な図形。内部に五芒星を生む。</p>
+      <div class="shape-card-corner"></div>
+    </div>
+
+    <!-- Card 5: Hexagon -->
+    <div class="shape-card reveal stagger-1" data-tilt>
+      <span class="shape-card-number">05</span>
+      <div class="shape-card-visual">
+        <svg viewBox="0 0 80 80" fill="none" stroke="#0a0a0a" stroke-width="1.2">
+          <polygon points="40,8 69,22 69,52 40,66 11,52 11,22">
+            <animateTransform attributeName="transform" type="rotate" values="0 40 40;30 40 40;0 40 40" dur="10s" repeatCount="indefinite"/>
+          </polygon>
+        </svg>
+      </div>
+      <h3 class="shape-card-name">Hexagon</h3>
+      <p class="shape-card-japanese">六角形 — ろっかくけい</p>
+      <p class="shape-card-desc">蜂の巣に見られる最も効率的な充填図形。自然界の知恵。</p>
+      <div class="shape-card-corner"></div>
+    </div>
+
+    <!-- Card 6: Ellipse -->
+    <div class="shape-card reveal stagger-2" data-tilt>
+      <span class="shape-card-number">06</span>
+      <div class="shape-card-visual">
+        <svg viewBox="0 0 80 80" fill="none" stroke="#0a0a0a" stroke-width="1.2">
+          <ellipse cx="40" cy="40" rx="35" ry="22">
+            <animate attributeName="ry" values="22;28;22" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="rx" values="35;30;35" dur="4s" repeatCount="indefinite"/>
+          </ellipse>
+          <circle cx="24" cy="40" r="2" fill="#c9a84c" opacity="0.6"/>
+          <circle cx="56" cy="40" r="2" fill="#c9a84c" opacity="0.6"/>
+        </svg>
+      </div>
+      <h3 class="shape-card-name">Ellipse</h3>
+      <p class="shape-card-japanese">楕円 — だえん</p>
+      <p class="shape-card-desc">二つの焦点を持つ優雅な曲線。惑星の軌道を描く天体の道。</p>
+      <div class="shape-card-corner"></div>
+    </div>
+
+    <!-- Card 7: Star -->
+    <div class="shape-card reveal stagger-3" data-tilt>
+      <span class="shape-card-number">07</span>
+      <div class="shape-card-visual">
+        <svg viewBox="0 0 80 80" fill="none" stroke="#0a0a0a" stroke-width="1.2">
+          <polygon points="40,6 47,30 72,30 52,46 58,70 40,56 22,70 28,46 8,30 33,30">
+            <animateTransform attributeName="transform" type="rotate" values="0 40 40;360 40 40" dur="30s" repeatCount="indefinite"/>
+          </polygon>
+        </svg>
+      </div>
+      <h3 class="shape-card-name">Star</h3>
+      <p class="shape-card-japanese">星形 — ほしがた</p>
+      <p class="shape-card-desc">光を放つかのような放射的な美。古来より導きの象徴として崇められてきた形。</p>
+      <div class="shape-card-corner"></div>
+    </div>
+
+    <!-- Card 8: Spiral -->
+    <div class="shape-card reveal stagger-4" data-tilt>
+      <span class="shape-card-number">08</span>
+      <div class="shape-card-visual">
+        <svg viewBox="0 0 80 80" fill="none" stroke="#0a0a0a" stroke-width="1.2">
+          <path d="M40,40 C40,30 50,25 55,32 C60,39 55,52 42,52 C29,52 22,40 26,28 C30,16 45,12 56,20 C67,28 68,48 58,58" stroke-dasharray="200" stroke-dashoffset="200">
+            <animate attributeName="stroke-dashoffset" values="200;0" dur="3s" repeatCount="indefinite"/>
+          </path>
+        </svg>
+      </div>
+      <h3 class="shape-card-name">Spiral</h3>
+      <p class="shape-card-japanese">螺旋 — らせん</p>
+      <p class="shape-card-desc">成長と進化の軌跡。貝殻、銀河、DNAに宿る宇宙の基本パターン。</p>
+      <div class="shape-card-corner"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================
+     INTERACTIVE CANVAS SECTION
+     ============================================ -->
+<section id="interactive">
+  <div class="interactive-container">
+    <div class="interactive-header reveal">
+      <div class="interactive-title-group">
+        <p class="interactive-eyebrow">— 03 / Interactive</p>
+        <h2 class="interactive-title">Create Your Own<br>Geometry</h2>
+      </div>
+      <div class="interactive-controls">
+        <button class="control-btn active" data-mode="particles">Particles</button>
+        <button class="control-btn" data-mode="waves">Waves</button>
+        <button class="control-btn" data-mode="constellation">Constellation</button>
+        <button class="control-btn" data-mode="voronoi">Voronoi</button>
+      </div>
+    </div>
+    <div class="interactive-canvas-wrap reveal-scale">
+      <canvas id="interactiveCanvas"></canvas>
+      <div class="canvas-overlay-info">
+        <div class="canvas-info-item">Shapes: <span class="canvas-info-value" id="shapeCount">0</span></div>
+        <div class="canvas-info-item">FPS: <span class="canvas-info-value" id="fpsCounter">60</span></div>
+        <div class="canvas-info-item">Mode: <span class="canvas-info-value" id="modeLabel">Particles</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================
+     MATHEMATICAL BEAUTY
+     ============================================ -->
+<section id="mathematics">
+  <div class="math-container">
+    <div class="math-header reveal">
+      <p class="math-eyebrow">— 04 / Mathematics</p>
+      <h2 class="math-title">Mathematical Beauty</h2>
+      <p class="math-subtitle">図形の背後に潜む数式の美しさ。数学は宇宙のアーキテクチャを記述する言語です。</p>
+    </div>
+
+    <div class="math-formulas">
+      <div class="math-formula-card reveal stagger-1">
+        <span class="math-formula-number">01</span>
+        <div class="math-formula-icon">
+          <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/></svg>
+        </div>
+        <h3 class="math-formula-name">Circle</h3>
+        <p class="math-formula-expression">A = πr² | C = 2πr</p>
+        <p class="math-formula-desc">円の面積と周長。πは無理数であり、その小数展開は無限に続く。自然界で最も美しい定数。</p>
+      </div>
+
+      <div class="math-formula-card reveal stagger-2">
+        <span class="math-formula-number">02</span>
+        <div class="math-formula-icon">
+          <svg viewBox="0 0 48 48"><polygon points="24,4 44,40 4,40"/></svg>
+        </div>
+        <h3 class="math-formula-name">Triangle</h3>
+        <p class="math-formula-expression">A = ½bh | a²+b²=c²</p>
+        <p class="math-formula-desc">ピタゴラスの定理は幾何学の金字塔。直角三角形の三辺の関係を永遠に結びつける。</p>
+      </div>
+
+      <div class="math-formula-card reveal stagger-3">
+        <span class="math-formula-number">03</span>
+        <div class="math-formula-icon">
+          <svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32"/></svg>
+        </div>
+        <h3 class="math-formula-name">Square</h3>
+        <p class="math-formula-expression">A = s² | d = s√2</p>
+        <p class="math-formula-desc">正方形は最も基本的な四角形。その対角線は辺の√2倍であり、無理数の発見につながった。</p>
+      </div>
+
+      <div class="math-formula-card reveal stagger-4">
+        <span class="math-formula-number">04</span>
+        <div class="math-formula-icon">
+          <svg viewBox="0 0 48 48"><ellipse cx="24" cy="24" rx="22" ry="14"/></svg>
+        </div>
+        <h3 class="math-formula-name">Ellipse</h3>
+        <p class="math-formula-expression">x²/a² + y²/b² = 1</p>
+        <p class="math-formula-desc">ケプラーが発見した惑星軌道の形。円錐曲線の一種であり、優雅な数学的構造を持つ。</p>
+      </div>
+
+      <div class="math-formula-card reveal stagger-5">
+        <span class="math-formula-number">05</span>
+        <div class="math-formula-icon">
+          <svg viewBox="0 0 48 48"><path d="M24,4 C24,4 44,20 24,44 C4,20 24,4 24,4Z"/></svg>
+        </div>
+        <h3 class="math-formula-name">Euler's Formula</h3>
+        <p class="math-formula-expression">V - E + F = 2</p>
+        <p class="math-formula-desc">多面体の頂点・辺・面の関係を記述するオイラーの多面体公式。トポロジーの出発点。</p>
+      </div>
+
+      <div class="math-formula-card reveal stagger-6">
+        <span class="math-formula-number">06</span>
+        <div class="math-formula-icon">
+          <svg viewBox="0 0 48 48">
+            <path d="M24,24 C24,14 34,9 39,16 C44,23 39,36 26,36 C13,36 6,24 10,12 C14,0 29,-4 40,4" fill="none"/>
+          </svg>
+        </div>
+        <h3 class="math-formula-name">Golden Spiral</h3>
+        <p class="math-formula-expression">φ = (1+√5)/2 ≈ 1.618</p>
+        <p class="math-formula-desc">黄金比は自然界に遍在する神聖な比率。フィボナッチ数列と深く結びつく。</p>
+      </div>
+    </div>
+
+    <div class="math-canvas-section">
+      <div class="math-canvas-wrap reveal-left">
+        <canvas id="mathCanvas"></canvas>
+      </div>
+      <div class="math-canvas-info reveal-right">
+        <h3 class="math-canvas-title">Living Mathematics</h3>
+        <p class="math-canvas-text">リサージュ曲線は二つの正弦波の合成によって生まれる美しいパターンです。周波数比を変えることで無限のバリエーションが生まれ、音と光の関係を視覚化します。</p>
+        <div class="math-stats">
+          <div class="math-stat">
+            <div class="math-stat-value" id="statPi">3.14159</div>
+            <div class="math-stat-label">Pi (π)</div>
+          </div>
+          <div class="math-stat">
+            <div class="math-stat-value" id="statPhi">1.61803</div>
+            <div class="math-stat-label">Phi (φ)</div>
+          </div>
+          <div class="math-stat">
+            <div class="math-stat-value" id="statE">2.71828</div>
+            <div class="math-stat-label">Euler (e)</div>
+          </div>
+          <div class="math-stat">
+            <div class="math-stat-value">∞</div>
+            <div class="math-stat-label">Possibilities</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     GOLDEN RATIO
+     ============================================ -->
+<section id="golden-ratio">
+  <div class="golden-container">
+    <div class="golden-header reveal">
+      <p class="golden-eyebrow">— 05 / φ — Golden Ratio</p>
+      <h2 class="golden-title">The Divine Proportion</h2>
+      <p class="golden-subtitle">黄金比φ=1.618...は、パルテノン神殿からモナ・リザまで、人類が最も美しいと感じる比率として知られています。</p>
+    </div>
+    <div class="golden-spiral-container reveal-scale">
+      <canvas id="goldenCanvas"></canvas>
+    </div>
+    <div class="golden-facts">
+      <div class="golden-fact reveal stagger-1">
+        <div class="golden-fact-symbol">φ</div>
+        <h4 class="golden-fact-title">黄金比</h4>
+        <p class="golden-fact-desc">1.6180339887... 無限に続く無理数でありながら、自然界に普遍的に現れる。</p>
+      </div>
+      <div class="golden-fact reveal stagger-2">
+        <div class="golden-fact-symbol">🌻</div>
+        <h4 class="golden-fact-title">自然界</h4>
+        <p class="golden-fact-desc">ひまわりの種の配列、松ぼっくりの鱗片、台風の渦巻き。</p>
+      </div>
+      <div class="golden-fact reveal stagger-3">
+        <div class="golden-fact-symbol">🏛</div>
+        <h4 class="golden-fact-title">建築</h4>
+        <p class="golden-fact-desc">パルテノン神殿、ノートルダム大聖堂、現代建築まで。</p>
+      </div>
+      <div class="golden-fact reveal stagger-4">
+        <div class="golden-fact-symbol">🎨</div>
+        <h4 class="golden-fact-title">芸術</h4>
+        <p class="golden-fact-desc">ダ・ヴィンチ、モンドリアン、現代デザインの基礎。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     DIMENSIONS
+     ============================================ -->
+<section id="dimensions">
+  <div class="dimensions-container">
+    <div class="dimensions-header reveal">
+      <h2 class="dimensions-title">Exploring Dimensions</h2>
+      <div class="dimensions-tabs">
+        <button class="dim-tab active" data-dim="2d">2D Shapes</button>
+        <button class="dim-tab" data-dim="3d">3D Wireframe</button>
+        <button class="dim-tab" data-dim="4d">4D Projection</button>
+      </div>
+    </div>
+    <div class="dimensions-viewport reveal-scale">
+      <canvas id="dimensionsCanvas"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     TESSELLATION
+     ============================================ -->
+<section id="tessellation">
+  <div class="tess-container">
+    <div class="tess-header reveal">
+      <div class="tess-title-group">
+        <p class="tess-eyebrow">— 06 / Tessellation</p>
+        <h2 class="tess-title">Infinite Patterns</h2>
+      </div>
+    </div>
+    <div class="tess-canvas-wrap reveal-scale">
+      <canvas id="tessCanvas"></canvas>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================
+     SYMMETRY
+     ============================================ -->
+<section id="symmetry">
+  <div class="symmetry-bg-shapes">
+    <svg width="100%" height="100%">
+      <pattern id="symPattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+        <circle cx="30" cy="30" r="1" fill="white"/>
+      </pattern>
+      <rect width="100%" height="100%" fill="url(#symPattern)"/>
+    </svg>
+  </div>
+  <div class="symmetry-container">
+    <div class="symmetry-header reveal">
+      <p class="symmetry-eyebrow">— 07 / Symmetry</p>
+      <h2 class="symmetry-title">Symmetry Explorer</h2>
+      <p class="symmetry-subtitle">対称性は自然界の根本原理。回転対称、鏡面対称、並進対称が生む無限の美。</p>
+    </div>
+    <div class="symmetry-showcase">
+      <div class="symmetry-item reveal stagger-1">
+        <canvas class="symmetry-canvas" data-symmetry="rotational" data-order="6"></canvas>
+        <span class="symmetry-item-label">6-fold Rotational</span>
+      </div>
+      <div class="symmetry-item reveal stagger-2">
+        <canvas class="symmetry-canvas" data-symmetry="mirror" data-order="8"></canvas>
+        <span class="symmetry-item-label">8-fold Mirror</span>
+      </div>
+      <div class="symmetry-item reveal stagger-3">
+        <canvas class="symmetry-canvas" data-symmetry="kaleidoscope" data-order="12"></canvas>
+        <span class="symmetry-item-label">12-fold Kaleidoscope</span>
+      </div>
+    </div>
+    <div class="symmetry-slider-wrap reveal">
+      <p class="symmetry-slider-label">Symmetry Order</p>
+      <input type="range" class="symmetry-slider" id="symmetryOrder" min="3" max="24" value="6">
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     FRACTALS
+     ============================================ -->
+<section id="fractals">
+  <div class="fractals-container">
+    <div class="fractals-header reveal">
+      <p class="fractals-eyebrow">— 08 / Fractals</p>
+      <h2 class="fractals-title">The Fractal World</h2>
+      <p class="fractals-subtitle">自己相似性の無限の美。部分が全体を反映するフラクタルは、自然界の複雑さを数学で捉えます。</p>
+    </div>
+    <div class="fractals-grid">
+      <div class="fractal-card reveal stagger-1">
+        <canvas class="fractal-canvas" data-type="sierpinski"></canvas>
+        <div class="fractal-card-info">
+          <h3 class="fractal-card-name">Sierpinski Triangle</h3>
+          <p class="fractal-card-desc">シェルピンスキーの三角形 — 再帰的な三角形の分割</p>
+        </div>
+      </div>
+      <div class="fractal-card reveal stagger-2">
+        <canvas class="fractal-canvas" data-type="koch"></canvas>
+        <div class="fractal-card-info">
+          <h3 class="fractal-card-name">Koch Snowflake</h3>
+          <p class="fractal-card-desc">コッホ雪片 — 有限面積の中に無限の周長</p>
+        </div>
+      </div>
+      <div class="fractal-card reveal stagger-3">
+        <canvas class="fractal-canvas" data-type="tree"></canvas>
+        <div class="fractal-card-info">
+          <h3 class="fractal-card-name">Fractal Tree</h3>
+          <p class="fractal-card-desc">フラクタル樹木 — 自然の分岐パターン</p>
+        </div>
+      </div>
+      <div class="fractal-card reveal stagger-4">
+        <canvas class="fractal-canvas" data-type="mandelbrot"></canvas>
+        <div class="fractal-card-info">
+          <h3 class="fractal-card-name">Mandelbrot Set</h3>
+          <p class="fractal-card-desc">マンデルブロ集合 — 複素平面上の無限の宇宙</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     3D POLYHEDRA
+     ============================================ -->
+<section id="polyhedra">
+  <div class="polyhedra-container">
+    <div class="polyhedra-header reveal">
+      <p class="polyhedra-eyebrow">— 09 / Polyhedra</p>
+      <h2 class="polyhedra-title">Platonic Solids</h2>
+      <p class="polyhedra-subtitle">古代ギリシャ人が発見した正多面体。宇宙の五大元素と結びつけられた神聖な立体。</p>
+    </div>
+    <div class="polyhedra-grid">
+      <div class="polyhedra-card reveal stagger-1">
+        <div class="polyhedra-canvas-wrap">
+          <canvas class="polyhedra-canvas" data-type="tetrahedron"></canvas>
+        </div>
+        <div class="polyhedra-card-info">
+          <h3 class="polyhedra-card-name">Tetrahedron</h3>
+          <p class="polyhedra-card-meta">4面 · 4頂点 · 6辺 · 火</p>
+          <p class="polyhedra-card-desc">最もシンプルなプラトン立体。四つの正三角形で構成される。</p>
+        </div>
+      </div>
+      <div class="polyhedra-card reveal stagger-2">
+        <div class="polyhedra-canvas-wrap">
+          <canvas class="polyhedra-canvas" data-type="cube"></canvas>
+        </div>
+        <div class="polyhedra-card-info">
+          <h3 class="polyhedra-card-name">Hexahedron</h3>
+          <p class="polyhedra-card-meta">6面 · 8頂点 · 12辺 · 土</p>
+          <p class="polyhedra-card-desc">正六面体。安定と秩序の象徴であり、最も身近な立体。</p>
+        </div>
+      </div>
+      <div class="polyhedra-card reveal stagger-3">
+        <div class="polyhedra-canvas-wrap">
+          <canvas class="polyhedra-canvas" data-type="octahedron"></canvas>
+        </div>
+        <div class="polyhedra-card-info">
+          <h3 class="polyhedra-card-name">Octahedron</h3>
+          <p class="polyhedra-card-meta">8面 · 6頂点 · 12辺 · 風</p>
+          <p class="polyhedra-card-desc">八つの正三角形からなる優美な多面体。ダイヤモンドの結晶構造。</p>
+        </div>
+      </div>
+      <div class="polyhedra-card reveal stagger-4">
+        <div class="polyhedra-canvas-wrap">
+          <canvas class="polyhedra-canvas" data-type="dodecahedron"></canvas>
+        </div>
+        <div class="polyhedra-card-info">
+          <h3 class="polyhedra-card-name">Dodecahedron</h3>
+          <p class="polyhedra-card-meta">12面 · 20頂点 · 30辺 · 宇宙</p>
+          <p class="polyhedra-card-desc">12枚の正五角形。プラトンが宇宙の形と考えた神聖な立体。</p>
+        </div>
+      </div>
+      <div class="polyhedra-card reveal stagger-5">
+        <div class="polyhedra-canvas-wrap">
+          <canvas class="polyhedra-canvas" data-type="icosahedron"></canvas>
+        </div>
+        <div class="polyhedra-card-info">
+          <h3 class="polyhedra-card-name">Icosahedron</h3>
+          <p class="polyhedra-card-meta">20面 · 12頂点 · 30辺 · 水</p>
+          <p class="polyhedra-card-desc">20の正三角形。球に最も近いプラトン立体。ウイルスの構造にも。</p>
+        </div>
+      </div>
+      <div class="polyhedra-card reveal stagger-6">
+        <div class="polyhedra-canvas-wrap">
+          <canvas class="polyhedra-canvas" data-type="sphere"></canvas>
+        </div>
+        <div class="polyhedra-card-info">
+          <h3 class="polyhedra-card-name">Sphere</h3>
+          <p class="polyhedra-card-meta">∞面 · 0頂点 · 0辺 · 完全</p>
+          <p class="polyhedra-card-desc">究極の対称性。全ての方向から等しい完全な立体。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     TIMELINE
+     ============================================ -->
+<section id="timeline">
+  <div class="timeline-container">
+    <div class="timeline-header reveal">
+      <p class="timeline-eyebrow">— 10 / History</p>
+      <h2 class="timeline-title">A Journey Through<br>Geometric History</h2>
+    </div>
+    <div class="timeline-line">
+      <div class="timeline-item">
+        <span class="timeline-year">c. 3000 BCE</span>
+        <h3 class="timeline-item-title">古代エジプト</h3>
+        <p class="timeline-item-text">ピラミッドの建設に幾何学が使われる。測量技術の発展。ナイル川の氾濫後の土地測量から「幾何学（Geometry＝地球の測量）」が生まれた。</p>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">c. 600 BCE</span>
+        <h3 class="timeline-item-title">タレスとピタゴラス</h3>
+        <p class="timeline-item-text">ギリシャの哲学者タレスが幾何学を証明の学問として確立。ピタゴラスは「万物は数なり」と宣言し、直角三角形の定理を発見した。</p>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">c. 300 BCE</span>
+        <h3 class="timeline-item-title">ユークリッドの原論</h3>
+        <p class="timeline-item-text">「原論」全13巻が編纂される。5つの公理から膨大な定理を導く演繹的体系は、聖書に次いで多く印刷された書物となった。</p>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">c. 250 BCE</span>
+        <h3 class="timeline-item-title">アルキメデス</h3>
+        <p class="timeline-item-text">球と円柱の体積比を発見。放物線の面積を求める「取り尽くし法」は後の積分法の先駆けとなった。</p>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">1637</span>
+        <h3 class="timeline-item-title">デカルト座標系</h3>
+        <p class="timeline-item-text">デカルトが解析幾何学を創始。図形と方程式を結びつけ、代数と幾何学を統一。これにより微積分学の道が開かれた。</p>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">1826</span>
+        <h3 class="timeline-item-title">非ユークリッド幾何学</h3>
+        <p class="timeline-item-text">ロバチェフスキーとボヤイが独立に双曲幾何学を発見。2000年以上不動だったユークリッドの第5公理が覆される。</p>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">1975</span>
+        <h3 class="timeline-item-title">フラクタル幾何学</h3>
+        <p class="timeline-item-text">マンデルブロがフラクタルの概念を提唱。自己相似性を持つ図形は、雲、海岸線、樹木など自然界の複雑な形状を記述する新しい数学を拓いた。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     FOOTER
+     ============================================ -->
+<footer id="footer">
+  <div class="footer-container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">Geometry</div>
+        <p class="footer-brand-text">幾何学の美しさを探求するインタラクティブなデジタル体験。数学と芸術の交差点で生まれた作品。</p>
+      </div>
+      <div class="footer-links-group">
+        <div class="footer-links-col">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="#philosophy">Philosophy</a></li>
+            <li><a href="#shapes-gallery">Shapes</a></li>
+            <li><a href="#interactive">Interactive</a></li>
+            <li><a href="#mathematics">Mathematics</a></li>
+          </ul>
+        </div>
+        <div class="footer-links-col">
+          <h4>Discover</h4>
+          <ul>
+            <li><a href="#golden-ratio">Golden Ratio</a></li>
+            <li><a href="#fractals">Fractals</a></li>
+            <li><a href="#polyhedra">Polyhedra</a></li>
+            <li><a href="#timeline">History</a></li>
+          </ul>
+        </div>
+        <div class="footer-links-col">
+          <h4>Symbols</h4>
+          <ul>
+            <li><a href="#">π — 3.14159...</a></li>
+            <li><a href="#">φ — 1.61803...</a></li>
+            <li><a href="#">e — 2.71828...</a></li>
+            <li><a href="#">∞ — Infinity</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copyright">&copy; 2026 Geometry. The Art of Shapes. All rights reserved.</p>
+      <div class="footer-social">
+        <a href="#" aria-label="Share">◯</a>
+        <a href="#" aria-label="Link">△</a>
+        <a href="#" aria-label="More">□</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================
+     JAVASCRIPT — CORE ENGINE
+     ============================================ -->
+<script>
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+const Utils = {
+  lerp(a, b, t) { return a + (b - a) * t; },
+  clamp(val, min, max) { return Math.min(Math.max(val, min), max); },
+  map(val, inMin, inMax, outMin, outMax) {
+    return ((val - inMin) / (inMax - inMin)) * (outMax - outMin) + outMin;
+  },
+  distance(x1, y1, x2, y2) {
+    return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+  },
+  randomRange(min, max) { return Math.random() * (max - min) + min; },
+  randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; },
+  degToRad(deg) { return deg * (Math.PI / 180); },
+  radToDeg(rad) { return rad * (180 / Math.PI); },
+  easeOutExpo(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); },
+  easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; },
+  easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); },
+  easeOutElastic(t) {
+    const c4 = (2 * Math.PI) / 3;
+    return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
+  },
+  easeOutBounce(t) {
+    const n1 = 7.5625, d1 = 2.75;
+    if (t < 1 / d1) return n1 * t * t;
+    else if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
+    else if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
+    else return n1 * (t -= 2.625 / d1) * t + 0.984375;
+  },
+  smoothstep(edge0, edge1, x) {
+    const t = Utils.clamp((x - edge0) / (edge1 - edge0), 0, 1);
+    return t * t * (3 - 2 * t);
+  },
+  getMousePos(canvas, evt) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+  },
+  throttle(func, limit) {
+    let inThrottle;
+    return function(...args) {
+      if (!inThrottle) {
+        func.apply(this, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+      }
+    };
+  },
+  debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+};
+
+// ============================================
+// VECTOR2D CLASS
+// ============================================
+class Vector2D {
+  constructor(x = 0, y = 0) {
+    this.x = x;
+    this.y = y;
+  }
+  add(v) { return new Vector2D(this.x + v.x, this.y + v.y); }
+  sub(v) { return new Vector2D(this.x - v.x, this.y - v.y); }
+  mult(s) { return new Vector2D(this.x * s, this.y * s); }
+  div(s) { return s !== 0 ? new Vector2D(this.x / s, this.y / s) : new Vector2D(); }
+  mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+  normalize() {
+    const m = this.mag();
+    return m !== 0 ? this.div(m) : new Vector2D();
+  }
+  limit(max) {
+    if (this.mag() > max) {
+      return this.normalize().mult(max);
+    }
+    return new Vector2D(this.x, this.y);
+  }
+  dist(v) { return this.sub(v).mag(); }
+  angle() { return Math.atan2(this.y, this.x); }
+  rotate(angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    return new Vector2D(this.x * cos - this.y * sin, this.x * sin + this.y * cos);
+  }
+  dot(v) { return this.x * v.x + this.y * v.y; }
+  copy() { return new Vector2D(this.x, this.y); }
+  static random() {
+    const angle = Math.random() * Math.PI * 2;
+    return new Vector2D(Math.cos(angle), Math.sin(angle));
+  }
+  static fromAngle(angle) {
+    return new Vector2D(Math.cos(angle), Math.sin(angle));
+  }
+}
+
+// ============================================
+// COLOR UTILITY
+// ============================================
+class Color {
+  constructor(r = 0, g = 0, b = 0, a = 1) {
+    this.r = r; this.g = g; this.b = b; this.a = a;
+  }
+  toString() { return `rgba(${this.r},${this.g},${this.b},${this.a})`; }
+  static lerp(c1, c2, t) {
+    return new Color(
+      Math.round(Utils.lerp(c1.r, c2.r, t)),
+      Math.round(Utils.lerp(c1.g, c2.g, t)),
+      Math.round(Utils.lerp(c1.b, c2.b, t)),
+      Utils.lerp(c1.a, c2.a, t)
+    );
+  }
+  static fromHex(hex) {
+    const r = parseInt(hex.slice(1,3),16);
+    const g = parseInt(hex.slice(3,5),16);
+    const b = parseInt(hex.slice(5,7),16);
+    return new Color(r, g, b, 1);
+  }
+  static fromHSL(h, s, l, a = 1) {
+    h /= 360; s /= 100; l /= 100;
+    let r, g, b;
+    if (s === 0) { r = g = b = l; }
+    else {
+      const hue2rgb = (p, q, t) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+    return new Color(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), a);
+  }
+}
+
+// ============================================
+// ANIMATION TIMER
+// ============================================
+class AnimationTimer {
+  constructor() {
+    this.startTime = 0;
+    this.running = false;
+    this.elapsed = 0;
+  }
+  start() { this.startTime = Date.now(); this.running = true; }
+  stop() { this.running = false; this.elapsed = Date.now() - this.startTime; }
+  getElapsed() {
+    return this.running ? Date.now() - this.startTime : this.elapsed;
+  }
+  reset() { this.startTime = Date.now(); this.elapsed = 0; }
+}
+
+// ============================================
+// SPRING PHYSICS
+// ============================================
+class Spring {
+  constructor(stiffness = 0.1, damping = 0.8) {
+    this.stiffness = stiffness;
+    this.damping = damping;
+    this.value = 0;
+    this.target = 0;
+    this.velocity = 0;
+  }
+  update() {
+    const force = (this.target - this.value) * this.stiffness;
+    this.velocity += force;
+    this.velocity *= this.damping;
+    this.value += this.velocity;
+    return this.value;
+  }
+  set(target) { this.target = target; }
+  setImmediate(value) { this.value = value; this.target = value; this.velocity = 0; }
+}
+
+// ============================================
+// PARTICLE CLASS
+// ============================================
+class Particle {
+  constructor(x, y, options = {}) {
+    this.pos = new Vector2D(x, y);
+    this.vel = options.vel || Vector2D.random().mult(Utils.randomRange(0.5, 2));
+    this.acc = new Vector2D();
+    this.size = options.size || Utils.randomRange(1, 4);
+    this.originalSize = this.size;
+    this.color = options.color || new Color(10, 10, 10, 0.6);
+    this.life = options.life || 1;
+    this.maxLife = this.life;
+    this.decay = options.decay || Utils.randomRange(0.001, 0.005);
+    this.friction = options.friction || 0.99;
+    this.shape = options.shape || 'circle';
+    this.rotation = 0;
+    this.rotationSpeed = Utils.randomRange(-0.05, 0.05);
+    this.alive = true;
+    this.trail = [];
+    this.maxTrail = options.maxTrail || 0;
+  }
+
+  applyForce(force) {
+    this.acc = this.acc.add(force);
+  }
+
+  update() {
+    if (!this.alive) return;
+    if (this.maxTrail > 0) {
+      this.trail.push(this.pos.copy());
+      if (this.trail.length > this.maxTrail) this.trail.shift();
+    }
+    this.vel = this.vel.add(this.acc);
+    this.vel = this.vel.mult(this.friction);
+    this.pos = this.pos.add(this.vel);
+    this.acc = new Vector2D();
+    this.rotation += this.rotationSpeed;
+    this.life -= this.decay;
+    if (this.life <= 0) this.alive = false;
+    this.size = this.originalSize * (this.life / this.maxLife);
+  }
+
+  draw(ctx) {
+    if (!this.alive) return;
+    const alpha = this.life / this.maxLife;
+    ctx.save();
+    ctx.globalAlpha = alpha * this.color.a;
+    if (this.trail.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(this.trail[0].x, this.trail[0].y);
+      for (let i = 1; i < this.trail.length; i++) {
+        ctx.lineTo(this.trail[i].x, this.trail[i].y);
+      }
+      ctx.strokeStyle = this.color.toString();
+      ctx.lineWidth = this.size * 0.5;
+      ctx.stroke();
+    }
+    ctx.translate(this.pos.x, this.pos.y);
+    ctx.rotate(this.rotation);
+    ctx.fillStyle = this.color.toString();
+    switch (this.shape) {
+      case 'circle':
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      case 'square':
+        ctx.fillRect(-this.size, -this.size, this.size * 2, this.size * 2);
+        break;
+      case 'triangle':
+        ctx.beginPath();
+        ctx.moveTo(0, -this.size);
+        ctx.lineTo(this.size, this.size);
+        ctx.lineTo(-this.size, this.size);
+        ctx.closePath();
+        ctx.fill();
+        break;
+      case 'ring':
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+        ctx.strokeStyle = this.color.toString();
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        break;
+    }
+    ctx.restore();
+  }
+}
+
+// ============================================
+// PARTICLE SYSTEM
+// ============================================
+class ParticleSystem {
+  constructor() {
+    this.particles = [];
+    this.emitters = [];
+    this.maxParticles = 1000;
+  }
+
+  emit(x, y, count = 1, options = {}) {
+    for (let i = 0; i < count; i++) {
+      if (this.particles.length < this.maxParticles) {
+        this.particles.push(new Particle(x, y, options));
+      }
+    }
+  }
+
+  update() {
+    this.particles = this.particles.filter(p => p.alive);
+    this.particles.forEach(p => p.update());
+  }
+
+  draw(ctx) {
+    this.particles.forEach(p => p.draw(ctx));
+  }
+
+  clear() {
+    this.particles = [];
+  }
+}
+
+// ============================================
+// NOISE (Simplex-like Perlin)
+// ============================================
+class NoiseGenerator {
+  constructor(seed = Math.random()) {
+    this.perm = new Uint8Array(512);
+    this.grad3 = [
+      [1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
+      [1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
+      [0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]
+    ];
+    const p = new Uint8Array(256);
+    for (let i = 0; i < 256; i++) p[i] = i;
+    let n, q;
+    for (let i = 255; i > 0; i--) {
+      n = Math.floor((seed = (seed * 16807) % 2147483647) / 2147483647 * (i + 1));
+      q = p[i]; p[i] = p[n]; p[n] = q;
+    }
+    for (let i = 0; i < 512; i++) this.perm[i] = p[i & 255];
+  }
+
+  dot3(g, x, y, z) { return g[0]*x + g[1]*y + g[2]*z; }
+
+  noise2D(xin, yin) {
+    const F2 = 0.5 * (Math.sqrt(3.0) - 1.0);
+    const G2 = (3.0 - Math.sqrt(3.0)) / 6.0;
+    let n0, n1, n2;
+    const s = (xin + yin) * F2;
+    const i = Math.floor(xin + s);
+    const j = Math.floor(yin + s);
+    const t = (i + j) * G2;
+    const X0 = i - t;
+    const Y0 = j - t;
+    const x0 = xin - X0;
+    const y0 = yin - Y0;
+    let i1, j1;
+    if (x0 > y0) { i1 = 1; j1 = 0; }
+    else { i1 = 0; j1 = 1; }
+    const x1 = x0 - i1 + G2;
+    const y1 = y0 - j1 + G2;
+    const x2 = x0 - 1.0 + 2.0 * G2;
+    const y2 = y0 - 1.0 + 2.0 * G2;
+    const ii = i & 255;
+    const jj = j & 255;
+    const gi0 = this.perm[ii + this.perm[jj]] % 12;
+    const gi1 = this.perm[ii + i1 + this.perm[jj + j1]] % 12;
+    const gi2 = this.perm[ii + 1 + this.perm[jj + 1]] % 12;
+    let t0 = 0.5 - x0*x0 - y0*y0;
+    if (t0 < 0) n0 = 0.0;
+    else { t0 *= t0; n0 = t0 * t0 * this.dot3(this.grad3[gi0], x0, y0, 0); }
+    let t1 = 0.5 - x1*x1 - y1*y1;
+    if (t1 < 0) n1 = 0.0;
+    else { t1 *= t1; n1 = t1 * t1 * this.dot3(this.grad3[gi1], x1, y1, 0); }
+    let t2 = 0.5 - x2*x2 - y2*y2;
+    if (t2 < 0) n2 = 0.0;
+    else { t2 *= t2; n2 = t2 * t2 * this.dot3(this.grad3[gi2], x2, y2, 0); }
+    return 70.0 * (n0 + n1 + n2);
+  }
+
+  fbm(x, y, octaves = 4, lacunarity = 2.0, gain = 0.5) {
+    let total = 0, frequency = 1, amplitude = 1, maxValue = 0;
+    for (let i = 0; i < octaves; i++) {
+      total += this.noise2D(x * frequency, y * frequency) * amplitude;
+      maxValue += amplitude;
+      amplitude *= gain;
+      frequency *= lacunarity;
+    }
+    return total / maxValue;
+  }
+}
+
+const noise = new NoiseGenerator();
+
+// ============================================
+// MATRIX3D for 3D wireframe projection
+// ============================================
+class Matrix3D {
+  static rotateX(angle) {
+    const c = Math.cos(angle), s = Math.sin(angle);
+    return [[1,0,0],[0,c,-s],[0,s,c]];
+  }
+  static rotateY(angle) {
+    const c = Math.cos(angle), s = Math.sin(angle);
+    return [[c,0,s],[0,1,0],[-s,0,c]];
+  }
+  static rotateZ(angle) {
+    const c = Math.cos(angle), s = Math.sin(angle);
+    return [[c,-s,0],[s,c,0],[0,0,1]];
+  }
+  static multiply(m, v) {
+    return [
+      m[0][0]*v[0] + m[0][1]*v[1] + m[0][2]*v[2],
+      m[1][0]*v[0] + m[1][1]*v[1] + m[1][2]*v[2],
+      m[2][0]*v[0] + m[2][1]*v[1] + m[2][2]*v[2]
+    ];
+  }
+  static multiplyMatrices(a, b) {
+    const result = [[0,0,0],[0,0,0],[0,0,0]];
+    for (let i = 0; i < 3; i++)
+      for (let j = 0; j < 3; j++)
+        for (let k = 0; k < 3; k++)
+          result[i][j] += a[i][k] * b[k][j];
+    return result;
+  }
+  static project(point3D, w, h, fov = 400, viewDist = 6) {
+    const factor = fov / (viewDist + point3D[2]);
+    return { x: point3D[0] * factor + w / 2, y: point3D[1] * factor + h / 2, z: point3D[2], factor };
+  }
+}
+
+// ============================================
+// POLYHEDRA DATA
+// ============================================
+const PolyhedraData = {
+  tetrahedron: {
+    vertices: [[1,1,1],[-1,-1,1],[-1,1,-1],[1,-1,-1]],
+    edges: [[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]]
+  },
+  cube: {
+    vertices: [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]],
+    edges: [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]]
+  },
+  octahedron: {
+    vertices: [[0,1,0],[0,-1,0],[1,0,0],[-1,0,0],[0,0,1],[0,0,-1]],
+    edges: [[0,2],[0,3],[0,4],[0,5],[1,2],[1,3],[1,4],[1,5],[2,4],[4,3],[3,5],[5,2]]
+  },
+  dodecahedron: (() => {
+    const phi = (1 + Math.sqrt(5)) / 2;
+    const b = 1 / phi;
+    const c = 2 - phi;
+    const verts = [
+      [1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1],
+      [-1,1,1],[-1,1,-1],[-1,-1,1],[-1,-1,-1],
+      [0,phi,b],[0,phi,-b],[0,-phi,b],[0,-phi,-b],
+      [b,0,phi],[-b,0,phi],[b,0,-phi],[-b,0,-phi],
+      [phi,b,0],[phi,-b,0],[-phi,b,0],[-phi,-b,0]
+    ];
+    const edges = [
+      [0,8],[0,12],[0,16],[1,9],[1,14],[1,16],[2,10],[2,12],[2,17],
+      [3,11],[3,14],[3,17],[4,8],[4,13],[4,18],[5,9],[5,15],[5,18],
+      [6,10],[6,13],[6,19],[7,11],[7,15],[7,19],[8,9],[10,11],
+      [12,13],[14,15],[16,17],[18,19]
+    ];
+    return { vertices: verts, edges };
+  })(),
+  icosahedron: (() => {
+    const phi = (1 + Math.sqrt(5)) / 2;
+    const verts = [
+      [0,1,phi],[0,1,-phi],[0,-1,phi],[0,-1,-phi],
+      [1,phi,0],[1,-phi,0],[-1,phi,0],[-1,-phi,0],
+      [phi,0,1],[phi,0,-1],[-phi,0,1],[-phi,0,-1]
+    ];
+    const edges = [
+      [0,2],[0,4],[0,6],[0,8],[0,10],[1,3],[1,4],[1,6],[1,9],[1,11],
+      [2,5],[2,7],[2,8],[2,10],[3,5],[3,7],[3,9],[3,11],
+      [4,6],[4,8],[4,9],[5,7],[5,8],[5,9],[6,10],[6,11],[7,10],[7,11],
+      [8,9],[10,11]
+    ];
+    return { vertices: verts, edges };
+  })(),
+  sphere: (() => {
+    const verts = [];
+    const edges = [];
+    const segments = 16;
+    const rings = 12;
+    for (let i = 0; i <= rings; i++) {
+      const phi = (Math.PI * i) / rings;
+      for (let j = 0; j < segments; j++) {
+        const theta = (2 * Math.PI * j) / segments;
+        verts.push([
+          1.2 * Math.sin(phi) * Math.cos(theta),
+          1.2 * Math.cos(phi),
+          1.2 * Math.sin(phi) * Math.sin(theta)
+        ]);
+      }
+    }
+    for (let i = 0; i <= rings; i++) {
+      for (let j = 0; j < segments; j++) {
+        const current = i * segments + j;
+        const next = i * segments + (j + 1) % segments;
+        if (i < rings) edges.push([current, current + segments]);
+        edges.push([current, next]);
+      }
+    }
+    return { vertices: verts, edges };
+  })()
+};
+
+// ============================================
+// GLOBAL STATE
+// ============================================
+const State = {
+  mouse: { x: window.innerWidth / 2, y: window.innerHeight / 2, prevX: 0, prevY: 0 },
+  scroll: 0,
+  time: 0,
+  loaded: false,
+  interactiveMode: 'particles',
+  dimensionMode: '2d',
+  symmetryOrder: 6,
+  fps: 60,
+  frameCount: 0,
+  lastFpsUpdate: 0
+};
+
+// ============================================
+// PRELOADER
+// ============================================
+const preloader = {
+  bar: document.getElementById('preloaderBar'),
+  el: document.getElementById('preloader'),
+  progress: 0,
+  targetProgress: 0,
+
+  init() {
+    this.targetProgress = 100;
+    this.animate();
+  },
+
+  animate() {
+    this.progress = Utils.lerp(this.progress, this.targetProgress, 0.03);
+    this.bar.style.width = this.progress + '%';
+    if (this.progress < 99) {
+      requestAnimationFrame(() => this.animate());
+    } else {
+      setTimeout(() => {
+        this.el.classList.add('hidden');
+        State.loaded = true;
+        document.body.style.overflow = '';
+        initAllSections();
+      }, 300);
+    }
+  }
+};
+
+// ============================================
+// CUSTOM CURSOR
+// ============================================
+const cursor = {
+  dot: document.getElementById('cursorDot'),
+  ring: document.getElementById('cursorRing'),
+  pos: { x: 0, y: 0 },
+  ringPos: { x: 0, y: 0 },
+  visible: true,
+
+  init() {
+    document.addEventListener('mousemove', (e) => {
+      State.mouse.prevX = State.mouse.x;
+      State.mouse.prevY = State.mouse.y;
+      State.mouse.x = e.clientX;
+      State.mouse.y = e.clientY;
+      this.pos.x = e.clientX;
+      this.pos.y = e.clientY;
+    });
+    document.addEventListener('mousedown', () => this.dot.classList.add('click'));
+    document.addEventListener('mouseup', () => this.dot.classList.remove('click'));
+
+    const hoverElements = document.querySelectorAll('a, button, .shape-card, .fractal-card, .polyhedra-card, .math-formula-card, .golden-fact');
+    hoverElements.forEach(el => {
+      el.addEventListener('mouseenter', () => this.ring.classList.add('hover'));
+      el.addEventListener('mouseleave', () => this.ring.classList.remove('hover'));
+    });
+
+    this.animate();
+  },
+
+  animate() {
+    this.ringPos.x = Utils.lerp(this.ringPos.x, this.pos.x, 0.12);
+    this.ringPos.y = Utils.lerp(this.ringPos.y, this.pos.y, 0.12);
+    this.dot.style.left = this.pos.x + 'px';
+    this.dot.style.top = this.pos.y + 'px';
+    this.ring.style.left = this.ringPos.x + 'px';
+    this.ring.style.top = this.ringPos.y + 'px';
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// NAVIGATION
+// ============================================
+const navigation = {
+  nav: document.getElementById('main-nav'),
+  menuBtn: document.getElementById('menuBtn'),
+  fullscreenMenu: document.getElementById('fullscreenMenu'),
+  isOpen: false,
+
+  init() {
+    window.addEventListener('scroll', Utils.throttle(() => {
+      State.scroll = window.scrollY;
+      if (State.scroll > 50) {
+        this.nav.classList.add('scrolled');
+      } else {
+        this.nav.classList.remove('scrolled');
+      }
+    }, 16));
+
+    this.menuBtn.addEventListener('click', () => this.toggleMenu());
+
+    document.querySelectorAll('.fullscreen-menu-link').forEach(link => {
+      link.addEventListener('click', () => this.closeMenu());
+    });
+  },
+
+  toggleMenu() {
+    this.isOpen = !this.isOpen;
+    this.menuBtn.classList.toggle('active');
+    this.fullscreenMenu.classList.toggle('active');
+  },
+
+  closeMenu() {
+    this.isOpen = false;
+    this.menuBtn.classList.remove('active');
+    this.fullscreenMenu.classList.remove('active');
+  }
+};
+
+// ============================================
+// SCROLL REVEAL
+// ============================================
+const scrollReveal = {
+  elements: [],
+
+  init() {
+    this.elements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .timeline-item');
+    this.check();
+    window.addEventListener('scroll', Utils.throttle(() => this.check(), 50));
+  },
+
+  check() {
+    this.elements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      const windowH = window.innerHeight;
+      if (rect.top < windowH * 0.85) {
+        el.classList.add('visible');
+      }
+    });
+  }
+};
+
+// ============================================
+// FLOATING BACKGROUND SHAPES
+// ============================================
+const floatingBg = {
+  container: document.getElementById('floatingShapes'),
+
+  init() {
+    const shapes = [
+      { type: 'circle', size: 200, x: '10%', y: '20%', speed: 0.0003 },
+      { type: 'circle', size: 150, x: '80%', y: '30%', speed: 0.0004 },
+      { type: 'circle', size: 100, x: '60%', y: '70%', speed: 0.0005 },
+      { type: 'square', size: 120, x: '30%', y: '60%', speed: 0.0003 },
+      { type: 'square', size: 80, x: '75%', y: '80%', speed: 0.0006 },
+      { type: 'cross', size: 40, x: '15%', y: '50%', speed: 0.0007 },
+      { type: 'cross', size: 30, x: '85%', y: '15%', speed: 0.0004 },
+      { type: 'circle', size: 60, x: '50%', y: '10%', speed: 0.0005 },
+      { type: 'square', size: 90, x: '40%', y: '85%', speed: 0.0003 },
+    ];
+
+    shapes.forEach((s, i) => {
+      const el = document.createElement('div');
+      el.className = `float-shape float-${s.type}`;
+      el.style.width = s.size + 'px';
+      el.style.height = s.size + 'px';
+      el.style.left = s.x;
+      el.style.top = s.y;
+      el.dataset.speed = s.speed;
+      el.dataset.index = i;
+      this.container.appendChild(el);
+    });
+
+    this.animate();
+  },
+
+  animate() {
+    const t = Date.now();
+    this.container.querySelectorAll('.float-shape').forEach(el => {
+      const speed = parseFloat(el.dataset.speed);
+      const idx = parseInt(el.dataset.index);
+      const offsetX = Math.sin(t * speed + idx) * 20;
+      const offsetY = Math.cos(t * speed * 0.7 + idx * 2) * 15;
+      const rotate = Math.sin(t * speed * 0.5 + idx * 3) * 10;
+      el.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${rotate}deg)`;
+    });
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// PARALLAX SHAPES
+// ============================================
+const parallaxShapes = {
+  elements: [],
+
+  init() {
+    this.elements = document.querySelectorAll('.parallax-shape');
+    window.addEventListener('mousemove', Utils.throttle((e) => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const dx = (e.clientX - cx) / cx;
+      const dy = (e.clientY - cy) / cy;
+
+      this.elements.forEach(el => {
+        const speed = parseFloat(el.dataset.speed) || 2;
+        const x = dx * speed * 10;
+        const y = dy * speed * 10;
+        el.style.transform = `translate(${x}px, ${y}px)`;
+      });
+    }, 16));
+  }
+};
+
+// ============================================
+// CANVAS: HERO
+// ============================================
+const heroCanvas = {
+  canvas: null,
+  ctx: null,
+  shapes: [],
+  lines: [],
+
+  init() {
+    this.canvas = document.getElementById('heroCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', Utils.debounce(() => this.resize(), 200));
+    this.createShapes();
+    this.animate();
+  },
+
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.height = rect.height + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.w = rect.width;
+    this.h = rect.height;
+  },
+
+  createShapes() {
+    this.shapes = [];
+    const count = 40;
+    for (let i = 0; i < count; i++) {
+      const types = ['circle', 'square', 'triangle', 'ring', 'cross', 'diamond', 'line'];
+      this.shapes.push({
+        x: Utils.randomRange(0, this.w),
+        y: Utils.randomRange(0, this.h),
+        size: Utils.randomRange(4, 40),
+        type: types[Utils.randomInt(0, types.length - 1)],
+        rotation: Utils.randomRange(0, Math.PI * 2),
+        rotationSpeed: Utils.randomRange(-0.005, 0.005),
+        speedX: Utils.randomRange(-0.3, 0.3),
+        speedY: Utils.randomRange(-0.3, 0.3),
+        opacity: Utils.randomRange(0.02, 0.08),
+        phase: Utils.randomRange(0, Math.PI * 2),
+        breathSpeed: Utils.randomRange(0.001, 0.003)
+      });
+    }
+
+    // Grid dots
+    this.gridDots = [];
+    const spacing = 60;
+    for (let x = spacing; x < this.w; x += spacing) {
+      for (let y = spacing; y < this.h; y += spacing) {
+        this.gridDots.push({ x, y, baseOpacity: 0.03 });
+      }
+    }
+  },
+
+  drawShape(ctx, shape, time) {
+    ctx.save();
+    ctx.translate(shape.x, shape.y);
+    ctx.rotate(shape.rotation);
+
+    const breathe = 1 + Math.sin(time * shape.breathSpeed + shape.phase) * 0.15;
+    const size = shape.size * breathe;
+
+    ctx.globalAlpha = shape.opacity;
+    ctx.strokeStyle = '#0a0a0a';
+    ctx.fillStyle = '#0a0a0a';
+    ctx.lineWidth = 0.8;
+
+    switch (shape.type) {
+      case 'circle':
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+        ctx.stroke();
+        break;
+      case 'square':
+        ctx.strokeRect(-size/2, -size/2, size, size);
+        break;
+      case 'triangle':
+        ctx.beginPath();
+        ctx.moveTo(0, -size);
+        ctx.lineTo(size * 0.866, size * 0.5);
+        ctx.lineTo(-size * 0.866, size * 0.5);
+        ctx.closePath();
+        ctx.stroke();
+        break;
+      case 'ring':
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 0.6, 0, Math.PI * 2);
+        ctx.stroke();
+        break;
+      case 'cross':
+        ctx.beginPath();
+        ctx.moveTo(-size, 0);
+        ctx.lineTo(size, 0);
+        ctx.moveTo(0, -size);
+        ctx.lineTo(0, size);
+        ctx.stroke();
+        break;
+      case 'diamond':
+        ctx.beginPath();
+        ctx.moveTo(0, -size);
+        ctx.lineTo(size * 0.6, 0);
+        ctx.lineTo(0, size);
+        ctx.lineTo(-size * 0.6, 0);
+        ctx.closePath();
+        ctx.stroke();
+        break;
+      case 'line':
+        ctx.beginPath();
+        ctx.moveTo(-size, 0);
+        ctx.lineTo(size, 0);
+        ctx.stroke();
+        break;
+    }
+    ctx.restore();
+  },
+
+  animate() {
+    const time = Date.now();
+    this.ctx.clearRect(0, 0, this.w, this.h);
+
+    // Draw grid dots with mouse proximity effect
+    this.gridDots.forEach(dot => {
+      const dist = Utils.distance(State.mouse.x, State.mouse.y, dot.x, dot.y);
+      const proximity = Math.max(0, 1 - dist / 200);
+      const opacity = dot.baseOpacity + proximity * 0.15;
+      const size = 1 + proximity * 3;
+      this.ctx.globalAlpha = opacity;
+      this.ctx.fillStyle = proximity > 0.1 ? '#c9a84c' : '#0a0a0a';
+      this.ctx.beginPath();
+      this.ctx.arc(dot.x, dot.y, size, 0, Math.PI * 2);
+      this.ctx.fill();
+    });
+
+    // Draw connecting lines near mouse
+    this.ctx.globalAlpha = 0.04;
+    this.ctx.strokeStyle = '#c9a84c';
+    this.ctx.lineWidth = 0.5;
+    const nearDots = this.gridDots.filter(d => Utils.distance(State.mouse.x, State.mouse.y, d.x, d.y) < 150);
+    for (let i = 0; i < nearDots.length; i++) {
+      for (let j = i + 1; j < nearDots.length; j++) {
+        if (Utils.distance(nearDots[i].x, nearDots[i].y, nearDots[j].x, nearDots[j].y) < 80) {
+          this.ctx.beginPath();
+          this.ctx.moveTo(nearDots[i].x, nearDots[i].y);
+          this.ctx.lineTo(nearDots[j].x, nearDots[j].y);
+          this.ctx.stroke();
+        }
+      }
+    }
+
+    // Draw shapes
+    this.shapes.forEach(shape => {
+      shape.x += shape.speedX;
+      shape.y += shape.speedY;
+      shape.rotation += shape.rotationSpeed;
+      if (shape.x < -50) shape.x = this.w + 50;
+      if (shape.x > this.w + 50) shape.x = -50;
+      if (shape.y < -50) shape.y = this.h + 50;
+      if (shape.y > this.h + 50) shape.y = -50;
+      this.drawShape(this.ctx, shape, time);
+    });
+
+    // Central geometric composition
+    const cx = this.w / 2;
+    const cy = this.h / 2;
+    const t = time * 0.001;
+
+    // Rotating circle
+    this.ctx.save();
+    this.ctx.translate(cx, cy);
+    this.ctx.rotate(t * 0.1);
+    this.ctx.globalAlpha = 0.04;
+    this.ctx.strokeStyle = '#0a0a0a';
+    this.ctx.lineWidth = 1;
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, 200, 0, Math.PI * 2);
+    this.ctx.stroke();
+
+    // Inner rotating square
+    this.ctx.rotate(t * -0.15);
+    this.ctx.strokeRect(-140, -140, 280, 280);
+
+    // Smaller elements
+    this.ctx.rotate(t * 0.2);
+    this.ctx.globalAlpha = 0.03;
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, 120, 0, Math.PI * 2);
+    this.ctx.stroke();
+
+    // Triangle
+    this.ctx.rotate(t * -0.08);
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, -160);
+    this.ctx.lineTo(138.6, 80);
+    this.ctx.lineTo(-138.6, 80);
+    this.ctx.closePath();
+    this.ctx.stroke();
+
+    this.ctx.restore();
+
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// CANVAS: INTERACTIVE
+// ============================================
+const interactiveCanvas = {
+  canvas: null,
+  ctx: null,
+  particles: [],
+  waves: [],
+  constellation: [],
+  voronoiPoints: [],
+
+  init() {
+    this.canvas = document.getElementById('interactiveCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', Utils.debounce(() => this.resize(), 200));
+
+    // Controls
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        State.interactiveMode = btn.dataset.mode;
+        document.getElementById('modeLabel').textContent = btn.textContent;
+        this.reset();
+      });
+    });
+
+    // Mouse interaction
+    this.canvas.addEventListener('mousemove', (e) => {
+      const pos = Utils.getMousePos(this.canvas, e);
+      this.mouseX = pos.x;
+      this.mouseY = pos.y;
+      this.handleMouseMove(pos);
+    });
+
+    this.canvas.addEventListener('click', (e) => {
+      const pos = Utils.getMousePos(this.canvas, e);
+      this.handleClick(pos);
+    });
+
+    this.mouseX = this.w / 2;
+    this.mouseY = this.h / 2;
+    this.reset();
+    this.animate();
+  },
+
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.height = rect.height + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.w = rect.width;
+    this.h = rect.height;
+  },
+
+  reset() {
+    this.particles = [];
+    this.waves = [];
+    this.constellation = [];
+    this.voronoiPoints = [];
+
+    switch (State.interactiveMode) {
+      case 'particles':
+        for (let i = 0; i < 200; i++) {
+          this.particles.push({
+            x: Utils.randomRange(0, this.w),
+            y: Utils.randomRange(0, this.h),
+            vx: Utils.randomRange(-0.5, 0.5),
+            vy: Utils.randomRange(-0.5, 0.5),
+            size: Utils.randomRange(1, 3),
+            type: ['circle', 'square', 'triangle'][Utils.randomInt(0, 2)],
+            opacity: Utils.randomRange(0.2, 0.6)
+          });
+        }
+        break;
+      case 'waves':
+        for (let i = 0; i < 30; i++) {
+          this.waves.push({
+            amplitude: Utils.randomRange(10, 50),
+            frequency: Utils.randomRange(0.005, 0.02),
+            phase: Utils.randomRange(0, Math.PI * 2),
+            speed: Utils.randomRange(0.01, 0.03),
+            y: (this.h / 32) * i + 20,
+            opacity: Utils.randomRange(0.05, 0.2)
+          });
+        }
+        break;
+      case 'constellation':
+        for (let i = 0; i < 120; i++) {
+          this.constellation.push({
+            x: Utils.randomRange(0, this.w),
+            y: Utils.randomRange(0, this.h),
+            vx: Utils.randomRange(-0.2, 0.2),
+            vy: Utils.randomRange(-0.2, 0.2),
+            size: Utils.randomRange(1, 3),
+            opacity: Utils.randomRange(0.3, 0.8),
+            pulse: Utils.randomRange(0, Math.PI * 2)
+          });
+        }
+        break;
+      case 'voronoi':
+        for (let i = 0; i < 40; i++) {
+          this.voronoiPoints.push({
+            x: Utils.randomRange(20, this.w - 20),
+            y: Utils.randomRange(20, this.h - 20),
+            vx: Utils.randomRange(-0.3, 0.3),
+            vy: Utils.randomRange(-0.3, 0.3),
+            color: `rgba(${Utils.randomInt(0,50)},${Utils.randomInt(0,50)},${Utils.randomInt(0,50)},0.04)`
+          });
+        }
+        break;
+    }
+  },
+
+  handleMouseMove(pos) {
+    if (State.interactiveMode === 'particles') {
+      const shapes = ['circle', 'square', 'triangle'];
+      if (Math.random() > 0.7) {
+        this.particles.push({
+          x: pos.x + Utils.randomRange(-20, 20),
+          y: pos.y + Utils.randomRange(-20, 20),
+          vx: Utils.randomRange(-1, 1),
+          vy: Utils.randomRange(-1, 1),
+          size: Utils.randomRange(1, 4),
+          type: shapes[Utils.randomInt(0, 2)],
+          opacity: 0.5,
+          life: 1,
+          decay: 0.005
+        });
+        if (this.particles.length > 500) this.particles.shift();
+      }
+    }
+  },
+
+  handleClick(pos) {
+    if (State.interactiveMode === 'particles') {
+      for (let i = 0; i < 30; i++) {
+        const angle = (Math.PI * 2 * i) / 30;
+        const speed = Utils.randomRange(1, 5);
+        this.particles.push({
+          x: pos.x,
+          y: pos.y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Utils.randomRange(2, 6),
+          type: ['circle', 'square', 'triangle'][Utils.randomInt(0, 2)],
+          opacity: 0.8,
+          life: 1,
+          decay: 0.01
+        });
+      }
+      if (this.particles.length > 600) this.particles.splice(0, 50);
+    } else if (State.interactiveMode === 'waves') {
+      this.waves.push({
+        amplitude: Utils.randomRange(20, 60),
+        frequency: Utils.randomRange(0.01, 0.03),
+        phase: 0,
+        speed: Utils.randomRange(0.02, 0.05),
+        y: pos.y,
+        opacity: 0.3,
+        centerX: pos.x
+      });
+    } else if (State.interactiveMode === 'constellation') {
+      for (let i = 0; i < 10; i++) {
+        this.constellation.push({
+          x: pos.x + Utils.randomRange(-30, 30),
+          y: pos.y + Utils.randomRange(-30, 30),
+          vx: Utils.randomRange(-0.5, 0.5),
+          vy: Utils.randomRange(-0.5, 0.5),
+          size: Utils.randomRange(1, 4),
+          opacity: 0.8,
+          pulse: 0
+        });
+      }
+    } else if (State.interactiveMode === 'voronoi') {
+      this.voronoiPoints.push({
+        x: pos.x, y: pos.y,
+        vx: Utils.randomRange(-0.5, 0.5), vy: Utils.randomRange(-0.5, 0.5),
+        color: `rgba(${Utils.randomInt(150,200)},${Utils.randomInt(130,170)},${Utils.randomInt(50,100)},0.06)`
+      });
+    }
+  },
+
+  drawParticles(time) {
+    const ctx = this.ctx;
+    let aliveCount = 0;
+
+    this.particles.forEach((p, i) => {
+      if (p.life !== undefined) {
+        p.life -= p.decay;
+        if (p.life <= 0) return;
+        p.opacity = p.life;
+      }
+      aliveCount++;
+
+      // Mouse repulsion
+      const dx = p.x - this.mouseX;
+      const dy = p.y - this.mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 100 && dist > 0) {
+        const force = (100 - dist) / 100 * 0.5;
+        p.vx += (dx / dist) * force;
+        p.vy += (dy / dist) * force;
+      }
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.99;
+      p.vy *= 0.99;
+
+      if (p.x < 0) p.x = this.w;
+      if (p.x > this.w) p.x = 0;
+      if (p.y < 0) p.y = this.h;
+      if (p.y > this.h) p.y = 0;
+
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = '#0a0a0a';
+      ctx.strokeStyle = '#0a0a0a';
+      ctx.lineWidth = 0.8;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(time * 0.001 + i);
+
+      switch (p.type) {
+        case 'circle':
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+        case 'square':
+          ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2);
+          break;
+        case 'triangle':
+          ctx.beginPath();
+          ctx.moveTo(0, -p.size * 1.5);
+          ctx.lineTo(p.size * 1.3, p.size);
+          ctx.lineTo(-p.size * 1.3, p.size);
+          ctx.closePath();
+          ctx.fill();
+          break;
+      }
+      ctx.restore();
+    });
+
+    // Clean up dead particles
+    this.particles = this.particles.filter(p => p.life === undefined || p.life > 0);
+    document.getElementById('shapeCount').textContent = aliveCount;
+  },
+
+  drawWaves(time) {
+    const ctx = this.ctx;
+    let count = 0;
+
+    this.waves.forEach(wave => {
+      ctx.globalAlpha = wave.opacity;
+      ctx.strokeStyle = '#0a0a0a';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+
+      const mouseInfluence = Math.abs(this.mouseY - wave.y) < 80 ? (1 - Math.abs(this.mouseY - wave.y) / 80) : 0;
+      const amp = wave.amplitude * (1 + mouseInfluence * 1.5);
+
+      for (let x = 0; x <= this.w; x += 2) {
+        const y = wave.y + Math.sin(x * wave.frequency + time * wave.speed + wave.phase) * amp;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+        count++;
+      }
+      ctx.stroke();
+    });
+
+    document.getElementById('shapeCount').textContent = count;
+  },
+
+  drawConstellation(time) {
+    const ctx = this.ctx;
+    const maxDist = 120;
+
+    this.constellation.forEach(star => {
+      star.x += star.vx;
+      star.y += star.vy;
+      star.pulse += 0.02;
+      if (star.x < 0) star.x = this.w;
+      if (star.x > this.w) star.x = 0;
+      if (star.y < 0) star.y = this.h;
+      if (star.y > this.h) star.y = 0;
+
+      const pulseSize = star.size * (1 + Math.sin(star.pulse) * 0.3);
+      ctx.globalAlpha = star.opacity * (0.7 + Math.sin(star.pulse) * 0.3);
+      ctx.fillStyle = '#0a0a0a';
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, pulseSize, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Draw connections
+    for (let i = 0; i < this.constellation.length; i++) {
+      for (let j = i + 1; j < this.constellation.length; j++) {
+        const a = this.constellation[i];
+        const b = this.constellation[j];
+        const dist = Utils.distance(a.x, a.y, b.x, b.y);
+        if (dist < maxDist) {
+          const alpha = (1 - dist / maxDist) * 0.15;
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = '#0a0a0a';
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Mouse connections
+    this.constellation.forEach(star => {
+      const dist = Utils.distance(star.x, star.y, this.mouseX, this.mouseY);
+      if (dist < 150) {
+        const alpha = (1 - dist / 150) * 0.3;
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = '#c9a84c';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(star.x, star.y);
+        ctx.lineTo(this.mouseX, this.mouseY);
+        ctx.stroke();
+      }
+    });
+
+    document.getElementById('shapeCount').textContent = this.constellation.length;
+  },
+
+  drawVoronoi(time) {
+    const ctx = this.ctx;
+    const w = this.w;
+    const h = this.h;
+    const resolution = 4;
+
+    this.voronoiPoints.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > w) p.vx *= -1;
+      if (p.y < 0 || p.y > h) p.vy *= -1;
+    });
+
+    // Draw cell boundaries
+    for (let x = 0; x < w; x += resolution) {
+      for (let y = 0; y < h; y += resolution) {
+        let minDist = Infinity;
+        let secondDist = Infinity;
+        let closestIdx = 0;
+
+        for (let i = 0; i < this.voronoiPoints.length; i++) {
+          const d = Utils.distance(x, y, this.voronoiPoints[i].x, this.voronoiPoints[i].y);
+          if (d < minDist) {
+            secondDist = minDist;
+            minDist = d;
+            closestIdx = i;
+          } else if (d < secondDist) {
+            secondDist = d;
+          }
+        }
+
+        const edge = secondDist - minDist;
+        if (edge < 6) {
+          const alpha = Utils.map(edge, 0, 6, 0.3, 0);
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = '#0a0a0a';
+          ctx.fillRect(x, y, resolution, resolution);
+        }
+      }
+    }
+
+    // Draw points
+    this.voronoiPoints.forEach(p => {
+      ctx.globalAlpha = 0.8;
+      ctx.fillStyle = '#c9a84c';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    document.getElementById('shapeCount').textContent = this.voronoiPoints.length;
+  },
+
+  animate() {
+    const time = Date.now();
+    this.ctx.clearRect(0, 0, this.w, this.h);
+
+    switch (State.interactiveMode) {
+      case 'particles': this.drawParticles(time); break;
+      case 'waves': this.drawWaves(time); break;
+      case 'constellation': this.drawConstellation(time); break;
+      case 'voronoi': this.drawVoronoi(time); break;
+    }
+
+    // FPS counter
+    State.frameCount++;
+    if (time - State.lastFpsUpdate > 500) {
+      State.fps = Math.round(State.frameCount / ((time - State.lastFpsUpdate) / 1000));
+      State.frameCount = 0;
+      State.lastFpsUpdate = time;
+      document.getElementById('fpsCounter').textContent = State.fps;
+    }
+
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// CANVAS: MATH (Lissajous)
+// ============================================
+const mathCanvas = {
+  canvas: null, ctx: null,
+
+  init() {
+    this.canvas = document.getElementById('mathCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', Utils.debounce(() => this.resize(), 200));
+    this.animate();
+  },
+
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.height = rect.height + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.w = rect.width;
+    this.h = rect.height;
+  },
+
+  animate() {
+    const ctx = this.ctx;
+    const t = Date.now() * 0.0005;
+    ctx.fillStyle = 'rgba(26,26,26,0.08)';
+    ctx.fillRect(0, 0, this.w, this.h);
+
+    const cx = this.w / 2;
+    const cy = this.h / 2;
+    const radius = Math.min(cx, cy) * 0.75;
+
+    // Lissajous curve
+    ctx.strokeStyle = 'rgba(201,168,76,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const a = 3, b = 4;
+    for (let i = 0; i <= 628; i++) {
+      const angle = i * 0.01;
+      const x = cx + radius * Math.sin(a * angle + t);
+      const y = cy + radius * Math.sin(b * angle);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Secondary curve
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    for (let i = 0; i <= 628; i++) {
+      const angle = i * 0.01;
+      const x = cx + radius * 0.8 * Math.sin(5 * angle + t * 1.3);
+      const y = cy + radius * 0.8 * Math.sin(4 * angle + t * 0.7);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Rose curve
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    const k = 5/3;
+    for (let i = 0; i <= 1884; i++) {
+      const angle = i * 0.01;
+      const r = radius * 0.6 * Math.cos(k * angle + t * 0.5);
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Moving dot on main curve
+    const dotAngle = t * 2;
+    const dotX = cx + radius * Math.sin(a * dotAngle + t);
+    const dotY = cy + radius * Math.sin(b * dotAngle);
+    ctx.fillStyle = '#c9a84c';
+    ctx.globalAlpha = 1;
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dot glow
+    const gradient = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, 20);
+    gradient.addColorStop(0, 'rgba(201,168,76,0.3)');
+    gradient.addColorStop(1, 'rgba(201,168,76,0)');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 20, 0, Math.PI * 2);
+    ctx.fill();
+
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// CANVAS: GOLDEN RATIO SPIRAL
+// ============================================
+const goldenCanvas = {
+  canvas: null, ctx: null,
+
+  init() {
+    this.canvas = document.getElementById('goldenCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', Utils.debounce(() => this.resize(), 200));
+    this.animate();
+  },
+
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.height = rect.height + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.w = rect.width;
+    this.h = rect.height;
+  },
+
+  animate() {
+    const ctx = this.ctx;
+    const t = Date.now() * 0.001;
+    ctx.clearRect(0, 0, this.w, this.h);
+
+    const cx = this.w / 2;
+    const cy = this.h / 2;
+    const phi = (1 + Math.sqrt(5)) / 2;
+
+    // Golden rectangles
+    const drawGoldenRects = (x, y, size, depth, rotation) => {
+      if (depth <= 0 || size < 2) return;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation + t * 0.05);
+
+      const alpha = Utils.map(depth, 0, 10, 0.02, 0.15);
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = '#c9a84c';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-size/2, -size/(2*phi), size, size/phi);
+
+      // Arc inside
+      ctx.beginPath();
+      ctx.arc(-size/2 + size/phi, -size/(2*phi), size/phi, 0, Math.PI/2);
+      ctx.stroke();
+
+      const newSize = size / phi;
+      drawGoldenRects(size/2 - newSize/2, 0, newSize, depth - 1, Math.PI / 2);
+      ctx.restore();
+    };
+
+    drawGoldenRects(cx, cy, Math.min(this.w, this.h) * 0.7, 10, 0);
+
+    // Golden spiral
+    ctx.globalAlpha = 0.5;
+    ctx.strokeStyle = '#c9a84c';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const spiralTurns = 6;
+    const spiralPoints = 500;
+    const maxRadius = Math.min(this.w, this.h) * 0.35;
+
+    for (let i = 0; i <= spiralPoints; i++) {
+      const angle = (i / spiralPoints) * spiralTurns * Math.PI * 2 + t * 0.3;
+      const r = maxRadius * Math.pow(phi, (angle - t * 0.3) / (Math.PI * 2) - spiralTurns) * Math.pow(phi, spiralTurns);
+      const normalized = r / maxRadius;
+      if (normalized > 1.2) continue;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Fibonacci numbers on spiral
+    const fibs = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
+    ctx.font = '12px "Courier New"';
+    ctx.fillStyle = '#c9a84c';
+    fibs.forEach((fib, idx) => {
+      const angle = idx * 0.8 + t * 0.3;
+      const r = 30 + idx * 25;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      ctx.globalAlpha = 0.3 + Math.sin(t + idx) * 0.15;
+      ctx.fillText(fib, x, y);
+    });
+
+    // Decorative circles at golden angle
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+    ctx.globalAlpha = 0.1;
+    for (let i = 0; i < 80; i++) {
+      const angle = i * goldenAngle + t * 0.1;
+      const r = Math.sqrt(i) * 20;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      const dotSize = 1.5 + (i / 80) * 3;
+      ctx.fillStyle = i % 3 === 0 ? '#c9a84c' : '#0a0a0a';
+      ctx.globalAlpha = 0.08 + (i / 80) * 0.15;
+      ctx.beginPath();
+      ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// CANVAS: DIMENSIONS
+// ============================================
+const dimensionsCanvas = {
+  canvas: null, ctx: null,
+
+  init() {
+    this.canvas = document.getElementById('dimensionsCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', Utils.debounce(() => this.resize(), 200));
+
+    document.querySelectorAll('.dim-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.dim-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        State.dimensionMode = tab.dataset.dim;
+      });
+    });
+
+    this.animate();
+  },
+
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.height = rect.height + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.w = rect.width;
+    this.h = rect.height;
+  },
+
+  draw2D(t) {
+    const ctx = this.ctx;
+    const cx = this.w / 2;
+    const cy = this.h / 2;
+
+    // Rotating 2D shapes composition
+    const shapes2D = [
+      { sides: 3, r: 60, dist: 0, speed: 0.3, color: '#0a0a0a' },
+      { sides: 4, r: 80, dist: 140, speed: -0.2, color: '#4a4a4a' },
+      { sides: 5, r: 50, dist: 100, speed: 0.15, color: '#6e6e6e' },
+      { sides: 6, r: 70, dist: 180, speed: -0.1, color: '#a0a0a0' },
+      { sides: 8, r: 40, dist: 220, speed: 0.25, color: '#c9a84c' },
+    ];
+
+    shapes2D.forEach((shape, idx) => {
+      const orbitAngle = t * shape.speed + (idx * Math.PI * 2 / shapes2D.length);
+      const sx = cx + Math.cos(orbitAngle) * shape.dist;
+      const sy = cy + Math.sin(orbitAngle) * shape.dist;
+
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(t * shape.speed * 2);
+      ctx.globalAlpha = 0.3;
+      ctx.strokeStyle = shape.color;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i <= shape.sides; i++) {
+        const angle = (Math.PI * 2 * i) / shape.sides - Math.PI / 2;
+        const x = Math.cos(angle) * shape.r;
+        const y = Math.sin(angle) * shape.r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Inner pattern
+      ctx.globalAlpha = 0.1;
+      ctx.beginPath();
+      for (let i = 0; i < shape.sides; i++) {
+        for (let j = i + 2; j < shape.sides; j++) {
+          const a1 = (Math.PI * 2 * i) / shape.sides - Math.PI / 2;
+          const a2 = (Math.PI * 2 * j) / shape.sides - Math.PI / 2;
+          ctx.moveTo(Math.cos(a1) * shape.r, Math.sin(a1) * shape.r);
+          ctx.lineTo(Math.cos(a2) * shape.r, Math.sin(a2) * shape.r);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+    });
+  },
+
+  draw3D(t) {
+    const ctx = this.ctx;
+    const cx = this.w / 2;
+    const cy = this.h / 2;
+
+    const rotX = Matrix3D.rotateX(t * 0.3);
+    const rotY = Matrix3D.rotateY(t * 0.5);
+    const rotZ = Matrix3D.rotateZ(t * 0.2);
+    const rot = Matrix3D.multiplyMatrices(Matrix3D.multiplyMatrices(rotX, rotY), rotZ);
+
+    // Draw a cube wireframe
+    const data = PolyhedraData.icosahedron;
+    const scale = 1.5;
+    const projected = data.vertices.map(v => {
+      const scaled = [v[0] * scale, v[1] * scale, v[2] * scale];
+      const rotated = Matrix3D.multiply(rot, scaled);
+      return Matrix3D.project(rotated, cx * 2, cy * 2, 500, 5);
+    });
+
+    // Draw edges
+    data.edges.forEach(([a, b]) => {
+      const pa = projected[a];
+      const pb = projected[b];
+      const avgZ = (pa.z + pb.z) / 2;
+      const alpha = Utils.map(avgZ, -3, 3, 0.5, 0.1);
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = '#0a0a0a';
+      ctx.lineWidth = Utils.map(avgZ, -3, 3, 2, 0.5);
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+    });
+
+    // Draw vertices
+    projected.forEach(p => {
+      const alpha = Utils.map(p.z, -3, 3, 0.8, 0.2);
+      const size = Utils.map(p.z, -3, 3, 4, 1.5);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#c9a84c';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  },
+
+  draw4D(t) {
+    const ctx = this.ctx;
+    const cx = this.w / 2;
+    const cy = this.h / 2;
+
+    // Tesseract (4D hypercube)
+    const verts4D = [];
+    for (let i = 0; i < 16; i++) {
+      verts4D.push([
+        (i & 1) ? 1 : -1,
+        (i & 2) ? 1 : -1,
+        (i & 4) ? 1 : -1,
+        (i & 8) ? 1 : -1
+      ]);
+    }
+
+    const edges4D = [];
+    for (let i = 0; i < 16; i++) {
+      for (let j = i + 1; j < 16; j++) {
+        let diff = 0;
+        for (let k = 0; k < 4; k++) {
+          if (verts4D[i][k] !== verts4D[j][k]) diff++;
+        }
+        if (diff === 1) edges4D.push([i, j]);
+      }
+    }
+
+    // 4D rotation
+    const cos1 = Math.cos(t * 0.3), sin1 = Math.sin(t * 0.3);
+    const cos2 = Math.cos(t * 0.5), sin2 = Math.sin(t * 0.5);
+
+    const projected = verts4D.map(v => {
+      // Rotate in XW plane
+      let x = v[0] * cos1 - v[3] * sin1;
+      let y = v[1];
+      let z = v[2];
+      let w = v[0] * sin1 + v[3] * cos1;
+
+      // Rotate in YZ plane
+      let y2 = y * cos2 - z * sin2;
+      let z2 = y * sin2 + z * cos2;
+
+      // 4D to 3D
+      const scale4D = 2 / (3 - w);
+      let x3 = x * scale4D;
+      let y3 = y2 * scale4D;
+      let z3 = z2 * scale4D;
+
+      // 3D rotation
+      const rotY = Matrix3D.rotateY(t * 0.2);
+      const rotated = Matrix3D.multiply(rotY, [x3, y3, z3]);
+
+      return Matrix3D.project(rotated, cx * 2, cy * 2, 400, 4);
+    });
+
+    edges4D.forEach(([a, b]) => {
+      const pa = projected[a];
+      const pb = projected[b];
+      ctx.globalAlpha = 0.25;
+      ctx.strokeStyle = '#0a0a0a';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+    });
+
+    projected.forEach(p => {
+      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = '#c9a84c';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  },
+
+  animate() {
+    const t = Date.now() * 0.001;
+    this.ctx.clearRect(0, 0, this.w, this.h);
+
+    switch (State.dimensionMode) {
+      case '2d': this.draw2D(t); break;
+      case '3d': this.draw3D(t); break;
+      case '4d': this.draw4D(t); break;
+    }
+
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// CANVAS: TESSELLATION
+// ============================================
+const tessCanvas = {
+  canvas: null, ctx: null,
+
+  init() {
+    this.canvas = document.getElementById('tessCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', Utils.debounce(() => this.resize(), 200));
+    this.animate();
+  },
+
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.height = rect.height + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.w = rect.width;
+    this.h = rect.height;
+  },
+
+  drawHexTessellation(t) {
+    const ctx = this.ctx;
+    const size = 40;
+    const w = size * Math.sqrt(3);
+    const h = size * 2;
+
+    for (let row = -1; row < this.h / (h * 0.75) + 2; row++) {
+      for (let col = -1; col < this.w / w + 2; col++) {
+        const offsetX = row % 2 === 0 ? 0 : w / 2;
+        const cx = col * w + offsetX;
+        const cy = row * h * 0.75;
+
+        const dist = Utils.distance(cx, cy, State.mouse.x, State.mouse.y - this.canvas.getBoundingClientRect().top);
+        const proximity = Math.max(0, 1 - dist / 200);
+        const scale = 1 - proximity * 0.3;
+        const rotation = proximity * Math.sin(t * 2 + col + row) * 0.3;
+
+        const nVal = noise.noise2D(cx * 0.005 + t * 0.2, cy * 0.005) * 0.5 + 0.5;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rotation);
+        ctx.scale(scale, scale);
+
+        ctx.globalAlpha = 0.08 + nVal * 0.15 + proximity * 0.2;
+        ctx.strokeStyle = proximity > 0.1 ? '#c9a84c' : '#0a0a0a';
+        ctx.lineWidth = proximity > 0.1 ? 1.5 : 0.8;
+
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i - Math.PI / 6;
+          const px = Math.cos(angle) * size;
+          const py = Math.sin(angle) * size;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Inner hexagon
+        if (proximity > 0.05) {
+          ctx.globalAlpha = proximity * 0.15;
+          ctx.beginPath();
+          for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i - Math.PI / 6 + t * 0.5;
+            const px = Math.cos(angle) * size * 0.5;
+            const py = Math.sin(angle) * size * 0.5;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+    }
+  },
+
+  animate() {
+    const t = Date.now() * 0.001;
+    this.ctx.clearRect(0, 0, this.w, this.h);
+    this.drawHexTessellation(t);
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// CANVAS: SYMMETRY
+// ============================================
+const symmetryCanvases = {
+  canvases: [],
+
+  init() {
+    this.canvases = document.querySelectorAll('.symmetry-canvas');
+    this.canvases.forEach(canvas => {
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      ctx.scale(dpr, dpr);
+      canvas._w = rect.width;
+      canvas._h = rect.height;
+      canvas._ctx = ctx;
+    });
+
+    document.getElementById('symmetryOrder').addEventListener('input', (e) => {
+      State.symmetryOrder = parseInt(e.target.value);
+    });
+
+    this.animate();
+  },
+
+  drawSymmetry(canvas, time) {
+    const ctx = canvas._ctx;
+    const w = canvas._w;
+    const h = canvas._h;
+    const type = canvas.dataset.symmetry;
+    const order = parseInt(canvas.dataset.order) || State.symmetryOrder;
+
+    ctx.clearRect(0, 0, w, h);
+    const cx = w / 2;
+    const cy = h / 2;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    const angleStep = (Math.PI * 2) / order;
+
+    for (let i = 0; i < order; i++) {
+      ctx.save();
+      ctx.rotate(angleStep * i);
+
+      if (type === 'mirror' && i % 2 === 1) {
+        ctx.scale(-1, 1);
+      }
+
+      // Draw elements
+      ctx.globalAlpha = 0.15;
+      ctx.strokeStyle = i % 3 === 0 ? '#c9a84c' : '#ffffff';
+      ctx.lineWidth = 1;
+
+      // Arc
+      const r1 = 60 + Math.sin(time * 0.5 + i) * 20;
+      ctx.beginPath();
+      ctx.arc(0, 0, r1, 0, angleStep * 0.8);
+      ctx.stroke();
+
+      // Line
+      ctx.beginPath();
+      ctx.moveTo(30, 0);
+      ctx.lineTo(r1 + 30, Math.sin(time + i * 0.5) * 20);
+      ctx.stroke();
+
+      // Small circle
+      const dotR = 80 + Math.cos(time * 0.7 + i) * 15;
+      ctx.beginPath();
+      ctx.arc(dotR, 0, 3, 0, Math.PI * 2);
+      ctx.fillStyle = i % 2 === 0 ? '#c9a84c' : 'rgba(255,255,255,0.5)';
+      ctx.globalAlpha = 0.4;
+      ctx.fill();
+
+      // Diamond
+      const dDist = 50 + Math.sin(time * 0.3 + i * 0.8) * 10;
+      ctx.globalAlpha = 0.08;
+      ctx.save();
+      ctx.translate(dDist, 10);
+      ctx.rotate(time * 0.2);
+      ctx.beginPath();
+      ctx.moveTo(0, -8);
+      ctx.lineTo(5, 0);
+      ctx.lineTo(0, 8);
+      ctx.lineTo(-5, 0);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.restore();
+    }
+
+    // Center element
+    ctx.globalAlpha = 0.2;
+    ctx.strokeStyle = '#c9a84c';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(0, 0, 15 + Math.sin(time) * 5, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.restore();
+  },
+
+  animate() {
+    const time = Date.now() * 0.001;
+    this.canvases.forEach(canvas => {
+      this.drawSymmetry(canvas, time);
+    });
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// CANVAS: FRACTALS
+// ============================================
+const fractalCanvases = {
+  canvases: [],
+
+  init() {
+    this.canvases = document.querySelectorAll('.fractal-canvas');
+    this.canvases.forEach(canvas => {
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      ctx.scale(dpr, dpr);
+      canvas._w = rect.width;
+      canvas._h = rect.height;
+      canvas._ctx = ctx;
+    });
+    this.animate();
+  },
+
+  drawSierpinski(canvas, time) {
+    const ctx = canvas._ctx;
+    const w = canvas._w;
+    const h = canvas._h;
+    ctx.clearRect(0, 0, w, h);
+
+    const maxDepth = 6;
+
+    function drawTriangle(x1, y1, x2, y2, x3, y3, depth) {
+      if (depth === 0) {
+        ctx.globalAlpha = 0.3 + (Math.sin(time + x1 * 0.01) * 0.15);
+        ctx.fillStyle = depth === 0 ? '#0a0a0a' : '#c9a84c';
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x3, y3);
+        ctx.closePath();
+        ctx.fill();
+        return;
+      }
+      const mx1 = (x1 + x2) / 2, my1 = (y1 + y2) / 2;
+      const mx2 = (x2 + x3) / 2, my2 = (y2 + y3) / 2;
+      const mx3 = (x1 + x3) / 2, my3 = (y1 + y3) / 2;
+      drawTriangle(x1, y1, mx1, my1, mx3, my3, depth - 1);
+      drawTriangle(mx1, my1, x2, y2, mx2, my2, depth - 1);
+      drawTriangle(mx3, my3, mx2, my2, x3, y3, depth - 1);
+    }
+
+    const margin = 40;
+    const size = Math.min(w, h) - margin * 2;
+    const topX = w / 2, topY = margin;
+    const leftX = w / 2 - size / 2, leftY = margin + size * 0.866;
+    const rightX = w / 2 + size / 2, rightY = margin + size * 0.866;
+
+    drawTriangle(topX, topY, leftX, leftY, rightX, rightY, maxDepth);
+  },
+
+  drawKoch(canvas, time) {
+    const ctx = canvas._ctx;
+    const w = canvas._w;
+    const h = canvas._h;
+    ctx.clearRect(0, 0, w, h);
+
+    function kochLine(x1, y1, x2, y2, depth) {
+      if (depth === 0) {
+        ctx.lineTo(x2, y2);
+        return;
+      }
+      const dx = x2 - x1, dy = y2 - y1;
+      const ax = x1 + dx / 3, ay = y1 + dy / 3;
+      const bx = x1 + dx * 2 / 3, by = y1 + dy * 2 / 3;
+      const px = (ax + bx) / 2 - (by - ay) * Math.sqrt(3) / 2;
+      const py = (ay + by) / 2 + (bx - ax) * Math.sqrt(3) / 2;
+      kochLine(x1, y1, ax, ay, depth - 1);
+      kochLine(ax, ay, px, py, depth - 1);
+      kochLine(px, py, bx, by, depth - 1);
+      kochLine(bx, by, x2, y2, depth - 1);
+    }
+
+    const margin = 60;
+    const size = Math.min(w, h) - margin * 2;
+    const cx = w / 2, cy = h / 2;
+    const r = size / 2;
+
+    const x1 = cx - r, y1 = cy + r * 0.4;
+    const x2 = cx + r, y2 = cy + r * 0.4;
+    const x3 = cx, y3 = cy - r * 0.7;
+
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = '#0a0a0a';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    kochLine(x1, y1, x3, y3, 4);
+    kochLine(x3, y3, x2, y2, 4);
+    kochLine(x2, y2, x1, y1, 4);
+    ctx.stroke();
+  },
+
+  drawTree(canvas, time) {
+    const ctx = canvas._ctx;
+    const w = canvas._w;
+    const h = canvas._h;
+    ctx.clearRect(0, 0, w, h);
+
+    function branch(x, y, angle, length, depth) {
+      if (depth === 0 || length < 2) return;
+      const endX = x + Math.cos(angle) * length;
+      const endY = y + Math.sin(angle) * length;
+
+      ctx.globalAlpha = Utils.map(depth, 0, 10, 0.1, 0.4);
+      ctx.strokeStyle = depth > 5 ? '#0a0a0a' : '#c9a84c';
+      ctx.lineWidth = depth * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      const angleVar = 0.4 + Math.sin(time + depth) * 0.1;
+      branch(endX, endY, angle - angleVar, length * 0.72, depth - 1);
+      branch(endX, endY, angle + angleVar, length * 0.72, depth - 1);
+    }
+
+    branch(w / 2, h - 40, -Math.PI / 2, h * 0.28, 10);
+  },
+
+  drawMandelbrot(canvas, time) {
+    const ctx = canvas._ctx;
+    const w = canvas._w;
+    const h = canvas._h;
+
+    if (!canvas._mandelbrotDrawn) {
+      const imageData = ctx.createImageData(w, h);
+      const data = imageData.data;
+      const maxIter = 80;
+      const zoom = 250;
+      const offsetX = -0.5;
+      const offsetY = 0;
+
+      for (let px = 0; px < w; px++) {
+        for (let py = 0; py < h; py++) {
+          const x0 = (px - w / 2) / zoom + offsetX;
+          const y0 = (py - h / 2) / zoom + offsetY;
+          let x = 0, y = 0, iter = 0;
+
+          while (x * x + y * y <= 4 && iter < maxIter) {
+            const xTemp = x * x - y * y + x0;
+            y = 2 * x * y + y0;
+            x = xTemp;
+            iter++;
+          }
+
+          const idx = (py * w + px) * 4;
+          if (iter === maxIter) {
+            data[idx] = 10;
+            data[idx+1] = 10;
+            data[idx+2] = 10;
+          } else {
+            const t = iter / maxIter;
+            data[idx] = Math.floor(t * 40);
+            data[idx+1] = Math.floor(t * 30);
+            data[idx+2] = Math.floor(t * 20);
+          }
+          data[idx+3] = 255;
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+      canvas._mandelbrotDrawn = true;
+    }
+  },
+
+  animate() {
+    const time = Date.now() * 0.001;
+    this.canvases.forEach(canvas => {
+      const type = canvas.dataset.type;
+      switch (type) {
+        case 'sierpinski': this.drawSierpinski(canvas, time); break;
+        case 'koch': this.drawKoch(canvas, time); break;
+        case 'tree': this.drawTree(canvas, time); break;
+        case 'mandelbrot': this.drawMandelbrot(canvas, time); break;
+      }
+    });
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// CANVAS: 3D POLYHEDRA
+// ============================================
+const polyhedraCanvases = {
+  canvases: [],
+
+  init() {
+    this.canvases = document.querySelectorAll('.polyhedra-canvas');
+    this.canvases.forEach(canvas => {
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      ctx.scale(dpr, dpr);
+      canvas._w = rect.width;
+      canvas._h = rect.height;
+      canvas._ctx = ctx;
+    });
+    this.animate();
+  },
+
+  drawPolyhedron(canvas, time) {
+    const ctx = canvas._ctx;
+    const w = canvas._w;
+    const h = canvas._h;
+    const type = canvas.dataset.type;
+    const data = PolyhedraData[type];
+    if (!data) return;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Gentle background gradient
+    ctx.fillStyle = 'rgba(247,247,247,0.5)';
+    ctx.fillRect(0, 0, w, h);
+
+    const cx = w / 2;
+    const cy = h / 2;
+
+    const rotX = Matrix3D.rotateX(time * 0.3 + Math.PI * 0.1);
+    const rotY = Matrix3D.rotateY(time * 0.5);
+    const rot = Matrix3D.multiplyMatrices(rotX, rotY);
+
+    const scale = type === 'sphere' ? 0.9 : 1.3;
+    const projected = data.vertices.map(v => {
+      const scaled = [v[0] * scale, v[1] * scale, v[2] * scale];
+      const rotated = Matrix3D.multiply(rot, scaled);
+      return Matrix3D.project(rotated, cx * 2, cy * 2, 350, 5);
+    });
+
+    // Sort edges by z for depth effect
+    const sortedEdges = data.edges.map(([a, b]) => ({
+      a, b,
+      z: (projected[a].z + projected[b].z) / 2
+    })).sort((a, b) => b.z - a.z);
+
+    sortedEdges.forEach(edge => {
+      const pa = projected[edge.a];
+      const pb = projected[edge.b];
+      const alpha = Utils.map(edge.z, -3, 3, 0.5, 0.1);
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = '#0a0a0a';
+      ctx.lineWidth = Utils.map(edge.z, -3, 3, 2, 0.5);
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+    });
+
+    // Vertices
+    projected.forEach(p => {
+      const alpha = Utils.map(p.z, -3, 3, 0.7, 0.15);
+      const size = Utils.map(p.z, -3, 3, 4, 1.5);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#c9a84c';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  },
+
+  animate() {
+    const time = Date.now() * 0.001;
+    this.canvases.forEach(canvas => this.drawPolyhedron(canvas, time));
+    requestAnimationFrame(() => this.animate());
+  }
+};
+
+// ============================================
+// TILT EFFECT FOR CARDS
+// ============================================
+const tiltEffect = {
+  init() {
+    document.querySelectorAll('[data-tilt]').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = (y - centerY) / centerY * -5;
+        const rotateY = (x - centerX) / centerX * 5;
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+      });
+    });
+  }
+};
+
+// ============================================
+// MAGNETIC BUTTONS
+// ============================================
+const magneticButtons = {
+  init() {
+    document.querySelectorAll('.magnetic-btn').forEach(btn => {
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = 'translate(0, 0)';
+      });
+    });
+  }
+};
+
+// ============================================
+// SMOOTH SCROLL LINKS
+// ============================================
+const smoothScroll = {
+  init() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  }
+};
+
+// ============================================
+// COUNTER ANIMATION
+// ============================================
+const counterAnimation = {
+  init() {
+    const statPi = document.getElementById('statPi');
+    const statPhi = document.getElementById('statPhi');
+    const statE = document.getElementById('statE');
+
+    const animateValue = (el, target, duration = 2000) => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            let start = 0;
+            const startTime = Date.now();
+            const animate = () => {
+              const elapsed = Date.now() - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const eased = Utils.easeOutQuart(progress);
+              const current = (target * eased).toFixed(5);
+              el.textContent = current;
+              if (progress < 1) requestAnimationFrame(animate);
+            };
+            animate();
+            observer.unobserve(el);
+          }
+        });
+      }, { threshold: 0.5 });
+      observer.observe(el);
+    };
+
+    if (statPi) animateValue(statPi, 3.14159);
+    if (statPhi) animateValue(statPhi, 1.61803);
+    if (statE) animateValue(statE, 2.71828);
+  }
+};
+
+// ============================================
+// TEXT SCRAMBLE EFFECT
+// ============================================
+class TextScramble {
+  constructor(el) {
+    this.el = el;
+    this.chars = '!<>-_\\/[]{}—=+*^?#________';
+    this.frameRequest = null;
+    this.frame = 0;
+    this.queue = [];
+    this.resolve = null;
+  }
+
+  setText(newText) {
+    const oldText = this.el.innerText;
+    const length = Math.max(oldText.length, newText.length);
+    const promise = new Promise((resolve) => this.resolve = resolve);
+    this.queue = [];
+    for (let i = 0; i < length; i++) {
+      const from = oldText[i] || '';
+      const to = newText[i] || '';
+      const start = Math.floor(Math.random() * 40);
+      const end = start + Math.floor(Math.random() * 40);
+      this.queue.push({ from, to, start, end });
+    }
+    cancelAnimationFrame(this.frameRequest);
+    this.frame = 0;
+    this.update();
+    return promise;
+  }
+
+  update() {
+    let output = '';
+    let complete = 0;
+    for (let i = 0; i < this.queue.length; i++) {
+      let { from, to, start, end, char } = this.queue[i];
+      if (this.frame >= end) {
+        complete++;
+        output += to;
+      } else if (this.frame >= start) {
+        if (!char || Math.random() < 0.28) {
+          char = this.chars[Math.floor(Math.random() * this.chars.length)];
+          this.queue[i].char = char;
+        }
+        output += `<span style="color:var(--gold)">${char}</span>`;
+      } else {
+        output += from;
+      }
+    }
+    this.el.innerHTML = output;
+    if (complete === this.queue.length) {
+      this.resolve();
+    } else {
+      this.frameRequest = requestAnimationFrame(() => this.update());
+      this.frame++;
+    }
+  }
+}
+
+// ============================================
+// PAGE TRANSITION EFFECT
+// ============================================
+const pageTransition = {
+  overlay: null,
+
+  init() {
+    this.overlay = document.createElement('div');
+    this.overlay.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--black); z-index: 99998; transform: translateY(100%);
+      transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+      pointer-events: none;
+    `;
+    document.body.appendChild(this.overlay);
+  },
+
+  show() {
+    this.overlay.style.transform = 'translateY(0)';
+    return new Promise(resolve => setTimeout(resolve, 600));
+  },
+
+  hide() {
+    this.overlay.style.transform = 'translateY(-100%)';
+    setTimeout(() => {
+      this.overlay.style.transform = 'translateY(100%)';
+    }, 800);
+  }
+};
+
+// ============================================
+// INIT ALL SECTIONS
+// ============================================
+function initAllSections() {
+  cursor.init();
+  navigation.init();
+  scrollReveal.init();
+  floatingBg.init();
+  parallaxShapes.init();
+  heroCanvas.init();
+  interactiveCanvas.init();
+  mathCanvas.init();
+  goldenCanvas.init();
+  dimensionsCanvas.init();
+  tessCanvas.init();
+  symmetryCanvases.init();
+  fractalCanvases.init();
+  polyhedraCanvases.init();
+  tiltEffect.init();
+  magneticButtons.init();
+  smoothScroll.init();
+  counterAnimation.init();
+  pageTransition.init();
+}
+
+// ============================================
+// BOOT
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.style.overflow = 'hidden';
+  preloader.init();
+});
+
+// Handle resize for all canvases
+window.addEventListener('resize', Utils.debounce(() => {
+  heroCanvas.createShapes();
+  interactiveCanvas.reset();
+}, 300));
+</script>
+</body>
+</html>
