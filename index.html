@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Works Collection | TOYO</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg:#0f0f14;--card:#1a1a24;--card-hover:#22222f;--text:#f1f1f4;--sub:#a7a7b5;--blue:#4da3ff}
+  body{background:var(--bg);color:var(--text);font-family:"Noto Sans JP","Yu Gothic",system-ui,sans-serif;min-height:100vh}
+  header{max-width:1080px;margin:0 auto;padding:56px 20px 8px}
+  header .kicker{color:var(--blue);font-size:13px;letter-spacing:.18em;font-weight:700}
+  header h1{font-size:clamp(28px,5vw,44px);margin:10px 0 12px;line-height:1.2}
+  header p{color:var(--sub);line-height:1.8;max-width:720px}
+  main{max-width:1080px;margin:0 auto;padding:28px 20px 64px}
+  h3.section{font-size:15px;letter-spacing:.12em;color:var(--sub);margin:28px 0 14px}
+  h3.section:first-child{margin-top:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .card{display:flex;flex-direction:column;gap:10px;background:var(--card);border:1px solid #2a2a38;border-radius:16px;padding:22px;text-decoration:none;color:inherit;transition:.18s}
+  .card:hover{background:var(--card-hover);transform:translateY(-3px);border-color:#3a3a52}
+  .badge{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.08em;padding:4px 10px;border-radius:999px;color:#0f0f14;background:#c9c9d6}
+  .b-red{background:#ff4d4d}.b-blue{background:#4da3ff}.b-green{background:#00ff41}.b-orange{background:#ffaa00}.b-purple{background:#c792ff}.b-pink{background:#ff8ac2}.b-teal{background:#3fe0c5}.b-yellow{background:#ffd94d}
+  .card h2{font-size:19px;line-height:1.4}
+  .card p{color:var(--sub);font-size:14px;line-height:1.7;flex:1}
+  .card .open{font-size:14px;font-weight:700}
+  .card .file{font-size:12px;color:#77778a;font-family:ui-monospace,monospace}
+  footer{max-width:1080px;margin:0 auto;padding:0 20px 40px;color:#77778a;font-size:13px;line-height:1.8}
+  @media (prefers-color-scheme:light){:root{--bg:#f6f6f8;--card:#fff;--card-hover:#fff;--text:#17171c;--sub:#555562}}
+</style>
+</head>
+<body>
+<header>
+  <div class="kicker">HTML WORKS COLLECTION ・ 全13作品</div>
+  <h1>作ったHTML、ぜんぶここから見られる。</h1>
+  <p>単体HTMLで動く13作品をまとめた閲覧サイトです。各カードを押すと、そのままブラウザで作品が開きます。ビルド不要・そのまま GitHub Pages でも公開できます。</p>
+</header>
+<main>
+  <h3 class="section">UI / ツール</h3>
+  <div class="grid">
+    <a class="card" href="./upload.html"><span class="badge b-red">UI CLONE</span><h2>YouTube</h2><p>YouTubeの画面を再現したUIクローン。ヘッダー・サイドバー・動画カードまで作り込んだ1枚もの。</p><span class="open">開く →</span><span class="file">upload.html ・ 96 KB</span></a>
+    <a class="card" href="./3D.html"><span class="badge b-blue">3D / CSS</span><h2>3D Calculator - Ultra Realistic</h2><p>立体感と光の表現にこだわった超リアルな3D電卓。CSSの perspective と陰影で質感を作っている。</p><span class="open">開く →</span><span class="file">3D.html ・ 280 KB</span></a>
+    <a class="card" href="./upload-4.html"><span class="badge b-blue">CALCULATOR</span><h2>Ultra HD Premium Calculator Pro Max</h2><p>超高精細をうたうプレミアム電卓。電卓シリーズのもう1つの力作版。</p><span class="open">開く →</span><span class="file">upload-4.html ・ 342 KB</span></a>
+    <a class="card" href="./upload-3.html"><span class="badge b-teal">MAKER</span><h2>Super Stage Maker - Beautiful Edition</h2><p>ステージを作れるメーカー系作品の Beautiful Edition。</p><span class="open">開く →</span><span class="file">upload-3.html ・ 315 KB</span></a>
+  </div>
+
+  <h3 class="section">ゲーム / シミュレーション</h3>
+  <div class="grid">
+    <a class="card" href="./SCP-1.html"><span class="badge b-green">SCP GAME</span><h2>SCP-1-JP 「凌空」 収容シミュレーター</h2><p>SCP収容施設を舞台にしたシミュレーター。ローディング・HUD・カスタムカーソル付きの没入型UI。</p><span class="open">開く →</span><span class="file">SCP-1.html ・ 276 KB</span></a>
+    <a class="card" href="./SCP-2.html"><span class="badge b-orange">SCP HORROR</span><h2>SCP-4721 Observation Chamber</h2><p>観察室を舞台にしたCLASSIFIED級ホラー。フリッカー、グリッチ、ダークな演出が中心。</p><span class="open">開く →</span><span class="file">SCP-2.html ・ 146 KB</span></a>
+    <a class="card" href="./upload-2.html"><span class="badge b-yellow">ACTION GAME</span><h2>しょぼんのアクション - HD Remake</h2><p>あのアクションゲームのHDリメイク版。</p><span class="open">開く →</span><span class="file">upload-2.html ・ 491 KB</span></a>
+    <a class="card" href="./3.1.html"><span class="badge b-teal">VOXEL</span><h2>Infinite Voxel World</h2><p>無限に広がるボクセルワールド。</p><span class="open">開く →</span><span class="file">3.1.html ・ 24 KB</span></a>
+    <a class="card" href="./upload-5.html"><span class="badge b-red">SIMULATION</span><h2>林野火災シミュレーション</h2><p>超高解像度アニメーションで描く林野火災シミュレーション。</p><span class="open">開く →</span><span class="file">upload-5.html ・ 237 KB</span></a>
+  </div>
+
+  <h3 class="section">ストーリー / トーク</h3>
+  <div class="grid">
+    <a class="card" href="./AI.html"><span class="badge b-purple">STORY</span><h2>AI GENESIS — 6日間の狂詩曲</h2><p>AIをテーマにした6日間の物語。</p><span class="open">開く →</span><span class="file">AI.html ・ 209 KB</span></a>
+    <a class="card" href="./upload-6.html"><span class="badge b-purple">CHAT LOG</span><h2>深夜の森 - The Chat Log</h2><p>深夜の森を舞台にしたチャットログ形式の作品。</p><span class="open">開く →</span><span class="file">upload-6.html ・ 169 KB</span></a>
+    <a class="card" href="./2.html"><span class="badge b-pink">TALK</span><h2>カロン &amp; コレー — 雑談トーク</h2><p>カロンとコレーの雑談トーク。</p><span class="open">開く →</span><span class="file">2.html ・ 395 KB</span></a>
+    <a class="card" href="./upload-7.html"><span class="badge b-pink">TALK</span><h2>三人の雑談 — 手書き × ドローン</h2><p>三人の雑談、手書きとドローンの組み合わせ。</p><span class="open">開く →</span><span class="file">upload-7.html ・ 266 KB</span></a>
+  </div>
+</main>
+<footer>
+  全作品とも単体HTMLファイルで動作します（外部ビルド不要）。<br>
+  Repository: sc8z35a-collab/html-works-site
+</footer>
+</body>
+</html>

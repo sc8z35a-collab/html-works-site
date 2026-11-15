@@ -1,0 +1,5260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCP-4721 | Observation Chamber | CLASSIFIED</title>
+<style>
+/* ============================================================
+   PART 1: CORE STYLES - FOUNDATION & RENDERING ENGINE
+   Total lines target: ~8300 lines for Part 1
+   ============================================================ */
+
+/* === RESET & BASE === */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --room-ambient: #0a0806;
+    --room-wall: #1a1410;
+    --room-floor: #0d0a07;
+    --room-ceiling: #111;
+    --blood-red: #4a0000;
+    --scp-glow: #ff2200;
+    --monitor-blue: #001122;
+    --monitor-glow: #00aaff;
+    --rust: #3a2010;
+    --mold: #1a2a10;
+    --warning-yellow: #ffaa00;
+    --text-green: #00ff41;
+    --text-red: #ff0033;
+    --flicker-speed: 0.1s;
+    --ambient-light: 0.15;
+    --fear-level: 0;
+    --glitch-intensity: 0;
+    --corruption: 0;
+    --static-opacity: 0.03;
+    --vignette-intensity: 0.7;
+    --chromatic-offset: 0px;
+    --scan-speed: 4s;
+    --heartbeat-rate: 1s;
+    --fog-density: 0.3;
+    --shadow-depth: 20px;
+    --crack-width: 2px;
+    --eye-glow: rgba(255, 34, 0, 0.8);
+    --portal-color: rgba(20, 0, 40, 0.9);
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Courier New', monospace;
+    cursor: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* === CUSTOM CURSOR === */
+#custom-cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 255, 65, 0.6);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100000;
+    transition: transform 0.1s ease, border-color 0.3s ease;
+    mix-blend-mode: difference;
+}
+
+#custom-cursor::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    background: rgba(0, 255, 65, 0.8);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#custom-cursor.fear {
+    border-color: rgba(255, 0, 0, 0.8);
+    transform: scale(1.5);
+    animation: cursorPulse 0.5s infinite;
+}
+
+#custom-cursor.hidden {
+    opacity: 0;
+}
+
+@keyframes cursorPulse {
+    0%, 100% { transform: scale(1.5); border-color: rgba(255, 0, 0, 0.8); }
+    50% { transform: scale(2); border-color: rgba(255, 0, 0, 0.3); }
+}
+
+/* === LOADING SCREEN === */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1.5s ease;
+}
+
+#loading-screen.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#loading-screen .scp-logo {
+    width: 120px;
+    height: 120px;
+    border: 3px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    position: relative;
+    animation: logoRotate 4s linear infinite;
+}
+
+@keyframes logoRotate {
+    0% { border-color: #333; }
+    50% { border-color: #ff2200; }
+    100% { border-color: #333; }
+}
+
+#loading-screen .scp-logo span {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ccc;
+    letter-spacing: 4px;
+}
+
+#loading-screen .loading-text {
+    color: var(--text-green);
+    font-size: 14px;
+    margin-bottom: 20px;
+    animation: textBlink 1s infinite;
+}
+
+@keyframes textBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+#loading-bar-container {
+    width: 300px;
+    height: 4px;
+    background: #111;
+    border: 1px solid #333;
+    position: relative;
+    overflow: hidden;
+}
+
+#loading-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--text-green), #00aa33);
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px var(--text-green);
+}
+
+#loading-status {
+    color: #666;
+    font-size: 11px;
+    margin-top: 15px;
+    min-height: 16px;
+}
+
+#loading-warning {
+    color: var(--text-red);
+    font-size: 12px;
+    margin-top: 30px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.6;
+}
+
+/* === MAIN CONTAINER === */
+#app-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--room-ambient);
+    perspective: 1200px;
+    perspective-origin: 50% 50%;
+}
+
+/* === 3D ROOM STRUCTURE === */
+#room-3d {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.05s linear;
+}
+
+/* Room Walls */
+.room-wall {
+    position: absolute;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+#wall-back {
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg,
+        #0d0a07 0%,
+        #1a1410 20%,
+        #15110d 60%,
+        #0d0a07 100%
+    );
+    transform: translateZ(-500px);
+    left: 0;
+    top: 0;
+}
+
+#wall-left {
+    width: 500px;
+    height: 100vh;
+    background: linear-gradient(90deg,
+        #0a0806 0%,
+        #15110d 100%
+    );
+    transform: rotateY(90deg) translateZ(0px);
+    transform-origin: left center;
+    left: 0;
+    top: 0;
+}
+
+#wall-right {
+    width: 500px;
+    height: 100vh;
+    background: linear-gradient(-90deg,
+        #0a0806 0%,
+        #15110d 100%
+    );
+    transform: rotateY(-90deg) translateZ(-100vw);
+    transform-origin: right center;
+    right: 0;
+    top: 0;
+}
+
+#wall-floor {
+    width: 100vw;
+    height: 500px;
+    background: linear-gradient(0deg,
+        #0a0705 0%,
+        #0d0a07 100%
+    );
+    transform: rotateX(90deg) translateZ(-100vh);
+    transform-origin: bottom center;
+    left: 0;
+    bottom: 0;
+}
+
+#wall-ceiling {
+    width: 100vw;
+    height: 500px;
+    background: linear-gradient(180deg,
+        #060606 0%,
+        #0a0a0a 100%
+    );
+    transform: rotateX(-90deg) translateZ(0px);
+    transform-origin: top center;
+    left: 0;
+    top: 0;
+}
+
+/* === WALL TEXTURES & DETAILS === */
+.wall-texture {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.wall-crack {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    transform-origin: center;
+}
+
+.wall-stain {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(ellipse,
+        rgba(40, 20, 10, 0.4) 0%,
+        rgba(40, 20, 10, 0.1) 60%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+
+.blood-stain {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(ellipse,
+        rgba(80, 0, 0, 0.5) 0%,
+        rgba(60, 0, 0, 0.2) 50%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+
+.blood-drip {
+    position: absolute;
+    width: 3px;
+    background: linear-gradient(180deg,
+        rgba(80, 0, 0, 0.6) 0%,
+        rgba(60, 0, 0, 0.3) 70%,
+        transparent 100%
+    );
+    border-radius: 0 0 2px 2px;
+}
+
+.mold-patch {
+    position: absolute;
+    border-radius: 40% 60% 50% 40%;
+    background: radial-gradient(ellipse,
+        rgba(20, 40, 10, 0.4) 0%,
+        rgba(15, 30, 8, 0.2) 60%,
+        transparent 100%
+    );
+}
+
+.wall-pipe {
+    position: absolute;
+    background: linear-gradient(90deg,
+        #1a1a1a 0%,
+        #2a2a2a 30%,
+        #1a1a1a 50%,
+        #2a2a2a 70%,
+        #1a1a1a 100%
+    );
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.pipe-rust {
+    position: absolute;
+    background: rgba(60, 30, 10, 0.5);
+    border-radius: 2px;
+}
+
+.pipe-drip {
+    position: absolute;
+    width: 2px;
+    height: 0;
+    background: linear-gradient(180deg,
+        rgba(40, 60, 40, 0.6),
+        transparent
+    );
+    animation: pipeDrip 3s ease-in infinite;
+}
+
+@keyframes pipeDrip {
+    0% { height: 0; opacity: 0.8; }
+    80% { height: 30px; opacity: 0.6; }
+    100% { height: 40px; opacity: 0; }
+}
+
+/* === ROOM FURNITURE === */
+.furniture {
+    position: absolute;
+    transform-style: preserve-3d;
+}
+
+/* Old Desk */
+#old-desk {
+    bottom: 30%;
+    left: 20%;
+    width: 250px;
+    height: 80px;
+    background: linear-gradient(180deg,
+        #2a1f15 0%,
+        #1f1610 50%,
+        #15100a 100%
+    );
+    border: 1px solid rgba(40, 30, 20, 0.5);
+    border-radius: 2px;
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(60, 45, 30, 0.2);
+    transform: perspective(500px) rotateX(5deg) rotateY(-5deg);
+}
+
+#old-desk::before {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: 10px;
+    width: 8px;
+    height: 40px;
+    background: linear-gradient(90deg, #1a1208, #2a1f15, #1a1208);
+    box-shadow: 230px 0 0 0 #1a1208;
+}
+
+.desk-paper {
+    position: absolute;
+    background: #d4c8a0;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    transform: rotate(var(--rotation));
+    opacity: 0.7;
+}
+
+.desk-paper::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    height: 2px;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 6px
+    );
+    height: calc(100% - 10px);
+}
+
+/* Filing Cabinet */
+#filing-cabinet {
+    bottom: 20%;
+    right: 15%;
+    width: 80px;
+    height: 180px;
+    background: linear-gradient(90deg,
+        #1a1a1a 0%,
+        #252525 30%,
+        #1f1f1f 70%,
+        #151515 100%
+    );
+    border: 1px solid rgba(50, 50, 50, 0.4);
+    border-radius: 1px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
+    transform: perspective(400px) rotateY(10deg);
+}
+
+.cabinet-drawer {
+    width: calc(100% - 8px);
+    height: 40px;
+    margin: 4px;
+    background: linear-gradient(180deg,
+        #222 0%,
+        #1a1a1a 100%
+    );
+    border: 1px solid rgba(60, 60, 60, 0.3);
+    position: relative;
+}
+
+.cabinet-drawer::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 6px;
+    background: #333;
+    border-radius: 1px;
+    border: 1px solid #444;
+}
+
+.cabinet-drawer.open {
+    transform: translateX(15px);
+    box-shadow: -3px 0 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Old Chair */
+#old-chair {
+    bottom: 25%;
+    left: 35%;
+    width: 60px;
+    height: 80px;
+    position: absolute;
+    transform: rotate(-15deg);
+}
+
+#old-chair .seat {
+    position: absolute;
+    bottom: 20px;
+    width: 60px;
+    height: 10px;
+    background: #1a1510;
+    border-radius: 2px;
+}
+
+#old-chair .back {
+    position: absolute;
+    bottom: 30px;
+    left: 5px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(180deg, #1a1510, #15100a);
+    border-radius: 3px 3px 0 0;
+    border: 1px solid rgba(40, 30, 20, 0.3);
+}
+
+#old-chair .leg {
+    position: absolute;
+    bottom: 0;
+    width: 4px;
+    height: 20px;
+    background: #1a1510;
+}
+
+/* === MONITORS === */
+.monitor-unit {
+    position: absolute;
+    transform-style: preserve-3d;
+}
+
+#main-monitor {
+    top: 25%;
+    left: 50%;
+    transform: translateX(-50%) perspective(600px) rotateY(0deg);
+    width: 320px;
+    height: 240px;
+}
+
+#side-monitor-left {
+    top: 30%;
+    left: 8%;
+    transform: perspective(600px) rotateY(15deg);
+    width: 200px;
+    height: 160px;
+}
+
+#side-monitor-right {
+    top: 28%;
+    right: 8%;
+    transform: perspective(600px) rotateY(-15deg);
+    width: 200px;
+    height: 160px;
+}
+
+.monitor-frame {
+    width: 100%;
+    height: 100%;
+    background: #111;
+    border: 3px solid #1a1a1a;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+        0 0 20px rgba(0, 0, 0, 0.8),
+        inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.monitor-screen {
+    width: 100%;
+    height: 100%;
+    background: var(--monitor-blue);
+    position: relative;
+    overflow: hidden;
+}
+
+.monitor-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0px,
+        rgba(0, 0, 0, 0.1) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    z-index: 2;
+    pointer-events: none;
+}
+
+.monitor-screen::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        transparent 0%,
+        rgba(0, 170, 255, 0.03) 50%,
+        transparent 100%
+    );
+    animation: monitorScan var(--scan-speed) linear infinite;
+    z-index: 3;
+    pointer-events: none;
+}
+
+@keyframes monitorScan {
+    0% { top: -100%; }
+    100% { top: 100%; }
+}
+
+.monitor-glow {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: radial-gradient(ellipse at center,
+        rgba(0, 100, 180, 0.1) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
+    z-index: -1;
+}
+
+.monitor-static {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: var(--static-opacity);
+    z-index: 4;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+}
+
+.monitor-text {
+    position: absolute;
+    color: var(--text-green);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    padding: 10px;
+    line-height: 1.6;
+    z-index: 1;
+    text-shadow: 0 0 5px var(--text-green);
+}
+
+.monitor-text .cursor-blink {
+    animation: cursorBlink 1s step-end infinite;
+}
+
+@keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.monitor-warning {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    color: var(--text-red);
+    font-size: 10px;
+    text-align: center;
+    z-index: 5;
+    animation: warningPulse 2s ease infinite;
+    text-shadow: 0 0 8px var(--text-red);
+}
+
+@keyframes warningPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+.monitor-content-096 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.figure-096 {
+    width: 60%;
+    height: 80%;
+    position: relative;
+    opacity: 0;
+    transition: opacity 2s ease;
+}
+
+.figure-096.visible {
+    opacity: 1;
+}
+
+.figure-096-body {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 120px;
+    background: linear-gradient(180deg,
+        #e8e0d0 0%,
+        #d4c8b0 50%,
+        #c0b098 100%
+    );
+    border-radius: 5px 5px 0 0;
+}
+
+.figure-096-head {
+    position: absolute;
+    bottom: calc(10% + 120px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 35px;
+    background: #e8e0d0;
+    border-radius: 50% 50% 40% 40%;
+}
+
+.figure-096-hands {
+    position: absolute;
+    bottom: calc(10% + 90px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 30px;
+}
+
+.figure-096-hands::before,
+.figure-096-hands::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 30px;
+    height: 25px;
+    background: #e8e0d0;
+    border-radius: 3px;
+}
+
+.figure-096-hands::before {
+    left: 0;
+    transform: rotate(-10deg);
+}
+
+.figure-096-hands::after {
+    right: 0;
+    transform: rotate(10deg);
+}
+
+.face-warning {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 0, 0, 0.15);
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.face-warning.active {
+    opacity: 1;
+    animation: faceWarn 0.3s ease infinite;
+}
+
+@keyframes faceWarn {
+    0%, 100% { background: rgba(255, 0, 0, 0.15); }
+    50% { background: rgba(255, 0, 0, 0.3); }
+}
+
+.face-warning-text {
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 0 0 20px #ff0000;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* === SCP-173 - THE SCULPTURE === */
+#scp-173-container {
+    position: absolute;
+    z-index: 20;
+    pointer-events: none;
+    transition: none;
+}
+
+#scp-173 {
+    position: relative;
+    width: 80px;
+    height: 160px;
+}
+
+.scp173-body {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 120px;
+    background: linear-gradient(135deg,
+        #8a7a60 0%,
+        #6a5a40 30%,
+        #7a6a50 60%,
+        #5a4a30 100%
+    );
+    border-radius: 15px 15px 10px 10px;
+    box-shadow:
+        inset -5px -5px 15px rgba(0, 0, 0, 0.4),
+        inset 3px 3px 10px rgba(160, 140, 100, 0.1),
+        0 5px 20px rgba(0, 0, 0, 0.6);
+}
+
+.scp173-head {
+    position: absolute;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 45px;
+    height: 45px;
+    background: radial-gradient(circle at 40% 40%,
+        #9a8a70 0%,
+        #7a6a50 50%,
+        #5a4a30 100%
+    );
+    border-radius: 50% 50% 45% 45%;
+    box-shadow:
+        inset -3px -3px 8px rgba(0, 0, 0, 0.3),
+        0 -2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.scp173-face {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 35px;
+    height: 30px;
+}
+
+.scp173-eye {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #110000 40%, #4a0000 100%);
+    border-radius: 50%;
+    border: 1px solid #2a0000;
+    top: 5px;
+}
+
+.scp173-eye.left {
+    left: 4px;
+}
+
+.scp173-eye.right {
+    right: 4px;
+}
+
+.scp173-mouth {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 15px;
+    height: 8px;
+    background: #1a0000;
+    border-radius: 0 0 50% 50%;
+    border: 1px solid #2a0000;
+}
+
+.scp173-rebar {
+    position: absolute;
+    width: 4px;
+    background: linear-gradient(90deg, #3a3a3a, #555, #3a3a3a);
+    border-radius: 2px;
+}
+
+.scp173-paint-red {
+    position: absolute;
+    background: rgba(150, 0, 0, 0.6);
+    border-radius: 40% 60% 50% 40%;
+}
+
+.scp173-paint-green {
+    position: absolute;
+    background: rgba(0, 100, 30, 0.4);
+    border-radius: 50% 40% 60% 40%;
+}
+
+/* === SCP-106 - THE OLD MAN === */
+#scp-106-container {
+    position: absolute;
+    bottom: 20%;
+    left: 5%;
+    z-index: 15;
+    pointer-events: none;
+}
+
+.scp106-portal {
+    position: absolute;
+    width: 120px;
+    height: 200px;
+    background: radial-gradient(ellipse at center,
+        var(--portal-color) 0%,
+        rgba(10, 0, 20, 0.7) 40%,
+        rgba(0, 0, 0, 0.3) 70%,
+        transparent 100%
+    );
+    border-radius: 50% 50% 45% 45%;
+    animation: portalPulse 4s ease infinite;
+}
+
+@keyframes portalPulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+}
+
+.scp106-figure {
+    position: absolute;
+    width: 80px;
+    height: 170px;
+    left: 20px;
+    top: 15px;
+}
+
+.scp106-body {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 110px;
+    background: linear-gradient(180deg,
+        #1a1008 0%,
+        #0d0804 50%,
+        #050302 100%
+    );
+    border-radius: 10px 10px 5px 5px;
+    opacity: 0.9;
+}
+
+.scp106-head {
+    position: absolute;
+    bottom: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 35px;
+    height: 40px;
+    background: radial-gradient(circle at 50% 40%,
+        #2a1a08 0%,
+        #1a0e04 60%,
+        #0a0502 100%
+    );
+    border-radius: 45% 45% 40% 40%;
+}
+
+.scp106-eye {
+    position: absolute;
+    width: 6px;
+    height: 4px;
+    background: rgba(255, 255, 200, 0.3);
+    border-radius: 50%;
+    top: 15px;
+    animation: scp106Blink 5s ease infinite;
+}
+
+.scp106-eye.left { left: 8px; }
+.scp106-eye.right { right: 8px; }
+
+@keyframes scp106Blink {
+    0%, 90%, 100% { height: 4px; opacity: 0.3; }
+    95% { height: 1px; opacity: 0.1; }
+}
+
+.scp106-smile {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 6px;
+    border-bottom: 2px solid rgba(100, 50, 20, 0.5);
+    border-radius: 0 0 50% 50%;
+}
+
+.scp106-decay {
+    position: absolute;
+    background: radial-gradient(ellipse,
+        rgba(20, 10, 0, 0.6) 0%,
+        rgba(10, 5, 0, 0.3) 50%,
+        transparent 100%
+    );
+    border-radius: 50%;
+    animation: decaySpread 8s ease infinite;
+}
+
+@keyframes decaySpread {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.3); opacity: 0.8; }
+}
+
+.scp106-hand {
+    position: absolute;
+    width: 25px;
+    height: 30px;
+    background: linear-gradient(135deg,
+        #1a1008 0%,
+        #0d0804 100%
+    );
+    border-radius: 5px 5px 3px 3px;
+}
+
+.scp106-hand.reaching {
+    animation: handReach 6s ease infinite;
+}
+
+@keyframes handReach {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    50% { transform: translateX(20px) rotate(5deg); }
+}
+
+.scp106-drip {
+    position: absolute;
+    width: 3px;
+    background: linear-gradient(180deg,
+        rgba(20, 10, 0, 0.8) 0%,
+        rgba(10, 5, 0, 0.4) 70%,
+        transparent 100%
+    );
+    animation: corrosionDrip 2s ease-in infinite;
+    border-radius: 0 0 2px 2px;
+}
+
+@keyframes corrosionDrip {
+    0% { height: 0; opacity: 0.8; top: 100%; }
+    100% { height: 30px; opacity: 0; top: calc(100% + 40px); }
+}
+
+.corrosion-pool {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 20px;
+    background: radial-gradient(ellipse,
+        rgba(20, 10, 0, 0.6) 0%,
+        rgba(10, 5, 0, 0.3) 60%,
+        transparent 100%
+    );
+    border-radius: 50%;
+    animation: poolSpread 6s ease infinite;
+}
+
+@keyframes poolSpread {
+    0%, 100% { width: 100px; }
+    50% { width: 130px; }
+}
+
+/* === SHADOW EYES (Ceiling Vent Entity) === */
+#ceiling-eyes-container {
+    position: absolute;
+    top: 5%;
+    left: 0;
+    width: 100%;
+    height: 20%;
+    z-index: 18;
+    pointer-events: none;
+}
+
+.vent-opening {
+    position: absolute;
+    width: 200px;
+    height: 40px;
+    background: linear-gradient(180deg, #000 0%, #0a0a0a 100%);
+    border: 2px solid #1a1a1a;
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow:
+        inset 0 5px 15px rgba(0, 0, 0, 0.9),
+        0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.vent-opening::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 18px,
+        #1a1a1a 18px,
+        #1a1a1a 20px
+    );
+    z-index: 1;
+}
+
+.shadow-eye {
+    position: absolute;
+    width: 12px;
+    height: 8px;
+    background: radial-gradient(ellipse,
+        var(--eye-glow) 0%,
+        rgba(255, 34, 0, 0.4) 50%,
+        transparent 100%
+    );
+    border-radius: 50%;
+    z-index: 0;
+    animation: eyeFloat 3s ease infinite;
+    transition: opacity 0.5s ease;
+}
+
+.shadow-eye::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 4px;
+    background: #ff0000;
+    border-radius: 50%;
+    box-shadow: 0 0 4px #ff0000;
+}
+
+@keyframes eyeFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(3px); }
+}
+
+.shadow-eye.blink {
+    animation: eyeBlink 0.2s ease;
+}
+
+@keyframes eyeBlink {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.1); }
+}
+
+/* === MIRROR ENTITY === */
+#mirror-container {
+    position: absolute;
+    top: 20%;
+    right: 20%;
+    width: 120px;
+    height: 200px;
+    z-index: 16;
+}
+
+.mirror-frame {
+    width: 100%;
+    height: 100%;
+    border: 8px solid #2a2018;
+    border-radius: 3px;
+    background: linear-gradient(135deg,
+        #0a1020 0%,
+        #0d1525 50%,
+        #081018 100%
+    );
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 0 15px rgba(0, 0, 0, 0.8),
+        inset 0 0 30px rgba(0, 20, 40, 0.3);
+}
+
+.mirror-reflection {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.15;
+    z-index: 1;
+}
+
+.mirror-surface {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.02) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.01) 100%
+    );
+    z-index: 3;
+}
+
+.mirror-entity {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 120px;
+    opacity: 0;
+    transition: opacity 3s ease;
+    z-index: 2;
+}
+
+.mirror-entity.visible {
+    opacity: 0.7;
+    animation: mirrorShift 8s ease infinite;
+}
+
+@keyframes mirrorShift {
+    0%, 100% { transform: translate(-50%, -50%) scaleX(1); }
+    25% { transform: translate(-48%, -50%) scaleX(1.02); }
+    75% { transform: translate(-52%, -50%) scaleX(0.98); }
+}
+
+.mirror-entity-body {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px 10px 5px 5px;
+}
+
+.mirror-entity-head {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 25px;
+    height: 30px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+}
+
+.mirror-entity-eyes {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 8px;
+}
+
+.mirror-entity-eye {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: rgba(200, 200, 255, 0.6);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(200, 200, 255, 0.4);
+}
+
+.mirror-entity-eye.left { left: 2px; }
+.mirror-entity-eye.right { right: 2px; }
+
+.mirror-crack {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    transform-origin: center;
+    z-index: 4;
+}
+
+.mirror-fog {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center,
+        rgba(100, 100, 120, 0.1) 0%,
+        transparent 70%
+    );
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 2s ease;
+}
+
+.mirror-fog.active {
+    opacity: 1;
+    animation: fogPulse 5s ease infinite;
+}
+
+@keyframes fogPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* === WINDOW (SCP-173 viewing window) === */
+#window-container {
+    position: absolute;
+    top: 15%;
+    left: 45%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 150px;
+    z-index: 12;
+}
+
+.window-frame {
+    width: 100%;
+    height: 100%;
+    border: 6px solid #1a1510;
+    background: linear-gradient(180deg,
+        rgba(10, 15, 20, 0.9) 0%,
+        rgba(5, 8, 12, 0.95) 100%
+    );
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        inset 0 0 20px rgba(0, 0, 0, 0.8),
+        0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.window-glass-crack {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.05);
+    z-index: 5;
+}
+
+.window-grime {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        ellipse at 30% 40%,
+        rgba(30, 25, 15, 0.3) 0%,
+        transparent 50%
+    ),
+    radial-gradient(
+        ellipse at 70% 60%,
+        rgba(25, 20, 10, 0.2) 0%,
+        transparent 40%
+    );
+    z-index: 4;
+}
+
+.window-corridor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg,
+        #0a0e12 0%,
+        #050810 50%,
+        #030508 100%
+    );
+    z-index: 0;
+}
+
+/* === LIGHTING SYSTEM === */
+#lighting-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+}
+
+.ambient-light {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        ellipse at 50% 30%,
+        rgba(40, 30, 20, var(--ambient-light)) 0%,
+        rgba(0, 0, 0, 0.85) 100%
+    );
+}
+
+.ceiling-light {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 20px;
+    background: #1a1a1a;
+    border-radius: 0 0 5px 5px;
+    z-index: 60;
+}
+
+.ceiling-light::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 8px;
+    background: rgba(255, 200, 100, 0.3);
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(255, 200, 100, 0.15);
+    animation: lightFlicker 0.1s infinite;
+}
+
+@keyframes lightFlicker {
+    0% { opacity: 0.6; }
+    10% { opacity: 0.8; }
+    20% { opacity: 0.5; }
+    30% { opacity: 0.9; }
+    40% { opacity: 0.7; }
+    50% { opacity: 0.3; }
+    60% { opacity: 0.8; }
+    70% { opacity: 0.6; }
+    80% { opacity: 0.9; }
+    90% { opacity: 0.4; }
+    100% { opacity: 0.7; }
+}
+
+.light-cone {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 500px;
+    background: linear-gradient(
+        180deg,
+        rgba(255, 200, 100, 0.06) 0%,
+        rgba(255, 200, 100, 0.02) 30%,
+        transparent 100%
+    );
+    clip-path: polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
+    z-index: 55;
+    pointer-events: none;
+}
+
+.flashlight-effect {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(
+        circle,
+        rgba(255, 240, 200, 0.08) 0%,
+        rgba(255, 240, 200, 0.03) 40%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 56;
+    transition: left 0.05s, top 0.05s;
+    display: none;
+}
+
+.flashlight-effect.active {
+    display: block;
+}
+
+/* === VIGNETTE & POST-PROCESSING === */
+#vignette {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 40%,
+        rgba(0, 0, 0, var(--vignette-intensity)) 100%
+    );
+    z-index: 80;
+    pointer-events: none;
+}
+
+#chromatic-aberration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 81;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#chromatic-aberration.active {
+    opacity: 0.3;
+}
+
+#film-grain {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    z-index: 82;
+    pointer-events: none;
+    opacity: 0.05;
+    animation: grainShift 0.5s steps(4) infinite;
+}
+
+@keyframes grainShift {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-5%, -5%); }
+    50% { transform: translate(5%, 5%); }
+    75% { transform: translate(-5%, 5%); }
+    100% { transform: translate(5%, -5%); }
+}
+
+#scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.03) 0px,
+        rgba(0, 0, 0, 0.03) 1px,
+        transparent 1px,
+        transparent 4px
+    );
+    z-index: 83;
+    pointer-events: none;
+}
+
+/* === GLITCH EFFECTS === */
+.glitch-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.glitch-overlay.active {
+    animation: glitchFlash 0.1s ease;
+    opacity: 1;
+}
+
+@keyframes glitchFlash {
+    0% { opacity: 0; }
+    10% { opacity: 0.8; background: rgba(255, 0, 0, 0.05); }
+    20% { opacity: 0; }
+    30% { opacity: 0.6; background: rgba(0, 255, 0, 0.03); transform: translateX(5px); }
+    40% { opacity: 0; transform: translateX(0); }
+    50% { opacity: 0.4; background: rgba(0, 0, 255, 0.05); transform: translateX(-3px); }
+    60% { opacity: 0; transform: translateX(0); }
+    100% { opacity: 0; }
+}
+
+.glitch-slice {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    z-index: 91;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.glitch-slice.active {
+    opacity: 1;
+    animation: sliceGlitch 0.15s ease;
+}
+
+@keyframes sliceGlitch {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(10px); }
+    50% { transform: translateX(-8px); }
+    75% { transform: translateX(5px); }
+    100% { transform: translateX(0); }
+}
+
+/* === FEAR METER HUD === */
+#hud-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 70;
+    pointer-events: none;
+}
+
+#fear-meter {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    width: 200px;
+    pointer-events: auto;
+}
+
+#fear-meter-label {
+    color: var(--text-green);
+    font-size: 10px;
+    margin-bottom: 5px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px var(--text-green);
+}
+
+#fear-bar-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+#fear-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--text-green), #ffaa00, #ff0000);
+    transition: width 0.5s ease;
+    box-shadow: 0 0 8px currentColor;
+}
+
+#fear-value {
+    color: var(--text-green);
+    font-size: 9px;
+    margin-top: 3px;
+    text-shadow: 0 0 3px var(--text-green);
+}
+
+/* Containment Status */
+#containment-status {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: var(--text-green);
+    font-size: 11px;
+    line-height: 1.8;
+    text-shadow: 0 0 5px var(--text-green);
+    pointer-events: auto;
+}
+
+#containment-status .status-line {
+    opacity: 0.7;
+}
+
+#containment-status .status-line.warning {
+    color: var(--warning-yellow);
+    text-shadow: 0 0 5px var(--warning-yellow);
+}
+
+#containment-status .status-line.critical {
+    color: var(--text-red);
+    text-shadow: 0 0 5px var(--text-red);
+    animation: criticalBlink 1s ease infinite;
+}
+
+@keyframes criticalBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Time Display */
+#time-display {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: var(--text-green);
+    font-size: 11px;
+    text-align: right;
+    line-height: 1.8;
+    text-shadow: 0 0 5px var(--text-green);
+}
+
+/* SCP Proximity Indicators */
+#proximity-radar {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    width: 120px;
+    height: 120px;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+#proximity-radar::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(0, 255, 65, 0.5), transparent);
+    transform-origin: left center;
+    animation: radarSweep 3s linear infinite;
+}
+
+@keyframes radarSweep {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#proximity-radar::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 4px;
+    background: var(--text-green);
+    border-radius: 50%;
+    box-shadow: 0 0 5px var(--text-green);
+}
+
+.radar-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid rgba(0, 255, 65, 0.1);
+    border-radius: 50%;
+}
+
+.radar-blip {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--text-red);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--text-red);
+    animation: blipPulse 2s ease infinite;
+}
+
+@keyframes blipPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* === EVENT LOG === */
+#event-log {
+    position: absolute;
+    bottom: 70px;
+    left: 30px;
+    width: 280px;
+    max-height: 150px;
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+.event-entry {
+    color: var(--text-green);
+    font-size: 9px;
+    line-height: 1.5;
+    opacity: 0.6;
+    margin-bottom: 2px;
+    text-shadow: 0 0 3px var(--text-green);
+    animation: eventFadeIn 0.5s ease;
+}
+
+.event-entry.warning {
+    color: var(--warning-yellow);
+    text-shadow: 0 0 3px var(--warning-yellow);
+    opacity: 0.8;
+}
+
+.event-entry.critical {
+    color: var(--text-red);
+    text-shadow: 0 0 5px var(--text-red);
+    opacity: 1;
+}
+
+@keyframes eventFadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 0.6; transform: translateY(0); }
+}
+
+/* === INTERACTION PROMPTS === */
+.interact-prompt {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 75;
+    white-space: nowrap;
+}
+
+.interact-prompt.visible {
+    opacity: 1;
+}
+
+/* === AUDIO VISUALIZER === */
+#audio-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 3px;
+    align-items: flex-end;
+    height: 30px;
+    z-index: 71;
+}
+
+.audio-bar {
+    width: 3px;
+    background: var(--text-green);
+    border-radius: 1px 1px 0 0;
+    transition: height 0.1s ease;
+    box-shadow: 0 0 3px var(--text-green);
+}
+
+/* === DOCUMENT OVERLAY === */
+#document-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 95;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#document-overlay.active {
+    display: flex;
+}
+
+.document-panel {
+    width: 500px;
+    max-height: 80vh;
+    background: #f5f0e0;
+    padding: 30px;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.document-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(139, 119, 80, 0.1), transparent 70%),
+        radial-gradient(ellipse at 80% 30%, rgba(139, 119, 80, 0.08), transparent 60%);
+    pointer-events: none;
+}
+
+.document-header {
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.document-header h2 {
+    color: #333;
+    font-size: 16px;
+    letter-spacing: 3px;
+}
+
+.document-header .classification {
+    color: #cc0000;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.document-body {
+    color: #333;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.document-body .redacted {
+    background: #000;
+    color: #000;
+    padding: 0 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s ease;
+}
+
+.document-body .redacted:hover {
+    background: #333;
+    color: #ccc;
+}
+
+.document-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #666;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 2;
+    transition: color 0.2s ease;
+}
+
+.document-close:hover {
+    color: #ff0000;
+}
+
+/* === NOTIFICATION SYSTEM === */
+.notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 93;
+    pointer-events: none;
+    opacity: 0;
+    text-shadow: 0 0 20px currentColor;
+    letter-spacing: 5px;
+}
+
+.notification.active {
+    animation: notificationShow 3s ease forwards;
+}
+
+@keyframes notificationShow {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+.notification.warning { color: var(--warning-yellow); }
+.notification.critical { color: var(--text-red); }
+
+/* === BREATHING OVERLAY === */
+#breathing-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 60%,
+        rgba(0, 0, 0, 0.2) 100%
+    );
+    z-index: 79;
+    pointer-events: none;
+    animation: breathingEffect 4s ease infinite;
+}
+
+@keyframes breathingEffect {
+    0%, 100% {
+        background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.2) 100%);
+    }
+    50% {
+        background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.3) 100%);
+    }
+}
+
+/* === HEARTBEAT OVERLAY === */
+#heartbeat-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 78;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 50%,
+        rgba(80, 0, 0, 0.15) 100%
+    );
+}
+
+#heartbeat-overlay.active {
+    animation: heartbeatPulse var(--heartbeat-rate) ease infinite;
+}
+
+@keyframes heartbeatPulse {
+    0% { opacity: 0; }
+    10% { opacity: 0.6; }
+    20% { opacity: 0; }
+    30% { opacity: 0.4; }
+    40% { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* === JUMPSCARE SYSTEM === */
+#jumpscare-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+    pointer-events: none;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+
+#jumpscare-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+    animation: jumpscareFlash 0.5s ease forwards;
+}
+
+@keyframes jumpscareFlash {
+    0% { opacity: 0; }
+    5% { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+#jumpscare-overlay .scare-image {
+    width: 80%;
+    height: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scare-face {
+    width: 300px;
+    height: 300px;
+    position: relative;
+    animation: scareFaceShake 0.1s infinite;
+}
+
+@keyframes scareFaceShake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(5px, -5px) rotate(1deg); }
+    50% { transform: translate(-5px, 5px) rotate(-1deg); }
+    75% { transform: translate(5px, 5px) rotate(1deg); }
+    100% { transform: translate(-5px, -5px) rotate(-1deg); }
+}
+
+.scare-eye {
+    position: absolute;
+    width: 60px;
+    height: 50px;
+    background: radial-gradient(circle, #fff 30%, #ccc 60%, #666 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+}
+
+.scare-eye.left {
+    top: 80px;
+    left: 60px;
+}
+
+.scare-eye.right {
+    top: 80px;
+    right: 60px;
+}
+
+.scare-pupil {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 25px;
+    height: 25px;
+    background: radial-gradient(circle, #000 50%, #300 100%);
+    border-radius: 50%;
+}
+
+.scare-mouth {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 80px;
+    background: #000;
+    border-radius: 0 0 50% 50%;
+    border: 3px solid #333;
+}
+
+/* === BLACKOUT EFFECT === */
+#blackout {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 96;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+#blackout.active {
+    opacity: 1;
+}
+
+/* === BLINK MECHANIC === */
+#blink-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 85;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+#blink-top, #blink-bottom {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background: #000;
+    transition: height 0.15s ease;
+}
+
+#blink-top { top: 0; }
+#blink-bottom { bottom: 0; }
+
+#blink-overlay.blinking #blink-top,
+#blink-overlay.blinking #blink-bottom {
+    height: 50%;
+}
+
+#blink-timer-container {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 80px;
+    z-index: 71;
+}
+
+#blink-timer-label {
+    color: var(--text-green);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 3px var(--text-green);
+}
+
+#blink-timer-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    margin-top: 3px;
+    overflow: hidden;
+}
+
+#blink-timer-fill {
+    width: 100%;
+    height: 100%;
+    background: var(--text-green);
+    transition: width 0.1s linear, background-color 0.3s ease;
+    box-shadow: 0 0 5px var(--text-green);
+}
+
+#blink-timer-fill.warning {
+    background: var(--warning-yellow);
+    box-shadow: 0 0 5px var(--warning-yellow);
+}
+
+#blink-timer-fill.critical {
+    background: var(--text-red);
+    box-shadow: 0 0 5px var(--text-red);
+    animation: blinkUrgent 0.5s ease infinite;
+}
+
+@keyframes blinkUrgent {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* === PARTICLE SYSTEM === */
+#particle-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 45;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.dust-particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(200, 180, 140, 0.2);
+    border-radius: 50%;
+    animation: dustFloat linear infinite;
+}
+
+@keyframes dustFloat {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+    }
+    10% { opacity: 0.3; }
+    90% { opacity: 0.3; }
+    100% {
+        transform: translate(var(--dx), var(--dy)) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.ember-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(255, 100, 0, 0.4);
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(255, 100, 0, 0.3);
+    animation: emberRise linear infinite;
+}
+
+@keyframes emberRise {
+    0% {
+        opacity: 0.6;
+        transform: translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--ex), -200px);
+    }
+}
+
+.fog-layer {
+    position: absolute;
+    bottom: 0;
+    left: -10%;
+    width: 120%;
+    height: 30%;
+    background: linear-gradient(
+        0deg,
+        rgba(20, 20, 25, var(--fog-density)) 0%,
+        rgba(15, 15, 20, calc(var(--fog-density) * 0.5)) 50%,
+        transparent 100%
+    );
+    animation: fogDrift 20s ease infinite;
+    z-index: 44;
+    pointer-events: none;
+}
+
+@keyframes fogDrift {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5%); }
+}
+
+.fog-layer:nth-child(2) {
+    animation-delay: -10s;
+    opacity: 0.7;
+    height: 25%;
+}
+
+/* === FULLSCREEN PROMPT === */
+#fullscreen-prompt {
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 11px;
+    z-index: 72;
+    cursor: pointer;
+    padding: 5px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    letter-spacing: 1px;
+}
+
+#fullscreen-prompt:hover {
+    color: rgba(255, 255, 255, 0.7);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    #main-monitor { width: 240px; height: 180px; }
+    #side-monitor-left, #side-monitor-right { display: none; }
+    #proximity-radar { width: 80px; height: 80px; }
+    #fear-meter { width: 150px; }
+    #containment-status { font-size: 9px; }
+    .notification { font-size: 18px; }
+}
+
+/* === DANGER ZONE - RED ALERT MODE === */
+body.red-alert #vignette {
+    background: radial-gradient(
+        ellipse at center,
+        transparent 30%,
+        rgba(80, 0, 0, 0.4) 100%
+    ) !important;
+}
+
+body.red-alert .ambient-light {
+    background: radial-gradient(
+        ellipse at 50% 30%,
+        rgba(60, 10, 10, 0.2) 0%,
+        rgba(0, 0, 0, 0.9) 100%
+    ) !important;
+}
+
+body.red-alert #containment-status {
+    color: var(--text-red) !important;
+}
+
+/* === CORRUPTION EFFECTS === */
+.corruption-block {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 88;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.corruption-block.active {
+    opacity: 1;
+    animation: corruptionGlitch 0.2s steps(3) infinite;
+}
+
+@keyframes corruptionGlitch {
+    0% { transform: translateX(0); }
+    33% { transform: translateX(3px); }
+    66% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+}
+
+/* === WRITING ON WALL === */
+.wall-writing {
+    position: absolute;
+    color: rgba(80, 0, 0, 0.4);
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    white-space: nowrap;
+    transform: rotate(var(--text-rotation, 0deg));
+    pointer-events: none;
+    text-shadow: 0 0 5px rgba(80, 0, 0, 0.2);
+}
+
+.wall-writing.reveal {
+    animation: wallTextReveal 5s ease forwards;
+}
+
+@keyframes wallTextReveal {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* === DOOR === */
+#room-door {
+    position: absolute;
+    bottom: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 200px;
+    z-index: 10;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.door-frame {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        #15100a 0%,
+        #1f1810 30%,
+        #1a1310 70%,
+        #120d08 100%
+    );
+    border: 3px solid #0a0805;
+    border-radius: 2px;
+    position: relative;
+    box-shadow:
+        inset 0 0 15px rgba(0, 0, 0, 0.5),
+        0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.door-handle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 25px;
+    background: linear-gradient(90deg, #2a2a2a, #444, #2a2a2a);
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.door-viewport {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #0a0805;
+    overflow: hidden;
+}
+
+.door-viewport-glass {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg,
+        rgba(10, 15, 20, 0.9) 0%,
+        rgba(5, 8, 12, 0.95) 100%
+    );
+    position: relative;
+}
+
+.door-number {
+    position: absolute;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(100, 80, 50, 0.5);
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+/* Door light indicator */
+.door-light {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #330000;
+    border: 1px solid #1a1a1a;
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+}
+
+.door-light.locked {
+    background: #ff0000;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    animation: doorLightPulse 2s ease infinite;
+}
+
+@keyframes doorLightPulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
+}
+
+/* === HIDDEN MESSAGE ON HOVER === */
+.hidden-message {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+    z-index: 40;
+}
+
+.hidden-message.revealed {
+    opacity: 1;
+}
+
+/* === CONTAINMENT BREACH ALARM === */
+#breach-alarm {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 92;
+    pointer-events: none;
+    opacity: 0;
+}
+
+#breach-alarm.active {
+    opacity: 1;
+    animation: breachAlarm 1s ease infinite;
+}
+
+@keyframes breachAlarm {
+    0%, 100% { background: transparent; }
+    25% { background: rgba(255, 0, 0, 0.05); }
+    50% { background: transparent; }
+    75% { background: rgba(255, 0, 0, 0.03); }
+}
+
+#breach-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-red);
+    font-size: 32px;
+    font-weight: bold;
+    letter-spacing: 8px;
+    text-shadow: 0 0 30px var(--text-red);
+    opacity: 0;
+}
+
+#breach-alarm.active #breach-text {
+    animation: breachTextPulse 2s ease infinite;
+}
+
+@keyframes breachTextPulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.8; }
+}
+
+/* === END OF PART 1 CSS === */
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+    <div class="scp-logo"><span>SCP</span></div>
+    <div class="loading-text">ACCESSING SECURE DATABASE...</div>
+    <div id="loading-bar-container">
+        <div id="loading-bar"></div>
+    </div>
+    <div id="loading-status">Initializing containment protocols...</div>
+    <div id="loading-warning">
+        ⚠ WARNING: UNAUTHORIZED ACCESS DETECTED<br>
+        MEMETIC KILL AGENT DEPLOYED<br>
+        CLEARANCE LEVEL 4 REQUIRED
+    </div>
+</div>
+
+<!-- CUSTOM CURSOR -->
+<div id="custom-cursor"></div>
+
+<!-- MAIN APP CONTAINER -->
+<div id="app-container">
+
+    <!-- 3D ROOM -->
+    <div id="room-3d">
+        <!-- Walls -->
+        <div id="wall-back" class="room-wall">
+            <div class="wall-texture" id="back-wall-texture"></div>
+        </div>
+        <div id="wall-left" class="room-wall"></div>
+        <div id="wall-right" class="room-wall"></div>
+        <div id="wall-floor" class="room-wall"></div>
+        <div id="wall-ceiling" class="room-wall"></div>
+
+        <!-- Wall Details Container -->
+        <div id="wall-details"></div>
+
+        <!-- Wall Writings -->
+        <div class="wall-writing" style="top: 55%; left: 10%; --text-rotation: -3deg;">助けて</div>
+        <div class="wall-writing" style="top: 40%; right: 12%; --text-rotation: 5deg; font-size: 10px;">IT SEES YOU</div>
+        <div class="wall-writing" style="bottom: 35%; left: 30%; --text-rotation: -8deg; font-size: 18px;">出口はない</div>
+        <div class="wall-writing" style="top: 65%; right: 25%; --text-rotation: 2deg; font-size: 12px;">DON'T BLINK</div>
+        <div class="wall-writing" style="bottom: 25%; left: 60%; --text-rotation: -5deg; font-size: 9px;">D-4721 LAST LOG: I CAN HEAR THEM BREATHING</div>
+
+        <!-- Window (173 viewing) -->
+        <div id="window-container">
+            <div class="window-frame">
+                <div class="window-corridor"></div>
+                <div class="window-grime"></div>
+            </div>
+        </div>
+
+        <!-- Monitors -->
+        <div id="main-monitor" class="monitor-unit">
+            <div class="monitor-glow"></div>
+            <div class="monitor-frame">
+                <div class="monitor-screen" id="main-screen">
+                    <div class="monitor-text" id="main-monitor-text"></div>
+                    <div class="monitor-content-096" id="content-096">
+                        <div class="figure-096" id="figure096">
+                            <div class="figure-096-head"></div>
+                            <div class="figure-096-hands"></div>
+                            <div class="figure-096-body"></div>
+                        </div>
+                    </div>
+                    <div class="face-warning" id="face-warning-096">
+                        <div class="face-warning-text">⚠ DO NOT LOOK ⚠<br>AVERT YOUR EYES</div>
+                    </div>
+                    <div class="monitor-static" id="main-static"></div>
+                    <div class="monitor-warning" id="main-warning">⚠ FEED COMPROMISED</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="side-monitor-left" class="monitor-unit">
+            <div class="monitor-glow"></div>
+            <div class="monitor-frame">
+                <div class="monitor-screen" id="left-screen">
+                    <div class="monitor-text" id="left-monitor-text"></div>
+                    <div class="monitor-static"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="side-monitor-right" class="monitor-unit">
+            <div class="monitor-glow"></div>
+            <div class="monitor-frame">
+                <div class="monitor-screen" id="right-screen">
+                    <div class="monitor-text" id="right-monitor-text"></div>
+                    <div class="monitor-static"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Old Desk -->
+        <div id="old-desk" class="furniture">
+            <div class="desk-paper" style="top: 5px; left: 15px; width: 60px; height: 80px; --rotation: -5deg;"></div>
+            <div class="desk-paper" style="top: 10px; left: 90px; width: 50px; height: 70px; --rotation: 8deg;"></div>
+            <div class="desk-paper" style="top: 3px; right: 30px; width: 55px; height: 75px; --rotation: -2deg;"></div>
+        </div>
+
+        <!-- Filing Cabinet -->
+        <div id="filing-cabinet" class="furniture">
+            <div class="cabinet-drawer"></div>
+            <div class="cabinet-drawer open"></div>
+            <div class="cabinet-drawer"></div>
+            <div class="cabinet-drawer"></div>
+        </div>
+
+        <!-- Old Chair -->
+        <div id="old-chair" class="furniture">
+            <div class="back"></div>
+            <div class="seat"></div>
+            <div class="leg" style="left: 5px;"></div>
+            <div class="leg" style="right: 5px;"></div>
+        </div>
+
+        <!-- Room Door -->
+        <div id="room-door">
+            <div class="door-light locked"></div>
+            <div class="door-frame">
+                <div class="door-viewport">
+                    <div class="door-viewport-glass"></div>
+                </div>
+                <div class="door-number">4721</div>
+                <div class="door-handle"></div>
+            </div>
+        </div>
+
+        <!-- SCP-173 Container -->
+        <div id="scp-173-container">
+            <div id="scp-173">
+                <div class="scp173-head">
+                    <div class="scp173-face">
+                        <div class="scp173-eye left"></div>
+                        <div class="scp173-eye right"></div>
+                        <div class="scp173-mouth"></div>
+                    </div>
+                </div>
+                <div class="scp173-body">
+                    <div class="scp173-paint-red" style="top: 10px; left: 5px; width: 20px; height: 15px;"></div>
+                    <div class="scp173-paint-red" style="top: 50px; right: 8px; width: 15px; height: 20px;"></div>
+                    <div class="scp173-paint-green" style="top: 30px; left: 15px; width: 25px; height: 18px;"></div>
+                    <div class="scp173-rebar" style="top: -10px; left: 10px; height: 40px; transform: rotate(10deg);"></div>
+                    <div class="scp173-rebar" style="top: -5px; right: 12px; height: 35px; transform: rotate(-8deg);"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCP-106 Container -->
+        <div id="scp-106-container">
+            <div class="scp106-portal">
+                <div class="scp106-figure">
+                    <div class="scp106-head">
+                        <div class="scp106-eye left"></div>
+                        <div class="scp106-eye right"></div>
+                        <div class="scp106-smile"></div>
+                    </div>
+                    <div class="scp106-body"></div>
+                    <div class="scp106-hand reaching" style="left: -20px; top: 40px;"></div>
+                    <div class="scp106-hand" style="right: -15px; top: 50px;"></div>
+                </div>
+                <div class="scp106-decay" style="bottom: -20px; left: -10px; width: 140px; height: 60px;"></div>
+                <div class="scp106-drip" style="left: 20px;"></div>
+                <div class="scp106-drip" style="left: 50px; animation-delay: 0.8s;"></div>
+                <div class="scp106-drip" style="right: 25px; animation-delay: 1.5s;"></div>
+                <div class="corrosion-pool"></div>
+            </div>
+        </div>
+
+        <!-- Ceiling Eyes Container -->
+        <div id="ceiling-eyes-container">
+            <div class="vent-opening" style="left: 30%; top: 10px;" id="vent-1">
+                <!-- Eyes will be dynamically added -->
+            </div>
+            <div class="vent-opening" style="left: 60%; top: 5px;" id="vent-2">
+            </div>
+        </div>
+
+        <!-- Mirror -->
+        <div id="mirror-container">
+            <div class="mirror-frame">
+                <div class="mirror-surface"></div>
+                <div class="mirror-reflection" id="mirror-reflection"></div>
+                <div class="mirror-entity" id="mirror-entity">
+                    <div class="mirror-entity-head">
+                        <div class="mirror-entity-eyes">
+                            <div class="mirror-entity-eye left"></div>
+                            <div class="mirror-entity-eye right"></div>
+                        </div>
+                    </div>
+                    <div class="mirror-entity-body"></div>
+                </div>
+                <div class="mirror-fog" id="mirror-fog"></div>
+                <div class="mirror-crack" style="top: 20%; left: 30%; width: 1px; height: 30%; transform: rotate(15deg);"></div>
+                <div class="mirror-crack" style="top: 40%; left: 28%; width: 1px; height: 20%; transform: rotate(-25deg);"></div>
+                <div class="mirror-crack" style="top: 50%; left: 35%; width: 1px; height: 15%; transform: rotate(45deg);"></div>
+            </div>
+        </div>
+
+    </div><!-- End room-3d -->
+
+    <!-- Particle Container -->
+    <div id="particle-container">
+        <div class="fog-layer"></div>
+        <div class="fog-layer"></div>
+    </div>
+
+    <!-- Lighting Layer -->
+    <div id="lighting-layer">
+        <div class="ambient-light"></div>
+    </div>
+
+    <div class="ceiling-light"></div>
+    <div class="light-cone"></div>
+    <div class="flashlight-effect" id="flashlight"></div>
+
+</div><!-- End app-container -->
+
+<!-- POST-PROCESSING OVERLAYS -->
+<div id="breathing-overlay"></div>
+<div id="heartbeat-overlay"></div>
+<div id="vignette"></div>
+<div id="chromatic-aberration"></div>
+<div id="film-grain"></div>
+<div id="scanlines"></div>
+<div id="blink-overlay">
+    <div id="blink-top"></div>
+    <div id="blink-bottom"></div>
+</div>
+
+<!-- HUD OVERLAY -->
+<div id="hud-overlay">
+    <!-- Containment Status -->
+    <div id="containment-status">
+        <div class="status-line">SCP FOUNDATION</div>
+        <div class="status-line">SITE-███ | SECTOR 7-G</div>
+        <div class="status-line" id="containment-level">CONTAINMENT: ACTIVE</div>
+        <div class="status-line" id="threat-level">THREAT LEVEL: MODERATE</div>
+    </div>
+
+    <!-- Time Display -->
+    <div id="time-display">
+        <div id="current-time"></div>
+        <div id="elapsed-time">ELAPSED: 00:00:00</div>
+        <div id="camera-id">CAM-4721-A</div>
+    </div>
+
+    <!-- Blink Timer -->
+    <div id="blink-timer-container">
+        <div id="blink-timer-label">BLINK</div>
+        <div id="blink-timer-bar">
+            <div id="blink-timer-fill"></div>
+        </div>
+    </div>
+
+    <!-- Fear Meter -->
+    <div id="fear-meter">
+        <div id="fear-meter-label">STRESS LEVEL</div>
+        <div id="fear-bar-container">
+            <div id="fear-bar"></div>
+        </div>
+        <div id="fear-value">0%</div>
+    </div>
+
+    <!-- Event Log -->
+    <div id="event-log"></div>
+
+    <!-- Proximity Radar -->
+    <div id="proximity-radar">
+        <div class="radar-ring" style="width: 40px; height: 40px;"></div>
+        <div class="radar-ring" style="width: 80px; height: 80px;"></div>
+        <div class="radar-ring" style="width: 116px; height: 116px;"></div>
+    </div>
+
+    <!-- Audio Indicator -->
+    <div id="audio-indicator"></div>
+
+    <!-- Fullscreen Prompt -->
+    <div id="fullscreen-prompt">[ F ] FULLSCREEN</div>
+</div>
+
+<!-- GLITCH OVERLAYS -->
+<div class="glitch-overlay" id="glitch-overlay"></div>
+<div class="glitch-slice" id="glitch-slice-1" style="top: 20%; height: 3px;"></div>
+<div class="glitch-slice" id="glitch-slice-2" style="top: 50%; height: 5px;"></div>
+<div class="glitch-slice" id="glitch-slice-3" style="top: 75%; height: 2px;"></div>
+
+<!-- BREACH ALARM -->
+<div id="breach-alarm">
+    <div id="breach-text">CONTAINMENT BREACH</div>
+</div>
+
+<!-- BLACKOUT -->
+<div id="blackout"></div>
+
+<!-- JUMPSCARE -->
+<div id="jumpscare-overlay">
+    <div class="scare-image">
+        <div class="scare-face">
+            <div class="scare-eye left"><div class="scare-pupil"></div></div>
+            <div class="scare-eye right"><div class="scare-pupil"></div></div>
+            <div class="scare-mouth"></div>
+        </div>
+    </div>
+</div>
+
+<!-- DOCUMENT OVERLAY -->
+<div id="document-overlay">
+    <div class="document-panel">
+        <div class="document-close" id="doc-close">✕</div>
+        <div class="document-header">
+            <h2>SCP-4721 INCIDENT REPORT</h2>
+            <div class="classification">TOP SECRET // LEVEL 4 CLEARANCE</div>
+        </div>
+        <div class="document-body" id="document-body">
+        </div>
+    </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification"></div>
+
+<!-- CORRUPTION BLOCKS -->
+<div class="corruption-block" id="corrupt-1" style="top: 10%; left: 5%; width: 100px; height: 20px;"></div>
+<div class="corruption-block" id="corrupt-2" style="top: 40%; right: 8%; width: 80px; height: 15px;"></div>
+<div class="corruption-block" id="corrupt-3" style="bottom: 20%; left: 15%; width: 120px; height: 10px;"></div>
+
+<script>
+// ============================================================
+// PART 1: CORE ENGINE - INITIALIZATION & STATE MANAGEMENT
+// ============================================================
+
+'use strict';
+
+// === GLOBAL STATE ===
+const STATE = {
+    loaded: false,
+    startTime: Date.now(),
+    elapsedTime: 0,
+    mouseX: 0,
+    mouseY: 0,
+    prevMouseX: 0,
+    prevMouseY: 0,
+    mouseSpeed: 0,
+    mouseIdle: 0,
+    fear: 0,
+    maxFear: 100,
+    fearDecayRate: 0.05,
+    fearGrowthRate: 0.1,
+    blinkTimer: 100,
+    blinkDecayRate: 0.15,
+    isBlinking: false,
+    blinkDuration: 300,
+    lastBlink: Date.now(),
+    scp173: {
+        x: -200,
+        y: 300,
+        visible: false,
+        distanceToPlayer: 1000,
+        moveSpeed: 0,
+        lastMoveTime: 0,
+        positions: [
+            { x: -150, y: 250 },
+            { x: 100, y: 300 },
+            { x: 300, y: 200 },
+            { x: 500, y: 280 },
+            { x: 700, y: 250 },
+            { x: 850, y: 200 },
+            { x: 650, y: 350 },
+            { x: 400, y: 150 },
+        ],
+        currentPosition: 0,
+        approachStage: 0,
+    },
+    scp106: {
+        visible: true,
+        activity: 0,
+        reaching: false,
+        portalSize: 1,
+        lastActivity: Date.now(),
+        emergenceLevel: 0,
+    },
+    scp096: {
+        visible: false,
+        faceViewed: false,
+        viewTime: 0,
+        agitated: false,
+        triggerThreshold: 3000,
+        screaming: false,
+    },
+    shadowEyes: {
+        count: 8,
+        maxCount: 20,
+        blinkInterval: 3000,
+        lastBlink: Date.now(),
+        watching: true,
+        positions: [],
+    },
+    mirrorEntity: {
+        visible: false,
+        proximity: 0,
+        lastAppearance: 0,
+        fogActive: false,
+    },
+    containment: {
+        status: 'ACTIVE',
+        breachLevel: 0,
+        breachThreshold: 80,
+        alarmActive: false,
+    },
+    audio: {
+        enabled: false,
+        masterVolume: 0.5,
+        ambientPlaying: false,
+        ctx: null,
+    },
+    events: [],
+    maxEvents: 15,
+    phase: 0,
+    phaseTimers: [30000, 60000, 120000, 180000, 300000],
+    glitchActive: false,
+    lastGlitch: 0,
+    documentFound: false,
+    flashlightActive: false,
+    interactionCount: 0,
+    secrets: {
+        wallMessages: 0,
+        hiddenDoor: false,
+        mirrorTouched: false,
+        deskSearched: false,
+    },
+    frameCount: 0,
+    lastFrameTime: 0,
+    fps: 0,
+    deltaTime: 0,
+    paused: false,
+};
+
+// === DOM REFERENCES ===
+const DOM = {};
+
+function cacheDOMElements() {
+    DOM.cursor = document.getElementById('custom-cursor');
+    DOM.loadingScreen = document.getElementById('loading-screen');
+    DOM.loadingBar = document.getElementById('loading-bar');
+    DOM.loadingStatus = document.getElementById('loading-status');
+    DOM.loadingWarning = document.getElementById('loading-warning');
+    DOM.appContainer = document.getElementById('app-container');
+    DOM.room3d = document.getElementById('room-3d');
+    DOM.mainMonitorText = document.getElementById('main-monitor-text');
+    DOM.leftMonitorText = document.getElementById('left-monitor-text');
+    DOM.rightMonitorText = document.getElementById('right-monitor-text');
+    DOM.mainScreen = document.getElementById('main-screen');
+    DOM.leftScreen = document.getElementById('left-screen');
+    DOM.rightScreen = document.getElementById('right-screen');
+    DOM.mainStatic = document.getElementById('main-static');
+    DOM.mainWarning = document.getElementById('main-warning');
+    DOM.figure096 = document.getElementById('figure096');
+    DOM.faceWarning096 = document.getElementById('face-warning-096');
+    DOM.content096 = document.getElementById('content-096');
+    DOM.scp173Container = document.getElementById('scp-173-container');
+    DOM.scp106Container = document.getElementById('scp-106-container');
+    DOM.ceilingEyes = document.getElementById('ceiling-eyes-container');
+    DOM.vent1 = document.getElementById('vent-1');
+    DOM.vent2 = document.getElementById('vent-2');
+    DOM.mirrorEntity = document.getElementById('mirror-entity');
+    DOM.mirrorFog = document.getElementById('mirror-fog');
+    DOM.mirrorReflection = document.getElementById('mirror-reflection');
+    DOM.fearBar = document.getElementById('fear-bar');
+    DOM.fearValue = document.getElementById('fear-value');
+    DOM.containmentLevel = document.getElementById('containment-level');
+    DOM.threatLevel = document.getElementById('threat-level');
+    DOM.currentTime = document.getElementById('current-time');
+    DOM.elapsedTime = document.getElementById('elapsed-time');
+    DOM.eventLog = document.getElementById('event-log');
+    DOM.proximityRadar = document.getElementById('proximity-radar');
+    DOM.audioIndicator = document.getElementById('audio-indicator');
+    DOM.flashlight = document.getElementById('flashlight');
+    DOM.vignette = document.getElementById('vignette');
+    DOM.chromaticAberration = document.getElementById('chromatic-aberration');
+    DOM.filmGrain = document.getElementById('film-grain');
+    DOM.blinkOverlay = document.getElementById('blink-overlay');
+    DOM.blinkTimerFill = document.getElementById('blink-timer-fill');
+    DOM.heartbeatOverlay = document.getElementById('heartbeat-overlay');
+    DOM.breathingOverlay = document.getElementById('breathing-overlay');
+    DOM.glitchOverlay = document.getElementById('glitch-overlay');
+    DOM.glitchSlices = [
+        document.getElementById('glitch-slice-1'),
+        document.getElementById('glitch-slice-2'),
+        document.getElementById('glitch-slice-3'),
+    ];
+    DOM.breachAlarm = document.getElementById('breach-alarm');
+    DOM.blackout = document.getElementById('blackout');
+    DOM.jumpscareOverlay = document.getElementById('jumpscare-overlay');
+    DOM.documentOverlay = document.getElementById('document-overlay');
+    DOM.documentBody = document.getElementById('document-body');
+    DOM.docClose = document.getElementById('doc-close');
+    DOM.notification = document.getElementById('notification');
+    DOM.corruptBlocks = [
+        document.getElementById('corrupt-1'),
+        document.getElementById('corrupt-2'),
+        document.getElementById('corrupt-3'),
+    ];
+    DOM.wallDetails = document.getElementById('wall-details');
+    DOM.roomDoor = document.getElementById('room-door');
+    DOM.fullscreenPrompt = document.getElementById('fullscreen-prompt');
+    DOM.particleContainer = document.getElementById('particle-container');
+    DOM.backWallTexture = document.getElementById('back-wall-texture');
+}
+
+// === UTILITY FUNCTIONS ===
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
+
+function clamp(val, min, max) {
+    return Math.max(min, Math.min(max, val));
+}
+
+function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function randomInt(min, max) {
+    return Math.floor(randomRange(min, max + 1));
+}
+
+function formatTime(ms) {
+    const totalSec = Math.floor(ms / 1000);
+    const h = Math.floor(totalSec / 3600).toString().padStart(2, '0');
+    const m = Math.floor((totalSec % 3600) / 60).toString().padStart(2, '0');
+    const s = (totalSec % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+}
+
+function getCurrentTimeString() {
+    const d = new Date();
+    return d.toLocaleTimeString('en-US', { hour12: false }) + '.' + d.getMilliseconds().toString().padStart(3, '0');
+}
+
+function probability(chance) {
+    return Math.random() < chance;
+}
+
+function distanceBetween(x1, y1, x2, y2) {
+    return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
+function easeInOutQuad(t) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
+function easeOutExpo(t) {
+    return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+}
+
+// === AUDIO ENGINE ===
+class AudioEngine {
+    constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.initialized = false;
+        this.sounds = {};
+        this.oscillators = {};
+    }
+
+    init() {
+        if (this.initialized) return;
+        try {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.value = STATE.audio.masterVolume;
+            this.masterGain.connect(this.ctx.destination);
+            this.initialized = true;
+            STATE.audio.ctx = this.ctx;
+            STATE.audio.enabled = true;
+        } catch (e) {
+            console.warn('Audio context not available:', e);
+        }
+    }
+
+    createNoise(duration, type) {
+        if (!this.initialized) return null;
+        const bufferSize = this.ctx.sampleRate * duration;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        if (type === 'white') {
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+        } else if (type === 'brown') {
+            let last = 0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                data[i] = (last + (0.02 * white)) / 1.02;
+                last = data[i];
+                data[i] *= 3.5;
+            }
+        } else if (type === 'pink') {
+            let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                data[i] *= 0.11;
+                b6 = white * 0.115926;
+            }
+        }
+
+        return buffer;
+    }
+
+    playAmbientDrone() {
+        if (!this.initialized) return;
+
+        // Deep drone
+        const osc1 = this.ctx.createOscillator();
+        const gain1 = this.ctx.createGain();
+        osc1.type = 'sawtooth';
+        osc1.frequency.value = 40;
+        gain1.gain.value = 0.03;
+        osc1.connect(gain1);
+        gain1.connect(this.masterGain);
+        osc1.start();
+
+        // Sub bass
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.value = 25;
+        gain2.gain.value = 0.05;
+        osc2.connect(gain2);
+        gain2.connect(this.masterGain);
+        osc2.start();
+
+        // Slow LFO modulation
+        const lfo = this.ctx.createOscillator();
+        const lfoGain = this.ctx.createGain();
+        lfo.type = 'sine';
+        lfo.frequency.value = 0.1;
+        lfoGain.gain.value = 5;
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc1.frequency);
+        lfo.start();
+
+        // Brown noise ambient
+        const noiseBuffer = this.createNoise(10, 'brown');
+        if (noiseBuffer) {
+            const noiseSource = this.ctx.createBufferSource();
+            const noiseGain = this.ctx.createGain();
+            const noiseFilter = this.ctx.createBiquadFilter();
+            noiseSource.buffer = noiseBuffer;
+            noiseSource.loop = true;
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.value = 200;
+            noiseGain.gain.value = 0.08;
+            noiseSource.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(this.masterGain);
+            noiseSource.start();
+        }
+
+        this.oscillators.drone = { osc1, osc2, lfo, gain1, gain2 };
+        STATE.audio.ambientPlaying = true;
+    }
+
+    playHeartbeat(rate) {
+        if (!this.initialized) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 60;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.1, now + 0.05);
+        gain.gain.linearRampToValueAtTime(0, now + 0.15);
+        gain.gain.linearRampToValueAtTime(0.07, now + 0.25);
+        gain.gain.linearRampToValueAtTime(0, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.4);
+    }
+
+    playStaticBurst(duration) {
+        if (!this.initialized) return;
+        const buffer = this.createNoise(duration || 0.3, 'white');
+        if (!buffer) return;
+        const source = this.ctx.createBufferSource();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        source.buffer = buffer;
+        filter.type = 'bandpass';
+        filter.frequency.value = 3000;
+        filter.Q.value = 0.5;
+        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + (duration || 0.3));
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        source.start();
+    }
+
+    playCreak() {
+        if (!this.initialized) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(80, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.5);
+        filter.type = 'bandpass';
+        filter.frequency.value = 800;
+        filter.Q.value = 10;
+        gain.gain.setValueAtTime(0.02, now);
+        gain.gain.linearRampToValueAtTime(0.04, now + 0.1);
+        gain.gain.linearRampToValueAtTime(0, now + 0.5);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.5);
+    }
+
+    playKnock() {
+        if (!this.initialized) return;
+        const now = this.ctx.currentTime;
+        const buffer = this.createNoise(0.1, 'white');
+        if (!buffer) return;
+        const source = this.ctx.createBufferSource();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        source.buffer = buffer;
+        filter.type = 'lowpass';
+        filter.frequency.value = 500;
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        source.start(now);
+        source.stop(now + 0.1);
+    }
+
+    playScream() {
+        if (!this.initialized) return;
+        const now = this.ctx.currentTime;
+
+        // Multi-layered scream
+        for (let i = 0; i < 4; i++) {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = i < 2 ? 'sawtooth' : 'square';
+            osc.frequency.setValueAtTime(200 + i * 300, now);
+            osc.frequency.exponentialRampToValueAtTime(800 + i * 200, now + 0.1);
+            osc.frequency.linearRampToValueAtTime(400 + i * 150, now + 1);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.linearRampToValueAtTime(0.12, now + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 1.5);
+        }
+
+        // Noise layer
+        const buffer = this.createNoise(1.5, 'white');
+        if (buffer) {
+            const source = this.ctx.createBufferSource();
+            const gain = this.ctx.createGain();
+            source.buffer = buffer;
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+            source.connect(gain);
+            gain.connect(this.masterGain);
+            source.start(now);
+            source.stop(now + 1.5);
+        }
+    }
+
+    playAlarm() {
+        if (!this.initialized) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(800, now);
+        gain.gain.value = 0.06;
+
+        // Siren modulation
+        const lfo = this.ctx.createOscillator();
+        const lfoGain = this.ctx.createGain();
+        lfo.frequency.value = 2;
+        lfoGain.gain.value = 200;
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        lfo.start(now);
+
+        this.oscillators.alarm = { osc, gain, lfo, lfoGain };
+    }
+
+    stopAlarm() {
+        if (this.oscillators.alarm) {
+            try {
+                this.oscillators.alarm.osc.stop();
+                this.oscillators.alarm.lfo.stop();
+            } catch (e) {}
+            delete this.oscillators.alarm;
+        }
+    }
+
+    playWhisper() {
+        if (!this.initialized) return;
+        const now = this.ctx.currentTime;
+        const buffer = this.createNoise(2, 'pink');
+        if (!buffer) return;
+        const source = this.ctx.createBufferSource();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        source.buffer = buffer;
+        filter.type = 'bandpass';
+        filter.frequency.value = 1500;
+        filter.Q.value = 5;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.03, now + 0.5);
+        gain.gain.linearRampToValueAtTime(0, now + 2);
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        source.start(now);
+        source.stop(now + 2);
+    }
+
+    setMasterVolume(vol) {
+        if (this.masterGain) {
+            this.masterGain.gain.value = clamp(vol, 0, 1);
+        }
+    }
+}
+
+const audioEngine = new AudioEngine();
+
+// === PARTICLE SYSTEM ===
+class ParticleSystem {
+    constructor(container) {
+        this.container = container;
+        this.particles = [];
+        this.maxParticles = 50;
+    }
+
+    createDustParticle() {
+        if (this.particles.length >= this.maxParticles) return;
+        const p = document.createElement('div');
+        p.className = 'dust-particle';
+        const x = randomRange(0, window.innerWidth);
+        const y = randomRange(0, window.innerHeight);
+        const size = randomRange(1, 3);
+        const duration = randomRange(8, 20);
+        const dx = randomRange(-100, 100);
+        const dy = randomRange(-80, 80);
+
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.setProperty('--dx', dx + 'px');
+        p.style.setProperty('--dy', dy + 'px');
+        p.style.animationDuration = duration + 's';
+        p.style.animationDelay = randomRange(0, 5) + 's';
+
+        this.container.appendChild(p);
+        this.particles.push(p);
+
+        setTimeout(() => {
+            if (p.parentNode) p.parentNode.removeChild(p);
+            const idx = this.particles.indexOf(p);
+            if (idx > -1) this.particles.splice(idx, 1);
+        }, duration * 1000 + 6000);
+    }
+
+    createEmberParticle(x, y) {
+        const p = document.createElement('div');
+        p.className = 'ember-particle';
+        const ex = randomRange(-30, 30);
+        p.style.left = (x || randomRange(0, window.innerWidth)) + 'px';
+        p.style.top = (y || window.innerHeight) + 'px';
+        p.style.setProperty('--ex', ex + 'px');
+        const duration = randomRange(3, 6);
+        p.style.animationDuration = duration + 's';
+
+        this.container.appendChild(p);
+        setTimeout(() => {
+            if (p.parentNode) p.parentNode.removeChild(p);
+        }, duration * 1000);
+    }
+
+    init() {
+        // 初期ダスト生成
+        for (let i = 0; i < 30; i++) {
+            setTimeout(() => this.createDustParticle(), randomRange(0, 3000));
+        }
+        // 継続的にダストを生成
+        setInterval(() => {
+            if (!STATE.paused) {
+                this.createDustParticle();
+            }
+        }, 800);
+    }
+}
+
+// === STATIC NOISE GENERATOR (Canvas) ===
+class StaticGenerator {
+    constructor() {
+        this.canvases = [];
+        this.contexts = [];
+        this.running = false;
+    }
+
+    init() {
+        const staticElements = document.querySelectorAll('.monitor-static');
+        staticElements.forEach((el) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = el.offsetWidth || 320;
+            canvas.height = el.offsetHeight || 240;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            el.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+            this.canvases.push(canvas);
+            this.contexts.push(ctx);
+        });
+        this.running = true;
+    }
+
+    update() {
+        if (!this.running) return;
+        this.contexts.forEach((ctx, i) => {
+            const canvas = this.canvases[i];
+            if (!canvas) return;
+            const w = canvas.width;
+            const h = canvas.height;
+            const imageData = ctx.createImageData(w, h);
+            const data = imageData.data;
+            const intensity = 0.15 + STATE.glitchActive * 0.3;
+
+            for (let j = 0; j < data.length; j += 4) {
+                const val = Math.random() * 255 * intensity;
+                data[j] = val;
+                data[j + 1] = val;
+                data[j + 2] = val;
+                data[j + 3] = Math.random() * 60;
+            }
+            ctx.putImageData(imageData, 0, 0);
+        });
+    }
+}
+
+// === FILM GRAIN GENERATOR ===
+class GrainGenerator {
+    constructor(element) {
+        this.element = element;
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 256;
+        this.canvas.style.width = '100%';
+        this.canvas.style.height = '100%';
+        this.ctx = this.canvas.getContext('2d');
+        this.element.appendChild(this.canvas);
+    }
+
+    update() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const imageData = this.ctx.createImageData(w, h);
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const val = Math.random() * 255;
+            data[i] = val;
+            data[i + 1] = val;
+            data[i + 2] = val;
+            data[i + 3] = 30;
+        }
+        this.ctx.putImageData(imageData, 0, 0);
+    }
+}
+
+// === EVENT LOG SYSTEM ===
+class EventLogger {
+    constructor(container, maxEntries) {
+        this.container = container;
+        this.maxEntries = maxEntries || 15;
+        this.entries = [];
+    }
+
+    log(message, type) {
+        const entry = document.createElement('div');
+        entry.className = 'event-entry';
+        if (type) entry.classList.add(type);
+
+        const timestamp = getCurrentTimeString();
+        entry.textContent = `[${timestamp}] ${message}`;
+
+        this.container.insertBefore(entry, this.container.firstChild);
+        this.entries.unshift(entry);
+
+        // 超過分を削除
+        while (this.entries.length > this.maxEntries) {
+            const old = this.entries.pop();
+            if (old.parentNode) old.parentNode.removeChild(old);
+        }
+
+        // 古いエントリをフェードアウト
+        this.entries.forEach((e, i) => {
+            e.style.opacity = Math.max(0.2, 1 - i * 0.06);
+        });
+    }
+
+    clear() {
+        this.entries.forEach(e => {
+            if (e.parentNode) e.parentNode.removeChild(e);
+        });
+        this.entries = [];
+    }
+}
+
+// === NOTIFICATION SYSTEM ===
+class NotificationSystem {
+    constructor(element) {
+        this.element = element;
+        this.queue = [];
+        this.showing = false;
+    }
+
+    show(text, type, duration) {
+        this.queue.push({ text, type: type || '', duration: duration || 3000 });
+        if (!this.showing) this._processQueue();
+    }
+
+    _processQueue() {
+        if (this.queue.length === 0) {
+            this.showing = false;
+            return;
+        }
+        this.showing = true;
+        const item = this.queue.shift();
+        this.element.textContent = item.text;
+        this.element.className = 'notification active ' + item.type;
+
+        setTimeout(() => {
+            this.element.className = 'notification';
+            setTimeout(() => this._processQueue(), 500);
+        }, item.duration);
+    }
+}
+
+// === RADAR BLIP SYSTEM ===
+class RadarSystem {
+    constructor(container) {
+        this.container = container;
+        this.blips = [];
+        this.centerX = 60;
+        this.centerY = 60;
+    }
+
+    addBlip(id, angle, distance, color) {
+        let blip = this.blips.find(b => b.id === id);
+        if (!blip) {
+            const el = document.createElement('div');
+            el.className = 'radar-blip';
+            el.style.background = color || 'var(--text-red)';
+            el.style.boxShadow = `0 0 6px ${color || 'var(--text-red)'}`;
+            this.container.appendChild(el);
+            blip = { id, el, angle, distance };
+            this.blips.push(blip);
+        }
+        blip.angle = angle;
+        blip.distance = distance;
+        this.updateBlipPosition(blip);
+    }
+
+    updateBlipPosition(blip) {
+        const rad = blip.angle * Math.PI / 180;
+        const maxDist = 55;
+        const d = clamp(blip.distance, 0, 1) * maxDist;
+        const x = this.centerX + Math.cos(rad) * d - 3;
+        const y = this.centerY + Math.sin(rad) * d - 3;
+        blip.el.style.left = x + 'px';
+        blip.el.style.top = y + 'px';
+    }
+
+    removeBlip(id) {
+        const idx = this.blips.findIndex(b => b.id === id);
+        if (idx > -1) {
+            if (this.blips[idx].el.parentNode) {
+                this.blips[idx].el.parentNode.removeChild(this.blips[idx].el);
+            }
+            this.blips.splice(idx, 1);
+        }
+    }
+
+    updateAll() {
+        this.blips.forEach(b => this.updateBlipPosition(b));
+    }
+}
+
+// === AUDIO VISUALIZER ===
+class AudioVisualizer {
+    constructor(container, barCount) {
+        this.container = container;
+        this.bars = [];
+        this.barCount = barCount || 20;
+        this.init();
+    }
+
+    init() {
+        for (let i = 0; i < this.barCount; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'audio-bar';
+            bar.style.height = '2px';
+            this.container.appendChild(bar);
+            this.bars.push(bar);
+        }
+    }
+
+    update(fearLevel) {
+        const baseHeight = 2;
+        const maxAdditional = 15 + (fearLevel / 100) * 15;
+
+        this.bars.forEach((bar, i) => {
+            const h = baseHeight + Math.random() * maxAdditional * (0.5 + Math.sin(Date.now() / 200 + i) * 0.5);
+            bar.style.height = h + 'px';
+
+            if (fearLevel > 70) {
+                bar.style.background = 'var(--text-red)';
+                bar.style.boxShadow = '0 0 3px var(--text-red)';
+            } else if (fearLevel > 40) {
+                bar.style.background = 'var(--warning-yellow)';
+                bar.style.boxShadow = '0 0 3px var(--warning-yellow)';
+            } else {
+                bar.style.background = 'var(--text-green)';
+                bar.style.boxShadow = '0 0 3px var(--text-green)';
+            }
+        });
+    }
+}
+
+// === TYPEWRITER EFFECT ===
+class Typewriter {
+    constructor(element, speed) {
+        this.element = element;
+        this.speed = speed || 50;
+        this.queue = [];
+        this.typing = false;
+        this.currentText = '';
+    }
+
+    type(text, callback) {
+        this.queue.push({ text, callback });
+        if (!this.typing) this._processQueue();
+    }
+
+    clear() {
+        this.element.innerHTML = '';
+        this.currentText = '';
+    }
+
+    _processQueue() {
+        if (this.queue.length === 0) {
+            this.typing = false;
+            return;
+        }
+        this.typing = true;
+        const item = this.queue.shift();
+        let i = 0;
+        const text = item.text;
+
+        const typeNext = () => {
+            if (i < text.length) {
+                this.currentText += text[i];
+                this.element.innerHTML = this.currentText + '<span class="cursor-blink">█</span>';
+                i++;
+                const delay = text[i - 1] === '\n' ? this.speed * 3 : this.speed + randomRange(-20, 20);
+                setTimeout(typeNext, Math.max(10, delay));
+            } else {
+                if (item.callback) item.callback();
+                setTimeout(() => this._processQueue(), 500);
+            }
+        };
+        typeNext();
+    }
+}
+
+// === WALL DETAIL GENERATOR ===
+class WallDetailGenerator {
+    constructor(container) {
+        this.container = container;
+    }
+
+    generate() {
+        this.generateCracks(15);
+        this.generateStains(10);
+        this.generateBloodStains(5);
+        this.generateBloodDrips(8);
+        this.generateMold(6);
+        this.generatePipes(3);
+    }
+
+    generateCracks(count) {
+        for (let i = 0; i < count; i++) {
+            const crack = document.createElement('div');
+            crack.className = 'wall-crack';
+            crack.style.left = randomRange(5, 95) + '%';
+            crack.style.top = randomRange(5, 95) + '%';
+            crack.style.width = randomRange(1, 3) + 'px';
+            crack.style.height = randomRange(20, 100) + 'px';
+            crack.style.transform = `rotate(${randomRange(-30, 30)}deg)`;
+            crack.style.opacity = randomRange(0.3, 0.7);
+            this.container.appendChild(crack);
+
+            // ブランチクラック
+            if (probability(0.5)) {
+                const branch = document.createElement('div');
+                branch.className = 'wall-crack';
+                branch.style.left = '0';
+                branch.style.top = randomRange(20, 80) + '%';
+                branch.style.width = randomRange(1, 2) + 'px';
+                branch.style.height = randomRange(10, 40) + 'px';
+                branch.style.transform = `rotate(${randomRange(30, 70)}deg)`;
+                branch.style.transformOrigin = 'top left';
+                branch.style.opacity = randomRange(0.2, 0.5);
+                crack.appendChild(branch);
+            }
+        }
+    }
+
+    generateStains(count) {
+        for (let i = 0; i < count; i++) {
+            const stain = document.createElement('div');
+            stain.className = 'wall-stain';
+            stain.style.left = randomRange(0, 90) + '%';
+            stain.style.top = randomRange(0, 90) + '%';
+            stain.style.width = randomRange(30, 100) + 'px';
+            stain.style.height = randomRange(20, 80) + 'px';
+            this.container.appendChild(stain);
+        }
+    }
+
+    generateBloodStains(count) {
+        for (let i = 0; i < count; i++) {
+            const stain = document.createElement('div');
+            stain.className = 'blood-stain';
+            stain.style.left = randomRange(10, 85) + '%';
+            stain.style.top = randomRange(20, 80) + '%';
+            stain.style.width = randomRange(20, 60) + 'px';
+            stain.style.height = randomRange(15, 50) + 'px';
+            stain.style.opacity = randomRange(0.3, 0.6);
+            this.container.appendChild(stain);
+        }
+    }
+
+    generateBloodDrips(count) {
+        for (let i = 0; i < count; i++) {
+            const drip = document.createElement('div');
+            drip.className = 'blood-drip';
+            drip.style.left = randomRange(10, 90) + '%';
+            drip.style.top = randomRange(20, 60) + '%';
+            drip.style.height = randomRange(20, 80) + 'px';
+            drip.style.opacity = randomRange(0.3, 0.6);
+            this.container.appendChild(drip);
+        }
+    }
+
+    generateMold(count) {
+        for (let i = 0; i < count; i++) {
+            const mold = document.createElement('div');
+            mold.className = 'mold-patch';
+            mold.style.left = randomRange(0, 85) + '%';
+            mold.style.top = randomRange(0, 85) + '%';
+            mold.style.width = randomRange(30, 80) + 'px';
+            mold.style.height = randomRange(20, 60) + 'px';
+            this.container.appendChild(mold);
+        }
+    }
+
+    generatePipes(count) {
+        for (let i = 0; i < count; i++) {
+            const pipe = document.createElement('div');
+            pipe.className = 'wall-pipe';
+            const isHorizontal = probability(0.5);
+            if (isHorizontal) {
+                pipe.style.left = randomRange(0, 40) + '%';
+                pipe.style.top = randomRange(5, 30) + '%';
+                pipe.style.width = randomRange(100, 300) + 'px';
+                pipe.style.height = '8px';
+            } else {
+                pipe.style.left = randomRange(5, 90) + '%';
+                pipe.style.top = randomRange(0, 40) + '%';
+                pipe.style.width = '8px';
+                pipe.style.height = randomRange(80, 200) + 'px';
+            }
+
+            // パイプの錆
+            const rust = document.createElement('div');
+            rust.className = 'pipe-rust';
+            rust.style.left = randomRange(10, 70) + '%';
+            rust.style.top = randomRange(0, 60) + '%';
+            rust.style.width = randomRange(10, 30) + 'px';
+            rust.style.height = randomRange(4, 8) + 'px';
+            pipe.appendChild(rust);
+
+            // 水滴
+            if (probability(0.4)) {
+                const drip = document.createElement('div');
+                drip.className = 'pipe-drip';
+                drip.style.left = randomRange(20, 80) + '%';
+                drip.style.bottom = '-30px';
+                drip.style.animationDelay = randomRange(0, 3) + 's';
+                pipe.appendChild(drip);
+            }
+
+            this.container.appendChild(pipe);
+        }
+    }
+}
+
+// === SHADOW EYES MANAGER ===
+class ShadowEyesManager {
+    constructor() {
+        this.eyes = [];
+        this.vents = [];
+    }
+
+    init() {
+        this.vents = [DOM.vent1, DOM.vent2];
+        this.spawnInitialEyes();
+    }
+
+    spawnInitialEyes() {
+        for (let i = 0; i < STATE.shadowEyes.count; i++) {
+            this.spawnEye();
+        }
+    }
+
+    spawnEye() {
+        if (this.eyes.length >= STATE.shadowEyes.maxCount) return;
+
+        const vent = this.vents[randomInt(0, this.vents.length - 1)];
+        if (!vent) return;
+
+        const eye = document.createElement('div');
+        eye.className = 'shadow-eye';
+        const x = randomRange(10, 180);
+        const y = randomRange(5, 25);
+        eye.style.left = x + 'px';
+        eye.style.top = y + 'px';
+        eye.style.animationDelay = randomRange(0, 3) + 's';
+
+        vent.appendChild(eye);
+        this.eyes.push({ el: eye, vent, x, y, blinkTime: Date.now() + randomRange(2000, 8000) });
+    }
+
+    update() {
+        const now = Date.now();
+        this.eyes.forEach(eye => {
+            // ランダムな瞬き
+            if (now > eye.blinkTime) {
+                eye.el.classList.add('blink');
+                setTimeout(() => eye.el.classList.remove('blink'), 200);
+                eye.blinkTime = now + randomRange(2000, 8000);
+            }
+
+            // マウスの方向を追跡
+            if (STATE.mouseX && STATE.mouseY) {
+                const rect = eye.el.getBoundingClientRect();
+                const eyeCenterX = rect.left + rect.width / 2;
+                const eyeCenterY = rect.top + rect.height / 2;
+                const angle = Math.atan2(STATE.mouseY - eyeCenterY, STATE.mouseX - eyeCenterX);
+                const pupilOffset = 2;
+                const px = Math.cos(angle) * pupilOffset;
+                const py = Math.sin(angle) * pupilOffset;
+                const pupil = eye.el.querySelector('::before');
+                // CSSで表現するため、transform使用
+                eye.el.style.setProperty('--pupil-x', px + 'px');
+                eye.el.style.setProperty('--pupil-y', py + 'px');
+            }
+        });
+
+        // フェーズに応じて目を増やす
+        if (STATE.phase >= 2 && this.eyes.length < STATE.shadowEyes.maxCount && probability(0.002)) {
+            this.spawnEye();
+        }
+    }
+
+    removeEye() {
+        if (this.eyes.length === 0) return;
+        const idx = randomInt(0, this.eyes.length - 1);
+        const eye = this.eyes[idx];
+        if (eye.el.parentNode) eye.el.parentNode.removeChild(eye.el);
+        this.eyes.splice(idx, 1);
+    }
+
+    setAllVisible(visible) {
+        this.eyes.forEach(e => {
+            e.el.style.opacity = visible ? '1' : '0';
+        });
+    }
+}
+
+// === SCP-173 BEHAVIOR ENGINE ===
+class SCP173Engine {
+    constructor() {
+        this.element = DOM.scp173Container;
+        this.positions = STATE.scp173.positions;
+        this.currentPos = 0;
+        this.targetX = -200;
+        this.targetY = 300;
+        this.actualX = -200;
+        this.actualY = 300;
+        this.visible = false;
+        this.frozen = true; // プレイヤーが見ている間は動かない
+    }
+
+    init() {
+        this.element.style.left = '-200px';
+        this.element.style.top = '300px';
+        this.element.style.opacity = '0';
+    }
+
+    onBlink() {
+        // プレイヤーが瞬きした時に移動
+        if (!this.visible && STATE.phase >= 1 && probability(0.3)) {
+            this.appear();
+            return;
+        }
+
+        if (this.visible) {
+            this.moveToNextPosition();
+        }
+    }
+
+    appear() {
+        this.visible = true;
+        this.currentPos = 0;
+        const pos = this.positions[this.currentPos];
+        this.actualX = pos.x;
+        this.actualY = pos.y;
+        this.element.style.left = pos.x + 'px';
+        this.element.style.top = pos.y + 'px';
+        this.element.style.opacity = '1';
+        this.element.style.transition = 'none';
+        STATE.scp173.visible = true;
+        STATE.scp173.currentPosition = 0;
+
+        eventLogger.log('SCP-173 detected in observation window', 'warning');
+        audioEngine.playKnock();
+        addFear(10);
+    }
+
+    moveToNextPosition() {
+        this.currentPos++;
+        if (this.currentPos >= this.positions.length) {
+            // 最接近 - jumpscareの可能性
+            this.triggerClose();
+            return;
+        }
+
+        const pos = this.positions[this.currentPos];
+        const prevX = this.actualX;
+        const prevY = this.actualY;
+        this.actualX = pos.x;
+        this.actualY = pos.y;
+
+        // 瞬時に移動（瞬きの間に動く）
+        this.element.style.transition = 'none';
+        this.element.style.left = pos.x + 'px';
+        this.element.style.top = pos.y + 'px';
+
+        // スケール（近づくにつれ大きく）
+        const scale = 1 + this.currentPos * 0.15;
+        this.element.style.transform = `scale(${scale})`;
+
+        STATE.scp173.currentPosition = this.currentPos;
+        STATE.scp173.distanceToPlayer = Math.max(0, 1000 - this.currentPos * 130);
+
+        const dist = distanceBetween(prevX, prevY, pos.x, pos.y);
+        if (dist > 100) {
+            audioEngine.playStaticBurst(0.15);
+        }
+
+        addFear(5 + this.currentPos * 3);
+
+        if (this.currentPos >= 4) {
+            eventLogger.log('SCP-173 proximity critical!', 'critical');
+        } else {
+            eventLogger.log('SCP-173 has moved - new position detected', 'warning');
+        }
+    }
+
+    triggerClose() {
+        // 最接近状態 - 画面いっぱいに
+        this.element.style.transition = 'none';
+        this.element.style.left = '50%';
+        this.element.style.top = '50%';
+        this.element.style.transform = 'translate(-50%, -50%) scale(4)';
+        this.element.style.zIndex = '97';
+
+        addFear(40);
+        triggerGlitch(500);
+        audioEngine.playScream();
+        eventLogger.log('SCP-173 CONTAINMENT BREACH - CRITICAL', 'critical');
+
+        // 短いジャンプスケア後にリセット
+        setTimeout(() => {
+            triggerBlackout(2000);
+            setTimeout(() => {
+                this.reset();
+                eventLogger.log('SCP-173 returned to containment', 'warning');
+                notificationSystem.show('SCP-173 RE-CONTAINED', 'warning', 2000);
+            }, 2500);
+        }, 800);
+    }
+
+    reset() {
+        this.visible = false;
+        this.currentPos = 0;
+        this.actualX = -200;
+        this.actualY = 300;
+        this.element.style.left = '-200px';
+        this.element.style.top = '300px';
+        this.element.style.opacity = '0';
+        this.element.style.transform = 'scale(1)';
+        this.element.style.zIndex = '20';
+        STATE.scp173.visible = false;
+        STATE.scp173.currentPosition = 0;
+        STATE.scp173.distanceToPlayer = 1000;
+    }
+
+    getRadarAngle() {
+        if (!this.visible) return null;
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        return Math.atan2(this.actualY - cy, this.actualX - cx) * 180 / Math.PI;
+    }
+
+    getRadarDistance() {
+        if (!this.visible) return 1;
+        return 1 - (this.currentPos / this.positions.length);
+    }
+}
+
+// === SCP-106 BEHAVIOR ENGINE ===
+class SCP106Engine {
+    constructor() {
+        this.element = DOM.scp106Container;
+        this.emergenceLevel = 0;
+        this.maxEmergence = 5;
+        this.active = false;
+        this.lastActivityTime = Date.now();
+    }
+
+    init() {
+        this.element.style.opacity = '0';
+        this.active = false;
+    }
+
+    update(deltaTime) {
+        const now = Date.now();
+
+        // フェーズ0では非アクティブ
+        if (STATE.phase < 1) return;
+
+        // ランダムに活動
+        if (!this.active && now - this.lastActivityTime > 15000 && probability(0.001)) {
+            this.beginActivity();
+        }
+
+        if (this.active) {
+            // 段階的に出現
+            if (this.emergenceLevel < this.maxEmergence) {
+                this.emergenceLevel += deltaTime * 0.0003;
+                const opacity = clamp(this.emergenceLevel / this.maxEmergence, 0, 1);
+                this.element.style.opacity = opacity.toString();
+
+                if (this.emergenceLevel > 2 && !STATE.scp106.reaching) {
+                    STATE.scp106.reaching = true;
+                    eventLogger.log('SCP-106 emergence detected - corrosion spreading', 'warning');
+                    addFear(8);
+                }
+
+                if (this.emergenceLevel > 4) {
+                    eventLogger.log('SCP-106 fully emerged - immediate threat!', 'critical');
+                    addFear(15);
+                    audioEngine.playWhisper();
+                }
+            }
+
+            // 恐怖レベルに応じた反応
+            if (STATE.fear > 60) {
+                STATE.scp106.activity = Math.min(1, STATE.scp106.activity + deltaTime * 0.0001);
+            }
+
+            // 一定時間後に退却
+            if (now - this.lastActivityTime > 30000 + Math.random() * 20000) {
+                this.retreat();
+            }
+        }
+    }
+
+    beginActivity() {
+        this.active = true;
+        this.emergenceLevel = 0;
+        this.lastActivityTime = Date.now();
+        STATE.scp106.visible = true;
+        eventLogger.log('Anomalous corrosion detected on west wall', '');
+        audioEngine.playCreak();
+        addFear(5);
+    }
+
+    retreat() {
+        this.active = false;
+        this.emergenceLevel = 0;
+        STATE.scp106.visible = false;
+        STATE.scp106.reaching = false;
+        STATE.scp106.activity = 0;
+
+        // フェードアウト
+        this.element.style.transition = 'opacity 3s ease';
+        this.element.style.opacity = '0';
+        setTimeout(() => {
+            this.element.style.transition = '';
+            this.lastActivityTime = Date.now();
+        }, 3000);
+
+        eventLogger.log('SCP-106 has retreated to pocket dimension', '');
+    }
+
+    forceAppear() {
+        this.active = true;
+        this.emergenceLevel = this.maxEmergence;
+        this.element.style.opacity = '1';
+        this.lastActivityTime = Date.now();
+        STATE.scp106.visible = true;
+        STATE.scp106.reaching = true;
+    }
+}
+
+// === SCP-096 BEHAVIOR ENGINE ===
+class SCP096Engine {
+    constructor() {
+        this.figure = DOM.figure096;
+        this.faceWarning = DOM.faceWarning096;
+        this.screen = DOM.mainScreen;
+        this.viewStartTime = 0;
+        this.isViewing = false;
+        this.triggered = false;
+        this.showTimer = null;
+    }
+
+    init() {
+        this.figure.style.opacity = '0';
+        this.startAppearanceTimer();
+    }
+
+    startAppearanceTimer() {
+        // ランダムな間隔で096がモニターに映る
+        const delay = randomRange(20000, 60000);
+        this.showTimer = setTimeout(() => {
+            if (STATE.phase >= 1) {
+                this.showOnMonitor();
+            } else {
+                this.startAppearanceTimer();
+            }
+        }, delay);
+    }
+
+    showOnMonitor() {
+        if (this.triggered) return;
+        this.figure.classList.add('visible');
+        STATE.scp096.visible = true;
+        eventLogger.log('Camera feed anomaly detected on main monitor', 'warning');
+
+        // 警告表示
+        setTimeout(() => {
+            if (STATE.scp096.visible && !this.triggered) {
+                this.faceWarning.classList.add('active');
+            }
+        }, 2000);
+
+        // 一定時間後に消える
+        setTimeout(() => {
+            if (!this.triggered) {
+                this.hideFromMonitor();
+            }
+        }, 15000);
+    }
+
+    hideFromMonitor() {
+        this.figure.classList.remove('visible');
+        this.faceWarning.classList.remove('active');
+        STATE.scp096.visible = false;
+        STATE.scp096.viewTime = 0;
+        this.isViewing = false;
+        this.startAppearanceTimer();
+    }
+
+    onMonitorHover() {
+        if (!STATE.scp096.visible || this.triggered) return;
+
+        if (!this.isViewing) {
+            this.isViewing = true;
+            this.viewStartTime = Date.now();
+            eventLogger.log('WARNING: Face detection active on monitor', 'warning');
+        }
+
+        STATE.scp096.viewTime = Date.now() - this.viewStartTime;
+
+        if (STATE.scp096.viewTime > STATE.scp096.triggerThreshold) {
+            this.trigger();
+        }
+    }
+
+    onMonitorLeave() {
+        if (this.isViewing && !this.triggered) {
+            this.isViewing = false;
+            STATE.scp096.viewTime = 0;
+        }
+    }
+
+    trigger() {
+        if (this.triggered) return;
+        this.triggered = true;
+        STATE.scp096.agitated = true;
+        STATE.scp096.screaming = true;
+
+        eventLogger.log('SCP-096 TRIGGERED - FACE VIEWED', 'critical');
+        notificationSystem.show('SCP-096 AGITATED', 'critical', 3000);
+
+        // スクリーム音
+        audioEngine.playScream();
+
+        // 画面グリッチ
+        triggerGlitch(2000);
+        addFear(50);
+
+        // モニターが赤く点滅
+        this.screen.style.animation = 'none';
+        this.screen.style.background = '#200000';
+
+        // 警告消去してフルスクリーンエフェクト
+        this.faceWarning.classList.remove('active');
+
+        setTimeout(() => {
+            triggerBlackout(3000);
+            setTimeout(() => {
+                this.reset();
+                this.screen.style.background = '';
+                eventLogger.log('SCP-096 event concluded - feed restored', 'warning');
+            }, 3500);
+        }, 2000);
+    }
+
+    reset() {
+        this.triggered = false;
+        STATE.scp096.agitated = false;
+        STATE.scp096.screaming = false;
+        STATE.scp096.visible = false;
+        STATE.scp096.viewTime = 0;
+        this.figure.classList.remove('visible');
+        this.faceWarning.classList.remove('active');
+        this.isViewing = false;
+        this.startAppearanceTimer();
+    }
+}
+
+// === MIRROR ENTITY ENGINE ===
+class MirrorEntityEngine {
+    constructor() {
+        this.entity = DOM.mirrorEntity;
+        this.fog = DOM.mirrorFog;
+        this.visible = false;
+        this.lastAppearance = 0;
+    }
+
+    init() {
+        this.entity.style.opacity = '0';
+    }
+
+    update() {
+        const now = Date.now();
+
+        // フェーズ1以降で出現可能
+        if (STATE.phase < 1) return;
+
+        // マウスが鏡に近いと反応
+        const mirrorRect = document.getElementById('mirror-container').getBoundingClientRect();
+        const dist = distanceBetween(
+            STATE.mouseX, STATE.mouseY,
+            mirrorRect.left + mirrorRect.width / 2,
+            mirrorRect.top + mirrorRect.height / 2
+        );
+
+        if (dist < 200) {
+            STATE.mirrorEntity.proximity = 1 - (dist / 200);
+
+            // 近接で霧が出る
+            if (dist < 150 && !STATE.mirrorEntity.fogActive) {
+                this.fog.classList.add('active');
+                STATE.mirrorEntity.fogActive = true;
+            }
+
+            // とても近いとエンティティが見える
+            if (dist < 100 && !this.visible && now - this.lastAppearance > 10000) {
+                this.show();
+            }
+        } else {
+            STATE.mirrorEntity.proximity = 0;
+            if (STATE.mirrorEntity.fogActive) {
+                this.fog.classList.remove('active');
+                STATE.mirrorEntity.fogActive = false;
+            }
+        }
+
+        // 一定時間で消える
+        if (this.visible && now - this.lastAppearance > 8000) {
+            this.hide();
+        }
+    }
+
+    show() {
+        this.visible = true;
+        this.lastAppearance = Date.now();
+        this.entity.classList.add('visible');
+        STATE.mirrorEntity.visible = true;
+
+        eventLogger.log('Mirror anomaly - unidentified reflection detected', 'warning');
+        audioEngine.playWhisper();
+        addFear(12);
+
+        if (!STATE.secrets.mirrorTouched) {
+            STATE.secrets.mirrorTouched = true;
+            eventLogger.log('SECRET: Mirror entity acknowledged your presence', '');
+        }
+    }
+
+    hide() {
+        this.visible = false;
+        this.entity.classList.remove('visible');
+        STATE.mirrorEntity.visible = false;
+    }
+}
+
+// === GLOBAL HELPER FUNCTIONS ===
+function addFear(amount) {
+    STATE.fear = clamp(STATE.fear + amount, 0, STATE.maxFear);
+    updateFearDisplay();
+    checkFearThresholds();
+}
+
+function reduceFear(amount) {
+    STATE.fear = clamp(STATE.fear - amount, 0, STATE.maxFear);
+    updateFearDisplay();
+}
+
+function updateFearDisplay() {
+    DOM.fearBar.style.width = STATE.fear + '%';
+    DOM.fearValue.textContent = Math.floor(STATE.fear) + '%';
+
+    if (STATE.fear > 70) {
+        DOM.fearValue.style.color = 'var(--text-red)';
+        DOM.fearValue.style.textShadow = '0 0 5px var(--text-red)';
+    } else if (STATE.fear > 40) {
+        DOM.fearValue.style.color = 'var(--warning-yellow)';
+        DOM.fearValue.style.textShadow = '0 0 5px var(--warning-yellow)';
+    } else {
+        DOM.fearValue.style.color = 'var(--text-green)';
+        DOM.fearValue.style.textShadow = '0 0 3px var(--text-green)';
+    }
+}
+
+function checkFearThresholds() {
+    // 恐怖レベルに応じたエフェクト
+    if (STATE.fear > 30) {
+        DOM.heartbeatOverlay.classList.add('active');
+        document.documentElement.style.setProperty('--heartbeat-rate',
+            (1 - (STATE.fear - 30) / 140) + 's');
+    } else {
+        DOM.heartbeatOverlay.classList.remove('active');
+    }
+
+    if (STATE.fear > 50) {
+        document.documentElement.style.setProperty('--vignette-intensity', '0.85');
+        document.documentElement.style.setProperty('--static-opacity', '0.08');
+    } else {
+        document.documentElement.style.setProperty('--vignette-intensity', '0.7');
+        document.documentElement.style.setProperty('--static-opacity', '0.03');
+    }
+
+    if (STATE.fear > 70) {
+        DOM.chromaticAberration.classList.add('active');
+        document.documentElement.style.setProperty('--chromatic-offset', '3px');
+    } else {
+        DOM.chromaticAberration.classList.remove('active');
+    }
+
+    // 収容違反チェック
+    if (STATE.fear > STATE.containment.breachThreshold && !STATE.containment.alarmActive) {
+        triggerContainmentBreach();
+    }
+}
+
+function triggerGlitch(duration) {
+    STATE.glitchActive = true;
+    DOM.glitchOverlay.classList.add('active');
+
+    DOM.glitchSlices.forEach((slice, i) => {
+        setTimeout(() => {
+            slice.classList.add('active');
+            setTimeout(() => slice.classList.remove('active'), 150);
+        }, i * 50);
+    });
+
+    audioEngine.playStaticBurst(duration / 1000);
+
+    setTimeout(() => {
+        STATE.glitchActive = false;
+        DOM.glitchOverlay.classList.remove('active');
+    }, duration);
+}
+
+function triggerBlackout(duration) {
+    DOM.blackout.classList.add('active');
+    setTimeout(() => {
+        DOM.blackout.classList.remove('active');
+    }, duration);
+}
+
+function triggerContainmentBreach() {
+    STATE.containment.alarmActive = true;
+    STATE.containment.status = 'BREACHED';
+    DOM.breachAlarm.classList.add('active');
+    document.body.classList.add('red-alert');
+
+    DOM.containmentLevel.textContent = 'CONTAINMENT: BREACHED';
+    DOM.containmentLevel.className = 'status-line critical';
+    DOM.threatLevel.textContent = 'THREAT LEVEL: CRITICAL';
+    DOM.threatLevel.className = 'status-line critical';
+
+    audioEngine.playAlarm();
+    eventLogger.log('!!! CONTAINMENT BREACH IN PROGRESS !!!', 'critical');
+    notificationSystem.show('CONTAINMENT BREACH', 'critical', 4000);
+
+    // 一定時間後に収容復旧
+    setTimeout(() => {
+        endContainmentBreach();
+    }, 15000);
+}
+
+function endContainmentBreach() {
+    STATE.containment.alarmActive = false;
+    STATE.containment.status = 'ACTIVE';
+    DOM.breachAlarm.classList.remove('active');
+    document.body.classList.remove('red-alert');
+
+    DOM.containmentLevel.textContent = 'CONTAINMENT: RE-ESTABLISHED';
+    DOM.containmentLevel.className = 'status-line warning';
+    DOM.threatLevel.textContent = 'THREAT LEVEL: ELEVATED';
+    DOM.threatLevel.className = 'status-line warning';
+
+    audioEngine.stopAlarm();
+    eventLogger.log('Containment protocols re-established', 'warning');
+    notificationSystem.show('CONTAINMENT RESTORED', 'warning', 3000);
+
+    reduceFear(30);
+
+    setTimeout(() => {
+        DOM.containmentLevel.textContent = 'CONTAINMENT: ACTIVE';
+        DOM.containmentLevel.className = 'status-line';
+        DOM.threatLevel.textContent = 'THREAT LEVEL: MODERATE';
+        DOM.threatLevel.className = 'status-line';
+    }, 10000);
+}
+
+function performBlink() {
+    if (STATE.isBlinking) return;
+    STATE.isBlinking = true;
+    STATE.lastBlink = Date.now();
+    STATE.blinkTimer = 100;
+
+    DOM.blinkOverlay.classList.add('blinking');
+
+    // 173が瞬きの間に移動
+    scp173Engine.onBlink();
+
+    setTimeout(() => {
+        DOM.blinkOverlay.classList.remove('blinking');
+        STATE.isBlinking = false;
+
+        // 瞬き後のチェック
+        updateBlinkTimerDisplay();
+    }, STATE.blinkDuration);
+}
+
+function updateBlinkTimerDisplay() {
+    DOM.blinkTimerFill.style.width = STATE.blinkTimer + '%';
+
+    DOM.blinkTimerFill.classList.remove('warning', 'critical');
+    if (STATE.blinkTimer < 20) {
+        DOM.blinkTimerFill.classList.add('critical');
+    } else if (STATE.blinkTimer < 40) {
+        DOM.blinkTimerFill.classList.add('warning');
+    }
+}
+
+// === DOCUMENT CONTENT ===
+function getDocumentContent() {
+    return `
+        <p><strong>Document #4721-A</strong></p>
+        <p><strong>Date:</strong> <span class="redacted">██/██/████</span></p>
+        <p><strong>Researcher:</strong> Dr. <span class="redacted">████████</span></p>
+        <br>
+        <p><strong>Subject:</strong> Room 4721 Anomalous Activity Report</p>
+        <br>
+        <p>Room 4721, formerly designated as Research Lab <span class="redacted">██</span>-7, 
+        has exhibited increasing levels of anomalous activity since 
+        Incident <span class="redacted">████</span>-4721.</p>
+        <br>
+        <p>Multiple SCP entities have been observed monitoring the room through 
+        various means:</p>
+        <br>
+        <p>1. SCP-<span class="redacted">███</span> has been sighted through the observation 
+        window on no fewer than <span class="redacted">██</span> occasions. Standard 
+        visual containment protocols remain in effect.</p>
+        <br>
+        <p>2. Corrosive damage consistent with SCP-<span class="redacted">███</span> activity 
+        has been detected on the western wall. Pocket dimension breaches 
+        are occurring at increasing frequency.</p>
+        <br>
+        <p>3. The monitoring system has captured footage of an entity matching 
+        SCP-<span class="redacted">███</span>'s description. <strong>ALL PERSONNEL ARE 
+        REMINDED: DO NOT VIEW THE FACE.</strong></p>
+        <br>
+        <p>4. Ventilation system inspection has revealed 
+        <span class="redacted">██████████████████</span> presence of 
+        multiple unidentified ocular formations.</p>
+        <br>
+        <p>5. The mirror in the room (originally standard-issue) now exhibits 
+        properties consistent with a Class-<span class="redacted">█</span> 
+        cognitohazard.</p>
+        <br>
+        <p><strong>Recommendation:</strong> Room 4721 should be sealed and classified 
+        as an anomalous zone. All D-class testing has been 
+        <span class="redacted">████████</span> suspended indefinitely.</p>
+        <br>
+        <p style="color: #cc0000; font-style: italic;">
+        Addendum: The last D-class personnel assigned to Room 4721 
+        (D-<span class="redacted">█████</span>) left the following message 
+        written in <span class="redacted">█████</span> on the wall: 
+        "They never stop watching. Even when you close your eyes, 
+        they see."</p>
+    `;
+}
+
+// === PHASE MANAGER ===
+class PhaseManager {
+    constructor() {
+        this.phaseCallbacks = {
+            0: this.phase0.bind(this),
+            1: this.phase1.bind(this),
+            2: this.phase2.bind(this),
+            3: this.phase3.bind(this),
+            4: this.phase4.bind(this),
+        };
+    }
+
+    checkPhaseTransition() {
+        const elapsed = Date.now() - STATE.startTime;
+        let newPhase = 0;
+
+        for (let i = 0; i < STATE.phaseTimers.length; i++) {
+            if (elapsed > STATE.phaseTimers[i]) {
+                newPhase = i + 1;
+            }
+        }
+
+        if (newPhase !== STATE.phase) {
+            const oldPhase = STATE.phase;
+            STATE.phase = newPhase;
+            this.onPhaseChange(oldPhase, newPhase);
+        }
+    }
+
+    onPhaseChange(from, to) {
+        eventLogger.log(`Phase transition: ${from} → ${to}`, 'warning');
+
+        if (this.phaseCallbacks[to]) {
+            this.phaseCallbacks[to]();
+        }
+    }
+
+    phase0() {
+        // 初期状態 - 静か
+    }
+
+    phase1() {
+        // 活動開始
+        notificationSystem.show('ANOMALOUS ACTIVITY INCREASING', 'warning', 3000);
+        addFear(5);
+        audioEngine.playCreak();
+
+        // 壁の文字がゆっくり現れる
+        document.querySelectorAll('.wall-writing').forEach((w, i) => {
+            setTimeout(() => w.classList.add('reveal'), i * 3000);
+        });
+    }
+
+    phase2() {
+        // 活動激化
+        notificationSystem.show('MULTIPLE ENTITIES ACTIVE', 'warning', 3000);
+        addFear(10);
+
+        // 106を強制出現
+        scp106Engine.forceAppear();
+
+        // 目の数を増やす
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => shadowEyesManager.spawnEye(), i * 1000);
+        }
+    }
+
+    phase3() {
+        // 危険レベル
+        notificationSystem.show('DANGER - ALL ENTITIES ACTIVE', 'critical', 4000);
+        addFear(20);
+        triggerGlitch(1000);
+
+        // ライトのちらつきを激しく
+        document.documentElement.style.setProperty('--ambient-light', '0.08');
+
+        // 破損ブロック表示
+        DOM.corruptBlocks.forEach(b => b.classList.add('active'));
+    }
+
+    phase4() {
+        // 最終フェーズ
+        notificationSystem.show('CRITICAL FAILURE IMMINENT', 'critical', 5000);
+        addFear(30);
+
+        // 全エンティティ最大活動
+        scp106Engine.forceAppear();
+
+        setTimeout(() => {
+            triggerContainmentBreach();
+        }, 5000);
+    }
+}
+
+// === INITIALIZATION ===
+let particleSystem, staticGenerator, grainGenerator;
+let eventLogger, notificationSystem, radarSystem, audioVisualizer;
+let mainMonitorTypewriter, leftMonitorTypewriter, rightMonitorTypewriter;
+let wallDetailGenerator, shadowEyesManager;
+let scp173Engine, scp106Engine, scp096Engine, mirrorEntityEngine;
+let phaseManager;
+
+function initSystems() {
+    cacheDOMElements();
+
+    // コアシステム初期化
+    particleSystem = new ParticleSystem(DOM.particleContainer);
+    staticGenerator = new StaticGenerator();
+    grainGenerator = new GrainGenerator(DOM.filmGrain);
+    eventLogger = new EventLogger(DOM.eventLog, STATE.maxEvents);
+    notificationSystem = new NotificationSystem(DOM.notification);
+    radarSystem = new RadarSystem(DOM.proximityRadar);
+    audioVisualizer = new AudioVisualizer(DOM.audioIndicator, 20);
+
+    // タイプライター
+    mainMonitorTypewriter = new Typewriter(DOM.mainMonitorText, 40);
+    leftMonitorTypewriter = new Typewriter(DOM.leftMonitorText, 30);
+    rightMonitorTypewriter = new Typewriter(DOM.rightMonitorText, 35);
+
+    // 壁ディテール
+    wallDetailGenerator = new WallDetailGenerator(DOM.wallDetails);
+    wallDetailGenerator.generate();
+
+    // SCPエンジン
+    shadowEyesManager = new ShadowEyesManager();
+    scp173Engine = new SCP173Engine();
+    scp106Engine = new SCP106Engine();
+    scp096Engine = new SCP096Engine();
+    mirrorEntityEngine = new MirrorEntityEngine();
+
+    // フェーズマネージャー
+    phaseManager = new PhaseManager();
+
+    // 初期化実行
+    shadowEyesManager.init();
+    scp173Engine.init();
+    scp106Engine.init();
+    scp096Engine.init();
+    mirrorEntityEngine.init();
+
+    // ドキュメント内容設定
+    DOM.documentBody.innerHTML = getDocumentContent();
+}
+
+// === LOADING SEQUENCE ===
+function startLoading() {
+    const loadSteps = [
+        { progress: 5, status: 'Establishing secure connection...' },
+        { progress: 12, status: 'Authenticating credentials...' },
+        { progress: 18, status: 'Loading containment database...' },
+        { progress: 25, status: 'Initializing SCP monitoring systems...' },
+        { progress: 32, status: 'Calibrating sensor arrays...' },
+        { progress: 40, status: 'Loading Room 4721 schematics...' },
+        { progress: 48, status: 'Initializing camera feeds...' },
+        { progress: 55, status: 'Running memetic hazard checks...' },
+        { progress: 62, status: 'Loading entity behavioral profiles...' },
+        { progress: 70, status: 'Establishing containment field...' },
+        { progress: 78, status: 'Synchronizing proximity sensors...' },
+        { progress: 85, status: 'Running final diagnostics...' },
+        { progress: 90, status: 'WARNING: Anomalous readings detected...' },
+        { progress: 95, status: 'Deploying observation interface...' },
+        { progress: 100, status: 'ACCESS GRANTED - CLEARANCE LEVEL 4' },
+    ];
+
+    let stepIndex = 0;
+
+    function nextStep() {
+        if (stepIndex >= loadSteps.length) {
+            finishLoading();
+            return;
+        }
+        const step = loadSteps[stepIndex];
+        DOM.loadingBar.style.width = step.progress + '%';
+        DOM.loadingStatus.textContent = step.status;
+
+        // 警告表示（70%以降）
+        if (step.progress >= 70) {
+            DOM.loadingWarning.style.opacity = '1';
+        }
+
+        stepIndex++;
+        const delay = randomRange(200, 600);
+        setTimeout(nextStep, delay);
+    }
+
+    setTimeout(nextStep, 500);
+}
+
+function finishLoading() {
+    setTimeout(() => {
+        DOM.loadingScreen.classList.add('fade-out');
+        setTimeout(() => {
+            DOM.loadingScreen.style.display = 'none';
+            STATE.loaded = true;
+            STATE.startTime = Date.now();
+            startExperience();
+        }, 1500);
+    }, 800);
+}
+
+function startExperience() {
+    // 初期タイプライター
+    mainMonitorTypewriter.type('SCP FOUNDATION\nSECURE OBSERVATION SYSTEM v4.7.21\n\n');
+    mainMonitorTypewriter.type('Camera: CAM-4721-A\nStatus: ONLINE\n');
+    mainMonitorTypewriter.type('WARNING: Multiple anomalies detected\n');
+    mainMonitorTypewriter.type('Containment status: ACTIVE\n\n');
+    mainMonitorTypewriter.type('> Monitoring Room 4721...\n');
+
+    leftMonitorTypewriter.type('SENSOR ARRAY - WEST\n\n');
+    leftMonitorTypewriter.type('Temperature: 12.4°C\n');
+    leftMonitorTypewriter.type('Humidity: 78%\n');
+    leftMonitorTypewriter.type('EMF: 340 mG [ELEVATED]\n');
+    leftMonitorTypewriter.type('Hume Level: 0.72 [LOW]\n\n');
+    leftMonitorTypewriter.type('> Anomalous fluctuations\n  detected...\n');
+
+    rightMonitorTypewriter.type('ENTITY TRACKER\n\n');
+    rightMonitorTypewriter.type('SCP-173: CONTAINED\n');
+    rightMonitorTypewriter.type('SCP-106: MONITORING\n');
+    rightMonitorTypewriter.type('SCP-096: CONTAINED\n');
+    rightMonitorTypewriter.type('UNKNOWN: DETECTED x███\n\n');
+    rightMonitorTypewriter.type('> All feeds active\n');
+
+    // パーティクル開始
+    particleSystem.init();
+    staticGenerator.init();
+
+    // 初期イベントログ
+    eventLogger.log('Observation system initialized', '');
+    eventLogger.log('Room 4721 monitoring active', '');
+    eventLogger.log('All camera feeds nominal', '');
+
+    // レーダーに初期ブリップ
+    radarSystem.addBlip('scp173', -90, 0.9, '#ff0000');
+    radarSystem.addBlip('scp106', 180, 0.7, '#aa00aa');
+    radarSystem.addBlip('unknown', 45, 0.5, '#ffaa00');
+
+    // オーディオ初期化（ユーザーインタラクション後）
+    document.addEventListener('click', function initAudio() {
+        audioEngine.init();
+        if (audioEngine.initialized) {
+            audioEngine.playAmbientDrone();
+            eventLogger.log('Audio systems online', '');
+        }
+        document.removeEventListener('click', initAudio);
+    }, { once: false });
+
+    // メインループ開始
+    requestAnimationFrame(mainLoop);
+}
+
+// === INPUT HANDLERS ===
+function setupInputHandlers() {
+    // マウス移動
+    document.addEventListener('mousemove', (e) => {
+        STATE.prevMouseX = STATE.mouseX;
+        STATE.prevMouseY = STATE.mouseY;
+        STATE.mouseX = e.clientX;
+        STATE.mouseY = e.clientY;
+        STATE.mouseIdle = 0;
+
+        // カーソル更新
+        DOM.cursor.style.left = (e.clientX - 10) + 'px';
+        DOM.cursor.style.top = (e.clientY - 10) + 'px';
+
+        // フラッシュライト
+        if (STATE.flashlightActive) {
+            DOM.flashlight.style.left = (e.clientX - 125) + 'px';
+            DOM.flashlight.style.top = (e.clientY - 125) + 'px';
+        }
+
+        // マウス速度計算
+        const dx = e.clientX - STATE.prevMouseX;
+        const dy = e.clientY - STATE.prevMouseY;
+        STATE.mouseSpeed = Math.sqrt(dx * dx + dy * dy);
+
+        // 部屋のパララックス
+        if (STATE.loaded) {
+            const px = (e.clientX / window.innerWidth - 0.5) * 10;
+            const py = (e.clientY / window.innerHeight - 0.5) * 5;
+            DOM.room3d.style.transform = `rotateY(${px}deg) rotateX(${-py}deg)`;
+        }
+    });
+
+    // キーボード
+    document.addEventListener('keydown', (e) => {
+        switch (e.key.toLowerCase()) {
+            case ' ':
+                e.preventDefault();
+                performBlink();
+                break;
+            case 'f':
+                toggleFullscreen();
+                break;
+            case 'l':
+                toggleFlashlight();
+                break;
+            case 'e':
+                handleInteract();
+                break;
+            case 'escape':
+                closeDocument();
+                break;
+        }
+    });
+
+    // マウスクリック
+    document.addEventListener('click', (e) => {
+        STATE.interactionCount++;
+
+        // SCP-096モニターチェック
+        const mainMonitor = document.getElementById('main-monitor');
+        if (mainMonitor) {
+            const rect = mainMonitor.getBoundingClientRect();
+            if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                scp096Engine.onMonitorHover();
+            }
+        }
+    });
+
+    // マウスオーバー - メインモニター
+    const mainMonitor = document.getElementById('main-monitor');
+    if (mainMonitor) {
+        mainMonitor.addEventListener('mouseenter', () => {
+            if (STATE.scp096.visible) {
+                scp096Engine.onMonitorHover();
+                DOM.cursor.classList.add('fear');
+            }
+        });
+        mainMonitor.addEventListener('mouseleave', () => {
+            scp096Engine.onMonitorLeave();
+            DOM.cursor.classList.remove('fear');
+        });
+    }
+
+    // ドア クリック
+    DOM.roomDoor.addEventListener('click', () => {
+        eventLogger.log('Door is sealed - electromagnetic lock active', 'warning');
+        audioEngine.playKnock();
+        addFear(3);
+
+        if (STATE.phase >= 2 && probability(0.3)) {
+            // ドアの向こうからノック返し
+            setTimeout(() => {
+                audioEngine.playKnock();
+                eventLogger.log('WARNING: Something knocked back', 'critical');
+                addFear(8);
+            }, 1500);
+        }
+    });
+
+    // デスク クリック
+    document.getElementById('old-desk').addEventListener('click', () => {
+        if (!STATE.secrets.deskSearched) {
+            STATE.secrets.deskSearched = true;
+            STATE.documentFound = true;
+            eventLogger.log('Document found on desk', '');
+            showDocument();
+        } else {
+            eventLogger.log('Desk already searched', '');
+        }
+    });
+
+    // ドキュメント閉じる
+    DOM.docClose.addEventListener('click', closeDocument);
+
+    // フルスクリーンプロンプト
+    DOM.fullscreenPrompt.addEventListener('click', toggleFullscreen);
+
+    // ウィンドウリサイズ
+    window.addEventListener('resize', () => {
+        staticGenerator.canvases.forEach((c, i) => {
+            const parent = c.parentElement;
+            if (parent) {
+                c.width = parent.offsetWidth || 320;
+                c.height = parent.offsetHeight || 240;
+            }
+        });
+    });
+
+    // ビジビリティチェンジ
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            STATE.paused = true;
+        } else {
+            STATE.paused = false;
+            STATE.lastFrameTime = performance.now();
+        }
+    });
+}
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(e => {});
+    } else {
+        document.exitFullscreen().catch(e => {});
+    }
+}
+
+function toggleFlashlight() {
+    STATE.flashlightActive = !STATE.flashlightActive;
+    if (STATE.flashlightActive) {
+        DOM.flashlight.classList.add('active');
+        eventLogger.log('Flashlight activated', '');
+    } else {
+        DOM.flashlight.classList.remove('active');
+        eventLogger.log('Flashlight deactivated', '');
+    }
+}
+
+function handleInteract() {
+    // 近くのインタラクティブオブジェクトを検索
+    const interactables = ['#old-desk', '#filing-cabinet', '#room-door', '#mirror-container'];
+    for (const selector of interactables) {
+        const el = document.querySelector(selector);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (STATE.mouseX >= rect.left - 30 && STATE.mouseX <= rect.right + 30 &&
+            STATE.mouseY >= rect.top - 30 && STATE.mouseY <= rect.bottom + 30) {
+            el.click();
+            return;
+        }
+    }
+}
+
+function showDocument() {
+    DOM.documentOverlay.classList.add('active');
+}
+
+function closeDocument() {
+    DOM.documentOverlay.classList.remove('active');
+}
+
+// === MAIN GAME LOOP ===
+function mainLoop(timestamp) {
+    if (!STATE.loaded) {
+        requestAnimationFrame(mainLoop);
+        return;
+    }
+
+    // Delta time計算
+    if (!STATE.lastFrameTime) STATE.lastFrameTime = timestamp;
+    STATE.deltaTime = Math.min(timestamp - STATE.lastFrameTime, 100); // max 100ms
+    STATE.lastFrameTime = timestamp;
+    STATE.frameCount++;
+
+    if (STATE.paused) {
+        requestAnimationFrame(mainLoop);
+        return;
+    }
+
+    // 経過時間
+    STATE.elapsedTime = Date.now() - STATE.startTime;
+
+    // FPS計算（1秒ごと）
+    if (STATE.frameCount % 60 === 0) {
+        STATE.fps = Math.round(1000 / STATE.deltaTime);
+    }
+
+    // === UPDATE SYSTEMS ===
+
+    // 時間表示更新
+    DOM.currentTime.textContent = getCurrentTimeString();
+    DOM.elapsedTime.textContent = 'ELAPSED: ' + formatTime(STATE.elapsedTime);
+
+    // 瞬きタイマー減少
+    STATE.blinkTimer = clamp(STATE.blinkTimer - STATE.blinkDecayRate * (STATE.deltaTime / 16.67), 0, 100);
+    updateBlinkTimerDisplay();
+
+    // 瞬きタイマーが0になると強制瞬き
+    if (STATE.blinkTimer <= 0) {
+        performBlink();
+    }
+
+    // 恐怖レベルの自然減少
+    if (STATE.fear > 0) {
+        STATE.fear = clamp(STATE.fear - STATE.fearDecayRate * (STATE.deltaTime / 16.67), 0, STATE.maxFear);
+        updateFearDisplay();
+    }
+
+    // マウスアイドル検出
+    STATE.mouseIdle += STATE.deltaTime;
+    if (STATE.mouseIdle > 10000 && probability(0.001)) {
+        eventLogger.log('Operator idle detected - are you still there?', 'warning');
+        addFear(3);
+    }
+
+    // カーソル恐怖状態
+    if (STATE.fear > 50) {
+        DOM.cursor.classList.add('fear');
+    } else {
+        DOM.cursor.classList.remove('fear');
+    }
+
+    // SCPエンジン更新
+    scp106Engine.update(STATE.deltaTime);
+    mirrorEntityEngine.update();
+    shadowEyesManager.update();
+
+    // フェーズチェック
+    phaseManager.checkPhaseTransition();
+
+    // スタティックノイズ更新（4フレームに1回）
+    if (STATE.frameCount % 4 === 0) {
+        staticGenerator.update();
+    }
+
+    // グレイン更新（8フレームに1回）
+    if (STATE.frameCount % 8 === 0) {
+        grainGenerator.update();
+    }
+
+    // オーディオビジュアライザー
+    audioVisualizer.update(STATE.fear);
+
+    // レーダー更新
+    updateRadar();
+
+    // ランダムイベント
+    processRandomEvents();
+
+    // ハートビート音（恐怖レベル高い場合）
+    if (STATE.fear > 40 && STATE.frameCount % 60 === 0 && audioEngine.initialized) {
+        audioEngine.playHeartbeat();
+    }
+
+    // 096のモニターホバー持続チェック
+    if (STATE.scp096.visible) {
+        const mainMonitor = document.getElementById('main-monitor');
+        if (mainMonitor) {
+            const rect = mainMonitor.getBoundingClientRect();
+            if (STATE.mouseX >= rect.left && STATE.mouseX <= rect.right &&
+                STATE.mouseY >= rect.top && STATE.mouseY <= rect.bottom) {
+                scp096Engine.onMonitorHover();
+            }
+        }
+    }
+
+    requestAnimationFrame(mainLoop);
+}
+
+function updateRadar() {
+    // SCP-173 レーダー
+    const angle173 = scp173Engine.getRadarAngle();
+    if (angle173 !== null) {
+        radarSystem.addBlip('scp173', angle173, scp173Engine.getRadarDistance(), '#ff0000');
+    } else {
+        radarSystem.addBlip('scp173', -90, 0.95, '#ff0000');
+    }
+
+    // SCP-106 レーダー
+    if (STATE.scp106.visible) {
+        radarSystem.addBlip('scp106', 180, 0.3 + Math.random() * 0.1, '#aa00aa');
+    } else {
+        radarSystem.addBlip('scp106', 180, 0.8, '#aa00aa');
+    }
+
+    // 不明エンティティ
+    const unknownAngle = (Date.now() / 50) % 360;
+    radarSystem.addBlip('unknown', unknownAngle, 0.4 + Math.sin(Date.now() / 1000) * 0.2, '#ffaa00');
+}
+
+function processRandomEvents() {
+    // ランダムな不穏イベント
+    if (probability(0.0005 + STATE.phase * 0.0002)) {
+        const events = [
+            () => {
+                audioEngine.playCreak();
+                eventLogger.log('Structural stress detected in ceiling', '');
+            },
+            () => {
+                audioEngine.playWhisper();
+                eventLogger.log('Audio anomaly - unidentified vocalization', 'warning');
+                addFear(3);
+            },
+            () => {
+                triggerGlitch(200);
+                eventLogger.log('Camera feed interference detected', '');
+            },
+            () => {
+                audioEngine.playKnock();
+                eventLogger.log('Impact detected - source unknown', 'warning');
+                addFear(2);
+            },
+            () => {
+                const msgs = [
+                    'Temperature drop detected: -4°C in 3 seconds',
+                    'EMF spike: 890 mG',
+                    'Hume level critical: 0.31',
+                    'Motion sensor triggered - no visible source',
+                    'Audio recorder captured anomalous frequency',
+                ];
+                eventLogger.log(msgs[randomInt(0, msgs.length - 1)], '');
+            },
+            () => {
+                // 一瞬ライトが消える
+                document.documentElement.style.setProperty('--ambient-light', '0.02');
+                addFear(5);
+                setTimeout(() => {
+                    document.documentElement.style.setProperty('--ambient-light', '0.15');
+                }, randomRange(500, 2000));
+                eventLogger.log('Power fluctuation detected', 'warning');
+            },
+            () => {
+                // 破損ブロック一瞬表示
+                const block = DOM.corruptBlocks[randomInt(0, 2)];
+                block.classList.add('active');
+                setTimeout(() => block.classList.remove('active'), 300);
+            },
+        ];
+
+        events[randomInt(0, events.length - 1)]();
+    }
+}
+
+// === BOOTSTRAP ===
+document.addEventListener('DOMContentLoaded', () => {
+    initSystems();
+    setupInputHandlers();
+    startLoading();
+});
+</script>
+
+</body>
+</html>

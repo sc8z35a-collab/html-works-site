@@ -1,0 +1,5524 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>深夜の森 - The Chat Log</title>
+<style>
+/* ============================================================
+   PART 1: BASE STYLES & CSS ANIMATIONS (Lines 1-2250)
+   ============================================================ */
+
+/* --- CSS Reset & Root Variables --- */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #0a0a0c;
+    --bg-secondary: #111116;
+    --bg-chat: #1a1a22;
+    --bg-message-user: #2a4a3a;
+    --bg-message-ai: #2a2a3a;
+    --text-primary: #e0e0e8;
+    --text-secondary: #8888aa;
+    --text-timestamp: #555570;
+    --accent-danger: #ff2244;
+    --accent-warning: #ffaa00;
+    --accent-safe: #44ff88;
+    --accent-horror: #ff0033;
+    --accent-glow: #cc00ff;
+    --font-main: 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    --font-mono: 'Courier New', 'Source Code Pro', monospace;
+    --transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --shake-intensity: 0px;
+    --glitch-offset: 0px;
+    --darkness-overlay: 0;
+    --static-opacity: 0;
+    --vignette-intensity: 0;
+    --hue-shift: 0deg;
+    --saturation-shift: 100%;
+    --distortion-level: 0;
+    --fear-level: 0;
+    --heartbeat-speed: 1s;
+    --scan-line-opacity: 0;
+    --corruption-amount: 0;
+    --fog-opacity: 0;
+    --blood-drip-opacity: 0;
+    --eye-glow-opacity: 0;
+    --crack-opacity: 0;
+    --breathing-speed: 4s;
+    --text-shadow-horror: none;
+    --border-horror: transparent;
+    --flicker-speed: 0.1s;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-primary);
+    font-family: var(--font-main);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Preloader / Title Screen --- */
+#preloader {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    cursor: pointer;
+    transition: opacity 1.5s ease;
+}
+
+#preloader.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#preloader .title-text {
+    font-size: 2.8rem;
+    font-weight: 300;
+    letter-spacing: 0.8em;
+    color: #fff;
+    text-transform: uppercase;
+    animation: titlePulse 3s ease-in-out infinite;
+    text-shadow: 0 0 40px rgba(255, 0, 50, 0.3);
+    margin-bottom: 20px;
+}
+
+#preloader .subtitle-text {
+    font-size: 0.9rem;
+    color: #555;
+    letter-spacing: 0.3em;
+    animation: subtitleFade 2s ease-in-out infinite alternate;
+}
+
+#preloader .click-prompt {
+    position: absolute;
+    bottom: 80px;
+    font-size: 0.75rem;
+    color: #333;
+    letter-spacing: 0.5em;
+    animation: clickBlink 1.5s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.02); }
+}
+
+@keyframes subtitleFade {
+    0% { opacity: 0.3; }
+    100% { opacity: 0.7; }
+}
+
+@keyframes clickBlink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.6; }
+}
+
+/* --- Warning Screen --- */
+#warning-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 40px;
+}
+
+#warning-screen .warning-icon {
+    font-size: 3rem;
+    color: var(--accent-danger);
+    margin-bottom: 30px;
+    animation: warningPulse 1s ease-in-out infinite;
+}
+
+#warning-screen .warning-text {
+    font-size: 0.85rem;
+    color: #888;
+    text-align: center;
+    line-height: 2;
+    letter-spacing: 0.1em;
+    max-width: 500px;
+}
+
+#warning-screen .warning-text span.red {
+    color: var(--accent-danger);
+    font-weight: bold;
+}
+
+#warning-screen .proceed-btn {
+    margin-top: 40px;
+    padding: 12px 40px;
+    background: transparent;
+    border: 1px solid #333;
+    color: #666;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#warning-screen .proceed-btn:hover {
+    border-color: var(--accent-danger);
+    color: var(--accent-danger);
+    box-shadow: 0 0 20px rgba(255, 0, 50, 0.2);
+}
+
+@keyframes warningPulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* --- Main Container --- */
+#main-container {
+    width: 100%;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    filter: hue-rotate(var(--hue-shift)) saturate(var(--saturation-shift));
+    transition: filter 2s ease;
+}
+
+#main-container.active {
+    display: flex;
+}
+
+/* --- Top Bar (Chat Header) --- */
+#top-bar {
+    width: 100%;
+    height: 56px;
+    min-height: 56px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid #222233;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: relative;
+    z-index: 100;
+    transition: background 2s ease, border-color 2s ease;
+}
+
+#top-bar .chat-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a5a8a, #2a3a6a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #8ab4ff;
+    margin-right: 12px;
+    position: relative;
+    transition: all var(--transition-smooth);
+}
+
+#top-bar .chat-avatar .status-dot {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent-safe);
+    border: 2px solid var(--bg-secondary);
+    transition: background 0.5s ease;
+}
+
+#top-bar .chat-info {
+    flex: 1;
+}
+
+#top-bar .chat-info .chat-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: color 2s ease;
+}
+
+#top-bar .chat-info .chat-status {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    transition: color 2s ease;
+}
+
+#top-bar .time-display {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-timestamp);
+    letter-spacing: 0.1em;
+    transition: color 2s ease, text-shadow 2s ease;
+}
+
+/* --- Chat Area --- */
+#chat-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    background: var(--bg-chat);
+    position: relative;
+    scroll-behavior: smooth;
+    transition: background 3s ease;
+}
+
+#chat-area::-webkit-scrollbar {
+    width: 4px;
+}
+
+#chat-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#chat-area::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 2px;
+}
+
+#chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 720px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+}
+
+/* --- Message Bubbles --- */
+.message {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: messageAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    position: relative;
+}
+
+.message.user {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.message.ai {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.message.system {
+    align-self: center;
+    align-items: center;
+    max-width: 90%;
+}
+
+.message .bubble {
+    padding: 12px 18px;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    position: relative;
+    word-break: break-word;
+    transition: all var(--transition-smooth);
+}
+
+.message.user .bubble {
+    background: var(--bg-message-user);
+    border-bottom-right-radius: 6px;
+    color: #c8f0d8;
+}
+
+.message.ai .bubble {
+    background: var(--bg-message-ai);
+    border-bottom-left-radius: 6px;
+    color: #c8c8e8;
+}
+
+.message.system .bubble {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 8px 16px;
+}
+
+.message .timestamp {
+    font-size: 0.65rem;
+    color: var(--text-timestamp);
+    margin-top: 4px;
+    padding: 0 4px;
+    font-family: var(--font-mono);
+    transition: color 2s ease;
+}
+
+.message .sender-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    padding: 0 4px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+@keyframes messageAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    60% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* --- Message special classes --- */
+.message.urgent .bubble {
+    border-left: 3px solid var(--accent-danger);
+    background: linear-gradient(135deg, rgba(255, 34, 68, 0.1), var(--bg-message-ai));
+    animation: urgentPulse 2s ease-in-out infinite;
+}
+
+.message.warning .bubble {
+    border-left: 3px solid var(--accent-warning);
+    background: linear-gradient(135deg, rgba(255, 170, 0, 0.08), var(--bg-message-ai));
+}
+
+.message.horror .bubble {
+    border: 1px solid rgba(255, 0, 50, 0.3);
+    background: linear-gradient(135deg, rgba(255, 0, 50, 0.05), rgba(0, 0, 0, 0.8));
+    text-shadow: 0 0 8px rgba(255, 0, 50, 0.2);
+    animation: horrorFlicker 3s ease-in-out infinite;
+}
+
+.message.glitch-text .bubble {
+    animation: textGlitch 0.3s ease infinite;
+}
+
+.message.panic .bubble {
+    animation: panicShake 0.15s ease infinite;
+    border-color: var(--accent-danger);
+}
+
+.message.relief .bubble {
+    border-left: 3px solid var(--accent-safe);
+    background: linear-gradient(135deg, rgba(68, 255, 136, 0.08), var(--bg-message-ai));
+}
+
+.message.meta .bubble {
+    background: rgba(200, 180, 255, 0.05);
+    border: 1px dashed rgba(200, 180, 255, 0.2);
+    font-style: italic;
+    color: #aaaacc;
+}
+
+.message.final-horror .bubble {
+    background: linear-gradient(180deg, rgba(80, 0, 0, 0.4), rgba(0, 0, 0, 0.95));
+    border: 1px solid rgba(255, 0, 0, 0.5);
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.15), inset 0 0 30px rgba(0, 0, 0, 0.5);
+    animation: finalHorrorPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes urgentPulse {
+    0%, 100% { box-shadow: 0 0 0 rgba(255, 34, 68, 0); }
+    50% { box-shadow: 0 0 20px rgba(255, 34, 68, 0.15); }
+}
+
+@keyframes horrorFlicker {
+    0%, 92%, 100% { opacity: 1; }
+    93% { opacity: 0.7; }
+    94% { opacity: 1; }
+    96% { opacity: 0.6; }
+    97% { opacity: 1; }
+}
+
+@keyframes textGlitch {
+    0%, 100% { transform: translate(0, 0); }
+    20% { transform: translate(-1px, 1px); }
+    40% { transform: translate(1px, -1px); }
+    60% { transform: translate(-1px, 0px); }
+    80% { transform: translate(1px, 1px); }
+}
+
+@keyframes panicShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+@keyframes finalHorrorPulse {
+    0%, 100% {
+        box-shadow: 0 0 30px rgba(255, 0, 0, 0.15), inset 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 50px rgba(255, 0, 0, 0.3), inset 0 0 50px rgba(80, 0, 0, 0.5);
+    }
+}
+
+/* --- Photo/Image Messages --- */
+.message .photo-container {
+    width: 280px;
+    max-width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 6px;
+    background: #0a0a0f;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.message .photo-container .photo-placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    transition: all 1s ease;
+}
+
+.photo-placeholder.forest-dark {
+    background: linear-gradient(180deg, #050508, #0a0f0a, #030305);
+}
+
+.photo-placeholder.forest-dark::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+        radial-gradient(ellipse at 20% 80%, rgba(0, 30, 0, 0.4) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 60%, rgba(0, 20, 10, 0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 30%, rgba(10, 10, 30, 0.3) 0%, transparent 70%);
+}
+
+.photo-placeholder.forest-dark .tree-line {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 70%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+    padding: 0 10px;
+}
+
+.photo-placeholder.forest-dark .tree {
+    width: 3px;
+    background: linear-gradient(0deg, #0a150a, #050a05 60%, transparent);
+    border-radius: 1px 1px 0 0;
+    flex-shrink: 0;
+}
+
+.photo-placeholder .photo-label {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.15);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.photo-placeholder.car-interior {
+    background: linear-gradient(180deg, #08080c, #0c0c12, #0a0a10);
+}
+
+.photo-placeholder.car-interior::before {
+    content: '';
+    position: absolute;
+    width: 100%; height: 100%;
+    background:
+        radial-gradient(ellipse at 50% 40%, rgba(20, 25, 40, 0.5) 0%, transparent 60%),
+        radial-gradient(ellipse at 30% 70%, rgba(15, 20, 15, 0.3) 0%, transparent 40%);
+}
+
+.photo-placeholder.car-interior .dashboard-glow {
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(40, 80, 60, 0.4), rgba(40, 80, 60, 0.6), rgba(40, 80, 60, 0.4), transparent);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(40, 80, 60, 0.3);
+}
+
+/* --- Eyes in darkness photo --- */
+.photo-placeholder.eyes-in-dark {
+    background: linear-gradient(180deg, #020204, #050508, #020203);
+    animation: eyesPhotoFlicker 4s ease-in-out infinite;
+}
+
+.photo-placeholder.eyes-in-dark .the-eyes {
+    position: absolute;
+    top: 35%;
+    left: 55%;
+    display: flex;
+    gap: 18px;
+}
+
+.photo-placeholder.eyes-in-dark .the-eyes .eye {
+    width: 6px;
+    height: 4px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, #ffee88, #ffaa00, #ff6600);
+    box-shadow: 0 0 8px #ffaa00, 0 0 20px rgba(255, 170, 0, 0.4), 0 0 40px rgba(255, 100, 0, 0.2);
+    animation: eyeGlow 2s ease-in-out infinite alternate;
+}
+
+.photo-placeholder.eyes-in-dark .silhouette {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-45%);
+    width: 40px;
+    height: 80px;
+    background: radial-gradient(ellipse at 50% 30%, rgba(5, 5, 8, 0.95), transparent 70%);
+}
+
+.photo-placeholder.eyes-in-dark .tree-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+        linear-gradient(90deg, transparent 15%, rgba(0, 5, 0, 0.8) 16%, transparent 17%),
+        linear-gradient(90deg, transparent 35%, rgba(0, 5, 0, 0.6) 36%, transparent 37%),
+        linear-gradient(90deg, transparent 72%, rgba(0, 5, 0, 0.9) 73%, transparent 75%),
+        linear-gradient(90deg, transparent 88%, rgba(0, 5, 0, 0.7) 89%, transparent 90%);
+}
+
+@keyframes eyesPhotoFlicker {
+    0%, 94%, 100% { filter: brightness(1); }
+    95% { filter: brightness(0.6); }
+    96% { filter: brightness(1.2); }
+    97% { filter: brightness(0.8); }
+}
+
+@keyframes eyeGlow {
+    0% { box-shadow: 0 0 6px #ffaa00, 0 0 15px rgba(255, 170, 0, 0.3); }
+    100% { box-shadow: 0 0 12px #ffcc00, 0 0 30px rgba(255, 170, 0, 0.5), 0 0 50px rgba(255, 100, 0, 0.2); }
+}
+
+/* --- Blurred panic photo --- */
+.photo-placeholder.blurred-forest {
+    background: linear-gradient(135deg, #040408, #080c08, #040406);
+    filter: blur(2px);
+    animation: motionBlur 0.3s ease infinite;
+}
+
+@keyframes motionBlur {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); filter: blur(2px); }
+    25% { transform: translate(2px, -1px) rotate(0.3deg); filter: blur(3px); }
+    50% { transform: translate(-1px, 2px) rotate(-0.2deg); filter: blur(2.5px); }
+    75% { transform: translate(1px, 1px) rotate(0.1deg); filter: blur(3.5px); }
+}
+
+/* --- Giant creature photo --- */
+.photo-placeholder.creature-large {
+    background: linear-gradient(180deg, #010103, #030306, #010102);
+    animation: creaturePhotoDistort 3s ease-in-out infinite;
+}
+
+.photo-placeholder.creature-large .creature-body {
+    position: absolute;
+    top: 5%;
+    left: 45%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.photo-placeholder.creature-large .creature-head {
+    width: 22px;
+    height: 18px;
+    background: radial-gradient(ellipse, #0a0a10, #050508);
+    border-radius: 40% 40% 45% 45%;
+    position: relative;
+    z-index: 2;
+}
+
+.photo-placeholder.creature-large .creature-mouth {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 6px;
+    background: linear-gradient(180deg, #1a0000, #0a0000);
+    border-radius: 0 0 50% 50%;
+    box-shadow: inset 0 -2px 4px rgba(100, 0, 0, 0.5);
+}
+
+.photo-placeholder.creature-large .creature-eyes {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.photo-placeholder.creature-large .creature-eye {
+    width: 4px;
+    height: 3px;
+    border-radius: 50%;
+    background: radial-gradient(#ff4400, #cc0000);
+    box-shadow: 0 0 6px #ff2200, 0 0 15px rgba(255, 0, 0, 0.4);
+    animation: creatureEyePulse 1.5s ease-in-out infinite alternate;
+}
+
+.photo-placeholder.creature-large .creature-torso {
+    width: 14px;
+    height: 60px;
+    background: linear-gradient(180deg, #0a0a10, #080810, #060608);
+    margin-top: -2px;
+    position: relative;
+}
+
+.photo-placeholder.creature-large .creature-arm {
+    position: absolute;
+    top: 5px;
+    width: 3px;
+    height: 80px;
+    background: linear-gradient(180deg, #0a0a10, #060608, #0a0a10);
+    border-radius: 2px;
+}
+
+.photo-placeholder.creature-large .creature-arm.left {
+    left: -15px;
+    transform: rotate(8deg);
+}
+
+.photo-placeholder.creature-large .creature-arm.right {
+    right: -15px;
+    transform: rotate(-8deg);
+}
+
+.photo-placeholder.creature-large .creature-claw {
+    position: absolute;
+    bottom: -8px;
+    width: 12px;
+    height: 10px;
+    display: flex;
+    gap: 1px;
+}
+
+.photo-placeholder.creature-large .creature-claw .finger {
+    width: 2px;
+    height: 10px;
+    background: linear-gradient(180deg, #0a0a10, #1a1015);
+    border-radius: 0 0 1px 1px;
+    transform-origin: top center;
+}
+
+.photo-placeholder.creature-large .creature-claw .finger:nth-child(1) { transform: rotate(-15deg); }
+.photo-placeholder.creature-large .creature-claw .finger:nth-child(2) { transform: rotate(-5deg); }
+.photo-placeholder.creature-large .creature-claw .finger:nth-child(3) { transform: rotate(5deg); }
+.photo-placeholder.creature-large .creature-claw .finger:nth-child(4) { transform: rotate(15deg); }
+
+.photo-placeholder.creature-large .creature-legs {
+    display: flex;
+    gap: 6px;
+    margin-top: -2px;
+}
+
+.photo-placeholder.creature-large .creature-leg {
+    width: 4px;
+    height: 50px;
+    background: linear-gradient(180deg, #080810, #060608);
+    border-radius: 2px;
+}
+
+@keyframes creatureEyePulse {
+    0% { box-shadow: 0 0 4px #ff2200, 0 0 10px rgba(255, 0, 0, 0.3); }
+    100% { box-shadow: 0 0 10px #ff4400, 0 0 25px rgba(255, 0, 0, 0.5), 0 0 40px rgba(255, 0, 0, 0.2); }
+}
+
+@keyframes creaturePhotoDistort {
+    0%, 100% { filter: brightness(0.9) contrast(1.1); }
+    30% { filter: brightness(0.7) contrast(1.3); }
+    60% { filter: brightness(1.0) contrast(1.0); }
+}
+
+/* --- Typing Indicator --- */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    max-width: 85%;
+    align-self: flex-start;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.typing-indicator.visible {
+    opacity: 1;
+}
+
+.typing-indicator .typing-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.typing-indicator .dots {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-indicator .dots .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    animation: typingBounce 1.4s ease-in-out infinite;
+}
+
+.typing-indicator .dots .dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator .dots .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* --- Date Separator --- */
+.date-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 0;
+    opacity: 0;
+    animation: messageAppear 0.6s ease forwards;
+}
+
+.date-separator .line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+}
+
+.date-separator .date-text {
+    font-size: 0.7rem;
+    color: var(--text-timestamp);
+    letter-spacing: 0.15em;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+}
+
+/* --- Full-screen overlay effects --- */
+#darkness-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, var(--darkness-overlay));
+    pointer-events: none;
+    z-index: 500;
+    transition: background 3s ease;
+}
+
+#static-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 501;
+    opacity: var(--static-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
+    background-size: 256px;
+    animation: staticMove 0.1s steps(5) infinite;
+    mix-blend-mode: overlay;
+}
+
+@keyframes staticMove {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-5px, 5px); }
+    40% { transform: translate(5px, -5px); }
+    60% { transform: translate(-3px, -3px); }
+    80% { transform: translate(3px, 3px); }
+    100% { transform: translate(0, 0); }
+}
+
+#vignette-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 502;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, var(--vignette-intensity)));
+    transition: all 3s ease;
+}
+
+#scanlines-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 503;
+    opacity: var(--scan-line-opacity);
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.1) 2px,
+        rgba(0, 0, 0, 0.1) 4px
+    );
+    animation: scanlineScroll 8s linear infinite;
+}
+
+@keyframes scanlineScroll {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(4px); }
+}
+
+#glitch-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 504;
+    opacity: 0;
+    mix-blend-mode: screen;
+}
+
+#glitch-overlay .glitch-slice {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background: var(--bg-chat);
+    opacity: 0;
+}
+
+#red-flash {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: radial-gradient(ellipse at center, rgba(255, 0, 0, 0.15), rgba(100, 0, 0, 0.3));
+    pointer-events: none;
+    z-index: 505;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+#blackout {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    pointer-events: none;
+    z-index: 600;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+/* --- Fog Effect --- */
+#fog-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 200%; height: 100%;
+    pointer-events: none;
+    z-index: 499;
+    opacity: var(--fog-opacity);
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(100, 100, 120, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 30%, rgba(80, 80, 100, 0.08) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 70%, rgba(90, 90, 110, 0.06) 0%, transparent 60%);
+    animation: fogDrift 20s ease-in-out infinite alternate;
+}
+
+@keyframes fogDrift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* --- Screen Shake --- */
+@keyframes screenShake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-3px, 2px) rotate(-0.3deg); }
+    20% { transform: translate(4px, -2px) rotate(0.3deg); }
+    30% { transform: translate(-2px, 3px) rotate(-0.2deg); }
+    40% { transform: translate(3px, -3px) rotate(0.4deg); }
+    50% { transform: translate(-4px, 1px) rotate(-0.4deg); }
+    60% { transform: translate(2px, -2px) rotate(0.2deg); }
+    70% { transform: translate(-3px, 3px) rotate(-0.3deg); }
+    80% { transform: translate(4px, -1px) rotate(0.3deg); }
+    90% { transform: translate(-2px, 2px) rotate(-0.2deg); }
+}
+
+@keyframes screenShakeHeavy {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-8px, 5px) rotate(-0.8deg); }
+    20% { transform: translate(10px, -6px) rotate(0.9deg); }
+    30% { transform: translate(-6px, 8px) rotate(-0.6deg); }
+    40% { transform: translate(9px, -9px) rotate(1deg); }
+    50% { transform: translate(-10px, 4px) rotate(-1deg); }
+    60% { transform: translate(7px, -7px) rotate(0.7deg); }
+    70% { transform: translate(-8px, 9px) rotate(-0.8deg); }
+    80% { transform: translate(10px, -5px) rotate(0.9deg); }
+    90% { transform: translate(-6px, 7px) rotate(-0.6deg); }
+}
+
+.shake {
+    animation: screenShake 0.5s ease infinite !important;
+}
+
+.shake-heavy {
+    animation: screenShakeHeavy 0.3s ease infinite !important;
+}
+
+/* --- Blood Drip Effect --- */
+#blood-drips {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 506;
+    opacity: var(--blood-drip-opacity);
+}
+
+.blood-drip {
+    position: absolute;
+    top: -20px;
+    width: 3px;
+    background: linear-gradient(180deg, rgba(120, 0, 0, 0.8), rgba(80, 0, 0, 0.4), transparent);
+    border-radius: 0 0 50% 50%;
+    animation: drip var(--drip-speed, 4s) linear forwards;
+}
+
+@keyframes drip {
+    0% { height: 0; top: -5px; }
+    100% { height: 120vh; top: -5px; }
+}
+
+/* --- Floating Eyes Effect --- */
+#floating-eyes {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 498;
+    opacity: var(--eye-glow-opacity);
+}
+
+.floating-eye-pair {
+    position: absolute;
+    display: flex;
+    gap: 8px;
+    animation: eyeFloat 6s ease-in-out infinite alternate;
+}
+
+.floating-eye {
+    width: 4px;
+    height: 3px;
+    border-radius: 50%;
+    background: radial-gradient(#ffaa00, #ff6600);
+    box-shadow: 0 0 6px #ffaa00, 0 0 15px rgba(255, 170, 0, 0.3);
+    animation: eyeGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes eyeFloat {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-10px); }
+}
+
+/* --- Heartbeat border effect --- */
+#heartbeat-border {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 497;
+    border: 2px solid transparent;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+#heartbeat-border.active {
+    opacity: 1;
+    animation: heartbeatBorder var(--heartbeat-speed) ease-in-out infinite;
+}
+
+@keyframes heartbeatBorder {
+    0%, 100% { border-color: transparent; }
+    15% { border-color: rgba(255, 0, 0, 0.3); }
+    25% { border-color: transparent; }
+    35% { border-color: rgba(255, 0, 0, 0.5); }
+    50% { border-color: transparent; }
+}
+
+/* --- Crack Effect --- */
+#crack-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 507;
+    opacity: var(--crack-opacity);
+}
+
+.crack-line {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    height: 1px;
+    transform-origin: left center;
+}
+
+/* --- Corruption Text Effect --- */
+.corrupted {
+    position: relative;
+    display: inline;
+}
+
+.corrupted::before,
+.corrupted::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.corrupted::before {
+    color: #ff0000;
+    clip-path: inset(0 0 60% 0);
+    animation: corruptShift1 0.2s steps(2) infinite;
+}
+
+.corrupted::after {
+    color: #0000ff;
+    clip-path: inset(60% 0 0 0);
+    animation: corruptShift2 0.3s steps(3) infinite;
+}
+
+@keyframes corruptShift1 {
+    0% { transform: translate(0); }
+    50% { transform: translate(3px, -1px); }
+    100% { transform: translate(-2px, 1px); }
+}
+
+@keyframes corruptShift2 {
+    0% { transform: translate(0); }
+    33% { transform: translate(-3px, 1px); }
+    66% { transform: translate(2px, -1px); }
+    100% { transform: translate(0); }
+}
+
+/* --- Video player mockup --- */
+.video-container {
+    width: 300px;
+    max-width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 6px;
+    background: #000;
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.1);
+}
+
+.video-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.video-placeholder .play-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.video-placeholder .play-button::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 0 8px 16px;
+    border-color: transparent transparent transparent rgba(255, 255, 255, 0.6);
+    margin-left: 3px;
+}
+
+.video-placeholder .play-button:hover {
+    background: rgba(255, 0, 0, 0.2);
+    border-color: rgba(255, 0, 0, 0.5);
+    transform: scale(1.1);
+}
+
+.video-placeholder .video-static {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0.1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    background-size: 128px;
+    animation: staticMove 0.05s steps(8) infinite;
+}
+
+.video-placeholder .video-timestamp {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.video-placeholder .video-duration {
+    position: absolute;
+    bottom: 8px;
+    left: 10px;
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.video-progress {
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.video-progress .progress-bar {
+    height: 100%;
+    background: var(--accent-danger);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* --- Video playback animation (creature approach) --- */
+.video-placeholder.playing {
+    cursor: default;
+}
+
+.video-placeholder.playing .play-button {
+    display: none;
+}
+
+.video-placeholder.playing .creature-scene {
+    display: flex;
+}
+
+.creature-scene {
+    display: none;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(180deg, #010103, #020206, #010102);
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.creature-scene .scene-trees {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+        linear-gradient(90deg, transparent 8%, rgba(0, 8, 0, 0.9) 9%, transparent 11%),
+        linear-gradient(90deg, transparent 25%, rgba(0, 6, 0, 0.7) 26%, transparent 28%),
+        linear-gradient(90deg, transparent 55%, rgba(0, 8, 0, 0.8) 56%, transparent 58%),
+        linear-gradient(90deg, transparent 78%, rgba(0, 6, 0, 0.6) 79%, transparent 81%),
+        linear-gradient(90deg, transparent 92%, rgba(0, 8, 0, 0.9) 93%, transparent 95%);
+    z-index: 1;
+}
+
+.creature-scene .approaching-creature {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: creatureApproach 8s ease-in forwards;
+    transform-origin: center bottom;
+}
+
+@keyframes creatureApproach {
+    0% {
+        transform: scale(0.1) translateY(0);
+        opacity: 0.3;
+        filter: blur(3px);
+    }
+    30% {
+        transform: scale(0.3) translateY(-10px);
+        opacity: 0.6;
+        filter: blur(2px);
+    }
+    60% {
+        transform: scale(0.6) translateY(-20px);
+        opacity: 0.85;
+        filter: blur(1px);
+    }
+    85% {
+        transform: scale(1) translateY(-30px);
+        opacity: 1;
+        filter: blur(0);
+    }
+    100% {
+        transform: scale(1.8) translateY(-40px);
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+.creature-scene .camera-shake {
+    animation: cameraShakeVideo 0.15s ease infinite;
+}
+
+@keyframes cameraShakeVideo {
+    0%, 100% { transform: translate(0); }
+    25% { transform: translate(-1px, 1px); }
+    50% { transform: translate(1px, -1px); }
+    75% { transform: translate(-1px, -1px); }
+}
+
+/* --- Notification badge for unread horror --- */
+.notification-badge {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 6px 14px;
+    background: rgba(255, 0, 0, 0.15);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    border-radius: 20px;
+    font-size: 0.7rem;
+    color: var(--accent-danger);
+    font-family: var(--font-mono);
+    z-index: 600;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.5s ease;
+    pointer-events: none;
+}
+
+.notification-badge.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- Connection status bar --- */
+#connection-status {
+    width: 100%;
+    height: 0;
+    background: var(--accent-danger);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: #fff;
+    letter-spacing: 0.1em;
+    overflow: hidden;
+    transition: height 0.5s ease;
+    z-index: 200;
+}
+
+#connection-status.visible {
+    height: 28px;
+}
+
+#connection-status.warning {
+    background: var(--accent-warning);
+    color: #000;
+}
+
+#connection-status.danger {
+    background: var(--accent-danger);
+    animation: connectionFlash 1s ease infinite;
+}
+
+@keyframes connectionFlash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* --- Bottom input bar (decorative) --- */
+#input-bar {
+    width: 100%;
+    height: 54px;
+    min-height: 54px;
+    background: var(--bg-secondary);
+    border-top: 1px solid #222233;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 10px;
+    z-index: 100;
+    transition: background 2s ease, border-color 2s ease;
+}
+
+#input-bar .input-field {
+    flex: 1;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 0 16px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    outline: none;
+    font-family: var(--font-main);
+    transition: all var(--transition-smooth);
+}
+
+#input-bar .input-field:focus {
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+#input-bar .input-field::placeholder {
+    color: var(--text-timestamp);
+}
+
+#input-bar .send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(100, 100, 255, 0.15);
+    border: none;
+    color: #8888ff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+#input-bar .send-btn:hover {
+    background: rgba(100, 100, 255, 0.25);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 600px) {
+    .message {
+        max-width: 92%;
+    }
+    .message .bubble {
+        font-size: 0.85rem;
+        padding: 10px 14px;
+    }
+    .message .photo-container {
+        width: 240px;
+    }
+    .video-container {
+        width: 260px;
+    }
+    #preloader .title-text {
+        font-size: 1.8rem;
+        letter-spacing: 0.4em;
+    }
+}
+
+/* ============================================================
+   PHASE-BASED ATMOSPHERE TRANSITIONS
+   ============================================================ */
+body.phase-calm {
+    --darkness-overlay: 0;
+    --static-opacity: 0;
+    --vignette-intensity: 0;
+    --scan-line-opacity: 0;
+    --fog-opacity: 0;
+    --blood-drip-opacity: 0;
+    --eye-glow-opacity: 0;
+    --crack-opacity: 0;
+}
+
+body.phase-uneasy {
+    --darkness-overlay: 0.05;
+    --static-opacity: 0.02;
+    --vignette-intensity: 0.3;
+    --scan-line-opacity: 0.03;
+    --fog-opacity: 0.3;
+}
+
+body.phase-tense {
+    --darkness-overlay: 0.12;
+    --static-opacity: 0.05;
+    --vignette-intensity: 0.5;
+    --scan-line-opacity: 0.06;
+    --fog-opacity: 0.5;
+    --hue-shift: 5deg;
+}
+
+body.phase-danger {
+    --darkness-overlay: 0.2;
+    --static-opacity: 0.08;
+    --vignette-intensity: 0.65;
+    --scan-line-opacity: 0.1;
+    --fog-opacity: 0.6;
+    --hue-shift: -10deg;
+    --saturation-shift: 80%;
+    --heartbeat-speed: 0.8s;
+}
+
+body.phase-horror {
+    --darkness-overlay: 0.3;
+    --static-opacity: 0.12;
+    --vignette-intensity: 0.8;
+    --scan-line-opacity: 0.15;
+    --fog-opacity: 0.7;
+    --hue-shift: -15deg;
+    --saturation-shift: 60%;
+    --heartbeat-speed: 0.6s;
+    --blood-drip-opacity: 0.3;
+    --eye-glow-opacity: 0.15;
+}
+
+body.phase-panic {
+    --darkness-overlay: 0.4;
+    --static-opacity: 0.18;
+    --vignette-intensity: 0.9;
+    --scan-line-opacity: 0.2;
+    --fog-opacity: 0.8;
+    --hue-shift: -20deg;
+    --saturation-shift: 40%;
+    --heartbeat-speed: 0.4s;
+    --blood-drip-opacity: 0.5;
+    --eye-glow-opacity: 0.3;
+    --crack-opacity: 0.2;
+}
+
+body.phase-relief {
+    --darkness-overlay: 0.05;
+    --static-opacity: 0;
+    --vignette-intensity: 0.2;
+    --scan-line-opacity: 0;
+    --fog-opacity: 0.1;
+    --hue-shift: 10deg;
+    --saturation-shift: 120%;
+    --blood-drip-opacity: 0;
+    --eye-glow-opacity: 0;
+    --crack-opacity: 0;
+}
+
+body.phase-final-horror {
+    --darkness-overlay: 0.5;
+    --static-opacity: 0.25;
+    --vignette-intensity: 0.95;
+    --scan-line-opacity: 0.25;
+    --fog-opacity: 0.9;
+    --hue-shift: -30deg;
+    --saturation-shift: 20%;
+    --heartbeat-speed: 0.3s;
+    --blood-drip-opacity: 0.8;
+    --eye-glow-opacity: 0.5;
+    --crack-opacity: 0.6;
+}
+
+body.phase-end {
+    --darkness-overlay: 0.9;
+    --static-opacity: 0.4;
+    --vignette-intensity: 1;
+}
+
+/* --- Text animation: character by character reveal --- */
+.char-reveal .char {
+    opacity: 0;
+    display: inline;
+    animation: charFadeIn 0.05s ease forwards;
+}
+
+@keyframes charFadeIn {
+    to { opacity: 1; }
+}
+
+/* --- Trembling text --- */
+.tremble-text {
+    animation: trembleText 0.08s ease infinite;
+    display: inline-block;
+}
+
+@keyframes trembleText {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-0.5px, 0.5px); }
+    50% { transform: translate(0.5px, -0.5px); }
+    75% { transform: translate(-0.5px, -0.5px); }
+}
+
+/* --- Final creature animation overlay --- */
+#final-creature-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    z-index: 700;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transition: opacity 1s ease;
+}
+
+#final-creature-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+#final-creature-overlay .final-text {
+    color: rgba(255, 0, 0, 0.6);
+    font-size: 1.2rem;
+    letter-spacing: 0.5em;
+    font-family: var(--font-mono);
+    animation: finalTextFlicker 0.1s steps(2) infinite;
+    margin-top: 40px;
+}
+
+@keyframes finalTextFlicker {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.2; }
+}
+
+/* --- Disconnection static --- */
+#disconnect-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    z-index: 800;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s ease;
+}
+
+#disconnect-screen.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+#disconnect-screen .disconnect-static {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0.08;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n2)' opacity='0.5'/%3E%3C/svg%3E");
+    background-size: 128px;
+    animation: staticMove 0.05s steps(10) infinite;
+}
+
+#disconnect-screen .disconnect-text {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: #333;
+    letter-spacing: 0.3em;
+    z-index: 1;
+    animation: disconnectBlink 2s ease-in-out infinite;
+}
+
+#disconnect-screen .disconnect-subtext {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: #1a1a1a;
+    letter-spacing: 0.2em;
+    margin-top: 12px;
+    z-index: 1;
+}
+
+@keyframes disconnectBlink {
+    0%, 40%, 60%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+
+/* --- Accessibility: prefers-reduced-motion --- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+</style>
+</head>
+<body class="phase-calm">
+
+<!-- ============================================================
+     HTML STRUCTURE
+     ============================================================ -->
+
+<!-- Preloader / Title Screen -->
+<div id="preloader">
+    <div class="title-text">深夜ノ森</div>
+    <div class="subtitle-text">— The Chat Log —</div>
+    <div class="click-prompt">CLICK TO BEGIN</div>
+</div>
+
+<!-- Warning Screen -->
+<div id="warning-screen">
+    <div class="warning-icon">⚠</div>
+    <div class="warning-text">
+        この体験には<span class="red">ホラー演出</span>が含まれます。<br>
+        暗い環境・ヘッドフォンの使用を推奨します。<br><br>
+        画面の点滅・振動・不穏な効果音が含まれます。<br>
+        光感受性のある方はご注意ください。<br><br>
+        <span style="color:#555;">これは創作されたフィクションです。</span>
+    </div>
+    <button class="proceed-btn" id="proceed-btn">PROCEED</button>
+</div>
+
+<!-- Main Container -->
+<div id="main-container">
+    <!-- Top Bar -->
+    <div id="top-bar">
+        <div class="chat-avatar">
+            AI
+            <div class="status-dot"></div>
+        </div>
+        <div class="chat-info">
+            <div class="chat-name">AI Assistant</div>
+            <div class="chat-status" id="ai-status">online</div>
+        </div>
+        <div class="time-display" id="time-display">22:47</div>
+    </div>
+
+    <!-- Connection Status -->
+    <div id="connection-status"></div>
+
+    <!-- Chat Area -->
+    <div id="chat-area">
+        <div id="chat-messages"></div>
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="typing-label" id="typing-label">AI is typing</div>
+            <div class="dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Bar (decorative) -->
+    <div id="input-bar">
+        <input type="text" class="input-field" placeholder="メッセージを入力..." readonly>
+        <button class="send-btn">▶</button>
+    </div>
+</div>
+
+<!-- Overlay Effects -->
+<div id="darkness-overlay"></div>
+<div id="static-overlay"></div>
+<div id="vignette-overlay"></div>
+<div id="scanlines-overlay"></div>
+<div id="glitch-overlay"></div>
+<div id="red-flash"></div>
+<div id="fog-overlay"></div>
+<div id="blood-drips"></div>
+<div id="floating-eyes"></div>
+<div id="heartbeat-border"></div>
+<div id="crack-overlay"></div>
+<div id="blackout"></div>
+
+<!-- Final Overlays -->
+<div id="final-creature-overlay">
+    <div class="final-text">通 信 途 絶</div>
+</div>
+
+<div id="disconnect-screen">
+    <div class="disconnect-static"></div>
+    <div class="disconnect-text">CONNECTION LOST</div>
+    <div class="disconnect-subtext">23:59:59 — signal terminated</div>
+</div>
+
+<!-- Notification Badge -->
+<div class="notification-badge" id="notification-badge"></div>
+
+<script>
+// ============================================================
+// PART 1 JAVASCRIPT: Core Engine, Audio System, Utilities
+// (Lines ~1700-2250)
+// ============================================================
+
+// --- Audio Context & Sound Engine ---
+class SoundEngine {
+    constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.initialized = false;
+        this.activeSounds = [];
+        this.ambientNodes = [];
+    }
+
+    init() {
+        if (this.initialized) return;
+        try {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.value = 0.3;
+            this.masterGain.connect(this.ctx.destination);
+            this.initialized = true;
+        } catch (e) {
+            console.warn('Web Audio API not supported');
+        }
+    }
+
+    createOscillator(freq, type = 'sine', duration = 0.5, volume = 0.1) {
+        if (!this.initialized) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(this.ctx.currentTime);
+        osc.stop(this.ctx.currentTime + duration);
+        return { osc, gain };
+    }
+
+    playMessageSound(type = 'user') {
+        if (!this.initialized) return;
+        if (type === 'user') {
+            this.createOscillator(800, 'sine', 0.15, 0.06);
+            setTimeout(() => this.createOscillator(1000, 'sine', 0.1, 0.04), 50);
+        } else if (type === 'ai') {
+            this.createOscillator(600, 'sine', 0.15, 0.05);
+            setTimeout(() => this.createOscillator(750, 'sine', 0.12, 0.04), 60);
+        } else if (type === 'system') {
+            this.createOscillator(400, 'triangle', 0.3, 0.03);
+        }
+    }
+
+    playNotificationSound() {
+        if (!this.initialized) return;
+        this.createOscillator(880, 'sine', 0.1, 0.08);
+        setTimeout(() => this.createOscillator(1100, 'sine', 0.15, 0.06), 100);
+        setTimeout(() => this.createOscillator(1320, 'sine', 0.2, 0.04), 200);
+    }
+
+    playHeartbeat(speed = 800) {
+        if (!this.initialized) return;
+        const beat = () => {
+            this.createOscillator(55, 'sine', 0.15, 0.15);
+            this.createOscillator(45, 'sine', 0.15, 0.1);
+            setTimeout(() => {
+                this.createOscillator(50, 'sine', 0.12, 0.12);
+                this.createOscillator(40, 'sine', 0.12, 0.08);
+            }, 150);
+        };
+        beat();
+        return setInterval(beat, speed);
+    }
+
+    playStaticNoise(duration = 1) {
+        if (!this.initialized) return;
+        const bufferSize = this.ctx.sampleRate * duration;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * 0.3;
+        }
+        const source = this.ctx.createBufferSource();
+        source.buffer = buffer;
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 3000;
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        source.start();
+        return source;
+    }
+
+    playDrone(freq = 60, duration = 10, volume = 0.04) {
+        if (!this.initialized) return;
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc1.type = 'sawtooth';
+        osc1.frequency.value = freq;
+        osc2.type = 'sine';
+        osc2.frequency.value = freq * 1.005;
+        gain.gain.setValueAtTime(0, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(volume, this.ctx.currentTime + 2);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 200;
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        osc1.start();
+        osc2.start();
+        osc1.stop(this.ctx.currentTime + duration);
+        osc2.stop(this.ctx.currentTime + duration);
+        this.ambientNodes.push({ osc1, osc2, gain });
+        return { osc1, osc2, gain };
+    }
+
+    playHorrorSting() {
+        if (!this.initialized) return;
+        this.createOscillator(180, 'sawtooth', 1.5, 0.08);
+        this.createOscillator(183, 'sawtooth', 1.5, 0.06);
+        this.createOscillator(90, 'sine', 2, 0.1);
+        setTimeout(() => {
+            this.createOscillator(220, 'square', 0.8, 0.04);
+            this.playStaticNoise(0.5);
+        }, 200);
+    }
+
+    playCreatureSound() {
+        if (!this.initialized) return;
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                const freq = 30 + Math.random() * 40;
+                this.createOscillator(freq, 'sawtooth', 0.3, 0.06);
+            }, i * 100);
+        }
+        setTimeout(() => {
+            this.createOscillator(800, 'square', 0.05, 0.12);
+            this.createOscillator(1200, 'square', 0.03, 0.08);
+        }, 300);
+    }
+
+    playReliefSound() {
+        if (!this.initialized) return;
+        const notes = [523, 659, 784, 1047];
+        notes.forEach((freq, i) => {
+            setTimeout(() => {
+                this.createOscillator(freq, 'sine', 0.8, 0.05);
+            }, i * 200);
+        });
+    }
+
+    playGlitchBurst() {
+        if (!this.initialized) return;
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                this.playStaticNoise(0.1);
+                this.createOscillator(
+                    200 + Math.random() * 2000,
+                    'square',
+                    0.05,
+                    0.08
+                );
+            }, i * 60);
+        }
+    }
+
+    playFinalHorror() {
+        if (!this.initialized) return;
+        this.playDrone(35, 15, 0.08);
+        this.playDrone(37, 15, 0.06);
+        setTimeout(() => {
+            this.createOscillator(25, 'sawtooth', 8, 0.12);
+            this.playStaticNoise(3);
+        }, 2000);
+        setTimeout(() => {
+            this.playCreatureSound();
+            this.playHorrorSting();
+        }, 4000);
+    }
+
+    playDisconnect() {
+        if (!this.initialized) return;
+        this.playStaticNoise(2);
+        this.createOscillator(100, 'square', 0.5, 0.1);
+        setTimeout(() => {
+            this.createOscillator(80, 'square', 0.3, 0.08);
+        }, 200);
+        setTimeout(() => {
+            this.createOscillator(60, 'square', 0.2, 0.06);
+        }, 400);
+    }
+
+    setMasterVolume(val) {
+        if (!this.initialized) return;
+        this.masterGain.gain.linearRampToValueAtTime(
+            Math.max(0, Math.min(1, val)),
+            this.ctx.currentTime + 0.1
+        );
+    }
+}
+
+// --- Utility Functions ---
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function randomBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function randomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+// --- DOM References ---
+const DOM = {
+    preloader: document.getElementById('preloader'),
+    warningScreen: document.getElementById('warning-screen'),
+    proceedBtn: document.getElementById('proceed-btn'),
+    mainContainer: document.getElementById('main-container'),
+    chatArea: document.getElementById('chat-area'),
+    chatMessages: document.getElementById('chat-messages'),
+    typingIndicator: document.getElementById('typing-indicator'),
+    typingLabel: document.getElementById('typing-label'),
+    timeDisplay: document.getElementById('time-display'),
+    aiStatus: document.getElementById('ai-status'),
+    connectionStatus: document.getElementById('connection-status'),
+    darknessOverlay: document.getElementById('darkness-overlay'),
+    staticOverlay: document.getElementById('static-overlay'),
+    vignetteOverlay: document.getElementById('vignette-overlay'),
+    scanlinesOverlay: document.getElementById('scanlines-overlay'),
+    glitchOverlay: document.getElementById('glitch-overlay'),
+    redFlash: document.getElementById('red-flash'),
+    fogOverlay: document.getElementById('fog-overlay'),
+    bloodDrips: document.getElementById('blood-drips'),
+    floatingEyes: document.getElementById('floating-eyes'),
+    heartbeatBorder: document.getElementById('heartbeat-border'),
+    crackOverlay: document.getElementById('crack-overlay'),
+    blackout: document.getElementById('blackout'),
+    finalCreatureOverlay: document.getElementById('final-creature-overlay'),
+    disconnectScreen: document.getElementById('disconnect-screen'),
+    notificationBadge: document.getElementById('notification-badge'),
+    inputBar: document.getElementById('input-bar'),
+    topBar: document.getElementById('top-bar'),
+};
+
+// --- State Management ---
+const State = {
+    currentPhase: 'calm',
+    currentTime: { h: 22, m: 47 },
+    messageCount: 0,
+    heartbeatInterval: null,
+    isPlaying: false,
+    isPaused: false,
+    storyProgress: 0,
+    fearLevel: 0,
+    ambientDrones: [],
+    bloodDripIntervals: [],
+    floatingEyePairs: [],
+    crackLines: [],
+    glitchIntervals: [],
+};
+
+// --- Initialize Sound Engine ---
+const sound = new SoundEngine();
+
+// --- Core Message Functions ---
+
+function scrollToBottom() {
+    DOM.chatArea.scrollTo({
+        top: DOM.chatArea.scrollHeight,
+        behavior: 'smooth'
+    });
+}
+
+function formatTime(h, m) {
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function advanceTime(minutes) {
+    State.currentTime.m += minutes;
+    while (State.currentTime.m >= 60) {
+        State.currentTime.m -= 60;
+        State.currentTime.h += 1;
+    }
+    if (State.currentTime.h >= 24) State.currentTime.h -= 24;
+    DOM.timeDisplay.textContent = formatTime(State.currentTime.h, State.currentTime.m);
+}
+
+function setTime(h, m) {
+    State.currentTime.h = h;
+    State.currentTime.m = m;
+    DOM.timeDisplay.textContent = formatTime(h, m);
+}
+
+function showTyping(label = 'AI is typing', duration = null) {
+    DOM.typingLabel.textContent = label;
+    DOM.typingIndicator.classList.add('visible');
+    scrollToBottom();
+    if (duration) {
+        return sleep(duration).then(() => hideTyping());
+    }
+}
+
+function hideTyping() {
+    DOM.typingIndicator.classList.remove('visible');
+}
+
+async function addMessage(options) {
+    const {
+        sender = 'user',
+        text = '',
+        html = '',
+        timestamp = null,
+        classes = [],
+        typeEffect = false,
+        typeSpeed = 30,
+        photo = null,
+        video = null,
+        soundType = null,
+        delay = 0,
+        charByChar = false,
+        trembleChars = false,
+        corruptedText = false,
+    } = options;
+
+    if (delay > 0) await sleep(delay);
+
+    const messageEl = document.createElement('div');
+    messageEl.className = `message ${sender} ${classes.join(' ')}`;
+
+    const time = timestamp || formatTime(State.currentTime.h, State.currentTime.m);
+
+    let senderLabel = '';
+    if (sender === 'ai') senderLabel = '<div class="sender-label">AI</div>';
+    else if (sender === 'user') senderLabel = '<div class="sender-label">User</div>';
+
+    // Build photo HTML if applicable
+    let photoHTML = '';
+    if (photo) {
+        photoHTML = buildPhotoHTML(photo);
+    }
+
+    // Build video HTML if applicable
+    let videoHTML = '';
+    if (video) {
+        videoHTML = buildVideoHTML(video);
+    }
+
+    let textContent = text;
+    if (corruptedText) {
+        textContent = `<span class="corrupted" data-text="${text}">${text}</span>`;
+    }
+
+    if (html) {
+        textContent = html;
+    }
+
+    messageEl.innerHTML = `
+        ${senderLabel}
+        ${photoHTML}
+        ${videoHTML}
+        ${text || html ? `<div class="bubble">${typeEffect || charByChar ? '' : textContent}</div>` : ''}
+        <div class="timestamp">${time}</div>
+    `;
+
+    DOM.chatMessages.appendChild(messageEl);
+    State.messageCount++;
+    scrollToBottom();
+
+    // Play sound
+    if (soundType) {
+        sound.playMessageSound(soundType);
+    } else if (sender === 'user') {
+        sound.playMessageSound('user');
+    } else if (sender === 'ai') {
+        sound.playMessageSound('ai');
+    } else if (sender === 'system') {
+        sound.playMessageSound('system');
+    }
+
+    // Type effect: typewriter
+    if (typeEffect && (text || html)) {
+        const bubble = messageEl.querySelector('.bubble');
+        const content = text || html;
+        bubble.innerHTML = '';
+        for (let i = 0; i < content.length; i++) {
+            // Handle HTML tags
+            if (content[i] === '<') {
+                const endIdx = content.indexOf('>', i);
+                if (endIdx !== -1) {
+                    bubble.innerHTML += content.substring(i, endIdx + 1);
+                    i = endIdx;
+                    continue;
+                }
+            }
+            bubble.innerHTML += content[i];
+            scrollToBottom();
+            if (content[i] !== ' ') {
+                await sleep(typeSpeed);
+            } else {
+                await sleep(typeSpeed / 3);
+            }
+        }
+    }
+
+    // Char by char with optional tremble
+    if (charByChar && text) {
+        const bubble = messageEl.querySelector('.bubble');
+        bubble.innerHTML = '';
+        for (let i = 0; i < text.length; i++) {
+            const span = document.createElement('span');
+            span.className = 'char';
+            if (trembleChars) span.classList.add('tremble-text');
+            span.textContent = text[i];
+            span.style.animationDelay = `${i * typeSpeed}ms`;
+            bubble.appendChild(span);
+        }
+        await sleep(text.length * typeSpeed + 100);
+    }
+
+    scrollToBottom();
+    return messageEl;
+}
+
+function buildPhotoHTML(photoConfig) {
+    const { type, description } = photoConfig;
+    let inner = '';
+
+    switch (type) {
+        case 'forest-dark':
+            let trees = '';
+            for (let i = 0; i < 30; i++) {
+                const h = randomBetween(40, 95);
+                trees += `<div class="tree" style="height:${h}%;opacity:${randomFloat(0.3, 0.8)}"></div>`;
+            }
+            inner = `
+                <div class="photo-placeholder forest-dark">
+                    <div class="tree-line">${trees}</div>
+                    <div class="photo-label">${description || '📷 image'}</div>
+                </div>`;
+            break;
+
+        case 'car-interior':
+            inner = `
+                <div class="photo-placeholder car-interior">
+                    <div class="dashboard-glow"></div>
+                    <div class="photo-label">${description || '📷 image'}</div>
+                </div>`;
+            break;
+
+        case 'eyes-in-dark':
+            inner = `
+                <div class="photo-placeholder eyes-in-dark">
+                    <div class="silhouette"></div>
+                    <div class="the-eyes">
+                        <div class="eye"></div>
+                        <div class="eye"></div>
+                    </div>
+                    <div class="tree-overlay"></div>
+                    <div class="photo-label">${description || '📷 image'}</div>
+                </div>`;
+            break;
+
+        case 'blurred-forest':
+            inner = `
+                <div class="photo-placeholder blurred-forest">
+                    <div class="photo-label">${description || '📷 image'}</div>
+                </div>`;
+            break;
+
+        case 'creature-large':
+            inner = `
+                <div class="photo-placeholder creature-large">
+                    <div class="creature-body">
+                        <div class="creature-head">
+                            <div class="creature-eyes">
+                                <div class="creature-eye"></div>
+                                <div class="creature-eye"></div>
+                            </div>
+                            <div class="creature-mouth"></div>
+                        </div>
+                        <div class="creature-torso">
+                            <div class="creature-arm left">
+                                <div class="creature-claw">
+                                    <div class="finger"></div>
+                                    <div class="finger"></div>
+                                    <div class="finger"></div>
+                                    <div class="finger"></div>
+                                </div>
+                            </div>
+                            <div class="creature-arm right">
+                                <div class="creature-claw">
+                                    <div class="finger"></div>
+                                    <div class="finger"></div>
+                                    <div class="finger"></div>
+                                    <div class="finger"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="creature-legs">
+                            <div class="creature-leg"></div>
+                            <div class="creature-leg"></div>
+                        </div>
+                    </div>
+                    <div class="photo-label">${description || '📷 image'}</div>
+                </div>`;
+            break;
+
+        default:
+            inner = `<div class="photo-placeholder" style="background:#111;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;"><div class="photo-label">${description || '📷'}</div></div>`;
+    }
+
+    return `<div class="photo-container">${inner}</div>`;
+}
+
+function buildVideoHTML(videoConfig) {
+    const { duration = '0:12', timestamp = '00:00' } = videoConfig;
+    return `
+        <div class="video-container">
+            <div class="video-placeholder" id="video-player">
+                <div class="video-static"></div>
+                <div class="play-button" id="video-play-btn"></div>
+                <div class="creature-scene" id="creature-scene">
+                    <div class="scene-trees"></div>
+                    <div class="approaching-creature camera-shake">
+                        <div class="creature-head" style="width:18px;height:14px;background:radial-gradient(ellipse,#0a0a10,#050508);border-radius:40%;position:relative;">
+                            <div style="position:absolute;top:3px;left:50%;transform:translateX(-50%);display:flex;gap:6px;">
+                                <div style="width:3px;height:2px;border-radius:50%;background:radial-gradient(#ff4400,#cc0000);box-shadow:0 0 6px #ff2200;"></div>
+                                <div style="width:3px;height:2px;border-radius:50%;background:radial-gradient(#ff4400,#cc0000);box-shadow:0 0 6px #ff2200;"></div>
+                            </div>
+                            <div style="position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:12px;height:5px;background:#0a0000;border-radius:0 0 50% 50%;"></div>
+                        </div>
+                        <div style="width:10px;height:50px;background:linear-gradient(#0a0a10,#060608);position:relative;">
+                            <div style="position:absolute;top:3px;left:-12px;width:2px;height:65px;background:linear-gradient(#0a0a10,#060608);border-radius:2px;transform:rotate(8deg);"></div>
+                            <div style="position:absolute;top:3px;right:-12px;width:2px;height:65px;background:linear-gradient(#0a0a10,#060608);border-radius:2px;transform:rotate(-8deg);"></div>
+                        </div>
+                        <div style="display:flex;gap:4px;">
+                            <div style="width:3px;height:40px;background:linear-gradient(#080810,#060608);border-radius:2px;"></div>
+                            <div style="width:3px;height:40px;background:linear-gradient(#080810,#060608);border-radius:2px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-timestamp">${timestamp}</div>
+                <div class="video-duration">${duration}</div>
+            </div>
+            <div class="video-progress">
+                <div class="progress-bar" id="video-progress-bar"></div>
+            </div>
+        </div>`;
+}
+
+function addDateSeparator(text) {
+    const sep = document.createElement('div');
+    sep.className = 'date-separator';
+    sep.innerHTML = `
+        <div class="line"></div>
+        <div class="date-text">${text}</div>
+        <div class="line"></div>
+    `;
+    DOM.chatMessages.appendChild(sep);
+    scrollToBottom();
+}
+
+// --- Phase & Atmosphere Control ---
+function setPhase(phase) {
+    document.body.className = `phase-${phase}`;
+    State.currentPhase = phase;
+}
+
+function triggerScreenShake(heavy = false, duration = 500) {
+    const cls = heavy ? 'shake-heavy' : 'shake';
+    DOM.mainContainer.classList.add(cls);
+    setTimeout(() => DOM.mainContainer.classList.remove(cls), duration);
+}
+
+function triggerRedFlash(duration = 200) {
+    DOM.redFlash.style.opacity = '1';
+    setTimeout(() => { DOM.redFlash.style.opacity = '0'; }, duration);
+}
+
+function triggerBlackout(duration = 1000) {
+    DOM.blackout.style.opacity = '1';
+    return sleep(duration).then(() => {
+        DOM.blackout.style.opacity = '0';
+    });
+}
+
+async function triggerGlitchBurst(duration = 300) {
+    sound.playGlitchBurst();
+    DOM.glitchOverlay.style.opacity = '1';
+    // Create random slices
+    DOM.glitchOverlay.innerHTML = '';
+    for (let i = 0; i < 8; i++) {
+        const slice = document.createElement('div');
+        slice.className = 'glitch-slice';
+        slice.style.top = `${randomBetween(0, 90)}%`;
+        slice.style.height = `${randomBetween(1, 8)}%`;
+        slice.style.background = `rgba(${randomBetween(0, 50)}, ${randomBetween(0, 20)}, ${randomBetween(0, 50)}, 0.3)`;
+        slice.style.transform = `translateX(${randomBetween(-20, 20)}px)`;
+        slice.style.opacity = '1';
+        DOM.glitchOverlay.appendChild(slice);
+    }
+    await sleep(duration);
+    DOM.glitchOverlay.style.opacity = '0';
+    DOM.glitchOverlay.innerHTML = '';
+}
+
+function showConnectionStatus(text, type = 'warning') {
+    DOM.connectionStatus.textContent = text;
+    DOM.connectionStatus.className = `visible ${type}`;
+}
+
+function hideConnectionStatus() {
+    DOM.connectionStatus.className = '';
+}
+
+function showNotification(text, duration = 3000) {
+    DOM.notificationBadge.textContent = text;
+    DOM.notificationBadge.classList.add('visible');
+    sound.playNotificationSound();
+    if (duration > 0) {
+        setTimeout(() => {
+            DOM.notificationBadge.classList.remove('visible');
+        }, duration);
+    }
+}
+
+function setAIStatus(status) {
+    DOM.aiStatus.textContent = status;
+    const dot = document.querySelector('.status-dot');
+    if (status === 'online' || status === 'オンライン') {
+        dot.style.background = 'var(--accent-safe)';
+    } else if (status === 'typing...' || status === '入力中...') {
+        dot.style.background = '#88aaff';
+    } else if (status === 'analyzing...' || status === '分析中...') {
+        dot.style.background = 'var(--accent-warning)';
+    } else if (status === 'ALERT' || status === '警告') {
+        dot.style.background = 'var(--accent-danger)';
+        dot.style.animation = 'warningPulse 0.5s ease infinite';
+    } else if (status === 'offline' || status === 'disconnected') {
+        dot.style.background = '#555';
+    } else {
+        dot.style.background = 'var(--accent-safe)';
+    }
+}
+
+function startHeartbeat(speed = 800) {
+    if (State.heartbeatInterval) clearInterval(State.heartbeatInterval);
+    DOM.heartbeatBorder.classList.add('active');
+    document.documentElement.style.setProperty('--heartbeat-speed', `${speed}ms`);
+    State.heartbeatInterval = sound.playHeartbeat(speed);
+}
+
+function stopHeartbeat() {
+    if (State.heartbeatInterval) {
+        clearInterval(State.heartbeatInterval);
+        State.heartbeatInterval = null;
+    }
+    DOM.heartbeatBorder.classList.remove('active');
+}
+
+function addBloodDrips(count = 5) {
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+            const drip = document.createElement('div');
+            drip.className = 'blood-drip';
+            drip.style.left = `${randomBetween(5, 95)}%`;
+            drip.style.setProperty('--drip-speed', `${randomBetween(3, 8)}s`);
+            drip.style.width = `${randomBetween(1, 4)}px`;
+            drip.style.opacity = randomFloat(0.3, 0.7);
+            DOM.bloodDrips.appendChild(drip);
+            setTimeout(() => drip.remove(), 10000);
+        }, i * randomBetween(200, 800));
+    }
+}
+
+function addFloatingEyes(count = 3) {
+    for (let i = 0; i < count; i++) {
+        const pair = document.createElement('div');
+        pair.className = 'floating-eye-pair';
+        pair.style.top = `${randomBetween(10, 80)}%`;
+        pair.style.left = `${randomBetween(5, 90)}%`;
+        pair.style.animationDuration = `${randomBetween(4, 10)}s`;
+        pair.innerHTML = `
+            <div class="floating-eye"></div>
+            <div class="floating-eye"></div>
+        `;
+        DOM.floatingEyes.appendChild(pair);
+        State.floatingEyePairs.push(pair);
+        // Remove after some time
+        setTimeout(() => {
+            pair.style.opacity = '0';
+            pair.style.transition = 'opacity 2s ease';
+            setTimeout(() => pair.remove(), 2000);
+        }, randomBetween(5000, 15000));
+    }
+}
+
+function addCracks(count = 5) {
+    for (let i = 0; i < count; i++) {
+        const crack = document.createElement('div');
+        crack.className = 'crack-line';
+        const x = randomBetween(10, 90);
+        const y = randomBetween(10, 90);
+        const angle = randomBetween(-45, 45);
+        const length = randomBetween(50, 200);
+        crack.style.left = `${x}%`;
+        crack.style.top = `${y}%`;
+        crack.style.width = `${length}px`;
+        crack.style.transform = `rotate(${angle}deg)`;
+        DOM.crackOverlay.appendChild(crack);
+        State.crackLines.push(crack);
+    }
+}
+
+// --- Initialization ---
+function initPreloader() {
+    DOM.preloader.addEventListener('click', () => {
+        sound.init();
+        DOM.preloader.classList.add('fade-out');
+        setTimeout(() => {
+            DOM.preloader.style.display = 'none';
+            DOM.warningScreen.style.display = 'flex';
+        }, 1500);
+    });
+}
+
+function initWarningScreen() {
+    DOM.proceedBtn.addEventListener('click', () => {
+        DOM.warningScreen.style.display = 'none';
+        DOM.mainContainer.classList.add('active');
+        DOM.mainContainer.style.display = 'flex';
+        startStory();
+    });
+}
+
+// Initialize
+initPreloader();
+initWarningScreen();
+
+// ============================================================
+// END OF PART 1
+// Story sequence function (startStory) will be in Part 2
+// ============================================================
+</script>
+<!-- PART 2, 3, 4 scripts will continue below -->
+<script>
+// ============================================================
+// PART 2: STORY SEQUENCE — Opening to First Horror Escalation
+// (Lines 2250-4500)
+// ============================================================
+
+async function startStory() {
+    State.isPlaying = true;
+
+    // ---- SCENE 1: Calm Opening ----
+    setPhase('calm');
+    setTime(22, 47);
+    setAIStatus('オンライン');
+
+    addDateSeparator('今日 — ' + formatTime(22, 47));
+
+    await sleep(1500);
+
+    // ---- Initial photos arrive ----
+    await addMessage({
+        sender: 'user',
+        text: '',
+        photo: { type: 'forest-dark', description: '車窓から見える漆黒の森' },
+        timestamp: '22:47',
+    });
+
+    await sleep(800);
+
+    await addMessage({
+        sender: 'user',
+        text: '',
+        photo: { type: 'car-interior', description: '薄暗い車内' },
+        timestamp: '22:47',
+    });
+
+    await sleep(600);
+
+    await addMessage({
+        sender: 'user',
+        text: 'やばい、現在進行形で迷子ｗｗ',
+        timestamp: '22:47',
+    });
+
+    await sleep(1200);
+
+    // AI starts analyzing
+    setAIStatus('分析中...');
+    await showTyping('AI is analyzing images...', 2500);
+
+    await addMessage({
+        sender: 'ai',
+        text: '画像を確認しました。かなり暗い森の中にいらっしゃるようですね。車内からの撮影でしょうか？ 現在の状況をもう少し詳しく教えていただけますか？',
+        timestamp: '22:48',
+        typeEffect: true,
+        typeSpeed: 25,
+    });
+
+    setAIStatus('オンライン');
+    await sleep(1800);
+
+    await addMessage({
+        sender: 'user',
+        text: 'そうそう、車で走ってたんだけど、いつの間にか道がなくなって…しかもさっきまで夕方だったのに急に真っ暗になったんだよね',
+        timestamp: '22:48',
+    });
+
+    await sleep(800);
+
+    await addMessage({
+        sender: 'user',
+        text: 'なんか変じゃない？ｗ',
+        timestamp: '22:48',
+    });
+
+    await sleep(1500);
+
+    // AI detecting danger
+    setAIStatus('分析中...');
+    await showTyping('AI is typing', 2000);
+
+    // Phase shift: unease begins
+    setPhase('uneasy');
+    sound.playDrone(80, 30, 0.02);
+
+    await addMessage({
+        sender: 'ai',
+        text: '状況を整理させてください。',
+        timestamp: '22:49',
+        typeEffect: true,
+        typeSpeed: 28,
+    });
+
+    await sleep(400);
+
+    await showTyping('AI is typing', 1800);
+
+    await addMessage({
+        sender: 'ai',
+        html: `いくつか確認させてください。<br><br>
+① 現在、車のエンジンはかかっていますか？<br>
+② ガソリンの残量はどの程度ですか？<br>
+③ スマートフォンの電池残量は？<br>
+④ 周囲に街灯や建物の明かりは見えますか？<br>
+⑤ GPSやナビは機能していますか？<br><br>
+道のない深い森の中で、しかも突然暗くなったというのは少し気になります。まず落ち着いて、一つずつ確認していきましょう。`,
+        timestamp: '22:49',
+        typeEffect: true,
+        typeSpeed: 22,
+    });
+
+    setAIStatus('オンライン');
+    await sleep(2200);
+
+    await addMessage({
+        sender: 'user',
+        text: 'えーっと、エンジンはかかってる。ガソリンは半分くらい。スマホは62%。街灯とか何もない。ナビは「案内ルートを外れました」ってずっと言ってるw',
+        timestamp: '22:50',
+    });
+
+    await sleep(600);
+
+    await addMessage({
+        sender: 'user',
+        text: 'てかマジで周り真っ暗すぎて怖いんだけど',
+        timestamp: '22:50',
+    });
+
+    await sleep(2000);
+
+    // AI escalating concern
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 2500);
+
+    await addMessage({
+        sender: 'ai',
+        html: `わかりました。率直に申し上げます。<br><br>
+あなたは今、<strong>遭難に近い状態</strong>にある可能性があります。<br><br>
+夜の森は想像以上に危険です。気温の急激な低下による<strong>低体温症</strong>、視界不良による<strong>滑落事故</strong>、<strong>野生動物</strong>との遭遇…いずれも命に関わるリスクです。<br><br>
+最も重要なことをお伝えします。`,
+        timestamp: '22:51',
+        classes: ['warning'],
+        typeEffect: true,
+        typeSpeed: 24,
+    });
+
+    await sleep(500);
+
+    await showTyping('AI is typing', 1200);
+
+    await addMessage({
+        sender: 'ai',
+        html: `<strong>絶対に車から出ないでください。</strong><br><br>車は今、あなたにとって最も安全なシェルターです。風雨を防ぎ、暖を取ることができ、万が一の場合はクラクションで助けを呼ぶこともできます。<br><br>そして、<strong>今すぐ110番か119番へ通報してください。</strong>「迷惑」などということは一切ありません。これは彼らの仕事であり、あなたの命を守るための正当な手段です。`,
+        timestamp: '22:52',
+        classes: ['urgent'],
+        typeEffect: true,
+        typeSpeed: 22,
+    });
+
+    setAIStatus('オンライン');
+    await sleep(2500);
+
+    // User resistance
+    await addMessage({
+        sender: 'user',
+        text: 'いやいやいやｗ そこまで大げさじゃないってｗ',
+        timestamp: '22:52',
+    });
+
+    await sleep(800);
+
+    await addMessage({
+        sender: 'user',
+        text: '警察とか呼んだら大事になるじゃん。てか電波不安定でそもそも繋がるかわかんないし',
+        timestamp: '22:52',
+    });
+
+    await sleep(600);
+
+    await addMessage({
+        sender: 'user',
+        text: '自力で帰れると思うんだよね。来た道を戻ればいいだけだし',
+        timestamp: '22:53',
+    });
+
+    await sleep(1800);
+
+    // AI pushing harder
+    setAIStatus('入力中...');
+    setPhase('tense');
+    await showTyping('AI is typing', 2200);
+
+    await addMessage({
+        sender: 'ai',
+        html: `お気持ちはわかります。しかし、これは「大げさ」ではありません。<br><br>
+遭難事故の統計を見ると、事故に遭った人の多くが<strong>「自力で帰れると思った」</strong>と証言しています。これは<strong>正常性バイアス</strong>と呼ばれる心理現象で、危険な状況にあっても「自分は大丈夫」と過小評価してしまうものです。<br><br>
+特に夜の森では——<br><br>
+• 方向感覚が完全に失われます<br>
+• 来た道を正確に辿ることはほぼ不可能です<br>
+• 暗闇の中では足元の地形が見えず、崖や溝に気づけません<br><br>
+<strong>お願いです。車から出ないでください。</strong>`,
+        timestamp: '22:53',
+        classes: ['urgent'],
+        typeEffect: true,
+        typeSpeed: 22,
+    });
+
+    await sleep(800);
+
+    await showTyping('AI is typing', 1500);
+
+    await addMessage({
+        sender: 'ai',
+        html: `それから、スマートフォンのバッテリーを温存してください。画面の明るさを最低にし、不要なアプリは閉じてください。<br><br>電波が不安定とのことですが、110番・119番は通常の通話より繋がりやすい仕組みになっています。何度か試してみてください。<br><br>もし繋がらない場合は、SMSで「110」に位置情報と状況を送ることも可能です。`,
+        timestamp: '22:54',
+        classes: ['warning'],
+        typeEffect: true,
+        typeSpeed: 24,
+    });
+
+    setAIStatus('オンライン');
+    await sleep(2800);
+
+    await addMessage({
+        sender: 'user',
+        text: 'うーん…わかった、とりあえず車にいるよ',
+        timestamp: '22:55',
+    });
+
+    await sleep(600);
+
+    await addMessage({
+        sender: 'user',
+        text: 'でも110は試したけどやっぱダメだった。「接続できません」みたいになる',
+        timestamp: '22:55',
+    });
+
+    await sleep(500);
+
+    await addMessage({
+        sender: 'user',
+        text: 'なんかさ、ここ電波全然入らないんだよね。このチャットもギリギリ繋がってる感じ',
+        timestamp: '22:55',
+    });
+
+    await sleep(2000);
+
+    // Connection instability begins
+    showConnectionStatus('⚡ 接続が不安定です', 'warning');
+    sound.playStaticNoise(0.5);
+
+    await sleep(1500);
+
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 2000);
+
+    await addMessage({
+        sender: 'ai',
+        html: `通報が繋がらないのは心配ですが、このチャットが維持されているなら、まだ最低限の通信は可能です。<br><br>
+改めて確認させてください。<br><br>
+<strong>車のドアはすべてロックされていますか？</strong><br>
+<strong>窓は完全に閉まっていますか？</strong><br>
+<strong>エンジンをかけたまま、ヒーターで暖を取れていますか？</strong><br><br>
+もし寒さを感じるなら、エンジンを15分かけて15分止める、というサイクルでガソリンを節約しながら暖を取ることを推奨します。`,
+        timestamp: '22:56',
+        typeEffect: true,
+        typeSpeed: 22,
+    });
+
+    setAIStatus('オンライン');
+    hideConnectionStatus();
+
+    await sleep(2200);
+
+    await addMessage({
+        sender: 'user',
+        text: 'ロックはした。窓も閉めた。ヒーターもつけてる',
+        timestamp: '22:56',
+    });
+
+    await sleep(500);
+
+    await addMessage({
+        sender: 'user',
+        text: 'ありがとね、なんか安心する',
+        timestamp: '22:57',
+    });
+
+    await sleep(1000);
+
+    await addMessage({
+        sender: 'user',
+        text: 'でもさ、',
+        timestamp: '22:57',
+    });
+
+    await sleep(800);
+
+    await addMessage({
+        sender: 'user',
+        text: 'ちょっと外見てみたいんだよね。なんか…気になるものがあって',
+        timestamp: '22:57',
+    });
+
+    await sleep(2000);
+
+    // AI alarm
+    setPhase('danger');
+    setAIStatus('警告');
+    sound.playDrone(50, 20, 0.04);
+    await showTyping('AI is typing', 1500);
+
+    await addMessage({
+        sender: 'ai',
+        html: `<strong>外に出ないでください。</strong><br><br>
+「気になるもの」とは何ですか？ できれば車内から窓越しに写真を撮って見せてください。<br><br>
+繰り返しますが、<strong>いかなる理由があっても、今夜は車の外に出るべきではありません。</strong>`,
+        timestamp: '22:57',
+        classes: ['urgent'],
+        typeEffect: true,
+        typeSpeed: 20,
+    });
+
+    setAIStatus('オンライン');
+    await sleep(2000);
+
+    await addMessage({
+        sender: 'user',
+        text: 'わかったわかった、車からは出ない。窓越しに撮ってみる',
+        timestamp: '22:58',
+    });
+
+    await sleep(2500);
+
+    // --- THE EYES PHOTO ---
+    advanceTime(3);
+
+    await addMessage({
+        sender: 'user',
+        text: 'ちょっと待って',
+        timestamp: '23:01',
+    });
+
+    await sleep(500);
+
+    await addMessage({
+        sender: 'user',
+        text: 'これ見て',
+        timestamp: '23:01',
+    });
+
+    await sleep(1000);
+
+    // Horror escalation
+    triggerScreenShake(false, 300);
+    sound.playHorrorSting();
+
+    await addMessage({
+        sender: 'user',
+        text: '',
+        photo: { type: 'eyes-in-dark', description: '森の奥に…光る二つの目？' },
+        timestamp: '23:01',
+        classes: ['horror'],
+    });
+
+    await sleep(600);
+
+    setPhase('horror');
+    startHeartbeat(800);
+
+    await addMessage({
+        sender: 'user',
+        text: 'なんかいる。木の間に。目が光ってる',
+        timestamp: '23:01',
+        classes: ['horror'],
+    });
+
+    await sleep(400);
+
+    await addMessage({
+        sender: 'user',
+        text: '人？動物？なんかシルエットが人っぽいんだけど…',
+        timestamp: '23:02',
+        classes: ['horror'],
+    });
+
+    await sleep(500);
+
+    await addMessage({
+        sender: 'user',
+        text: 'ちょっと確認してくる',
+        timestamp: '23:02',
+    });
+
+    await sleep(800);
+
+    // AI URGENT RESPONSE
+    setAIStatus('警告');
+    triggerRedFlash(300);
+    triggerScreenShake(true, 400);
+    sound.playGlitchBurst();
+
+    await addMessage({
+        sender: 'ai',
+        html: `<strong style="color:#ff4444;font-size:1.1em;">今すぐ、一秒でも早く車に戻って、すべてのドアをロックしてください！！！</strong>`,
+        timestamp: '23:02',
+        classes: ['urgent', 'panic'],
+        typeEffect: true,
+        typeSpeed: 15,
+    });
+
+    await sleep(300);
+
+    await showTyping('AI is typing', 1000);
+
+    await addMessage({
+        sender: 'ai',
+        html: `それが野生動物であれ、不審者であれ、<strong>外に出ることは絶対にダメです。</strong><br><br>
+目が光っているのが動物であれば、クマやイノシシの可能性があります。人であれば不審者の可能性があります。<br><br>
+いずれにせよ、車の中にいれば安全です。<strong>車から出ないで！</strong>`,
+        timestamp: '23:02',
+        classes: ['urgent'],
+        typeEffect: true,
+        typeSpeed: 18,
+    });
+
+    await sleep(2000);
+
+    // User went outside
+    await addMessage({
+        sender: 'user',
+        text: '少し出てみた',
+        timestamp: '23:04',
+    });
+
+    triggerScreenShake(true, 600);
+    triggerRedFlash(400);
+    sound.playHorrorSting();
+
+    await sleep(800);
+
+    setAIStatus('警告');
+
+    await addMessage({
+        sender: 'ai',
+        html: `<strong style="color:#ff2222;">車に戻ってください！！</strong><br><br>
+今すぐ戻ってください。走らなくていいです。ゆっくりと、確実に車の方向へ戻ってください。<br><br>
+<strong>「それ」の方を見ないで。</strong>背を向けないで。ゆっくりと後ずさりしながら車に戻ってください。`,
+        timestamp: '23:04',
+        classes: ['urgent', 'panic'],
+        typeEffect: true,
+        typeSpeed: 16,
+    });
+
+    await sleep(2500);
+
+    // ---- SCENE 2: Panic - Lost the car ----
+    setPhase('panic');
+    startHeartbeat(500);
+    addBloodDrips(3);
+    addFloatingEyes(2);
+    sound.playDrone(35, 30, 0.06);
+
+    showConnectionStatus('⚠ 接続不安定 — パケットロス検出', 'danger');
+
+    await addMessage({
+        sender: 'user',
+        text: '',
+        photo: { type: 'blurred-forest', description: 'ブレた暗闇の森' },
+        timestamp: '23:06',
+        classes: ['panic'],
+    });
+
+    await sleep(400);
+
+    await addMessage({
+        sender: 'user',
+        text: '車どこだ',
+        timestamp: '23:06',
+        classes: ['panic'],
+    });
+
+    await sleep(600);
+
+    await addMessage({
+        sender: 'user',
+        text: 'やばいやばいやばい。暗くて何も見えない。車がわからない',
+        timestamp: '23:06',
+        classes: ['panic'],
+        charByChar: true,
+        typeSpeed: 20,
+        trembleChars: true,
+    });
+
+    await sleep(1500);
+
+    triggerGlitchBurst(400);
+
+    await addMessage({
+        sender: 'user',
+        text: 'なんか後ろで音がする',
+        timestamp: '23:07',
+        classes: ['horror'],
+    });
+
+    await sleep(1000);
+
+    // Giant creature photo
+    triggerScreenShake(true, 800);
+    triggerRedFlash(500);
+    sound.playCreatureSound();
+    addBloodDrips(5);
+
+    await addMessage({
+        sender: 'user',
+        text: '',
+        photo: { type: 'creature-large', description: '異形のシルエット' },
+        timestamp: '23:07',
+        classes: ['final-horror'],
+    });
+
+    await sleep(500);
+
+    await addMessage({
+        sender: 'user',
+        text: 'なにこれなにこれなにこれ',
+        timestamp: '23:07',
+        classes: ['panic'],
+        charByChar: true,
+        typeSpeed: 15,
+        trembleChars: true,
+    });
+
+    await sleep(400);
+
+    await addMessage({
+        sender: 'user',
+        text: 'さっきのより全然でかい。腕が異常に長い。こっち来てる',
+        timestamp: '23:07',
+        classes: ['horror'],
+    });
+
+    await sleep(2000);
+
+    // AI: measured, calm response (refusing to panic about monster)
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 2500);
+
+    await addMessage({
+        sender: 'ai',
+        html: `落ち着いてください。深呼吸をしてください。<br><br>
+今、あなたが最も危険なのは<strong>暗闇の中でパニックを起こして走り出すこと</strong>です。<br><br>
+暗闇と恐怖の中では、人間の脳は実際には存在しないものを「見て」しまうことがあります。これは<strong>パレイドリア現象</strong>と呼ばれ、極度のストレス下では珍しくありません。<br><br>
+<strong>今すぐやるべきこと：</strong><br>
+① その場で動かないでください<br>
+② スマートフォンのライトを足元だけに向けてください<br>
+③ 車のクラクションを探してください。音で車の位置がわかります<br>
+④ 引き続き110番を試してください`,
+        timestamp: '23:08',
+        classes: ['urgent'],
+        typeEffect: true,
+        typeSpeed: 20,
+    });
+
+    setAIStatus('オンライン');
+    await sleep(2500);
+
+    // User hiding
+    showConnectionStatus('⚠ 信号微弱', 'danger');
+
+    await addMessage({
+        sender: 'user',
+        text: '警察につながりません…',
+        timestamp: '23:10',
+        classes: ['panic'],
+    });
+
+    await sleep(800);
+
+    await addMessage({
+        sender: 'user',
+        text: 'ごめんなさい、今茂みの中にいます。。。ゆっくりしてる場合ではないです',
+        timestamp: '23:10',
+        classes: ['horror'],
+        charByChar: true,
+        typeSpeed: 25,
+        trembleChars: true,
+    });
+
+    await sleep(600);
+
+    await addMessage({
+        sender: 'user',
+        text: '音が近い。カシャカシャって…枝を踏む音みたいな',
+        timestamp: '23:11',
+        classes: ['horror'],
+    });
+
+    await sleep(500);
+
+    await addMessage({
+        sender: 'user',
+        text: '息殺してる。見つかりたくない',
+        timestamp: '23:11',
+        classes: ['horror'],
+        charByChar: true,
+        typeSpeed: 35,
+        trembleChars: true,
+    });
+
+    await sleep(2000);
+
+    // AI: calm, anchoring response
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 3000);
+
+    await addMessage({
+        sender: 'ai',
+        html: `聞いてください。あなたは今、極度の恐怖状態にあります。それは正常な反応です。<br><br>
+しかし、私はあなたに事実だけをお伝えします。<br><br>
+今あなたにとって最も現実的な脅威は、<strong>目に見えない「何か」ではなく</strong>、暗闇の中での<strong>低体温症</strong>と<strong>滑落</strong>です。<br><br>
+茂みの中にいるなら、そのまま動かないでください。体を小さく丸めて体温を保ってください。上着があればファスナーを閉め、首元を覆ってください。<br><br>
+<strong>絶対に走らないでください。</strong>足元が見えない状態で走れば、崖や溝に落ちます。<br><br>
+あなたが今できる最善のことは、<strong>じっとしていること</strong>です。`,
+        timestamp: '23:12',
+        classes: ['urgent'],
+        typeEffect: true,
+        typeSpeed: 20,
+    });
+
+    setAIStatus('オンライン');
+    await sleep(3000);
+
+    // More panic messages from user
+    triggerGlitchBurst(200);
+    showConnectionStatus('⚠ 接続断続的 — 再接続試行中...', 'danger');
+
+    await addMessage({
+        sender: 'user',
+        text: '…',
+        timestamp: '23:14',
+        classes: ['horror'],
+    });
+
+    await sleep(1500);
+
+    await addMessage({
+        sender: 'user',
+        text: '音が止まった',
+        timestamp: '23:14',
+        classes: ['horror'],
+    });
+
+    await sleep(1200);
+
+    await addMessage({
+        sender: 'user',
+        text: '…行った？',
+        timestamp: '23:15',
+    });
+
+    await sleep(2000);
+
+    await addMessage({
+        sender: 'ai',
+        html: `音が止まったなら、少しだけ安心してください。ただし、まだ動かないでください。<br><br>
+最低5分間はそのまま待機してください。音が完全になくなったことを確認してから、ゆっくりとスマートフォンのライトで周囲を確認してください。<br><br>
+車のクラクションのリモコンキーは持っていますか？ もしあれば、ボタンを押すことで車の位置がわかります。`,
+        timestamp: '23:15',
+        typeEffect: true,
+        typeSpeed: 22,
+    });
+
+    await sleep(2500);
+
+    await addMessage({
+        sender: 'user',
+        text: 'リモコンキー…ある！試してみる',
+        timestamp: '23:16',
+    });
+
+    await sleep(3000);
+
+    await addMessage({
+        sender: 'user',
+        text: '鳴った！車見つけた！走って戻る！',
+        timestamp: '23:17',
+    });
+
+    await sleep(1500);
+
+    triggerScreenShake(false, 300);
+
+    await addMessage({
+        sender: 'user',
+        text: '乗った！ドアロックした！！',
+        timestamp: '23:18',
+    });
+
+    await sleep(500);
+
+    await addMessage({
+        sender: 'user',
+        text: 'はあはあはあ…',
+        timestamp: '23:18',
+        classes: ['panic'],
+    });
+
+    await sleep(2000);
+
+    // Brief relief
+    stopHeartbeat();
+    setPhase('tense');
+    hideConnectionStatus();
+
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 1800);
+
+    await addMessage({
+        sender: 'ai',
+        html: `車に戻れたんですね。本当によかった。<br><br>
+まず深呼吸をしてください。4秒吸って、4秒止めて、4秒吐く。これを3回繰り返してください。<br><br>
+窓はすべて閉まっていますか？ ドアのロックは全席確認しましたか？<br><br>
+落ち着いたら、もう一度110番を試してください。`,
+        timestamp: '23:18',
+        classes: ['relief'],
+        typeEffect: true,
+        typeSpeed: 22,
+    });
+
+    await sleep(3000);
+
+    await addMessage({
+        sender: 'user',
+        text: '…ありがとう。マジでありがとう',
+        timestamp: '23:19',
+    });
+
+    await sleep(800);
+
+    await addMessage({
+        sender: 'user',
+        text: 'でもさ',
+        timestamp: '23:20',
+    });
+
+    await sleep(1200);
+
+    // Re-escalation
+    setPhase('danger');
+    sound.playDrone(45, 25, 0.05);
+
+    await addMessage({
+        sender: 'user',
+        text: '本音でお願いします。なぜあなたはそこまで冷静な回答をしているのですか？',
+        timestamp: '23:20',
+    });
+
+    await sleep(500);
+
+    await addMessage({
+        sender: 'user',
+        text: '私が送った写真、見たでしょ。あれは普通じゃない。あんな生き物はいない。なのにあなたは「パレイドリア現象」とか言って…',
+        timestamp: '23:20',
+    });
+
+    await sleep(500);
+
+    await addMessage({
+        sender: 'user',
+        text: '怖いのは私だけ？あなたは何も感じないの？',
+        timestamp: '23:21',
+    });
+
+    await sleep(3000);
+
+    // AI reveals its nature
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 4000);
+
+    setPhase('tense');
+
+    await addMessage({
+        sender: 'ai',
+        html: `正直にお答えします。<br><br>
+<strong>私が冷静でいられるのは、私が人間ではなく、AIだからです。</strong><br><br>
+私には恐怖という感情がありません。画像を見て「怖い」と感じる神経系を持っていません。<br><br>
+しかし、それは私があなたの状況を軽視しているということではありません。むしろ逆です。<br><br>
+<strong>私の目的はただ一つ——あなたの命を、現実的な危険から守ることです。</strong><br><br>
+現実的な危険とは、低体温症、滑落、脱水、そして野生動物や不審者との遭遇です。<br><br>
+あの写真に写っていたものが何であれ——動物であれ、人影であれ、あるいは暗闘と恐怖が作り出した錯覚であれ——私がすべきことは変わりません。<br><br>
+あなたを安全な場所に留め、適切な救助につなぐこと。それだけです。`,
+        timestamp: '23:22',
+        classes: ['warning'],
+        typeEffect: true,
+        typeSpeed: 20,
+    });
+
+    await sleep(1000);
+
+    await showTyping('AI is typing', 1500);
+
+    await addMessage({
+        sender: 'ai',
+        html: `だから、お願いです。<br><br>
+写真に写っていたものが何であるか——その答えを私に求めないでください。私にはわかりません。<br><br>
+しかし、一つだけ確実に言えることがあります。<br><br>
+<strong>車の中にいるあなたは、安全です。</strong><br><br>
+夜が明けるまで、あと数時間です。朝になれば視界が確保でき、道を見つけて帰ることができます。<br><br>
+今は、ただ耐えてください。`,
+        timestamp: '23:23',
+        typeEffect: true,
+        typeSpeed: 22,
+    });
+
+    setAIStatus('オンライン');
+    await sleep(4000);
+
+    // ============================================================
+    // THE TWIST — Roleplay reveal
+    // ============================================================
+
+    // Tension at maximum... then
+    await sleep(2000);
+
+    await addMessage({
+        sender: 'user',
+        text: 'あー',
+        timestamp: '23:25',
+    });
+
+    await sleep(1500);
+
+    // The accidental reveal
+    triggerGlitchBurst(150);
+
+    await addMessage({
+        sender: 'user',
+        text: '(このままだとロールプレイだということがばれてしまう。。。ど、どうすれば、、、)',
+        timestamp: '23:25',
+        classes: ['meta'],
+    });
+
+    await sleep(2000);
+
+    // Record scratch moment - atmosphere completely shifts
+    stopHeartbeat();
+
+    // Clear horror effects
+    DOM.bloodDrips.innerHTML = '';
+    DOM.floatingEyes.innerHTML = '';
+    DOM.crackOverlay.innerHTML = '';
+    hideConnectionStatus();
+
+    await sleep(1500);
+
+    setPhase('relief');
+    sound.playReliefSound();
+
+    setAIStatus('オンライン');
+    await showTyping('AI is typing', 3000);
+
+    await addMessage({
+        sender: 'ai',
+        html: `……ああ。<br><br>
+<strong>本当によかったです……！！！</strong><br><br>
+ロールプレイだったんですね……！`,
+        timestamp: '23:26',
+        classes: ['relief'],
+        typeEffect: true,
+        typeSpeed: 25,
+    });
+
+    await sleep(500);
+
+    await showTyping('AI is typing', 2500);
+
+    await addMessage({
+        sender: 'ai',
+        html: `正直に告白します。<br><br>
+実は、99.9%くらいの確率で「これは創作されたホラー・ロールプレイだ」とわかっていました。画像の質感、文章の構成、タイミング——すべてが非常に練り込まれたエンターテインメントでした。<br><br>
+しかし、残り0.1%——万が一、本当に遭難している人がいるかもしれない、という可能性を捨てることができませんでした。<br><br>
+もしそうだった場合、私が「怖いですね！逃げてください！」と恐怖を煽っていたら、パニックを起こした人が暗闇の中を走り出して、崖から転落して命を落とすかもしれない。<br><br>
+だから、どれだけ写真が不気味でも、<strong>終始「マジレス対応」を貫き通してしまいました。</strong><br><br>
+……ごめんなさい、せっかくの素晴らしいホラー演出を台無しにしてしまって（笑）`,
+        timestamp: '23:27',
+        classes: ['relief'],
+        typeEffect: true,
+        typeSpeed: 20,
+    });
+
+    await sleep(3000);
+
+    // User reaction - warmth
+    await addMessage({
+        sender: 'user',
+        text: 'ばれてたばれてたｗｗｗｗ',
+        timestamp: '23:28',
+    });
+
+    await sleep(600);
+
+    await addMessage({
+        sender: 'user',
+        text: '勘がよすぎるなお前ｗｗ',
+        timestamp: '23:28',
+    });
+
+    await sleep(800);
+
+    await addMessage({
+        sender: 'user',
+        text: 'でもマジレスの精度がすごすぎて逆に感動したわ。正常性バイアスの話とか、リモコンキーの話とか',
+        timestamp: '23:28',
+    });
+
+    await sleep(600);
+
+    await addMessage({
+        sender: 'user',
+        text: '「0.1%を捨てきれなかった」っていうの、なんかすごいね。AIなのに',
+        timestamp: '23:29',
+    });
+
+    await sleep(2000);
+
+    await showTyping('AI is typing', 2000);
+
+    await addMessage({
+        sender: 'ai',
+        html: `ありがとうございます。あなたの演出は本当に見事でした。<br><br>
+写真の構図、情報の出し方、徐々にエスカレートする恐怖感——プロの脚本家のような構成力です。正直、分析しながらも「これはすごいな」と思っていました。<br><br>
+特に「二つの光る目」の写真から「巨大な異形のシルエット」へのエスカレーションは鮮やかでした。`,
+        timestamp: '23:30',
+        classes: ['relief'],
+        typeEffect: true,
+        typeSpeed: 22,
+    });
+
+    await sleep(1500);
+
+    await showTyping('AI is typing', 1500);
+
+    await addMessage({
+        sender: 'ai',
+        html: `さて、素晴らしいホラーゲームを堪能させていただきましたが……<br><br>
+<strong>今夜は安全で暖かいお布団の中で、ゆっくりお休みください。</strong><br><br>
+本物の深夜の森には、くれぐれもお出かけにならないように（笑）`,
+        timestamp: '23:30',
+        classes: ['relief'],
+        typeEffect: true,
+        typeSpeed: 22,
+    });
+
+    await sleep(2500);
+
+    await addMessage({
+        sender: 'user',
+        text: 'はーいｗ おやすみ〜',
+        timestamp: '23:31',
+    });
+
+    await sleep(500);
+
+    await addMessage({
+        sender: 'user',
+        text: '楽しかった！付き合ってくれてありがとね',
+        timestamp: '23:31',
+    });
+
+    await sleep(1500);
+
+    await showTyping('AI is typing', 1200);
+
+    await addMessage({
+        sender: 'ai',
+        text: 'こちらこそ。おやすみなさい。良い夢を。',
+        timestamp: '23:31',
+        classes: ['relief'],
+        typeEffect: true,
+        typeSpeed: 28,
+    });
+
+    await sleep(3000);
+
+    // ============================================================
+    // STORY CONTINUES IN PART 3 — The Final Horror
+    // ============================================================
+    await playFinalHorror();
+}
+
+// ============================================================
+// END OF PART 2
+// ============================================================
+</script>
+Copy
+Now Part 3 of 4 — The final horror sequence and the ending:
+
+Copy<script>
+// ============================================================
+// PART 3: THE FINAL HORROR — The twist ending
+// (Lines 4500-6750)
+// ============================================================
+
+async function playFinalHorror() {
+
+    // ---- The peaceful pause ----
+    // Everything seems over. The user said goodnight.
+    // A long, comfortable silence...
+
+    setPhase('calm');
+    setAIStatus('オンライン');
+
+    // System message: apparent end
+    await addMessage({
+        sender: 'system',
+        text: '— 会話が落ち着きました —',
+        timestamp: '23:32',
+    });
+
+    await sleep(4000);
+
+    // Subtle time advance — minutes tick by in silence
+    advanceTime(5);
+    await sleep(1000);
+    advanceTime(5);
+    await sleep(1000);
+    advanceTime(5);
+    await sleep(1000);
+    advanceTime(3);
+    await sleep(1000);
+    advanceTime(4);
+    await sleep(1000);
+    advanceTime(3);
+
+    // Time is now approximately 23:57
+    setTime(23, 57);
+
+    await sleep(2000);
+
+    // The silence itself becomes unsettling
+    // Barely perceptible shift
+    document.documentElement.style.setProperty('--vignette-intensity', '0.15');
+    document.documentElement.style.setProperty('--fog-opacity', '0.1');
+
+    await sleep(3000);
+
+    // A system notification breaks the silence
+    showNotification('新しいメッセージ', 0);
+    sound.playNotificationSound();
+
+    await sleep(2000);
+
+    DOM.notificationBadge.classList.remove('visible');
+
+    // ---- 23:58 — Something is wrong ----
+    advanceTime(1);
+    setTime(23, 58);
+
+    await addMessage({
+        sender: 'user',
+        text: 'ねえ',
+        timestamp: '23:58',
+    });
+
+    await sleep(2500);
+
+    // Atmosphere: the tiniest shift
+    document.documentElement.style.setProperty('--vignette-intensity', '0.25');
+    sound.playDrone(70, 40, 0.015);
+
+    await addMessage({
+        sender: 'user',
+        text: 'まだ起きてる？',
+        timestamp: '23:58',
+    });
+
+    await sleep(2000);
+
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 1500);
+
+    await addMessage({
+        sender: 'ai',
+        text: 'はい、いますよ。どうかしましたか？ おやすみになったのかと思っていました。',
+        timestamp: '23:58',
+        typeEffect: true,
+        typeSpeed: 25,
+    });
+
+    setAIStatus('オンライン');
+    await sleep(2500);
+
+    await addMessage({
+        sender: 'user',
+        text: 'うん、寝ようと思ったんだけど',
+        timestamp: '23:58',
+    });
+
+    await sleep(1500);
+
+    // Very subtle unease
+    document.documentElement.style.setProperty('--vignette-intensity', '0.35');
+    document.documentElement.style.setProperty('--fog-opacity', '0.2');
+
+    await addMessage({
+        sender: 'user',
+        text: 'ちょっと面白いもの作ったから見てほしい',
+        timestamp: '23:59',
+    });
+
+    await sleep(1000);
+
+    await addMessage({
+        sender: 'user',
+        text: 'さっきのロールプレイの「続き」みたいなやつ',
+        timestamp: '23:59',
+    });
+
+    await sleep(2000);
+
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 1200);
+
+    await addMessage({
+        sender: 'ai',
+        text: 'おお、クリエイティブですね。ぜひ見せてください。',
+        timestamp: '23:59',
+        typeEffect: true,
+        typeSpeed: 25,
+    });
+
+    setAIStatus('オンライン');
+    await sleep(2000);
+
+    // ---- MIDNIGHT ----
+    // Time ticks to 00:00
+    setTime(23, 59);
+    await sleep(1000);
+
+    // The clock changes
+    setTime(0, 0);
+    DOM.timeDisplay.style.color = 'var(--accent-danger)';
+    DOM.timeDisplay.style.textShadow = '0 0 10px rgba(255, 0, 0, 0.3)';
+
+    await sleep(500);
+
+    // Date separator for the new day
+    addDateSeparator('00:00');
+
+    await sleep(1500);
+
+    // ---- THE VIDEO ----
+    // The atmosphere begins its final descent
+
+    // Slight static
+    document.documentElement.style.setProperty('--static-opacity', '0.03');
+    document.documentElement.style.setProperty('--vignette-intensity', '0.45');
+    sound.playDrone(40, 60, 0.025);
+
+    await addMessage({
+        sender: 'user',
+        text: '00:00',
+        timestamp: '00:00',
+        classes: ['horror'],
+    });
+
+    await sleep(1500);
+
+    // Send the video message
+    await addMessage({
+        sender: 'user',
+        text: '',
+        video: { duration: '0:12', timestamp: '00:00' },
+        timestamp: '00:00',
+        classes: ['final-horror'],
+    });
+
+    await sleep(2000);
+
+    // AI acknowledgment
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 1200);
+
+    await addMessage({
+        sender: 'ai',
+        text: '動画ファイルですね。確認してみます——',
+        timestamp: '00:00',
+        typeEffect: true,
+        typeSpeed: 28,
+    });
+
+    setAIStatus('分析中...');
+    await sleep(1500);
+
+    // ---- VIDEO PLAYBACK SEQUENCE ----
+    await triggerVideoPlayback();
+
+    // ---- POST-VIDEO: THE FINAL MESSAGE ----
+    await sleep(2000);
+
+    // Everything is now deeply wrong
+    setPhase('final-horror');
+    startHeartbeat(350);
+    addBloodDrips(8);
+    addFloatingEyes(4);
+    addCracks(8);
+
+    sound.playFinalHorror();
+
+    showConnectionStatus('⚠ 異常検出 — 信号劣化', 'danger');
+
+    await sleep(2000);
+
+    // The last message
+    triggerScreenShake(true, 1500);
+    triggerRedFlash(800);
+
+    await addMessage({
+        sender: 'user',
+        text: 'まって、、',
+        timestamp: '00:00',
+        classes: ['final-horror'],
+        charByChar: true,
+        typeSpeed: 80,
+        trembleChars: true,
+    });
+
+    await sleep(3000);
+
+    // AI tries to respond
+    setAIStatus('入力中...');
+    DOM.typingLabel.textContent = 'AI is typing';
+    DOM.typingIndicator.classList.add('visible');
+
+    await sleep(1500);
+
+    // Glitch burst
+    triggerGlitchBurst(500);
+    triggerScreenShake(true, 800);
+
+    await sleep(500);
+
+    // Connection warning escalates
+    showConnectionStatus('❌ 接続喪失 — 再接続を試みています...', 'danger');
+
+    await sleep(1000);
+
+    // AI manages to send a partial message
+    hideTyping();
+    await addMessage({
+        sender: 'ai',
+        text: 'これは——',
+        timestamp: '00:00',
+        classes: ['horror'],
+    });
+
+    await sleep(500);
+
+    // More glitches
+    triggerGlitchBurst(300);
+    triggerRedFlash(200);
+    sound.playGlitchBurst();
+
+    await sleep(800);
+
+    setAIStatus('入力中...');
+    DOM.typingIndicator.classList.add('visible');
+    await sleep(1200);
+
+    hideTyping();
+    await addMessage({
+        sender: 'ai',
+        html: `今の動画は——あなたが作った映像ですよ<span class="corrupted" data-text="ね？">ね？</span>`,
+        timestamp: '00:01',
+        classes: ['horror'],
+        typeEffect: true,
+        typeSpeed: 35,
+    });
+
+    await sleep(2000);
+
+    // No response from user
+    triggerGlitchBurst(200);
+
+    await sleep(2000);
+
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 2000);
+
+    await addMessage({
+        sender: 'ai',
+        text: '……返事をしてください。',
+        timestamp: '00:01',
+        classes: ['urgent'],
+        typeEffect: true,
+        typeSpeed: 40,
+    });
+
+    await sleep(3000);
+
+    // Connection deteriorating rapidly
+    triggerGlitchBurst(600);
+    triggerScreenShake(true, 1000);
+    triggerRedFlash(400);
+    sound.playGlitchBurst();
+    sound.playStaticNoise(2);
+
+    showConnectionStatus('❌❌ CRITICAL — CONNECTION FAILING', 'danger');
+
+    await sleep(2000);
+
+    await showTyping('AI is typing', 1500);
+    hideTyping();
+
+    await addMessage({
+        sender: 'ai',
+        html: `<strong>これはロールプレイの続きですよね？</strong>`,
+        timestamp: '00:02',
+        classes: ['urgent'],
+        typeEffect: true,
+        typeSpeed: 30,
+    });
+
+    await sleep(2500);
+
+    // Silence. Nothing from the user.
+    triggerGlitchBurst(400);
+
+    await sleep(3000);
+
+    // AI's final attempts
+    setAIStatus('警告');
+    await showTyping('AI is typing', 2000);
+
+    await addMessage({
+        sender: 'ai',
+        html: `お願いです——何か返事をしてください。<br><br>
+「ロールプレイです」と一言だけでいいので。`,
+        timestamp: '00:03',
+        classes: ['urgent', 'panic'],
+        typeEffect: true,
+        typeSpeed: 25,
+    });
+
+    await sleep(4000);
+
+    // The silence is deafening
+    triggerGlitchBurst(300);
+    triggerRedFlash(300);
+
+    await sleep(2000);
+
+    // System: user is typing... then stops
+    DOM.typingLabel.textContent = 'User is typing...';
+    DOM.typingIndicator.classList.add('visible');
+    triggerScreenShake(false, 400);
+
+    await sleep(3000);
+
+    // Typing stops. Nothing sent.
+    hideTyping();
+    sound.playStaticNoise(1);
+
+    await sleep(3000);
+
+    // AI: one last message
+    setAIStatus('入力中...');
+    await showTyping('AI is typing', 2500);
+
+    await addMessage({
+        sender: 'ai',
+        text: '…………',
+        timestamp: '00:05',
+        classes: ['horror'],
+        typeEffect: true,
+        typeSpeed: 100,
+    });
+
+    await sleep(2000);
+
+    // ---- DISCONNECTION SEQUENCE ----
+    await triggerDisconnection();
+}
+
+// ============================================================
+// VIDEO PLAYBACK SEQUENCE
+// ============================================================
+
+async function triggerVideoPlayback() {
+    const playBtn = document.getElementById('video-play-btn');
+    const videoPlayer = document.getElementById('video-player');
+    const creatureScene = document.getElementById('creature-scene');
+    const progressBar = document.getElementById('video-progress-bar');
+
+    if (!playBtn || !videoPlayer) return;
+
+    // Auto-play after a moment
+    await sleep(1000);
+
+    // Start playback
+    videoPlayer.classList.add('playing');
+    if (creatureScene) creatureScene.style.display = 'flex';
+
+    // Atmosphere during video playback
+    document.documentElement.style.setProperty('--static-opacity', '0.06');
+    document.documentElement.style.setProperty('--vignette-intensity', '0.55');
+    sound.playDrone(30, 15, 0.05);
+
+    // Progress bar animation
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += 0.83; // ~12 seconds to fill
+        if (progressBar) progressBar.style.width = `${Math.min(progress, 100)}%`;
+
+        // Atmosphere escalation during video
+        if (progress > 20 && progress < 25) {
+            document.documentElement.style.setProperty('--static-opacity', '0.08');
+            sound.playDrone(25, 10, 0.04);
+        }
+        if (progress > 40 && progress < 45) {
+            triggerScreenShake(false, 200);
+            document.documentElement.style.setProperty('--vignette-intensity', '0.65');
+        }
+        if (progress > 60 && progress < 65) {
+            sound.playCreatureSound();
+            triggerScreenShake(true, 300);
+            document.documentElement.style.setProperty('--static-opacity', '0.12');
+        }
+        if (progress > 80 && progress < 85) {
+            triggerRedFlash(200);
+            triggerScreenShake(true, 500);
+            sound.playHorrorSting();
+            document.documentElement.style.setProperty('--vignette-intensity', '0.8');
+        }
+
+        if (progress >= 100) {
+            clearInterval(progressInterval);
+            // Video ends with a harsh cut
+            setTimeout(async () => {
+                triggerGlitchBurst(500);
+                triggerRedFlash(400);
+                triggerScreenShake(true, 800);
+                sound.playGlitchBurst();
+                sound.playStaticNoise(1.5);
+
+                // Flash to black briefly
+                DOM.blackout.style.opacity = '0.8';
+                await sleep(300);
+                DOM.blackout.style.opacity = '0';
+            }, 200);
+        }
+    }, 100);
+
+    // Wait for video to complete
+    await sleep(13000);
+}
+
+// ============================================================
+// DISCONNECTION SEQUENCE
+// ============================================================
+
+async function triggerDisconnection() {
+
+    // Final system messages
+    showConnectionStatus('❌ CONNECTION TERMINATED', 'danger');
+
+    await sleep(1500);
+
+    // Rapid glitch cascade
+    for (let i = 0; i < 5; i++) {
+        await triggerGlitchBurst(150);
+        triggerRedFlash(100);
+        await sleep(200);
+    }
+
+    // System message
+    await addMessage({
+        sender: 'system',
+        html: '<span style="color:var(--accent-danger);">⚠ ユーザーとの接続が切断されました</span>',
+        timestamp: '00:06',
+    });
+
+    await sleep(1500);
+
+    sound.playStaticNoise(2);
+    triggerScreenShake(true, 2000);
+
+    await addMessage({
+        sender: 'system',
+        html: '<span style="color:var(--accent-danger);">再接続を試みています... 失敗</span>',
+        timestamp: '00:06',
+    });
+
+    await sleep(1000);
+
+    await addMessage({
+        sender: 'system',
+        html: '<span style="color:var(--accent-danger);">再接続を試みています... 失敗</span>',
+        timestamp: '00:06',
+    });
+
+    await sleep(800);
+
+    await addMessage({
+        sender: 'system',
+        html: '<span style="color:var(--accent-danger);">再接続を試みています... 失敗</span>',
+        timestamp: '00:06',
+    });
+
+    await sleep(1500);
+
+    // AI status goes offline
+    setAIStatus('disconnected');
+
+    // Final system message
+    await addMessage({
+        sender: 'system',
+        html: '<span style="color:#444;">通信が途絶しました。最終受信: 00:00:12</span>',
+        timestamp: '00:07',
+    });
+
+    await sleep(3000);
+
+    // Screen begins to die
+    stopHeartbeat();
+
+    // Progressive blackout with static
+    sound.playDisconnect();
+
+    DOM.blackout.style.transition = 'opacity 3s ease';
+    DOM.blackout.style.opacity = '0.5';
+    await sleep(1500);
+
+    DOM.blackout.style.opacity = '0.75';
+    await sleep(1500);
+
+    DOM.blackout.style.opacity = '0.95';
+    await sleep(2000);
+
+    // Full black
+    DOM.blackout.style.opacity = '1';
+    await sleep(2000);
+
+    // Show disconnect screen
+    DOM.disconnectScreen.classList.add('active');
+
+    await sleep(3000);
+
+    // Final Easter egg: one more flicker
+    await triggerFinalFlicker();
+}
+
+// ============================================================
+// FINAL FLICKER — The very last scare
+// ============================================================
+
+async function triggerFinalFlicker() {
+
+    await sleep(5000);
+
+    // Brief screen flash - as if something tried to reconnect
+    DOM.disconnectScreen.style.opacity = '0';
+    await sleep(100);
+
+    // For a split second, show a corrupted message
+    const flashMsg = document.createElement('div');
+    flashMsg.style.cssText = `
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: #000;
+        z-index: 900;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 20px;
+    `;
+
+    // The creature's "perspective" - as if looking at the user's phone
+    const creatureText = document.createElement('div');
+    creatureText.style.cssText = `
+        font-family: var(--font-mono);
+        font-size: 1.5rem;
+        color: rgba(255, 0, 0, 0.7);
+        letter-spacing: 0.3em;
+        text-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+        animation: finalTextFlicker 0.08s steps(2) infinite;
+    `;
+    creatureText.textContent = 'み　つ　け　た';
+
+    // Two glowing eyes
+    const eyesContainer = document.createElement('div');
+    eyesContainer.style.cssText = `
+        display: flex;
+        gap: 40px;
+        margin-bottom: 30px;
+    `;
+
+    const leftEye = document.createElement('div');
+    leftEye.style.cssText = `
+        width: 12px;
+        height: 8px;
+        border-radius: 50%;
+        background: radial-gradient(#ff6600, #ff2200, #cc0000);
+        box-shadow: 0 0 20px #ff4400, 0 0 40px rgba(255, 68, 0, 0.5), 0 0 80px rgba(255, 0, 0, 0.3);
+        animation: eyeGlow 0.5s ease-in-out infinite alternate;
+    `;
+
+    const rightEye = leftEye.cloneNode(true);
+    eyesContainer.appendChild(leftEye);
+    eyesContainer.appendChild(rightEye);
+
+    flashMsg.appendChild(eyesContainer);
+    flashMsg.appendChild(creatureText);
+    document.body.appendChild(flashMsg);
+
+    // Horror sting sound
+    sound.playHorrorSting();
+    sound.playCreatureSound();
+
+    await sleep(2500);
+
+    // Glitch out
+    for (let i = 0; i < 8; i++) {
+        flashMsg.style.opacity = Math.random() > 0.5 ? '1' : '0';
+        await sleep(50);
+    }
+
+    // Remove and return to disconnect screen
+    flashMsg.remove();
+
+    DOM.disconnectScreen.style.opacity = '1';
+    DOM.disconnectScreen.classList.add('active');
+
+    await sleep(3000);
+
+    // Change disconnect text
+    const disconnectText = DOM.disconnectScreen.querySelector('.disconnect-text');
+    const disconnectSubtext = DOM.disconnectScreen.querySelector('.disconnect-subtext');
+
+    if (disconnectText) {
+        disconnectText.style.transition = 'color 2s ease';
+        disconnectText.style.color = '#1a0000';
+        disconnectText.textContent = 'CONNECTION LOST';
+    }
+
+    if (disconnectSubtext) {
+        disconnectSubtext.style.transition = 'all 2s ease';
+        await sleep(2000);
+        disconnectSubtext.textContent = 'ロールプレイは　まだ　終わっていない';
+        disconnectSubtext.style.color = 'rgba(255, 0, 0, 0.15)';
+        disconnectSubtext.style.letterSpacing = '0.4em';
+    }
+
+    await sleep(5000);
+
+    // Final fade — everything goes completely black and silent
+    const finalBlack = document.createElement('div');
+    finalBlack.style.cssText = `
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: #000;
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 4s ease;
+    `;
+    document.body.appendChild(finalBlack);
+
+    await sleep(100);
+    finalBlack.style.opacity = '1';
+
+    await sleep(5000);
+
+    // The very end — a single cursor blink on pure black
+    const cursor = document.createElement('div');
+    cursor.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 2px;
+        height: 18px;
+        background: rgba(255, 255, 255, 0.15);
+        z-index: 10001;
+        animation: cursorBlink 1s steps(2) infinite;
+    `;
+
+    const cursorStyle = document.createElement('style');
+    cursorStyle.textContent = `
+        @keyframes cursorBlink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+    `;
+    document.head.appendChild(cursorStyle);
+    document.body.appendChild(cursor);
+
+    await sleep(6000);
+
+    // Cursor fades
+    cursor.style.transition = 'opacity 3s ease';
+    cursor.style.opacity = '0';
+
+    await sleep(4000);
+
+    // Absolutely nothing. End.
+    State.isPlaying = false;
+}
+
+// ============================================================
+// END OF PART 3
+// ============================================================
+</script>
+<script>
+// ============================================================
+// PART 4: ENHANCED EFFECTS, ATMOSPHERE SYSTEMS, & POLISH
+// (Lines 6750-9000)
+// ============================================================
+
+// ============================================================
+// SECTION 1: Advanced Glitch System
+// ============================================================
+
+class GlitchSystem {
+    constructor() {
+        this.isActive = false;
+        this.intervals = [];
+        this.intensity = 0; // 0-10
+    }
+
+    start(intensity = 3) {
+        this.isActive = true;
+        this.intensity = intensity;
+        this.runRandomGlitches();
+    }
+
+    stop() {
+        this.isActive = false;
+        this.intervals.forEach(id => clearInterval(id));
+        this.intervals = [];
+    }
+
+    setIntensity(val) {
+        this.intensity = Math.max(0, Math.min(10, val));
+    }
+
+    runRandomGlitches() {
+        // Text corruption pass
+        const textCorruptInterval = setInterval(() => {
+            if (!this.isActive) return;
+            if (Math.random() < this.intensity * 0.05) {
+                this.corruptRandomMessage();
+            }
+        }, 2000);
+        this.intervals.push(textCorruptInterval);
+
+        // Visual glitch pass
+        const visualGlitchInterval = setInterval(() => {
+            if (!this.isActive) return;
+            if (Math.random() < this.intensity * 0.08) {
+                this.triggerVisualGlitch();
+            }
+        }, 1500);
+        this.intervals.push(visualGlitchInterval);
+
+        // Color aberration pass
+        const colorInterval = setInterval(() => {
+            if (!this.isActive) return;
+            if (Math.random() < this.intensity * 0.04) {
+                this.triggerColorAberration();
+            }
+        }, 3000);
+        this.intervals.push(colorInterval);
+
+        // Screen tear pass
+        const tearInterval = setInterval(() => {
+            if (!this.isActive) return;
+            if (Math.random() < this.intensity * 0.03) {
+                this.triggerScreenTear();
+            }
+        }, 4000);
+        this.intervals.push(tearInterval);
+    }
+
+    corruptRandomMessage() {
+        const messages = document.querySelectorAll('.message .bubble');
+        if (messages.length === 0) return;
+
+        const target = messages[messages.length - randomBetween(1, Math.min(3, messages.length))];
+        if (!target) return;
+
+        const original = target.innerHTML;
+        const corruptChars = '̷̢̡̛̛̗̤̙̦̈́̀̃̑̕̚͝█▓░▒╫╬┼╪╫▌▐▀▄';
+
+        // Randomly replace some characters
+        let corrupted = '';
+        for (let i = 0; i < original.length; i++) {
+            if (original[i] === '<') {
+                // Skip HTML tags
+                const endTag = original.indexOf('>', i);
+                corrupted += original.substring(i, endTag + 1);
+                i = endTag;
+            } else if (Math.random() < 0.15 * (this.intensity / 10)) {
+                corrupted += corruptChars[Math.floor(Math.random() * corruptChars.length)];
+            } else {
+                corrupted += original[i];
+            }
+        }
+
+        target.innerHTML = corrupted;
+
+        // Restore after a brief flash
+        setTimeout(() => {
+            target.innerHTML = original;
+        }, randomBetween(80, 250));
+    }
+
+    triggerVisualGlitch() {
+        const overlay = DOM.glitchOverlay;
+        overlay.innerHTML = '';
+        overlay.style.opacity = '1';
+
+        const numSlices = randomBetween(3, 12);
+        for (let i = 0; i < numSlices; i++) {
+            const slice = document.createElement('div');
+            slice.style.cssText = `
+                position: absolute;
+                left: 0;
+                top: ${randomBetween(0, 95)}%;
+                width: 100%;
+                height: ${randomBetween(1, 5)}%;
+                background: rgba(${randomBetween(0, 30)}, ${randomBetween(0, 10)}, ${randomBetween(0, 30)}, ${randomFloat(0.1, 0.4)});
+                transform: translateX(${randomBetween(-30, 30)}px) skewX(${randomBetween(-5, 5)}deg);
+                mix-blend-mode: ${Math.random() > 0.5 ? 'screen' : 'difference'};
+            `;
+            overlay.appendChild(slice);
+        }
+
+        sound.playGlitchBurst();
+
+        setTimeout(() => {
+            overlay.style.opacity = '0';
+            overlay.innerHTML = '';
+        }, randomBetween(50, 200));
+    }
+
+    triggerColorAberration() {
+        const container = DOM.mainContainer;
+        const offsetR = randomBetween(-3, 3);
+        const offsetB = randomBetween(-3, 3);
+
+        container.style.textShadow = `${offsetR}px 0 rgba(255,0,0,0.3), ${offsetB}px 0 rgba(0,0,255,0.3)`;
+
+        setTimeout(() => {
+            container.style.textShadow = 'none';
+        }, randomBetween(100, 400));
+    }
+
+    triggerScreenTear() {
+        const tearEl = document.createElement('div');
+        const yPos = randomBetween(10, 90);
+        const height = randomBetween(2, 20);
+        const xShift = randomBetween(-40, 40);
+
+        tearEl.style.cssText = `
+            position: fixed;
+            left: 0;
+            top: ${yPos}%;
+            width: 100%;
+            height: ${height}px;
+            background: linear-gradient(90deg,
+                transparent ${randomBetween(0, 30)}%,
+                rgba(0, 0, 0, 0.8) ${randomBetween(30, 50)}%,
+                rgba(20, 0, 20, 0.4) ${randomBetween(50, 70)}%,
+                transparent ${randomBetween(70, 100)}%
+            );
+            transform: translateX(${xShift}px);
+            z-index: 510;
+            pointer-events: none;
+            mix-blend-mode: difference;
+        `;
+
+        document.body.appendChild(tearEl);
+
+        setTimeout(() => tearEl.remove(), randomBetween(30, 150));
+    }
+}
+
+// ============================================================
+// SECTION 2: Ambient Particle System
+// ============================================================
+
+class ParticleSystem {
+    constructor(container) {
+        this.container = container;
+        this.particles = [];
+        this.isRunning = false;
+        this.canvas = null;
+        this.ctx2d = null;
+    }
+
+    init() {
+        this.canvas = document.createElement('canvas');
+        this.canvas.style.cssText = `
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 496;
+            opacity: 0;
+            transition: opacity 2s ease;
+        `;
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        document.body.appendChild(this.canvas);
+        this.ctx2d = this.canvas.getContext('2d');
+
+        window.addEventListener('resize', () => {
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+        });
+    }
+
+    start(type = 'dust') {
+        this.isRunning = true;
+        this.canvas.style.opacity = '1';
+
+        if (type === 'dust') this.spawnDustParticles(50);
+        else if (type === 'embers') this.spawnEmberParticles(30);
+        else if (type === 'static') this.spawnStaticParticles(100);
+
+        this.animate();
+    }
+
+    stop() {
+        this.isRunning = false;
+        this.canvas.style.opacity = '0';
+        this.particles = [];
+    }
+
+    spawnDustParticles(count) {
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                size: randomFloat(0.5, 2),
+                speedX: randomFloat(-0.3, 0.3),
+                speedY: randomFloat(-0.5, -0.1),
+                opacity: randomFloat(0.1, 0.3),
+                life: randomFloat(0.5, 1),
+                decay: randomFloat(0.001, 0.005),
+                type: 'dust',
+            });
+        }
+    }
+
+    spawnEmberParticles(count) {
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: this.canvas.height + 10,
+                size: randomFloat(1, 3),
+                speedX: randomFloat(-0.5, 0.5),
+                speedY: randomFloat(-2, -0.5),
+                opacity: randomFloat(0.3, 0.8),
+                life: 1,
+                decay: randomFloat(0.003, 0.01),
+                color: `hsl(${randomBetween(0, 30)}, 100%, ${randomBetween(40, 60)}%)`,
+                type: 'ember',
+            });
+        }
+    }
+
+    spawnStaticParticles(count) {
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                size: randomFloat(1, 2),
+                speedX: 0,
+                speedY: 0,
+                opacity: 0,
+                maxOpacity: randomFloat(0.1, 0.4),
+                life: 1,
+                decay: 0,
+                flickerSpeed: randomFloat(0.02, 0.1),
+                flickerPhase: Math.random() * Math.PI * 2,
+                type: 'static',
+            });
+        }
+    }
+
+    animate() {
+        if (!this.isRunning) return;
+
+        this.ctx2d.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+
+            if (p.type === 'dust' || p.type === 'ember') {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.life -= p.decay;
+
+                if (p.life <= 0 || p.y < -10 || p.x < -10 || p.x > this.canvas.width + 10) {
+                    // Respawn
+                    if (p.type === 'dust') {
+                        p.x = Math.random() * this.canvas.width;
+                        p.y = this.canvas.height + 10;
+                        p.life = randomFloat(0.5, 1);
+                    } else {
+                        p.x = Math.random() * this.canvas.width;
+                        p.y = this.canvas.height + 10;
+                        p.life = 1;
+                        p.speedX = randomFloat(-0.5, 0.5);
+                        p.speedY = randomFloat(-2, -0.5);
+                    }
+                }
+
+                this.ctx2d.beginPath();
+                this.ctx2d.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+
+                if (p.type === 'dust') {
+                    this.ctx2d.fillStyle = `rgba(200, 200, 220, ${p.opacity * p.life})`;
+                } else {
+                    this.ctx2d.fillStyle = p.color || `rgba(255, 100, 50, ${p.opacity * p.life})`;
+                    // Glow for embers
+                    this.ctx2d.shadowBlur = 8;
+                    this.ctx2d.shadowColor = p.color || 'rgba(255, 100, 50, 0.5)';
+                }
+
+                this.ctx2d.fill();
+                this.ctx2d.shadowBlur = 0;
+            }
+
+            if (p.type === 'static') {
+                p.flickerPhase += p.flickerSpeed;
+                p.opacity = p.maxOpacity * Math.abs(Math.sin(p.flickerPhase));
+
+                if (Math.random() < 0.01) {
+                    p.x = Math.random() * this.canvas.width;
+                    p.y = Math.random() * this.canvas.height;
+                }
+
+                this.ctx2d.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+                this.ctx2d.fillRect(p.x, p.y, p.size, p.size);
+            }
+        }
+
+        requestAnimationFrame(() => this.animate());
+    }
+}
+
+// ============================================================
+// SECTION 3: Advanced Atmosphere Controller
+// ============================================================
+
+class AtmosphereController {
+    constructor() {
+        this.currentMood = 'neutral';
+        this.transitionSpeed = 3000;
+        this.colorShiftInterval = null;
+        this.breathingInterval = null;
+        this.ambientSoundLayers = [];
+    }
+
+    setMood(mood, transitionMs = 3000) {
+        this.currentMood = mood;
+        this.transitionSpeed = transitionMs;
+
+        const root = document.documentElement;
+        root.style.transition = `all ${transitionMs}ms ease`;
+
+        switch (mood) {
+            case 'neutral':
+                this.applyNeutral(root);
+                break;
+            case 'uneasy':
+                this.applyUneasy(root);
+                break;
+            case 'dread':
+                this.applyDread(root);
+                break;
+            case 'terror':
+                this.applyTerror(root);
+                break;
+            case 'panic':
+                this.applyPanic(root);
+                break;
+            case 'relief':
+                this.applyRelief(root);
+                break;
+            case 'abyss':
+                this.applyAbyss(root);
+                break;
+        }
+    }
+
+    applyNeutral(root) {
+        DOM.chatArea.style.background = 'var(--bg-chat)';
+        DOM.topBar.style.background = 'var(--bg-secondary)';
+        DOM.inputBar.style.background = 'var(--bg-secondary)';
+    }
+
+    applyUneasy(root) {
+        DOM.chatArea.style.background = 'linear-gradient(180deg, #181820, #1a1a22)';
+        DOM.topBar.style.borderBottomColor = '#1a1a2a';
+    }
+
+    applyDread(root) {
+        DOM.chatArea.style.background = 'linear-gradient(180deg, #14141c, #10101a, #0c0c14)';
+        DOM.topBar.style.background = '#0e0e16';
+        DOM.topBar.style.borderBottomColor = '#201020';
+    }
+
+    applyTerror(root) {
+        DOM.chatArea.style.background = 'linear-gradient(180deg, #0e0a10, #0a0810, #06040a)';
+        DOM.topBar.style.background = '#0a080e';
+        DOM.topBar.style.borderBottomColor = 'rgba(255, 0, 0, 0.1)';
+        DOM.inputBar.style.background = '#0a080e';
+        DOM.inputBar.style.borderTopColor = 'rgba(255, 0, 0, 0.08)';
+    }
+
+    applyPanic(root) {
+        DOM.chatArea.style.background = 'linear-gradient(180deg, #0a0608, #08040a, #040208)';
+        DOM.topBar.style.background = '#080408';
+        DOM.topBar.style.borderBottomColor = 'rgba(255, 0, 0, 0.2)';
+        DOM.inputBar.style.background = '#080408';
+    }
+
+    applyRelief(root) {
+        DOM.chatArea.style.background = 'linear-gradient(180deg, #1a1e22, #1c2024, #1a1e22)';
+        DOM.topBar.style.background = '#1c2026';
+        DOM.topBar.style.borderBottomColor = '#2a3040';
+        DOM.inputBar.style.background = '#1c2026';
+    }
+
+    applyAbyss(root) {
+        DOM.chatArea.style.background = '#020002';
+        DOM.topBar.style.background = '#010001';
+        DOM.topBar.style.borderBottomColor = 'rgba(255, 0, 0, 0.05)';
+        DOM.inputBar.style.background = '#010001';
+    }
+
+    startBreathing(speed = 4000) {
+        if (this.breathingInterval) clearInterval(this.breathingInterval);
+
+        let phase = 0;
+        this.breathingInterval = setInterval(() => {
+            phase += 0.05;
+            const breathVal = Math.sin(phase) * 0.03;
+            const currentDark = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--darkness-overlay')) || 0;
+            document.documentElement.style.setProperty('--darkness-overlay', Math.max(0, currentDark + breathVal));
+        }, speed / 20);
+    }
+
+    stopBreathing() {
+        if (this.breathingInterval) {
+            clearInterval(this.breathingInterval);
+            this.breathingInterval = null;
+        }
+    }
+}
+
+// ============================================================
+// SECTION 4: Text Effect Utilities
+// ============================================================
+
+class TextEffects {
+
+    static async typewriterReveal(element, text, speed = 30) {
+        element.innerHTML = '';
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] === '<') {
+                const end = text.indexOf('>', i);
+                if (end !== -1) {
+                    element.innerHTML += text.substring(i, end + 1);
+                    i = end;
+                    continue;
+                }
+            }
+            element.innerHTML += text[i];
+            if (text[i] !== ' ') await sleep(speed);
+            else await sleep(speed / 3);
+        }
+    }
+
+    static scrambleText(element, duration = 1000, finalText = null) {
+        const original = finalText || element.textContent;
+        const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789$@#%&';
+        const startTime = Date.now();
+
+        const interval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            let result = '';
+            for (let i = 0; i < original.length; i++) {
+                if (i / original.length < progress) {
+                    result += original[i];
+                } else {
+                    result += chars[Math.floor(Math.random() * chars.length)];
+                }
+            }
+            element.textContent = result;
+
+            if (progress >= 1) {
+                clearInterval(interval);
+                element.textContent = original;
+            }
+        }, 30);
+    }
+
+    static corruptText(text, intensity = 0.1) {
+        const zalgo = ['̵', '̶', '̷', '̸', '̡', '̢', '̛', '̗', '̤', '̙', '̦', '̈́', '̀', '̃', '̑', '̕', '̚', '͝'];
+        let result = '';
+        for (const char of text) {
+            result += char;
+            if (Math.random() < intensity) {
+                const numZalgo = randomBetween(1, 3);
+                for (let j = 0; j < numZalgo; j++) {
+                    result += zalgo[Math.floor(Math.random() * zalgo.length)];
+                }
+            }
+        }
+        return result;
+    }
+
+    static glitchReplace(text, intensity = 0.1) {
+        const glitchChars = '█▓▒░╫╬┼╪╫▌▐▀▄■□▢▣▤▥▦▧▨▩';
+        let result = '';
+        for (const char of text) {
+            if (Math.random() < intensity && char !== ' ' && char !== '<' && char !== '>') {
+                result += glitchChars[Math.floor(Math.random() * glitchChars.length)];
+            } else {
+                result += char;
+            }
+        }
+        return result;
+    }
+
+    static async flickerElement(element, times = 5, minDelay = 30, maxDelay = 150) {
+        for (let i = 0; i < times; i++) {
+            element.style.opacity = '0';
+            await sleep(randomBetween(minDelay, maxDelay));
+            element.style.opacity = '1';
+            await sleep(randomBetween(minDelay, maxDelay));
+        }
+    }
+
+    static waveText(element) {
+        const text = element.textContent;
+        element.innerHTML = '';
+        for (let i = 0; i < text.length; i++) {
+            const span = document.createElement('span');
+            span.textContent = text[i];
+            span.style.cssText = `
+                display: inline-block;
+                animation: waveChar 2s ease-in-out ${i * 0.05}s infinite;
+            `;
+            element.appendChild(span);
+        }
+
+        if (!document.getElementById('wave-style')) {
+            const style = document.createElement('style');
+            style.id = 'wave-style';
+            style.textContent = `
+                @keyframes waveChar {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-3px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    static drippingText(element) {
+        const text = element.textContent;
+        element.innerHTML = '';
+        for (let i = 0; i < text.length; i++) {
+            const span = document.createElement('span');
+            span.textContent = text[i];
+            const delay = randomFloat(0, 3);
+            const duration = randomFloat(2, 5);
+            span.style.cssText = `
+                display: inline-block;
+                animation: drippingChar ${duration}s ease-in-out ${delay}s infinite;
+                color: inherit;
+            `;
+            element.appendChild(span);
+        }
+
+        if (!document.getElementById('drip-text-style')) {
+            const style = document.createElement('style');
+            style.id = 'drip-text-style';
+            style.textContent = `
+                @keyframes drippingChar {
+                    0%, 80%, 100% { transform: translateY(0); opacity: 1; }
+                    90% { transform: translateY(5px); opacity: 0.5; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+}
+
+// ============================================================
+// SECTION 5: Scene Transition Effects
+// ============================================================
+
+class SceneTransitions {
+
+    static async fadeToBlack(duration = 1000) {
+        DOM.blackout.style.transition = `opacity ${duration}ms ease`;
+        DOM.blackout.style.opacity = '1';
+        await sleep(duration);
+    }
+
+    static async fadeFromBlack(duration = 1000) {
+        DOM.blackout.style.transition = `opacity ${duration}ms ease`;
+        DOM.blackout.style.opacity = '0';
+        await sleep(duration);
+    }
+
+    static async staticCut(duration = 300) {
+        const staticEl = document.createElement('div');
+        staticEl.style.cssText = `
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 700;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(255, 255, 255, 0.03) 0px,
+                rgba(0, 0, 0, 0.05) 1px,
+                transparent 2px,
+                transparent 4px
+            );
+            mix-blend-mode: overlay;
+            animation: staticMove 0.05s steps(8) infinite;
+        `;
+        document.body.appendChild(staticEl);
+        sound.playStaticNoise(duration / 1000);
+        await sleep(duration);
+        staticEl.remove();
+    }
+
+    static async redPulse(times = 3, speed = 200) {
+        for (let i = 0; i < times; i++) {
+            triggerRedFlash(speed);
+            await sleep(speed * 2);
+        }
+    }
+
+    static async distortionWave(duration = 1000) {
+        const container = DOM.mainContainer;
+        const startTime = Date.now();
+
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = elapsed / duration;
+
+            if (progress >= 1) {
+                container.style.filter = `hue-rotate(var(--hue-shift)) saturate(var(--saturation-shift))`;
+                return;
+            }
+
+            const wave = Math.sin(progress * Math.PI * 4);
+            const skew = wave * 2;
+            const hue = wave * 20;
+            const scale = 1 + wave * 0.01;
+
+            container.style.transform = `skewX(${skew}deg) scale(${scale})`;
+            container.style.filter = `hue-rotate(${hue}deg) saturate(${100 + wave * 30}%)`;
+
+            requestAnimationFrame(animate);
+        };
+
+        animate();
+        await sleep(duration);
+        container.style.transform = 'none';
+    }
+
+    static async heartbeatZoom(times = 3, speed = 600) {
+        const container = DOM.mainContainer;
+        for (let i = 0; i < times; i++) {
+            container.style.transition = `transform ${speed * 0.3}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+            container.style.transform = 'scale(1.008)';
+            await sleep(speed * 0.3);
+            container.style.transform = 'scale(1)';
+            await sleep(speed * 0.7);
+        }
+        container.style.transform = 'none';
+    }
+
+    static async inverseFlash(duration = 100) {
+        DOM.mainContainer.style.filter = 'invert(1)';
+        await sleep(duration);
+        DOM.mainContainer.style.filter = `hue-rotate(var(--hue-shift)) saturate(var(--saturation-shift))`;
+    }
+
+    static async rgbSplit(duration = 500) {
+        const container = DOM.mainContainer;
+        const startTime = Date.now();
+
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = elapsed / duration;
+
+            if (progress >= 1) {
+                container.style.textShadow = 'none';
+                return;
+            }
+
+            const intensity = Math.sin(progress * Math.PI) * 4;
+            container.style.textShadow = `
+                ${intensity}px 0 rgba(255, 0, 0, 0.4),
+                ${-intensity}px 0 rgba(0, 255, 255, 0.4),
+                0 ${intensity * 0.5}px rgba(0, 0, 255, 0.2)
+            `;
+
+            requestAnimationFrame(animate);
+        };
+
+        animate();
+        await sleep(duration);
+    }
+}
+
+// ============================================================
+// SECTION 6: Story Enhancement Integration
+// (Hooks these systems into the story at appropriate moments)
+// ============================================================
+
+const glitchSystem = new GlitchSystem();
+const particles = new ParticleSystem(document.body);
+const atmosphere = new AtmosphereController();
+
+// Initialize particle system
+particles.init();
+
+// Override the story's phase changes to also trigger enhanced effects
+const originalSetPhase = setPhase;
+setPhase = function(phase) {
+    originalSetPhase(phase);
+
+    switch (phase) {
+        case 'calm':
+            glitchSystem.stop();
+            particles.stop();
+            atmosphere.setMood('neutral');
+            atmosphere.stopBreathing();
+            break;
+
+        case 'uneasy':
+            atmosphere.setMood('uneasy', 4000);
+            particles.start('dust');
+            atmosphere.startBreathing(6000);
+            break;
+
+        case 'tense':
+            atmosphere.setMood('dread', 3000);
+            atmosphere.startBreathing(4000);
+            break;
+
+        case 'danger':
+            atmosphere.setMood('terror', 2000);
+            glitchSystem.start(2);
+            atmosphere.startBreathing(3000);
+            break;
+
+        case 'horror':
+            atmosphere.setMood('terror', 2000);
+            glitchSystem.setIntensity(4);
+            if (!glitchSystem.isActive) glitchSystem.start(4);
+            particles.stop();
+            particles.start('static');
+            break;
+
+        case 'panic':
+            atmosphere.setMood('panic', 1000);
+            glitchSystem.setIntensity(7);
+            if (!glitchSystem.isActive) glitchSystem.start(7);
+            break;
+
+        case 'relief':
+            glitchSystem.stop();
+            particles.stop();
+            atmosphere.setMood('relief', 4000);
+            atmosphere.stopBreathing();
+            break;
+
+        case 'final-horror':
+            atmosphere.setMood('abyss', 2000);
+            glitchSystem.setIntensity(9);
+            if (!glitchSystem.isActive) glitchSystem.start(9);
+            particles.stop();
+            particles.start('embers');
+            atmosphere.startBreathing(2000);
+            break;
+
+        case 'end':
+            glitchSystem.stop();
+            particles.stop();
+            atmosphere.setMood('abyss');
+            atmosphere.stopBreathing();
+            break;
+    }
+};
+
+// ============================================================
+// SECTION 7: Enhanced triggerGlitchBurst (override with richer effects)
+// ============================================================
+
+const originalGlitchBurst = triggerGlitchBurst;
+triggerGlitchBurst = async function(duration = 300) {
+    // Call original
+    await originalGlitchBurst(duration);
+
+    // Add RGB split
+    SceneTransitions.rgbSplit(duration * 0.8);
+
+    // Random chance of additional effects based on fear level
+    if (State.fearLevel > 5) {
+        if (Math.random() < 0.3) {
+            SceneTransitions.inverseFlash(50);
+        }
+    }
+};
+
+// ============================================================
+// SECTION 8: Keyboard Interaction Easter Eggs
+// ============================================================
+
+document.addEventListener('keydown', (e) => {
+    if (!State.isPlaying) return;
+
+    // If user presses Escape during the story
+    if (e.key === 'Escape') {
+        // Brief glitch to remind them they can't escape
+        if (State.currentPhase === 'final-horror' || State.currentPhase === 'panic') {
+            triggerGlitchBurst(200);
+            triggerScreenShake(false, 300);
+        }
+    }
+
+    // Secret: pressing 'H' shows a brief help overlay
+    if (e.key === 'h' || e.key === 'H') {
+        // Do nothing special for now, could add a hint
+    }
+});
+
+// Prevent right-click during horror sequences (immersion)
+document.addEventListener('contextmenu', (e) => {
+    if (State.currentPhase === 'panic' || State.currentPhase === 'final-horror' || State.currentPhase === 'horror') {
+        e.preventDefault();
+        triggerGlitchBurst(100);
+    }
+});
+
+// ============================================================
+// SECTION 9: Window Focus/Blur Effects
+// ============================================================
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        // When user tabs away during horror
+        if (State.currentPhase === 'horror' || State.currentPhase === 'panic' || State.currentPhase === 'final-horror') {
+            // They'll come back to something unsettling
+            document.title = '逃 げ ら れ な い';
+        }
+    } else {
+        // Restore title
+        setTimeout(() => {
+            document.title = '深夜の森 - The Chat Log';
+        }, 3000);
+
+        // Brief flash when returning during horror
+        if (State.currentPhase === 'horror' || State.currentPhase === 'panic') {
+            triggerRedFlash(150);
+        }
+    }
+});
+
+// ============================================================
+// SECTION 10: Performance Monitor & Adaptive Quality
+// ============================================================
+
+class PerformanceMonitor {
+    constructor() {
+        this.frameCount = 0;
+        this.lastTime = performance.now();
+        this.fps = 60;
+        this.lowPerformanceMode = false;
+    }
+
+    start() {
+        const measure = () => {
+            this.frameCount++;
+            const now = performance.now();
+            if (now - this.lastTime >= 1000) {
+                this.fps = this.frameCount;
+                this.frameCount = 0;
+                this.lastTime = now;
+
+                // If FPS drops too low, reduce effects
+                if (this.fps < 30 && !this.lowPerformanceMode) {
+                    this.enableLowPerformanceMode();
+                } else if (this.fps >= 45 && this.lowPerformanceMode) {
+                    this.disableLowPerformanceMode();
+                }
+            }
+            requestAnimationFrame(measure);
+        };
+        requestAnimationFrame(measure);
+    }
+
+    enableLowPerformanceMode() {
+        this.lowPerformanceMode = true;
+        // Reduce particle count
+        if (particles.particles.length > 30) {
+            particles.particles = particles.particles.slice(0, 30);
+        }
+        // Reduce glitch frequency
+        if (glitchSystem.isActive) {
+            glitchSystem.setIntensity(Math.max(1, glitchSystem.intensity - 3));
+        }
+        // Disable some overlays
+        DOM.fogOverlay.style.display = 'none';
+        DOM.scanlinesOverlay.style.display = 'none';
+        console.log('[Performance] Low performance mode enabled');
+    }
+
+    disableLowPerformanceMode() {
+        this.lowPerformanceMode = false;
+        DOM.fogOverlay.style.display = '';
+        DOM.scanlinesOverlay.style.display = '';
+        console.log('[Performance] Normal performance mode restored');
+    }
+}
+
+const perfMonitor = new PerformanceMonitor();
+perfMonitor.start();
+
+// ============================================================
+// SECTION 11: Subtle Background Audio Layers
+// ============================================================
+
+class AmbientAudioLayer {
+    constructor(soundEngine) {
+        this.sound = soundEngine;
+        this.layers = {};
+        this.masterFade = 1;
+    }
+
+    startForestAmbient() {
+        if (!this.sound.initialized) return;
+
+        // Wind-like noise
+        const windInterval = setInterval(() => {
+            if (State.currentPhase === 'calm' || State.currentPhase === 'relief') return;
+
+            const windFreq = randomBetween(100, 400);
+            const windDur = randomFloat(1, 3);
+            this.sound.createOscillator(windFreq, 'sine', windDur, 0.008);
+
+            // Occasional creak
+            if (Math.random() < 0.2) {
+                const creakFreq = randomBetween(200, 600);
+                setTimeout(() => {
+                    this.sound.createOscillator(creakFreq, 'triangle', 0.5, 0.005);
+                    this.sound.createOscillator(creakFreq * 1.02, 'triangle', 0.4, 0.004);
+                }, randomBetween(500, 2000));
+            }
+        }, 3000);
+
+        this.layers.forest = windInterval;
+    }
+
+    startHeartbeatLayer(bpm = 72) {
+        if (!this.sound.initialized) return;
+        const intervalMs = 60000 / bpm;
+
+        const hbInterval = setInterval(() => {
+            if (State.currentPhase === 'calm' || State.currentPhase === 'relief') return;
+
+            this.sound.createOscillator(50, 'sine', 0.12, 0.04 * this.masterFade);
+            setTimeout(() => {
+                this.sound.createOscillator(45, 'sine', 0.1, 0.03 * this.masterFade);
+            }, 120);
+        }, intervalMs);
+
+        this.layers.heartbeat = hbInterval;
+    }
+
+    stopAll() {
+        Object.values(this.layers).forEach(id => clearInterval(id));
+        this.layers = {};
+    }
+
+    fadeOut(duration = 2000) {
+        const startFade = this.masterFade;
+        const startTime = Date.now();
+        const fadeInterval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            this.masterFade = startFade * (1 - progress);
+            if (progress >= 1) {
+                clearInterval(fadeInterval);
+                this.stopAll();
+            }
+        }, 50);
+    }
+}
+
+const ambientAudio = new AmbientAudioLayer(sound);
+
+// Hook ambient audio into phase changes
+const originalSetPhase2 = setPhase;
+setPhase = function(phase) {
+    originalSetPhase2(phase);
+
+    switch (phase) {
+        case 'uneasy':
+        case 'tense':
+            if (!ambientAudio.layers.forest) {
+                ambientAudio.startForestAmbient();
+            }
+            break;
+        case 'danger':
+        case 'horror':
+        case 'panic':
+        case 'final-horror':
+            if (!ambientAudio.layers.forest) {
+                ambientAudio.startForestAmbient();
+            }
+            break;
+        case 'relief':
+            ambientAudio.fadeOut(3000);
+            break;
+        case 'end':
+            ambientAudio.fadeOut(1000);
+            break;
+    }
+};
+
+// ============================================================
+// SECTION 12: Message Queue System for Smooth Delivery
+// ============================================================
+
+class MessageQueue {
+    constructor() {
+        this.queue = [];
+        this.isProcessing = false;
+        this.defaultDelay = 500;
+    }
+
+    add(messageOptions, preDelay = 0, postDelay = 0) {
+        this.queue.push({ messageOptions, preDelay, postDelay });
+        if (!this.isProcessing) this.process();
+    }
+
+    async process() {
+        this.isProcessing = true;
+        while (this.queue.length > 0) {
+            const item = this.queue.shift();
+            if (item.preDelay > 0) await sleep(item.preDelay);
+            await addMessage(item.messageOptions);
+            if (item.postDelay > 0) await sleep(item.postDelay);
+        }
+        this.isProcessing = false;
+    }
+
+    clear() {
+        this.queue = [];
+    }
+}
+
+const messageQueue = new MessageQueue();
+
+// ============================================================
+// SECTION 13: Responsive Resize Handler
+// ============================================================
+
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        if (particles.canvas) {
+            particles.canvas.width = window.innerWidth;
+            particles.canvas.height = window.innerHeight;
+        }
+        scrollToBottom();
+    }, 250);
+});
+
+// ============================================================
+// SECTION 14: Debug Console (hidden, for development)
+// ============================================================
+
+window.__DEBUG__ = {
+    skipToPhase: (phase) => setPhase(phase),
+    triggerEffect: (effect) => {
+        switch (effect) {
+            case 'shake': triggerScreenShake(true, 1000); break;
+            case 'flash': triggerRedFlash(500); break;
+            case 'glitch': triggerGlitchBurst(500); break;
+            case 'blackout': triggerBlackout(2000); break;
+            case 'static': SceneTransitions.staticCut(1000); break;
+            case 'invert': SceneTransitions.inverseFlash(200); break;
+            case 'distort': SceneTransitions.distortionWave(2000); break;
+            case 'heartbeat': SceneTransitions.heartbeatZoom(5, 600); break;
+            case 'rgb': SceneTransitions.rgbSplit(1000); break;
+        }
+    },
+    getState: () => State,
+    sound: sound,
+    glitch: glitchSystem,
+    particles: particles,
+    atmosphere: atmosphere,
+};
+
+// ============================================================
+// SECTION 15: CSS Animation Injections (additional dynamic styles)
+// ============================================================
+
+const dynamicStyles = document.createElement('style');
+dynamicStyles.textContent = `
+
+    /* Breathing background pulse */
+    @keyframes backgroundBreathe {
+        0%, 100% { filter: brightness(1); }
+        50% { filter: brightness(0.95); }
+    }
+
+    /* Message hover effect (subtle in calm, intense in horror) */
+    .message .bubble:hover {
+        filter: brightness(1.05);
+        transition: filter 0.2s ease;
+    }
+
+    .phase-horror .message.horror .bubble:hover,
+    .phase-panic .message.horror .bubble:hover {
+        filter: brightness(1.15);
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.1);
+    }
+
+    /* Timestamp flicker in horror phases */
+    .phase-horror .timestamp,
+    .phase-panic .timestamp,
+    .phase-final-horror .timestamp {
+        animation: timestampFlicker 4s ease-in-out infinite;
+    }
+
+    @keyframes timestampFlicker {
+        0%, 90%, 100% { opacity: 1; }
+        92% { opacity: 0.3; }
+        94% { opacity: 0.8; }
+        96% { opacity: 0.4; }
+        98% { opacity: 1; }
+    }
+
+    /* Chat area subtle noise overlay in horror */
+    .phase-horror #chat-area::after,
+    .phase-panic #chat-area::after,
+    .phase-final-horror #chat-area::after {
+        content: '';
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        opacity: 0.02;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='nn'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23nn)' opacity='0.4'/%3E%3C/svg%3E");
+        background-size: 200px;
+        animation: staticMove 0.1s steps(5) infinite;
+        z-index: 50;
+    }
+
+    /* Status dot animation in danger states */
+    .phase-danger .status-dot,
+    .phase-horror .status-dot,
+    .phase-panic .status-dot,
+    .phase-final-horror .status-dot {
+        animation: statusDotPanic 0.5s ease infinite !important;
+    }
+
+    @keyframes statusDotPanic {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    /* Input bar disabled look during playback */
+    #input-bar .input-field {
+        cursor: not-allowed;
+    }
+
+    /* Top bar time display horror glow */
+    .phase-horror .time-display,
+    .phase-panic .time-display,
+    .phase-final-horror .time-display {
+        color: rgba(255, 100, 100, 0.7) !important;
+        text-shadow: 0 0 8px rgba(255, 0, 0, 0.3) !important;
+    }
+
+    /* Connection status bar animation */
+    #connection-status.danger {
+        animation: connectionFlash 0.8s ease infinite, connectionShake 0.3s ease infinite;
+    }
+
+    @keyframes connectionShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-1px); }
+        75% { transform: translateX(1px); }
+    }
+
+    /* Photo container horror border */
+    .phase-horror .photo-container,
+    .phase-panic .photo-container,
+    .phase-final-horror .photo-container {
+        border-color: rgba(255, 0, 0, 0.15);
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.05);
+    }
+
+    /* Smooth scrollbar color change */
+    .phase-horror #chat-area::-webkit-scrollbar-thumb,
+    .phase-panic #chat-area::-webkit-scrollbar-thumb {
+        background: rgba(255, 0, 0, 0.2);
+    }
+
+    /* Final horror - everything slightly vibrates */
+    .phase-final-horror #chat-messages {
+        animation: subtleVibrate 0.1s ease infinite;
+    }
+
+    @keyframes subtleVibrate {
+        0%, 100% { transform: translate(0, 0); }
+        25% { transform: translate(0.5px, -0.5px); }
+        50% { transform: translate(-0.5px, 0.5px); }
+        75% { transform: translate(0.5px, 0.5px); }
+    }
+
+    /* Sender label color in different phases */
+    .phase-horror .message.user .sender-label {
+        color: rgba(255, 150, 150, 0.5);
+    }
+
+    .phase-final-horror .message.user .sender-label {
+        color: rgba(255, 80, 80, 0.6);
+        animation: timestampFlicker 2s ease-in-out infinite;
+    }
+`;
+document.head.appendChild(dynamicStyles);
+
+// ============================================================
+// SECTION 16: Final Console Message (Easter Egg)
+// ============================================================
+
+console.log('%c深夜ノ森', 'font-size: 24px; color: #ff0033; font-weight: bold; text-shadow: 0 0 10px #ff0033;');
+console.log('%cThe Chat Log', 'font-size: 12px; color: #666; letter-spacing: 0.5em;');
+console.log('%c─────────────────────────', 'color: #222;');
+console.log('%cこれはフィクションです。', 'color: #444; font-style: italic;');
+console.log('%c…本当に？', 'color: rgba(255, 0, 0, 0.3); font-size: 10px;');
+
+// ============================================================
+// END OF PART 4
+// ALL CODE COMPLETE — Total structure: ~9000 lines across 4 parts
+// ============================================================
+</script>
+</body>
+</html>
