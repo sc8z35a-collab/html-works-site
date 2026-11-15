@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3Dスプラトゥーン風FPS 4v4</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Yu Gothic", sans-serif;
+      background: radial-gradient(circle at top, #1f2937, #020617 70%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+    .wrap { width: min(1120px, 100%); display: grid; gap: 12px; }
+    .hud {
+      background: #0f172acc;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      align-items: center;
+      justify-content: space-between;
+      font-variant-numeric: tabular-nums;
+    }
+    .stats { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hint { color: #cbd5e1; font-size: 13px; }
+    button {
+      border: 0; border-radius: 999px; padding: 8px 14px; cursor: pointer;
+      color: #fff; font-weight: 700; background: linear-gradient(135deg, #f97316, #ec4899);
+    }
+    .stage { position: relative; width: min(1040px, 100%); }
+    #view {
+      width: 100%; aspect-ratio: 16 / 9; border-radius: 14px;
+      border: 2px solid #334155; background: #0b1120; image-rendering: pixelated; display: block;
+    }
+    #minimap {
+      position: absolute; right: 14px; bottom: 14px; width: 190px; height: 190px;
+      border: 2px solid #cbd5e1; border-radius: 10px; background: #0f172a; opacity: 0.96;
+    }
+    .center {
+      position: absolute; inset: 0; pointer-events: none; display: grid; place-items: center;
+      font-size: 30px; text-shadow: 0 0 8px #000;
+    }
+  </style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hud">
+      <div class="stats">
+        <span>⏱️ <strong id="time">120.0</strong>s</span>
+        <span>🟧 <strong id="orange">0.0</strong>%</span>
+        <span>🟪 <strong id="purple">0.0</strong>%</span>
+        <span>🎯 命中 <strong id="hits">0</strong></span>
+        <span>👥 4v4 <strong id="alive">4 - 4</strong></span>
+      </div>
+      <button id="restart">リスタート</button>
+      <div class="hint">WASD移動 / マウス左右で旋回（矢印左右も可）/ クリック長押しで発射</div>
+    </div>
+    <div class="stage">
+      <canvas id="view" width="960" height="540"></canvas>
+      <canvas id="minimap" width="190" height="190"></canvas>
+      <div class="center">+</div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const view = document.getElementById('view');
+      const vctx = view.getContext('2d');
+      const minimap = document.getElementById('minimap');
+      const mctx = minimap.getContext('2d');
+      const hud = {
+        time: document.getElementById('time'), orange: document.getElementById('orange'),
+        purple: document.getElementById('purple'), hits: document.getElementById('hits'), alive: document.getElementById('alive')
+      };
+
+      const R_W = 320, R_H = 180;
+      const off = document.createElement('canvas'); off.width = R_W; off.height = R_H;
+      const octx = off.getContext('2d');
+
+      const MAP_W = 24, MAP_H = 24;
+      const map = Array.from({ length: MAP_H }, (_, y) =>
+        Array.from({ length: MAP_W }, (_, x) => (x === 0 || y === 0 || x === MAP_W - 1 || y === MAP_H - 1 ? 1 : 0))
+      );
+      // 迷路ではなく、中央広場+遮蔽物だけ
+      const blocks = [
+        [6, 6, 3, 3], [15, 6, 3, 3], [6, 15, 3, 3], [15, 15, 3, 3],
+        [10, 4, 4, 2], [10, 18, 4, 2], [4, 10, 2, 4], [18, 10, 2, 4], [11, 11, 2, 2]
+      ];
+      for (const [sx, sy, w, h] of blocks) {
+        for (let y = sy; y < sy + h; y++) for (let x = sx; x < sx + w; x++) map[y][x] = 1;
+      }
+
+      const paint = new Uint8Array(MAP_W * MAP_H); // 0 none, 1 orange, 2 purple
+      const idx = (x, y) => y * MAP_W + x;
+      const wallAt = (x, y) => {
+        const gx = Math.floor(x), gy = Math.floor(y);
+        if (gx < 0 || gy < 0 || gx >= MAP_W || gy >= MAP_H) return 1;
+        return map[gy][gx] === 1;
+      };
+
+      const colors = {
+        floor: [190, 198, 255], orange: [249, 115, 22], purple: [139, 92, 246], wall: [71, 85, 105]
+      };
+
+      const entities = [];
+      const keys = new Set();
+      let leftDown = false;
+      let hits = 0;
+      let timer = 120;
+      let running = true;
+      let last = performance.now();
+
+      const player = { id: 0, team: 1, isPlayer: true, x: 4.5, y: 12, dir: 0, speed: 3.4, radius: 0.24, cooldown: 0, hp: 100, respawn: 0 };
+      entities.push(player);
+
+      function spawn(team, i) {
+        const orangeSpawns = [[3.5, 5.5], [4.5, 18.5], [6.5, 12.5]];
+        const purpleSpawns = [[20.5, 5.5], [19.5, 18.5], [17.5, 12.5], [20.5, 12.5]];
+        const [x, y] = team === 1 ? orangeSpawns[i] || [4.5, 12.5] : purpleSpawns[i] || [19.5, 12.5];
+        return { id: entities.length, team, isPlayer: false, x, y, dir: team === 1 ? 0 : Math.PI, speed: 2.5, radius: 0.22, cooldown: 0, hp: 100, respawn: 0, think: 0, strafe: 0 };
+      }
+
+      entities.push(spawn(1, 0), spawn(1, 1), spawn(1, 2));
+      entities.push(spawn(2, 0), spawn(2, 1), spawn(2, 2), spawn(2, 3));
+
+      function paintAt(x, y, color, radius = 1.05) {
+        const minX = Math.max(0, Math.floor(x - radius)), maxX = Math.min(MAP_W - 1, Math.ceil(x + radius));
+        const minY = Math.max(0, Math.floor(y - radius)), maxY = Math.min(MAP_H - 1, Math.ceil(y + radius));
+        const r2 = radius * radius;
+        for (let gy = minY; gy <= maxY; gy++) {
+          for (let gx = minX; gx <= maxX; gx++) {
+            if (map[gy][gx]) continue;
+            const dx = gx + 0.5 - x, dy = gy + 0.5 - y;
+            if (dx * dx + dy * dy <= r2) paint[idx(gx, gy)] = color;
+          }
+        }
+      }
+
+      function castRay(ox, oy, angle, owner, maxDist = 24) {
+        const s = Math.sin(angle), c = Math.cos(angle);
+        let d = 0;
+        while (d < maxDist) {
+          d += 0.02;
+          const x = ox + c * d, y = oy + s * d;
+          if (wallAt(x, y)) return { dist: d, x, y, target: null };
+          if (owner) {
+            for (const e of entities) {
+              if (e === owner || e.respawn > 0 || e.team === owner.team) continue;
+              const dd = (x - e.x) ** 2 + (y - e.y) ** 2;
+              if (dd < e.radius * e.radius * 1.7) return { dist: d, x, y, target: e };
+            }
+          }
+        }
+        return { dist: maxDist, x: ox + c * maxDist, y: oy + s * maxDist, target: null };
+      }
+
+      function moveEntity(ent, dt, forward, strafe = 0) {
+        const dx = Math.cos(ent.dir) * forward - Math.sin(ent.dir) * strafe;
+        const dy = Math.sin(ent.dir) * forward + Math.cos(ent.dir) * strafe;
+        const nx = ent.x + dx * dt, ny = ent.y + dy * dt;
+        if (!wallAt(nx + Math.sign(dx || 1) * ent.radius, ent.y)) ent.x = nx;
+        if (!wallAt(ent.x, ny + Math.sign(dy || 1) * ent.radius)) ent.y = ny;
+      }
+
+      function shoot(ent) {
+        if (ent.cooldown > 0 || ent.respawn > 0) return;
+        ent.cooldown = 0.13;
+        const spread = ent.isPlayer ? 0.05 : 0.12;
+        const ray = castRay(ent.x, ent.y, ent.dir + (Math.random() - 0.5) * spread, ent, 16);
+        const dist = Math.max(0.45, ray.dist - 0.2);
+        const px = ent.x + Math.cos(ent.dir) * dist;
+        const py = ent.y + Math.sin(ent.dir) * dist;
+        paintAt(px, py, ent.team, 0.95 + Math.random() * 0.25);
+
+        if (ray.target) {
+          ray.target.hp -= 38;
+          if (ent === player) hits++;
+          if (ray.target.hp <= 0) {
+            ray.target.respawn = 2.5;
+            ray.target.hp = 100;
+            ray.target.x = ray.target.team === 1 ? 4.5 : 19.5;
+            ray.target.y = ray.target.team === 1 ? 12.5 : 12.5;
+            paintAt(ray.target.x, ray.target.y, ent.team, 1.2);
+          }
+        }
+      }
+
+      function nearestEnemy(ent) {
+        let best = null, bd = 1e9;
+        for (const e of entities) {
+          if (e.team === ent.team || e.respawn > 0) continue;
+          const d = (e.x - ent.x) ** 2 + (e.y - ent.y) ** 2;
+          if (d < bd) { bd = d; best = e; }
+        }
+        return best;
+      }
+
+      function updateBot(ent, dt) {
+        if (ent.respawn > 0) return;
+        ent.think -= dt;
+        if (ent.think <= 0) {
+          ent.think = 0.3 + Math.random() * 0.6;
+          const target = nearestEnemy(ent);
+          if (target) {
+            const aim = Math.atan2(target.y - ent.y, target.x - ent.x);
+            ent.dir += (aim - ent.dir) * 0.65;
+            ent.strafe = (Math.random() - 0.5) * ent.speed;
+          }
+        }
+        moveEntity(ent, dt, ent.speed * 0.75, ent.strafe * 0.35);
+        if (wallAt(ent.x + Math.cos(ent.dir), ent.y + Math.sin(ent.dir))) ent.dir += (Math.random() - 0.5) * 2.2;
+        if (Math.random() < 0.11) shoot(ent);
+      }
+
+      function render3D() {
+        const img = octx.createImageData(R_W, R_H);
+        const data = img.data;
+        const depth = new Float32Array(R_W);
+        const fov = Math.PI / 3;
+
+        for (let y = 0; y < R_H; y++) {
+          const sky = y < R_H / 2;
+          for (let x = 0; x < R_W; x++) {
+            const i = (y * R_W + x) * 4;
+            if (sky) {
+              const t = y / (R_H / 2);
+              data[i] = 30 + t * 34; data[i + 1] = 62 + t * 42; data[i + 2] = 116 + t * 62;
+            } else {
+              const p = y - R_H / 2;
+              const rowDist = 24 / Math.max(1, p);
+              const a = player.dir + ((x / R_W) - 0.5) * fov;
+              const wx = player.x + Math.cos(a) * rowDist, wy = player.y + Math.sin(a) * rowDist;
+              const gx = Math.floor(wx), gy = Math.floor(wy);
+              let col = colors.floor;
+              if (gx >= 0 && gy >= 0 && gx < MAP_W && gy < MAP_H && !map[gy][gx]) {
+                const pnt = paint[idx(gx, gy)];
+                if (pnt === 1) col = colors.orange;
+                if (pnt === 2) col = colors.purple;
+              }
+              const shade = Math.max(0.33, 1 - rowDist / 20);
+              data[i] = col[0] * shade; data[i + 1] = col[1] * shade; data[i + 2] = col[2] * shade;
+            }
+            data[i + 3] = 255;
+          }
+        }
+
+        for (let x = 0; x < R_W; x++) {
+          const a = player.dir + ((x / R_W) - 0.5) * fov;
+          const ray = castRay(player.x, player.y, a, null, 26);
+          const d = ray.dist * Math.cos(a - player.dir);
+          depth[x] = d;
+          const h = Math.min(R_H, Math.floor((R_H * 0.95) / Math.max(0.01, d)));
+          const top = (R_H - h) >> 1;
+          const shade = Math.max(0.22, 1 - d / 16);
+          const wr = colors.wall[0] * shade, wg = colors.wall[1] * shade, wb = colors.wall[2] * shade;
+          for (let y = top; y < top + h; y++) {
+            const i = (y * R_W + x) * 4;
+            data[i] = wr; data[i + 1] = wg; data[i + 2] = wb;
+          }
+        }
+
+        const sprites = [];
+        for (const e of entities) {
+          if (e === player || e.respawn > 0) continue;
+          const dx = e.x - player.x, dy = e.y - player.y;
+          const dist = Math.hypot(dx, dy);
+          const rel = Math.atan2(dy, dx) - player.dir;
+          let a = rel;
+          while (a > Math.PI) a -= Math.PI * 2;
+          while (a < -Math.PI) a += Math.PI * 2;
+          if (Math.abs(a) > fov * 0.7) continue;
+          sprites.push({ e, dist, a });
+        }
+        sprites.sort((a, b) => b.dist - a.dist);
+
+        for (const s of sprites) {
+          const size = Math.max(6, Math.floor(R_H / (s.dist * 0.9)));
+          const cx = Math.floor((0.5 + s.a / fov) * R_W);
+          const top = Math.floor(R_H / 2 - size * 0.75);
+          const col = s.e.team === 1 ? [251, 146, 60] : [167, 139, 250];
+          for (let x = cx - size / 2; x < cx + size / 2; x++) {
+            if (x < 0 || x >= R_W || s.dist > depth[x]) continue;
+            for (let y = top; y < top + size; y++) {
+              if (y < 0 || y >= R_H) continue;
+              const i = ((y | 0) * R_W + (x | 0)) * 4;
+              const shade = Math.max(0.35, 1 - s.dist / 15);
+              data[i] = col[0] * shade; data[i + 1] = col[1] * shade; data[i + 2] = col[2] * shade;
+            }
+          }
+        }
+
+        octx.putImageData(img, 0, 0);
+        vctx.imageSmoothingEnabled = false;
+        vctx.drawImage(off, 0, 0, view.width, view.height);
+      }
+
+      function renderMinimap() {
+        const s = minimap.width / MAP_W;
+        mctx.fillStyle = '#0b1220'; mctx.fillRect(0, 0, minimap.width, minimap.height);
+        for (let y = 0; y < MAP_H; y++) {
+          for (let x = 0; x < MAP_W; x++) {
+            if (map[y][x]) mctx.fillStyle = '#334155';
+            else {
+              const p = paint[idx(x, y)];
+              mctx.fillStyle = p === 1 ? '#f97316' : p === 2 ? '#8b5cf6' : '#c7d2fe';
+            }
+            mctx.fillRect(x * s, y * s, s - 1, s - 1);
+          }
+        }
+        for (const e of entities) {
+          if (e.respawn > 0) continue;
+          mctx.fillStyle = e.isPlayer ? '#fef08a' : e.team === 1 ? '#fb923c' : '#a78bfa';
+          mctx.beginPath(); mctx.arc(e.x * s, e.y * s, e.isPlayer ? 4.5 : 3.4, 0, Math.PI * 2); mctx.fill();
+        }
+      }
+
+      function score() {
+        let o = 0, p = 0, total = 0;
+        for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) {
+          if (map[y][x]) continue;
+          total++;
+          const v = paint[idx(x, y)];
+          if (v === 1) o++;
+          if (v === 2) p++;
+        }
+        return { o: (o / total) * 100, p: (p / total) * 100 };
+      }
+
+      function aliveCount(team) {
+        return entities.filter(e => e.team === team && e.respawn <= 0).length;
+      }
+
+      function reset() {
+        paint.fill(0);
+        timer = 120; hits = 0; running = true;
+        entities.length = 0;
+        entities.push(player);
+        Object.assign(player, { id: 0, x: 4.5, y: 12, dir: 0, cooldown: 0, hp: 100, respawn: 0 });
+        entities.push(spawn(1, 0), spawn(1, 1), spawn(1, 2));
+        entities.push(spawn(2, 0), spawn(2, 1), spawn(2, 2), spawn(2, 3));
+      }
+
+      function update(dt) {
+        if (!running) return;
+        timer -= dt;
+        if (timer <= 0) { timer = 0; running = false; }
+
+        for (const e of entities) {
+          if (e.respawn > 0) {
+            e.respawn -= dt;
+            if (e.respawn <= 0) {
+              e.respawn = 0;
+              e.x = e.team === 1 ? 4.5 + Math.random() * 2 : 18.5 + Math.random() * 2;
+              e.y = 10 + Math.random() * 4;
+            }
+          }
+          e.cooldown = Math.max(0, e.cooldown - dt);
+        }
+
+        let f = 0, s = 0;
+        if (keys.has('w')) f += player.speed;
+        if (keys.has('s')) f -= player.speed;
+        if (keys.has('a')) s -= player.speed * 0.8;
+        if (keys.has('d')) s += player.speed * 0.8;
+        if (keys.has('arrowleft')) player.dir -= 2.2 * dt;
+        if (keys.has('arrowright')) player.dir += 2.2 * dt;
+
+        moveEntity(player, dt, f, s);
+        if (leftDown) shoot(player);
+
+        for (const e of entities) if (!e.isPlayer) updateBot(e, dt);
+      }
+
+      function hudUpdate() {
+        const s = score();
+        hud.time.textContent = timer.toFixed(1);
+        hud.orange.textContent = s.o.toFixed(1);
+        hud.purple.textContent = s.p.toFixed(1);
+        hud.hits.textContent = String(hits);
+        hud.alive.textContent = `${aliveCount(1)} - ${aliveCount(2)}`;
+
+        if (!running) {
+          vctx.fillStyle = 'rgba(0,0,0,0.58)'; vctx.fillRect(0, 0, view.width, view.height);
+          vctx.fillStyle = '#fff'; vctx.textAlign = 'center';
+          vctx.font = 'bold 54px sans-serif';
+          vctx.fillText(s.o >= s.p ? 'ORANGE WIN!' : 'PURPLE WIN!', view.width / 2, view.height / 2 - 10);
+          vctx.font = '25px sans-serif';
+          vctx.fillText(`オレンジ ${s.o.toFixed(1)}% vs パープル ${s.p.toFixed(1)}%`, view.width / 2, view.height / 2 + 34);
+        }
+      }
+
+      function frame(now) {
+        const dt = Math.min(0.033, (now - last) / 1000);
+        last = now;
+        update(dt);
+        render3D();
+        renderMinimap();
+        hudUpdate();
+        requestAnimationFrame(frame);
+      }
+
+      window.addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
+      window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+      window.addEventListener('mousemove', e => { if (document.pointerLockElement === view) player.dir += e.movementX * 0.0026; });
+      view.addEventListener('click', () => { if (document.pointerLockElement !== view) view.requestPointerLock(); leftDown = true; });
+      view.addEventListener('mousedown', e => { if (e.button === 0) leftDown = true; });
+      window.addEventListener('mouseup', () => { leftDown = false; });
+      document.getElementById('restart').addEventListener('click', reset);
+
+      reset();
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>

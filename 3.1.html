@@ -32,6 +32,22 @@ canvas{display:block}
 #zoomInd{position:fixed;bottom:18px;right:18px;color:#fff;font:15px/1 monospace;z-index:10;pointer-events:none;text-shadow:1px 1px 3px #000;background:rgba(0,0,0,.4);padding:6px 12px;border-radius:6px;display:none}
 #flyInd{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);color:#0f0;font:bold 14px monospace;z-index:10;pointer-events:none;text-shadow:0 0 6px rgba(0,255,0,.5);display:none}
 </style>
+
+<!-- hw-mobile-shim: smartphone support injected by hub build -->
+<style id="hw-mobile-shim-style">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas,img,svg,video{max-width:100%}
+input,select,textarea{font-size:16px}
+@media (pointer:coarse){button,a,[role="button"],input[type="button"],input[type="submit"]{touch-action:manipulation}}
+</style>
+<script id="hw-mobile-shim-script">
+(function(){
+  function setVh(){document.documentElement.style.setProperty("--hw-vh",(window.innerHeight*0.01)+"px");}
+  setVh();window.addEventListener("resize",setVh);window.addEventListener("orientationchange",setVh);
+  document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+})();
+</script>
 </head>
 <body>
 <div id="blocker"><div>

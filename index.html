@@ -11,166 +11,142 @@
 <title>HTML Works Hub | TOYO</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  :root{
-    --bg:#0b0b10;--panel:#15151f;--card:#1a1a26;--card-hover:#232332;
-    --text:#f2f2f6;--sub:#a8a8ba;--line:#2b2b3c;--blue:#4da3ff;
-    --sat:env(safe-area-inset-top);--sar:env(safe-area-inset-right);
-    --sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left)
-  }
-  html{scrollbar-color:#444 var(--bg)}
-  body{background:var(--bg);color:var(--text);font-family:"Noto Sans JP","Yu Gothic",system-ui,sans-serif;min-height:100dvh}
-  /* ===== Hub top bar ===== */
-  .topbar{
-    position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;
-    padding:calc(10px + var(--sat)) calc(16px + var(--sar)) 10px calc(16px + var(--sal));
-    background:rgba(11,11,16,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)
-  }
+  :root{--bg:#0b0b10;--panel:#15151f;--card:#1a1a26;--card-hover:#232332;--text:#f2f2f6;--sub:#a8a8ba;--line:#2b2b3c;--blue:#4da3ff;--sat:env(safe-area-inset-top);--sar:env(safe-area-inset-right);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left)}
+  body{background:var(--bg);color:var(--text);font-family:"Noto Sans JP","Yu Gothic",system-ui,sans-serif;min-height:100dvh;-webkit-tap-highlight-color:transparent}
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;padding:calc(10px + var(--sat)) calc(16px + var(--sar)) 10px calc(16px + var(--sal));background:rgba(11,11,16,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4da3ff,#c792ff);display:flex;align-items:center;justify-content:center;font-weight:900;color:#0b0b10;font-size:17px;flex:none}
   .topbar .name{font-weight:800;font-size:16px;line-height:1.15}
   .topbar .name small{display:block;color:var(--sub);font-weight:500;font-size:11px;letter-spacing:.14em}
   .topbar .spacer{flex:1}
-  .fsbtn{appearance:none;border:0;cursor:pointer;background:var(--blue);color:#08131f;font-weight:800;font-size:13px;padding:10px 14px;border-radius:999px;white-space:nowrap}
-  .fsbtn:active{transform:scale(.97)}
-  /* ===== Hero ===== */
-  .hero{max-width:1120px;margin:0 auto;padding:26px calc(16px + var(--sar)) 4px calc(16px + var(--sal))}
-  .hero h1{font-size:clamp(24px,4.5vw,38px);line-height:1.25}
+  .fsbtn{appearance:none;border:0;cursor:pointer;background:var(--blue);color:#08131f;font-weight:800;font-size:13px;padding:10px 14px;border-radius:999px;white-space:nowrap;min-height:44px}
+  .hero{max-width:1120px;margin:0 auto;padding:24px calc(16px + var(--sar)) 2px calc(16px + var(--sal))}
+  .hero h1{font-size:clamp(23px,4.5vw,36px);line-height:1.25}
   .hero p{color:var(--sub);line-height:1.8;margin-top:8px;max-width:760px;font-size:14px}
-  .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-  .links a{color:var(--text);text-decoration:none;font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--panel);padding:7px 12px;border-radius:999px}
+  .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .links a{color:var(--text);text-decoration:none;font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--panel);padding:8px 12px;border-radius:999px}
   .links a b{color:var(--blue)}
-  /* ===== Controls ===== */
-  .controls{max-width:1120px;margin:0 auto;padding:16px calc(16px + var(--sar)) 0 calc(16px + var(--sal));display:flex;flex-direction:column;gap:12px}
-  .search{width:100%;appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:12px 14px;font-size:15px;outline:none}
+  .controls{max-width:1120px;margin:0 auto;padding:14px calc(16px + var(--sar)) 0 calc(16px + var(--sal));display:flex;flex-direction:column;gap:10px}
+  .search{width:100%;appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:13px 14px;font-size:16px;outline:none}
   .search:focus{border-color:var(--blue)}
-  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
-  .chip{flex:none;appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--sub);font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--sub);font-size:13px;font-weight:700;padding:9px 14px;border-radius:999px;cursor:pointer;min-height:40px}
   .chip.on{background:var(--text);color:#0b0b10;border-color:var(--text)}
   .count{color:var(--sub);font-size:12px}
-  /* ===== Grid ===== */
-  main{max-width:1120px;margin:0 auto;padding:14px calc(16px + var(--sar)) calc(48px + var(--sab)) calc(16px + var(--sal))}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
-  .card{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;text-decoration:none;color:inherit;transition:.15s}
+  main{max-width:1120px;margin:0 auto;padding:6px calc(16px + var(--sar)) calc(48px + var(--sab)) calc(16px + var(--sal))}
+  .sec{margin-top:26px}
+  .sec-title{font-size:17px;display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+  .sec-count{color:var(--sub);font-size:12px;font-weight:500}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:13px}
+  .card{position:relative;display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px;text-decoration:none;color:inherit;transition:.15s}
   .card:hover,.card:active{background:var(--card-hover);border-color:#3d3d55}
   .badge{align-self:flex-start;font-size:10px;font-weight:800;letter-spacing:.08em;padding:4px 9px;border-radius:999px;color:#0b0b10;background:#c9c9d6}
-  .b-red{background:#ff4d4d}.b-blue{background:#4da3ff}.b-green{background:#00ff41}.b-orange{background:#ffaa00}
-  .b-purple{background:#c792ff}.b-pink{background:#ff8ac2}.b-teal{background:#3fe0c5}.b-yellow{background:#ffd94d}
-  .card h2{font-size:17px;line-height:1.4}
+  .b-red{background:#ff4d4d}.b-blue{background:#4da3ff}.b-green{background:#00ff41}.b-orange{background:#ffaa00}.b-purple{background:#c792ff}.b-pink{background:#ff8ac2}.b-teal{background:#3fe0c5}.b-yellow{background:#ffd94d}
+  .card h2{font-size:16px;line-height:1.45}
   .card p{color:var(--sub);font-size:13px;line-height:1.65;flex:1}
-  .card .meta{display:flex;justify-content:space-between;align-items:center;font-size:12px}
-  .card .open{font-weight:800;color:var(--blue)}
-  .card .file{color:#74748c;font-family:ui-monospace,monospace;font-size:11px}
+  .card .meta{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
+  .card .open{font-weight:800;color:var(--blue);white-space:nowrap}
+  .card .file{color:#74748c;font-family:ui-monospace,monospace;font-size:11px;text-align:right}
+  .card .tag{font-size:11px;color:var(--sub)}
   .empty{display:none;color:var(--sub);text-align:center;padding:36px 0}
   footer{max-width:1120px;margin:0 auto;padding:0 calc(16px + var(--sar)) calc(28px + var(--sab)) calc(16px + var(--sal));color:#74748c;font-size:12px;line-height:1.9}
   footer a{color:var(--sub)}
-  /* ===== Smartphone landscape: hub becomes a wide launchpad ===== */
   @media (orientation:landscape) and (max-height:520px){
-    .hero{padding-top:12px}
-    .hero h1{font-size:22px}
-    .hero p{display:none}
+    .hero{padding-top:10px}.hero h1{font-size:21px}.hero p{display:none}
     .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-    .card{padding:13px}
-    .card p{display:none}
-    .controls{padding-top:10px}
+    .card{padding:12px}.card p{display:none}.sec{margin-top:16px}
   }
-  @media (prefers-color-scheme:light){
-    :root{--bg:#f4f4f7;--panel:#fff;--card:#fff;--card-hover:#fff;--text:#16161d;--sub:#555564;--line:#dddde6}
-    .topbar{background:rgba(244,244,247,.92)}
-  }
+  @media (prefers-color-scheme:light){:root{--bg:#f4f4f7;--panel:#fff;--card:#fff;--card-hover:#fff;--text:#16161d;--sub:#555564;--line:#dddde6}.topbar{background:rgba(244,244,247,.94)}}
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="logo">H</div>
-  <div class="name">HTML Works Hub<small>TOYO ・ 全13作品</small></div>
+  <div class="name">HTML Works Hub<small>TOYO ・ 全71作品</small></div>
   <div class="spacer"></div>
   <button class="fsbtn" id="hubFs" type="button">⛶ 全画面（横）</button>
 </header>
-
 <section class="hero">
-  <h1>作品ハブ — 開きたいやつを押すだけ。</h1>
-  <p>単体HTML13作品の玄関です。作品は全画面ビューワーで開きます（スマホは横向き全画面が最適）。検索とカテゴリで絞り込みもできます。</p>
+  <h1>作品ハブ — 項目別に、ぜんぶここから。</h1>
+  <p>単体HTML全71作品を7カテゴリに整理した玄関です。全作品にスマホ対応（viewport・タップ最適化）を注入済み。作品は全画面ビューワーで開きます。カードの「⌨ キーボード中心」はPC操作が中心の作品、「👆 タッチ可」はタッチ操作に対応した作品です（自動判定）。</p>
   <div class="links">
-    <a href="https://html-works-site.sc8z-35a.workers.dev/"><b>Cloudflare</b> 本番サイト</a>
+    <a href="https://html-works-site.sc8z-35a.workers.dev/"><b>Cloudflare</b> 本番</a>
     <a href="https://sc8z35a-collab.github.io/html-works-site/"><b>GitHub Pages</b> ミラー</a>
     <a href="https://github.com/sc8z35a-collab/html-works-site"><b>GitHub</b> リポジトリ</a>
   </div>
 </section>
-
 <div class="controls">
-  <input class="search" id="q" type="search" placeholder="作品を検索（例：SCP、電卓、雑談）" autocomplete="off">
-  <div class="chips" id="chips">
-    <button class="chip on" data-cat="all" type="button">すべて</button>
-    <button class="chip" data-cat="tool" type="button">UI / ツール</button>
-    <button class="chip" data-cat="game" type="button">ゲーム / シミュレーション</button>
-    <button class="chip" data-cat="story" type="button">ストーリー / トーク</button>
-  </div>
+  <input class="search" id="q" type="search" placeholder="作品を検索（例：SCP、特許、カメラ、雑談）" autocomplete="off">
+  <div class="chips" id="chips"><button class="chip on" data-cat="all" type="button">すべて</button><button class="chip" data-cat="game" type="button">ゲーム（19）</button><button class="chip" data-cat="tool" type="button">ツール・UI（9）</button><button class="chip" data-cat="story" type="button">ストーリー・対戦・トーク（10）</button><button class="chip" data-cat="tech" type="button">テック・製品リサーチ（19）</button><button class="chip" data-cat="patent" type="button">学習・特許（4）</button><button class="chip" data-cat="art" type="button">アート・SVG・体験（7）</button><button class="chip" data-cat="doc" type="button">資料・プロンプト（3）</button></div>
   <div class="count" id="count"></div>
 </div>
-
 <main>
-  <div class="grid" id="grid">
-    <a class="card" data-cat="tool" data-name="youtube ui クローン" href="./viewer.html?src=upload.html"><span class="badge b-red">UI CLONE</span><h2>YouTube</h2><p>YouTubeの画面を再現したUIクローン。ヘッダー・サイドバー・動画カードまで作り込んだ1枚もの。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload.html</span></span></a>
-    <a class="card" data-cat="tool" data-name="3d calculator 電卓" href="./viewer.html?src=3D.html"><span class="badge b-blue">3D / CSS</span><h2>3D Calculator - Ultra Realistic</h2><p>立体感と光にこだわった超リアルな3D電卓。CSSの perspective と陰影で質感を作っている。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">3D.html</span></span></a>
-    <a class="card" data-cat="tool" data-name="ultra hd premium calculator 電卓" href="./viewer.html?src=upload-4.html"><span class="badge b-blue">CALCULATOR</span><h2>Ultra HD Premium Calculator Pro Max</h2><p>超高精細をうたうプレミアム電卓。電卓シリーズのもう1つの力作版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-4.html</span></span></a>
-    <a class="card" data-cat="tool" data-name="super stage maker ステージ" href="./viewer.html?src=upload-3.html"><span class="badge b-teal">MAKER</span><h2>Super Stage Maker - Beautiful Edition</h2><p>ステージを作れるメーカー系作品の Beautiful Edition。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-3.html</span></span></a>
-    <a class="card" data-cat="game" data-name="scp 収容 シミュレーター 凌空" href="./viewer.html?src=SCP-1.html"><span class="badge b-green">SCP GAME</span><h2>SCP-1-JP 「凌空」 収容シミュレーター</h2><p>SCP収容施設を舞台にしたシミュレーター。ローディング・HUD・カスタムカーソル付きの没入型UI。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SCP-1.html</span></span></a>
-    <a class="card" data-cat="game" data-name="scp 4721 observation chamber ホラー" href="./viewer.html?src=SCP-2.html"><span class="badge b-orange">SCP HORROR</span><h2>SCP-4721 Observation Chamber</h2><p>観察室を舞台にしたCLASSIFIED級ホラー。フリッカー、グリッチ、ダークな演出が中心。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SCP-2.html</span></span></a>
-    <a class="card" data-cat="game" data-name="しょぼん アクション syobon" href="./viewer.html?src=upload-2.html"><span class="badge b-yellow">ACTION GAME</span><h2>しょぼんのアクション - HD Remake</h2><p>あのアクションゲームのHDリメイク版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-2.html</span></span></a>
-    <a class="card" data-cat="game" data-name="infinite voxel world ボクセル" href="./viewer.html?src=3.1.html"><span class="badge b-teal">VOXEL</span><h2>Infinite Voxel World</h2><p>無限に広がるボクセルワールド。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">3.1.html</span></span></a>
-    <a class="card" data-cat="game" data-name="林野火災 シミュレーション fire" href="./viewer.html?src=upload-5.html"><span class="badge b-red">SIMULATION</span><h2>林野火災シミュレーション</h2><p>超高解像度アニメーションで描く林野火災シミュレーション。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-5.html</span></span></a>
-    <a class="card" data-cat="story" data-name="ai genesis 物語" href="./viewer.html?src=AI.html"><span class="badge b-purple">STORY</span><h2>AI GENESIS — 6日間の狂詩曲</h2><p>AIをテーマにした6日間の物語。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">AI.html</span></span></a>
-    <a class="card" data-cat="story" data-name="深夜の森 chat log チャット" href="./viewer.html?src=upload-6.html"><span class="badge b-purple">CHAT LOG</span><h2>深夜の森 - The Chat Log</h2><p>深夜の森を舞台にしたチャットログ形式の作品。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-6.html</span></span></a>
-    <a class="card" data-cat="story" data-name="カロン コレー 雑談 トーク" href="./viewer.html?src=2.html"><span class="badge b-pink">TALK</span><h2>カロン &amp; コレー — 雑談トーク</h2><p>カロンとコレーの雑談トーク。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">2.html</span></span></a>
-    <a class="card" data-cat="story" data-name="三人 雑談 手書き ドローン" href="./viewer.html?src=upload-7.html"><span class="badge b-pink">TALK</span><h2>三人の雑談 — 手書き × ドローン</h2><p>三人の雑談、手書きとドローンの組み合わせ。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-7.html</span></span></a>
-  </div>
+<section class="sec" data-sec="game">
+  <h3 class="sec-title">ゲーム<span class="sec-count">19作品</span></h3>
+  <div class="grid"><a class="card" data-cat="game" data-name="scp-1-jp 「凌空」 収容シミュレーター scp-1.html scp game" href="./viewer.html?src=SCP-1.html"><span class="badge b-green">SCP GAME</span><h2>SCP-1-JP 「凌空」 収容シミュレーター</h2><p>SCP収容施設のシミュレーター。HUD・カスタムカーソル付き没入型UI。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SCP-1.html ・ 268 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="scp-4721 observation chamber scp-2.html scp horror" href="./viewer.html?src=SCP-2.html"><span class="badge b-green">SCP HORROR</span><h2>SCP-4721 Observation Chamber</h2><p>観察室を舞台にしたCLASSIFIED級ホラー。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SCP-2.html ・ 141 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="しょぼんのアクション - hd remake upload-2.html action" href="./viewer.html?src=upload-2.html"><span class="badge b-green">ACTION</span><h2>しょぼんのアクション - HD Remake</h2><p>あのアクションゲームのHDリメイク版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-2.html ・ 477 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="game" data-name="infinite voxel world 3.1.html voxel" href="./viewer.html?src=3.1.html"><span class="badge b-green">VOXEL</span><h2>Infinite Voxel World</h2><p>無限に広がるボクセルワールド。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">3.1.html ・ 24 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="林野火災シミュレーション upload-5.html simulation" href="./viewer.html?src=upload-5.html"><span class="badge b-green">SIMULATION</span><h2>林野火災シミュレーション</h2><p>超高解像度アニメーションの火災シミュレーション。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-5.html ・ 231 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="game" data-name="fortnitestyle 3d battle royale call_1.html 3d battle royale" href="./viewer.html?src=Call_1.html"><span class="badge b-green">3D BATTLE ROYALE</span><h2>FortniteStyle 3D Battle Royale</h2><p>フォートナイト風3Dバトルロイヤル。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">Call_1.html ・ 242 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="にゃんこバトル大戦争 upload-16.html battle" href="./viewer.html?src=upload-16.html"><span class="badge b-green">BATTLE</span><h2>にゃんこバトル大戦争</h2><p>にゃんこたちのバトルゲーム。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-16.html ・ 248 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="game" data-name="あつまれ どうぶつの島 - animal island life upload-18.html island life" href="./viewer.html?src=upload-18.html"><span class="badge b-green">ISLAND LIFE</span><h2>あつまれ どうぶつの島 - Animal Island Life</h2><p>どうぶつたちの島暮らし。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-18.html ・ 335 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="game" data-name="piza経営シミュレーション piza_2.0.html simulation" href="./viewer.html?src=PIZA_2.0.html"><span class="badge b-green">SIMULATION</span><h2>PIZA経営シミュレーション</h2><p>ピザ屋経営シミュレーション。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">PIZA_2.0.html ・ 197 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="3dスプラトゥーン風fps 4v4 supura.html fps" href="./viewer.html?src=SUPURA.html"><span class="badge b-green">FPS</span><h2>3Dスプラトゥーン風FPS 4v4</h2><p>スプラ風の3D FPS、4対4。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SUPURA.html ・ 17 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="冬季森林キャンプ サバイバル upload-19.html survival" href="./viewer.html?src=upload-19.html"><span class="badge b-green">SURVIVAL</span><h2>冬季森林キャンプ サバイバル</h2><p>冬の森でキャンプサバイバル。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-19.html ・ 445 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="game" data-name="秘密基地設置 計画1.0 upload-21.html plan / sim" href="./viewer.html?src=upload-21.html"><span class="badge b-green">PLAN / SIM</span><h2>秘密基地設置 計画1.0</h2><p>冬季森林の秘密基地設置計画シミュレーション。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-21.html ・ 330 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="学校怪異 ～逃げられない校舎～ upload-23.html horror" href="./viewer.html?src=upload-23.html"><span class="badge b-green">HORROR</span><h2>学校怪異 ～逃げられない校舎～</h2><p>逃げられない校舎の学校怪異ホラー（版1）。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-23.html ・ 23 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="game" data-name="学校怪異 ～逃げられない校舎～ 別版 upload-24.html horror" href="./viewer.html?src=upload-24.html"><span class="badge b-green">HORROR</span><h2>学校怪異 ～逃げられない校舎～ 別版</h2><p>学校怪異の別バージョン。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-24.html ・ 18 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="インクバトル - ナワバリバトル upload-25.html ink battle" href="./viewer.html?src=upload-25.html"><span class="badge b-green">INK BATTLE</span><h2>インクバトル - ナワバリバトル</h2><p>インクで塗り合うナワバリバトル。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-25.html ・ 25 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="voxel sandbox upload-26.html voxel" href="./viewer.html?src=upload-26.html"><span class="badge b-green">VOXEL</span><h2>Voxel Sandbox</h2><p>ボクセルのサンドボックス。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-26.html ・ 19 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="友達コレクション 3d - わくわく生活 upload-27.html 3d life" href="./viewer.html?src=upload-27.html"><span class="badge b-green">3D LIFE</span><h2>友達コレクション 3D - わくわく生活</h2><p>友達コレクション風の3D生活ゲーム。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-27.html ・ 75 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="game" data-name="pac-man 3d ultra 2-3.html 3d arcade" href="./viewer.html?src=2-3.html"><span class="badge b-green">3D ARCADE</span><h2>PAC-MAN 3D ULTRA</h2><p>パックマンの3D ULTRA版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">2-3.html ・ 24 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="game" data-name="ビルエクスプローラー 3d 2-4.html 3d explore" href="./viewer.html?src=2-4.html"><span class="badge b-green">3D EXPLORE</span><h2>ビルエクスプローラー 3D</h2><p>ビルを探索する3Dゲーム。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">2-4.html ・ 33 KB</span></span><span class="tag">⌨ キーボード中心</span></a></div>
+</section>
+<section class="sec" data-sec="tool">
+  <h3 class="sec-title">ツール・UI<span class="sec-count">9作品</span></h3>
+  <div class="grid"><a class="card" data-cat="tool" data-name="youtube upload.html ui clone" href="./viewer.html?src=upload.html"><span class="badge b-blue">UI CLONE</span><h2>YouTube</h2><p>YouTube画面のUIクローン。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload.html ・ 95 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="tool" data-name="3d calculator - ultra realistic 3d.html 3d / css" href="./viewer.html?src=3D.html"><span class="badge b-blue">3D / CSS</span><h2>3D Calculator - Ultra Realistic</h2><p>超リアルな3D電卓。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">3D.html ・ 272 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tool" data-name="ultra hd premium calculator pro max upload-4.html calculator" href="./viewer.html?src=upload-4.html"><span class="badge b-blue">CALCULATOR</span><h2>Ultra HD Premium Calculator Pro Max</h2><p>プレミアム電卓の力作版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-4.html ・ 333 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tool" data-name="super stage maker - beautiful edition upload-3.html maker" href="./viewer.html?src=upload-3.html"><span class="badge b-blue">MAKER</span><h2>Super Stage Maker - Beautiful Edition</h2><p>ステージ作成メーカー。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-3.html ・ 306 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tool" data-name="mican 1.0 pro — 温州みかんの総合研究プラットフォーム mican_1.0_pro.html research platform" href="./viewer.html?src=Mican_1.0_pro.html"><span class="badge b-blue">RESEARCH PLATFORM</span><h2>Mican 1.0 pro — 温州みかんの総合研究プラットフォーム</h2><p>温州みかんの総合研究プラットフォーム。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">Mican_1.0_pro.html ・ 570 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tool" data-name="ghence — ガジェットの本質を、探る。 ghence.html gadget media" href="./viewer.html?src=Ghence.html"><span class="badge b-blue">GADGET MEDIA</span><h2>Ghence — ガジェットの本質を、探る。</h2><p>ガジェットメディアサイト。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">Ghence.html ・ 330 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tool" data-name="chronos elite — ultimate precision timepiece 2.0_max.html luxury watch" href="./viewer.html?src=2.0_Max.html"><span class="badge b-blue">LUXURY WATCH</span><h2>CHRONOS ELITE — Ultimate Precision Timepiece</h2><p>高級時計のプロダクトページ。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">2.0_Max.html ・ 995 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tool" data-name="windows（gemini版） gemini.html os ui clone" href="./viewer.html?src=gemini.html"><span class="badge b-blue">OS UI CLONE</span><h2>Windows（Gemini版）</h2><p>Windows UIの再現（Gemini生成版）。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">gemini.html ・ 32 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="tool" data-name="windows（gpt版） gpt.html os ui clone" href="./viewer.html?src=gpt.html"><span class="badge b-blue">OS UI CLONE</span><h2>Windows（GPT版）</h2><p>Windows UIの再現（GPT生成版）。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">gpt.html ・ 32 KB</span></span><span class="tag">👆 タッチ可</span></a></div>
+</section>
+<section class="sec" data-sec="story">
+  <h3 class="sec-title">ストーリー・対戦・トーク<span class="sec-count">10作品</span></h3>
+  <div class="grid"><a class="card" data-cat="story" data-name="ai genesis — 6日間の狂詩曲 ai.html story" href="./viewer.html?src=AI.html"><span class="badge b-pink">STORY</span><h2>AI GENESIS — 6日間の狂詩曲</h2><p>AIをテーマにした6日間の物語。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">AI.html ・ 202 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="story" data-name="深夜の森 - the chat log upload-6.html chat log" href="./viewer.html?src=upload-6.html"><span class="badge b-pink">CHAT LOG</span><h2>深夜の森 - The Chat Log</h2><p>深夜の森のチャットログ形式作品。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-6.html ・ 164 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="story" data-name="カロン &amp; コレー — 雑談トーク 2.html talk" href="./viewer.html?src=2.html"><span class="badge b-pink">TALK</span><h2>カロン &amp; コレー — 雑談トーク</h2><p>カロンとコレーの雑談トーク。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">2.html ・ 385 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="story" data-name="三人の雑談 — 手書き × ドローン upload-7.html talk" href="./viewer.html?src=upload-7.html"><span class="badge b-pink">TALK</span><h2>三人の雑談 — 手書き × ドローン</h2><p>三人の雑談。手書き×ドローン。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-7.html ・ 260 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="story" data-name="都市伝説 vs ai - believe or logic upload-9.html vs / story" href="./viewer.html?src=upload-9.html"><span class="badge b-pink">VS / STORY</span><h2>都市伝説 vs AI - BELIEVE OR LOGIC</h2><p>都市伝説とAIの対決。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-9.html ・ 222 KB</span></span></a><a class="card" data-cat="story" data-name="田舎の森・デジタルデトックスの旅 - 前編 upload-11.html story" href="./viewer.html?src=upload-11.html"><span class="badge b-pink">STORY</span><h2>田舎の森・デジタルデトックスの旅 - 前編</h2><p>田舎の森でのデジタルデトックスの旅、前編。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-11.html ・ 148 KB</span></span></a><a class="card" data-cat="story" data-name="ミドルクラス衛門 vs 関暁夫 — complete edition upload-12.html vs / story" href="./viewer.html?src=upload-12.html"><span class="badge b-pink">VS / STORY</span><h2>ミドルクラス衛門 vs 関暁夫 — COMPLETE EDITION</h2><p>ミドルクラス衛門と関暁夫の対決、完全版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-12.html ・ 55 KB</span></span></a><a class="card" data-cat="story" data-name="隆昌 ―― 彼は強かった。 upload-13.html story" href="./viewer.html?src=upload-13.html"><span class="badge b-pink">STORY</span><h2>隆昌 ―― 彼は強かった。</h2><p>隆昌の物語。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-13.html ・ 135 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="story" data-name="領域展開「all winner」- カツカツ vs そうめんロボ upload-14.html vs / story" href="./viewer.html?src=upload-14.html"><span class="badge b-pink">VS / STORY</span><h2>領域展開「ALL WINNER」- カツカツ vs そうめんロボ</h2><p>カツカツ vs そうめんロボの領域展開バトル。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-14.html ・ 115 KB</span></span></a><a class="card" data-cat="story" data-name="秘密基地トーク 1.0（poe） 1.0_26.2.20.html talk" href="./viewer.html?src=1.0_26.2.20.html"><span class="badge b-pink">TALK</span><h2>秘密基地トーク 1.0（Poe）</h2><p>秘密基地のみんなの雑談トーク（Poe生成ページ）。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">1.0_26.2.20.html ・ 60 KB</span></span><span class="tag">⌨ キーボード中心</span></a></div>
+</section>
+<section class="sec" data-sec="tech">
+  <h3 class="sec-title">テック・製品リサーチ<span class="sec-count">19作品</span></h3>
+  <div class="grid"><a class="card" data-cat="tech" data-name="gta6開発の裏側に迫る gta6.html research" href="./viewer.html?src=GTA6.html"><span class="badge b-teal">RESEARCH</span><h2>GTA6開発の裏側に迫る</h2><p>GTA6開発の裏側リサーチ。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">GTA6.html ・ 286 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tech" data-name="gta vi 開発資金分析 gta6-2.html research" href="./viewer.html?src=GTA6-2.html"><span class="badge b-teal">RESEARCH</span><h2>GTA VI 開発資金分析</h2><p>GTA VIの開発資金を分析。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">GTA6-2.html ・ 269 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="tech" data-name="ykkファスナーの品質 upload-28.html research" href="./viewer.html?src=upload-28.html"><span class="badge b-teal">RESEARCH</span><h2>YKKファスナーの品質</h2><p>YKKファスナーの品質を解説（旧 upload.HTML）。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-28.html ・ 6 KB</span></span></a><a class="card" data-cat="tech" data-name="ykkの品質 — 世界が認めるファスナーの真価 ykk___2.0.html research" href="./viewer.html?src=YKK___2.0.html"><span class="badge b-teal">RESEARCH</span><h2>YKKの品質 — 世界が認めるファスナーの真価</h2><p>YKK品質の真価、2.0版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">YKK___2.0.html ・ 201 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tech" data-name="20万円以下カメラ 26.2.22 20.html camera" href="./viewer.html?src=20.html"><span class="badge b-teal">CAMERA</span><h2>20万円以下カメラ 26.2.22</h2><p>20万円以下カメラガイド。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">20.html ・ 288 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tech" data-name="sony a7 iv vs フラグシップスマホ — センサー技術で読み解く a7_iv.html camera" href="./viewer.html?src=A7_IV.html"><span class="badge b-teal">CAMERA</span><h2>SONY A7 IV vs フラグシップスマホ — センサー技術で読み解く</h2><p>A7 IVとスマホをセンサー技術で比較。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">A7_IV.html ・ 98 KB</span></span></a><a class="card" data-cat="tech" data-name="sony a7 iv vs フラッグシップスマホ 2026 a7_iv-2.html camera" href="./viewer.html?src=A7_IV-2.html"><span class="badge b-teal">CAMERA</span><h2>SONY A7 IV vs フラッグシップスマホ 2026</h2><p>A7 IV vs スマホ比較の2026版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">A7_IV-2.html ・ 67 KB</span></span></a><a class="card" data-cat="tech" data-name="sony a7 iv — the definitive hybrid camera sony_a7_iv.html camera" href="./viewer.html?src=SONY_A7_IV.html"><span class="badge b-teal">CAMERA</span><h2>SONY A7 IV — The Definitive Hybrid Camera</h2><p>A7 IVの決定版ガイド。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SONY_A7_IV.html ・ 332 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tech" data-name="sony a7 iv reddit評価 徹底分析 sony_reddit.html camera" href="./viewer.html?src=SONY_Reddit.html"><span class="badge b-teal">CAMERA</span><h2>SONY A7 IV Reddit評価 徹底分析</h2><p>RedditでのA7 IV評価を分析。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SONY_Reddit.html ・ 137 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="tech" data-name="sonyのセンサー 世界シェアno.1の全貌 sony.html sensor" href="./viewer.html?src=SONY.html"><span class="badge b-teal">SENSOR</span><h2>SONYのセンサー 世界シェアNo.1の全貌</h2><p>SONYセンサー事業の全貌。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SONY.html ・ 142 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="tech" data-name="bravia離脱 26.2.22 sony_brevia.html tv / research" href="./viewer.html?src=SONY_BREVIA.html"><span class="badge b-teal">TV / RESEARCH</span><h2>BRAVIA離脱 26.2.22</h2><p>BRAVIA離脱をめぐるリサーチ。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">SONY_BREVIA.html ・ 666 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tech" data-name="wd blue 8tb – technical deep dive wd_blue_8tb.html storage" href="./viewer.html?src=WD_Blue_8TB.html"><span class="badge b-teal">STORAGE</span><h2>WD BLUE 8TB – Technical Deep Dive</h2><p>WD Blue 8TB HDDの技術深掘り。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">WD_Blue_8TB.html ・ 153 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tech" data-name="メモリ高騰2026 - memory crisis intelligence 2026.html market" href="./viewer.html?src=2026.html"><span class="badge b-teal">MARKET</span><h2>メモリ高騰2026 - Memory Crisis Intelligence</h2><p>2026年のメモリ価格高騰を追う。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">2026.html ・ 560 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tech" data-name="缶ジュース 総合1.0 日本の缶飲料完全ガイド 1.0.html guide" href="./viewer.html?src=1.0.html"><span class="badge b-teal">GUIDE</span><h2>缶ジュース 総合1.0 日本の缶飲料完全ガイド</h2><p>日本の缶飲料の完全ガイド。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">1.0.html ・ 511 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tech" data-name="3万円ヘッドホン 26.2.22 premium headphone guide 3_________25.2.22.html audio" href="./viewer.html?src=3_________25.2.22.html"><span class="badge b-teal">AUDIO</span><h2>3万円ヘッドホン 26.2.22 Premium Headphone Guide</h2><p>3万円ヘッドホンガイド。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">3_________25.2.22.html ・ 334 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="tech" data-name="26.2.21 最新の動画ai - ai video generation models 2026 26.2.21_____ai.html ai research" href="./viewer.html?src=26.2.21_____AI.html"><span class="badge b-teal">AI RESEARCH</span><h2>26.2.21 最新の動画AI - AI Video Generation Models 2026</h2><p>最新の動画生成AIモデルまとめ。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">26.2.21_____AI.html ・ 159 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="tech" data-name="2027年1月 ai技術予測 2027______ai.html ai research" href="./viewer.html?src=2027______AI.html"><span class="badge b-teal">AI RESEARCH</span><h2>2027年1月 AI技術予測</h2><p>2027年1月のAI技術予測。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">2027______AI.html ・ 75 KB</span></span></a><a class="card" data-cat="tech" data-name="現代のai依存 ai_____26.2.20.html ai research" href="./viewer.html?src=AI_____26.2.20.html"><span class="badge b-teal">AI RESEARCH</span><h2>現代のAI依存</h2><p>現代のAI依存を考える。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">AI_____26.2.20.html ・ 67 KB</span></span></a><a class="card" data-cat="tech" data-name="アニメ激動 26.2.22 26.2.22.html media research" href="./viewer.html?src=26.2.22.html"><span class="badge b-teal">MEDIA RESEARCH</span><h2>アニメ激動 26.2.22</h2><p>アニメ業界の激動を追う。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">26.2.22.html ・ 377 KB</span></span><span class="tag">⌨ キーボード中心</span></a></div>
+</section>
+<section class="sec" data-sec="patent">
+  <h3 class="sec-title">学習・特許<span class="sec-count">4作品</span></h3>
+  <div class="grid"><a class="card" data-cat="patent" data-name="数ii 三角関数 公式図鑑（モーション版） upload-10.html study" href="./viewer.html?src=upload-10.html"><span class="badge b-yellow">STUDY</span><h2>数II 三角関数 公式図鑑（モーション版）</h2><p>三角関数の公式図鑑、モーション版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-10.html ・ 42 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="patent" data-name="ai発明特許難易度 | ai patent difficulty index ai-2.html patent" href="./viewer.html?src=AI-2.html"><span class="badge b-yellow">PATENT</span><h2>AI発明特許難易度 | AI Patent Difficulty Index</h2><p>AI発明の特許難易度インデックス。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">AI-2.html ・ 435 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="patent" data-name="高校生の特許取得 - 次世代イノベーションの最前線 upload-15.html patent" href="./viewer.html?src=upload-15.html"><span class="badge b-yellow">PATENT</span><h2>高校生の特許取得 - 次世代イノベーションの最前線</h2><p>高校生の特許取得ガイド。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-15.html ・ 318 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="patent" data-name="特許取得と活用 1.0 pro 1.0_pro.html patent" href="./viewer.html?src=1.0_Pro.html"><span class="badge b-yellow">PATENT</span><h2>特許取得と活用 1.0 Pro</h2><p>特許の取得と活用、Pro版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">1.0_Pro.html ・ 742 KB</span></span><span class="tag">👆 タッチ可</span></a></div>
+</section>
+<section class="sec" data-sec="art">
+  <h3 class="sec-title">アート・SVG・体験<span class="sec-count">7作品</span></h3>
+  <div class="grid"><a class="card" data-cat="art" data-name="ultra hd anime girl svg - rebuilt a_woman.html svg art" href="./viewer.html?src=A_woman.html"><span class="badge b-purple">SVG ART</span><h2>Ultra HD Anime Girl SVG - Rebuilt</h2><p>アニメガールのSVGアート、再構築版。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">A_woman.html ・ 37 KB</span></span></a><a class="card" data-cat="art" data-name="スマホ画面イラスト（svg） upload-8.html svg art" href="./viewer.html?src=upload-8.html"><span class="badge b-purple">SVG ART</span><h2>スマホ画面イラスト（SVG）</h2><p>スマホ画面のSVGイラスト。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-8.html ・ 20 KB</span></span></a><a class="card" data-cat="art" data-name="discover uiイラスト（svg） 2-2.html svg art" href="./viewer.html?src=2-2.html"><span class="badge b-purple">SVG ART</span><h2>Discover UIイラスト（SVG）</h2><p>Discover画面風のSVGイラスト。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">2-2.html ・ 10 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="art" data-name="8-bit chromaverse - ultimate color experience 8bit.html experience" href="./viewer.html?src=8bit.html"><span class="badge b-purple">EXPERIENCE</span><h2>8-BIT CHROMAVERSE - Ultimate Color Experience</h2><p>8ビット色彩の体験型ページ。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">8bit.html ・ 233 KB</span></span><span class="tag">⌨ キーボード中心</span></a><a class="card" data-cat="art" data-name="geometry — the art of shapes upload-20.html experience" href="./viewer.html?src=upload-20.html"><span class="badge b-purple">EXPERIENCE</span><h2>GEOMETRY — The Art of Shapes</h2><p>図形のアート体験。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-20.html ・ 150 KB</span></span></a><a class="card" data-cat="art" data-name="● sphere:anomaly ● maru_1.0_web_gl.html webgl" href="./viewer.html?src=Maru_1.0_WEB_GL.html"><span class="badge b-purple">WEBGL</span><h2>● SPHERE:ANOMALY ●</h2><p>WebGLの球体アノマリー体験。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">Maru_1.0_WEB_GL.html ・ 675 KB</span></span><span class="tag">👆 タッチ可</span></a><a class="card" data-cat="art" data-name="webデザイン体験ページ（poe） upload-22.html web design" href="./viewer.html?src=upload-22.html"><span class="badge b-purple">WEB DESIGN</span><h2>Webデザイン体験ページ（Poe）</h2><p>流れるアニメーションのWebデザイン体験（Poe生成ページ）。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">upload-22.html ・ 35 KB</span></span></a></div>
+</section>
+<section class="sec" data-sec="doc">
+  <h3 class="sec-title">資料・プロンプト<span class="sec-count">3作品</span></h3>
+  <div class="grid"><a class="card" data-cat="doc" data-name="生成プロンプト 3.0 — minecraft風ブロックゲーム prompt-3.0.html prompt" href="./viewer.html?src=prompt-3.0.html"><span class="badge b-orange">PROMPT</span><h2>生成プロンプト 3.0 — Minecraft風ブロックゲーム</h2><p>Infinite Voxel World系を作るための生成プロンプト全文。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">prompt-3.0.html ・ 14 KB</span></span></a><a class="card" data-cat="doc" data-name="生成プロンプト — ai発明特許難易度（pdf 2.0） prompt-pdf2.0.html prompt" href="./viewer.html?src=prompt-pdf2.0.html"><span class="badge b-orange">PROMPT</span><h2>生成プロンプト — AI発明特許難易度（PDF 2.0）</h2><p>AI発明特許難易度サイトの生成プロンプト全文。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">prompt-pdf2.0.html ・ 2 KB</span></span></a><a class="card" data-cat="doc" data-name="生成プロンプト — piza屋経営ゲーム prompt-piza.html prompt" href="./viewer.html?src=prompt-piza.html"><span class="badge b-orange">PROMPT</span><h2>生成プロンプト — PIZA屋経営ゲーム</h2><p>PIZA経営シミュレーションの生成プロンプト全文。</p><span class="meta"><span class="open">全画面で開く →</span><span class="file">prompt-piza.html ・ 11 KB</span></span></a></div>
+</section>
+
   <div class="empty" id="empty">見つからなかった。検索ワードを変えてみて。</div>
 </main>
-
 <footer>
-  全作品とも単体HTMLで動作（ビルド不要）。ビューワーでは「全画面（横）」ボタンでスマホ横向き全画面表示になります。<br>
+  全作品とも単体HTMLで動作（ビルド不要）。ビューワーの「全画面（横）」でスマホ横向き全画面表示になります。<br>
   Hosting: Cloudflare Workers（本番） / GitHub Pages（ミラー） ・ Source: github.com/sc8z35a-collab/html-works-site
 </footer>
-
 <script>
-  var q = document.getElementById("q");
-  var chips = document.getElementById("chips");
-  var cards = Array.prototype.slice.call(document.querySelectorAll(".card"));
-  var count = document.getElementById("count");
-  var empty = document.getElementById("empty");
-  var cat = "all";
+  var q=document.getElementById("q"),chips=document.getElementById("chips");
+  var cards=Array.prototype.slice.call(document.querySelectorAll(".card"));
+  var secs=Array.prototype.slice.call(document.querySelectorAll(".sec"));
+  var count=document.getElementById("count"),empty=document.getElementById("empty"),cat="all";
   function apply(){
-    var word = (q.value || "").trim().toLowerCase();
-    var shown = 0;
+    var word=(q.value||"").trim().toLowerCase(),shown=0;
     cards.forEach(function(c){
-      var okCat = cat === "all" || c.dataset.cat === cat;
-      var hay = (c.querySelector("h2").textContent + " " + (c.dataset.name || "")).toLowerCase();
-      var okWord = !word || hay.indexOf(word) !== -1;
-      var show = okCat && okWord;
-      c.style.display = show ? "" : "none";
-      if (show) shown++;
+      var okCat=cat==="all"||c.dataset.cat===cat;
+      var okWord=!word||c.dataset.name.indexOf(word)!==-1;
+      var show=okCat&&okWord;c.style.display=show?"":"none";if(show)shown++;
     });
-    count.textContent = shown + " / " + cards.length + " 作品";
-    empty.style.display = shown ? "none" : "block";
+    secs.forEach(function(s){
+      var any=Array.prototype.some.call(s.querySelectorAll(".card"),function(c){return c.style.display!=="none";});
+      s.style.display=any?"":"none";
+    });
+    count.textContent=shown+" / "+cards.length+" 作品";
+    empty.style.display=shown?"none":"block";
   }
-  q.addEventListener("input", apply);
-  chips.addEventListener("click", function(e){
-    var b = e.target.closest(".chip"); if (!b) return;
-    chips.querySelectorAll(".chip").forEach(function(x){ x.classList.remove("on"); });
-    b.classList.add("on"); cat = b.dataset.cat; apply();
+  q.addEventListener("input",apply);
+  chips.addEventListener("click",function(e){
+    var b=e.target.closest(".chip");if(!b)return;
+    chips.querySelectorAll(".chip").forEach(function(x){x.classList.remove("on");});
+    b.classList.add("on");cat=b.dataset.cat;apply();
   });
   apply();
-
-  async function goFullscreenLandscape(){
-    try {
-      if (document.documentElement.requestFullscreen) {
-        await document.documentElement.requestFullscreen({ navigationUI: "hide" }).catch(async function(){
-          await document.documentElement.requestFullscreen();
-        });
-      }
-    } catch(e) {}
-    try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape"); } catch(e) {}
+  async function goFS(){
+    try{if(document.documentElement.requestFullscreen){await document.documentElement.requestFullscreen({navigationUI:"hide"}).catch(async function(){await document.documentElement.requestFullscreen();});}}catch(e){}
+    try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock("landscape");}catch(e){}
   }
-  document.getElementById("hubFs").addEventListener("click", goFullscreenLandscape);
+  document.getElementById("hubFs").addEventListener("click",goFS);
 </script>
 </body>
 </html>
